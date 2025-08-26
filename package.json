@@ -1,0 +1,20 @@
+{
+    "name": "staywise",
+    "scripts": {
+        "build": "turbo run build",
+        "dev": "turbo run dev",
+        "start": "turbo run start"
+    },
+    "packageManager": "npm@10.0.0",
+    "workspaces": [
+        "apps/*",
+        "packages/*"
+    ],
+    "devDependencies": {
+        "cross-env": "^10.0.0",
+        "tsx": "^4.20.3",
+        "turbo": "^2.5.5",
+        "typescript": "^5.8.3",
+        "zod": "^4.0.13"
+    }
+}
