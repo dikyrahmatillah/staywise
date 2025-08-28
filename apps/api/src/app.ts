@@ -1,6 +1,7 @@
 import express, { Application, Request, Response } from "express";
 import { errorMiddleware } from "./middlewares/error.middleware.js";
-import authRouter from "./router/auth.router.js";
+import authRouter from "./routers/auth.router.js";
+import logger from "./utils/logger.js";
 
 export class App {
   app: Application;
@@ -29,7 +30,7 @@ export class App {
 
   listen(port: string) {
     this.app.listen(port, () => {
-      console.log(`Server is running on port ${port}`);
+      logger.info(`Server is running on port ${port}`);
     });
   }
 }
