@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Figtree, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
 
 const figtree = Figtree({
   variable: "--font-figtree",
@@ -25,11 +26,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${figtree.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${figtree.variable} ${geistMono.variable} antialiased`}>
         <Header />
-        {children}
+        <main className="min-h-[calc(100vh-12rem)]">{children}</main>
+        <Footer />
       </body>
     </html>
   );
