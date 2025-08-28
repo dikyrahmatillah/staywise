@@ -107,14 +107,14 @@ export function Header() {
               variant="outline"
               className="search-button h-10 px-3 py-2 rounded-full border border-gray-300 shadow-sm hover:shadow-md transition-shadow justify-start text-left font-normal"
             >
-              <Search className="ml-auto h-4 w-4 text-rose-500" />
+              <Search className="ml-auto h-4 w-4 font-sans text-rose-500" />
               Search
             </Button>
           </div>
 
           <div className="flex items-center justify-center flex-shrink-0">
             <Link href="/" className="flex items-center space-x-2">
-              <Home className="h-8 w-8 text-rose-500" />
+              <Home className="h-8 w-8 font-sans text-rose-500" />
               <span className="font-bold text-xl text-rose-500 hidden sm:inline-block">
                 StayWise
               </span>
@@ -170,7 +170,7 @@ export function Header() {
                     >
                       <div className="flex items-center justify-between w-full">
                         <div className="flex-1">
-                          <div className="font-semibold text-xs text-gray-700 uppercase tracking-wide mb-1">
+                          <div className="font-sans font-semibold text-xs text-gray-700 uppercase tracking-wide mb-1">
                             Where
                           </div>
                           <Input
@@ -226,7 +226,7 @@ export function Header() {
                     >
                       <div className="flex items-center justify-between w-full">
                         <div className="flex-1">
-                          <div className="font-semibold text-xs text-gray-700 uppercase tracking-wide mb-1">
+                          <div className="font-sans font-semibold text-xs text-gray-700 uppercase tracking-wide mb-1">
                             When
                           </div>
                           <div
@@ -412,7 +412,7 @@ export function Header() {
                     >
                       <div className="flex items-center justify-between w-full">
                         <div>
-                          <div className="font-semibold text-xs text-gray-700 uppercase tracking-wide mb-1">
+                          <div className="font-sans font-semibold text-xs text-gray-700 uppercase tracking-wide mb-1">
                             Who
                           </div>
                           <div
@@ -465,8 +465,10 @@ export function Header() {
                       {/* Adults */}
                       <div className="flex items-center justify-between">
                         <div>
-                          <div className="text-sm font-semibold">Adults</div>
-                          <div className="text-xs text-gray-500">
+                          <div className="text-sm font-sans font-semibold">
+                            Adults
+                          </div>
+                          <div className="text-xs font-sans text-gray-500">
                             Ages 13 or above
                           </div>
                         </div>
@@ -497,8 +499,12 @@ export function Header() {
                       {/* Children */}
                       <div className="flex items-center justify-between">
                         <div>
-                          <div className="text-sm font-semibold">Children</div>
-                          <div className="text-xs text-gray-500">Ages 2–12</div>
+                          <div className="text-sm font-sans font-semibold">
+                            Children
+                          </div>
+                          <div className="text-xs font-sans text-gray-500">
+                            Ages 2–12
+                          </div>
                         </div>
                         <div className="flex items-center space-x-3">
                           <Button
@@ -529,8 +535,10 @@ export function Header() {
                       {/* Pets */}
                       <div className="flex items-center justify-between">
                         <div>
-                          <div className="text-sm font-semibold">Pets</div>
-                          <div className="text-xs text-gray-500">
+                          <div className="text-sm font-sans font-semibold">
+                            Pets
+                          </div>
+                          <div className="text-xs font-sans text-gray-500">
                             Service animals allowed
                           </div>
                         </div>

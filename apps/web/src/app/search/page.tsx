@@ -15,22 +15,28 @@ export default function SearchPage() {
 
   return (
     <div className="container mx-auto px-6 py-8">
-      <h1 className="text-3xl font-bold mb-8">Search Results</h1>
+      <h1 className="font-sans text-3xl font-bold mb-8">Search Results</h1>
 
-      <div className="bg-white rounded-lg border p-6 mb-8">
-        <h2 className="text-xl font-semibold mb-4">Search Parameters</h2>
+      <div className="font-sans bg-white rounded-lg border p-6 mb-8">
+        <h2 className="font-sans text-xl font-semibold mb-4">
+          Search Parameters
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {location && (
             <div>
-              <span className="font-medium text-gray-700">Location:</span>
-              <p className="text-gray-900">{location}</p>
+              <span className="font-sans font-medium text-gray-700">
+                Location:
+              </span>
+              <p className="font-sans text-gray-900">{location}</p>
             </div>
           )}
 
           {checkIn && (
             <div>
-              <span className="font-medium text-gray-700">Check-in:</span>
-              <p className="text-gray-900">
+              <span className="font-sans font-medium text-gray-700">
+                Check-in:
+              </span>
+              <p className="font-sans text-gray-900">
                 {format(new Date(checkIn), "MMM d, yyyy")}
               </p>
             </div>
@@ -38,16 +44,18 @@ export default function SearchPage() {
 
           {checkOut && (
             <div>
-              <span className="font-medium text-gray-700">Check-out:</span>
-              <p className="text-gray-900">
+              <span className="font-sans font-medium text-gray-700">
+                Check-out:
+              </span>
+              <p className="font-sans text-gray-900">
                 {format(new Date(checkOut), "MMM d, yyyy")}
               </p>
             </div>
           )}
 
           <div>
-            <span className="font-medium text-gray-700">Guests:</span>
-            <p className="text-gray-900">
+            <span className="font-sans font-medium text-gray-700">Guests:</span>
+            <p className="font-sans text-gray-900">
               {adults} adult{parseInt(adults) > 1 ? "s" : ""}
               {parseInt(children) > 0 &&
                 `, ${children} child${parseInt(children) > 1 ? "ren" : ""}`}
@@ -58,7 +66,7 @@ export default function SearchPage() {
         </div>
       </div>
 
-      <div className="text-center text-gray-500">
+      <div className="text-center font-sans text-gray-500">
         <p>
           Property listings will be displayed here based on your search
           criteria.

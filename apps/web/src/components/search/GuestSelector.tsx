@@ -48,7 +48,7 @@ export function GuestSelector({
         >
           <div className="flex items-center justify-between w-full">
             <div>
-              <div className="font-semibold text-xs text-gray-700 uppercase tracking-wide mb-1">
+              <div className="font-sans font-semibold text-xs text-gray-700 uppercase tracking-wide mb-1">
                 Who
               </div>
               <div
@@ -92,7 +92,9 @@ export function GuestSelector({
               >
                 <Minus className="h-4 w-4" />
               </Button>
-              <span className="w-8 text-center font-medium">{guests}</span>
+              <span className="w-8 text-center font-sans font-medium">
+                {guests}
+              </span>
               <Button
                 variant="outline"
                 size="icon"
