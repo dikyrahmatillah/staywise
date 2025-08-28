@@ -9,7 +9,7 @@ export default function SearchPage() {
   const location = searchParams.get("location") || "";
   const checkIn = searchParams.get("checkIn");
   const checkOut = searchParams.get("checkOut");
-  const adults = searchParams.get("adults") || "1";
+  const adults = searchParams.get("adults") || "0";
   const children = searchParams.get("children") || "0";
   const pets = searchParams.get("pets") || "0";
 
