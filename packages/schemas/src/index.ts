@@ -1,3 +1,1 @@
-import { CreateUserSchema, CreateUserInput } from "./user.schema.js";
-
-export { CreateUserSchema, CreateUserInput };
+export * from "./user.schema.js";
