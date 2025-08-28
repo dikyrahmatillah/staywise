@@ -65,7 +65,7 @@ export function DateRangePicker({
           role="button"
           tabIndex={0}
           className={cn(
-            "flex-1 min-w-0 py-2 px-6 border-l border-gray-300 text-left h-14 items-center overflow-hidden",
+            "flex-1 min-w-0 py-2 px-3 sm:px-6 border-l border-gray-300 text-left h-12 sm:h-14 items-center overflow-hidden",
             isOpen ? "bg-gray-100" : "bg-transparent"
           )}
         >
@@ -90,10 +90,10 @@ export function DateRangePicker({
                 variant="ghost"
                 size="icon"
                 onClick={clearDates}
-                className="h-6 w-6"
+                className="h-5 w-5 sm:h-6 sm:w-6 flex-shrink-0"
                 aria-label="Clear dates"
               >
-                <X className="h-4 w-4" />
+                <X className="h-3 w-3 sm:h-4 sm:w-4" />
               </Button>
             )}
           </div>

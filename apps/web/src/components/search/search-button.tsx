@@ -19,7 +19,7 @@ export function SearchButton({ isSearchOpen, onToggle }: SearchButtonProps) {
       aria-label={isSearchOpen ? "Close search" : "Open search"}
     >
       <Search className="ml-auto h-4 w-4 font-sans text-rose-500" />
-      Search
+      <span className="hidden sm:inline">Search</span>
     </Button>
   );
 }

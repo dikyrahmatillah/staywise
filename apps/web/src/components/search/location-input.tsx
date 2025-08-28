@@ -40,12 +40,12 @@ export function LocationInput({
           role="button"
           tabIndex={0}
           className={cn(
-            "flex-1 min-w-0 py-2 px-6 text-left h-14 items-center overflow-hidden",
+            "flex-1 min-w-0 py-2 px-3 sm:px-6 text-left h-12 sm:h-14 items-center overflow-hidden",
             isOpen ? "bg-gray-100" : "bg-transparent"
           )}
         >
           <div className="flex items-center justify-between w-full">
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <div className="font-sans font-semibold text-xs text-gray-700 uppercase tracking-wide mb-1">
                 Where
               </div>
@@ -67,10 +67,10 @@ export function LocationInput({
                 variant="ghost"
                 size="icon"
                 onClick={() => onLocationChange("")}
-                className="h-6 w-6"
+                className="h-5 w-5 sm:h-6 sm:w-6 flex-shrink-0"
                 aria-label="Clear location"
               >
-                <X className="h-4 w-4" />
+                <X className="h-3 w-3 sm:h-4 sm:w-4" />
               </Button>
             )}
           </div>
