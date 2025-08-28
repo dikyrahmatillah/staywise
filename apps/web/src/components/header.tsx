@@ -2,14 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { User, Home } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Home } from "lucide-react";
+
+import { LoginButton } from "./signin-button";
+
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { SearchButton } from "./search/search-button";
@@ -69,12 +65,12 @@ export function Header() {
       onMouseDown={(e) => e.stopPropagation()}
       className={cn(
         "sticky top-0 z-50 w-full border-b bg-white transition-all duration-300 ease-in-out",
-        isSearchOpen ? "h-[120px]" : "h-16"
+        isSearchOpen ? "h-[140px] sm:h-[120px]" : "h-16"
       )}
     >
-      <div className="container mx-auto max-w-screen-2xl px-6">
-        <div className="flex h-16 items-center justify-between">
-          <div className="flex-1">
+      <div className="container mx-auto max-w-screen-2xl px-4 sm:px-6">
+        <div className="flex h-16 items-center justify-between gap-2 sm:gap-4">
+          <div className="flex-1 min-w-0">
             <SearchButton
               isSearchOpen={isSearchOpen}
               onToggle={() => setIsSearchOpen(!isSearchOpen)}
@@ -82,34 +78,16 @@ export function Header() {
           </div>
 
           <div className="flex items-center justify-center flex-shrink-0">
-            <Link href="/" className="flex items-center space-x-2">
-              <Home className="h-8 w-8 font-sans text-rose-500" />
-              <span className="font-bold text-xl text-rose-500 hidden sm:inline-block">
+            <Link href="/" className="flex items-center space-x-1 sm:space-x-2">
+              <Home className="h-6 w-6 sm:h-8 sm:w-8 font-sans text-rose-500" />
+              <span className="font-bold text-lg sm:text-xl text-rose-500 hidden sm:inline-block">
                 StayWise
               </span>
             </Link>
           </div>
 
-          <div className="flex items-center space-x-4 flex-1 justify-end">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="h-10 px-3 rounded-full border-gray-300 hover:shadow-md transition-shadow"
-                >
-                  Login
-                  <User className="h-6 w-6 bg-gray-500 rounded-full p-1 text-white" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-20">
-                <DropdownMenuItem className="cursor-pointer">
-                  <span>Guest</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer">
-                  <span>Tenant</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+          <div className="flex items-center flex-1 justify-end min-w-0">
+            <LoginButton />
           </div>
         </div>
 
