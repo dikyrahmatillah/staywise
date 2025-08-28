@@ -1,3 +1,4 @@
+
 import logger from "@/utils/logger.js";
 import { Request, Response, NextFunction } from "express";
 import z, { ZodError } from "zod";
@@ -5,6 +6,7 @@ import { Prisma } from "@repo/database/generated/prisma";
 import { AppError } from "@/errors/app.error.js";
 
 export function errorMiddleware(
+
   error: Error,
   request: Request,
   response: Response,
@@ -44,3 +46,4 @@ export function errorMiddleware(
     message: error instanceof Error ? error.message : "Unknown error occurred",
   });
 }
+
