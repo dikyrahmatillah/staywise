@@ -2,17 +2,16 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { X } from "lucide-react";
 import { format, addMonths, subMonths } from "date-fns";
+import { CalendarWithHeader } from "./calendar-with-header";
 import { cn } from "@/lib/utils";
 
-// Shared calendar class names
 const calendarClassNames = {
   month_caption: "hidden",
   nav: "hidden",
@@ -52,10 +51,23 @@ export function DateRangePicker({
 }: DateRangePickerProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
 
+  const handleRangeSelect = (range: { from?: Date; to?: Date } | undefined) => {
+    if (range?.from) onCheckInChange(range.from);
+    if (range?.to) onCheckOutChange(range.to);
+  };
+
   const clearDates = (e: React.MouseEvent) => {
     e.stopPropagation();
     onCheckInChange(undefined);
     onCheckOutChange(undefined);
+  };
+
+  const navigateMonth = (direction: "prev" | "next") => {
+    setCurrentMonth(
+      direction === "prev"
+        ? subMonths(currentMonth, 1)
+        : addMonths(currentMonth, 1)
+    );
   };
 
   return (
@@ -65,7 +77,7 @@ export function DateRangePicker({
           role="button"
           tabIndex={0}
           className={cn(
-            "flex-1 min-w-0 py-2 px-3 sm:px-6 border-l border-gray-300 text-left h-12 sm:h-14 items-center overflow-hidden",
+            "flex-1 min-w-0 py-2 px-3 sm:px-6 border-l border-gray-300 text-left h-12 sm:h-14 items-center overflow-hidden cursor-pointer",
             isOpen ? "bg-gray-100" : "bg-transparent"
           )}
         >
@@ -104,66 +116,44 @@ export function DateRangePicker({
         onMouseDown={(e) => e.stopPropagation()}
       >
         <div className="p-4">
-          <div className="flex gap-4 items-start">
-            <div className="flex-1">
-              <div className="flex items-center justify-between mb-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-                  disabled={currentMonth <= new Date()}
-                  className="h-8 w-8 rounded-full"
-                >
-                  <ChevronLeft />
-                </Button>
-                <h4 className="text-sm font-semibold text-center w-full">
-                  {format(currentMonth, "MMMM yyyy")}
-                </h4>
-              </div>
-              <CalendarComponent
-                mode="range"
-                selected={{ from: checkIn, to: checkOut }}
-                onSelect={(range) => {
-                  if (range?.from) onCheckInChange(range.from);
-                  if (range?.to) onCheckOutChange(range.to);
-                }}
-                disabled={(date) => date < new Date()}
-                numberOfMonths={1}
-                month={currentMonth}
-                onMonthChange={setCurrentMonth}
-                className="w-full"
-                classNames={calendarClassNames}
-              />
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="text-sm font-semibold text-center w-full">
-                  {format(addMonths(currentMonth, 1), "MMMM yyyy")}
-                </h4>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-                  className="h-8 w-8 rounded-full"
-                >
-                  <ChevronRight />
-                </Button>
-              </div>
-              <CalendarComponent
-                mode="range"
-                selected={{ from: checkIn, to: checkOut }}
-                onSelect={(range) => {
-                  if (range?.from) onCheckInChange(range.from);
-                  if (range?.to) onCheckOutChange(range.to);
-                }}
-                disabled={(date) => date < new Date()}
-                numberOfMonths={1}
-                month={addMonths(currentMonth, 1)}
-                onMonthChange={(m) => setCurrentMonth(subMonths(m, 1))}
-                className="w-full"
-                classNames={calendarClassNames}
-              />
-            </div>
+          <div className="block sm:hidden">
+            <CalendarWithHeader
+              month={currentMonth}
+              showLeftNav
+              showRightNav
+              currentMonth={currentMonth}
+              setCurrentMonth={setCurrentMonth}
+              checkIn={checkIn}
+              checkOut={checkOut}
+              handleRangeSelect={handleRangeSelect}
+              navigateMonth={navigateMonth}
+              calendarClassNames={calendarClassNames}
+            />
+          </div>
+
+          <div className="hidden sm:flex gap-4 items-start">
+            <CalendarWithHeader
+              month={currentMonth}
+              showLeftNav
+              currentMonth={currentMonth}
+              setCurrentMonth={setCurrentMonth}
+              checkIn={checkIn}
+              checkOut={checkOut}
+              handleRangeSelect={handleRangeSelect}
+              navigateMonth={navigateMonth}
+              calendarClassNames={calendarClassNames}
+            />
+            <CalendarWithHeader
+              month={addMonths(currentMonth, 1)}
+              showRightNav
+              currentMonth={currentMonth}
+              setCurrentMonth={setCurrentMonth}
+              checkIn={checkIn}
+              checkOut={checkOut}
+              handleRangeSelect={handleRangeSelect}
+              navigateMonth={navigateMonth}
+              calendarClassNames={calendarClassNames}
+            />
           </div>
         </div>
       </PopoverContent>

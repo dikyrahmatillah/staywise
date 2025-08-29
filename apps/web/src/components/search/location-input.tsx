@@ -40,7 +40,7 @@ export function LocationInput({
           role="button"
           tabIndex={0}
           className={cn(
-            "flex-1 min-w-0 py-2 px-3 sm:px-6 text-left h-12 sm:h-14 items-center overflow-hidden",
+            "flex-1 min-w-0 py-2 px-3 sm:px-6 text-left h-12 sm:h-14 items-center overflow-hidden cursor-pointer",
             isOpen ? "bg-gray-100" : "bg-transparent"
           )}
         >
