@@ -48,7 +48,7 @@ export function GuestSelector({
           role="button"
           tabIndex={0}
           className={cn(
-            "flex-1 min-w-0 py-2 px-3 sm:px-6 border-l border-gray-300 text-left h-12 sm:h-14 flex items-center justify-between overflow-hidden",
+            "flex-1 min-w-0 py-2 px-3 sm:px-6 border-l border-gray-300 text-left h-12 sm:h-14 flex items-center justify-between overflow-hidden cursor-pointer",
             isOpen ? "bg-gray-100" : "bg-transparent"
           )}
         >
@@ -92,9 +92,9 @@ export function GuestSelector({
             label="Adults"
             subtitle="Ages 13 or above"
             value={adults}
-            onDec={() => onAdultsChange(Math.max(1, adults - 1))}
+            onDec={() => onAdultsChange(Math.max(0, adults - 1))}
             onInc={() => onAdultsChange(adults + 1)}
-            disableDec={adults <= 1}
+            disableDec={adults <= 0}
           />
           <GuestCounter
             label="Children"

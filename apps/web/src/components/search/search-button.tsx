@@ -13,7 +13,7 @@ export function SearchButton({ isSearchOpen, onToggle }: SearchButtonProps) {
     <Button
       onClick={onToggle}
       variant="outline"
-      className="search-button h-10 px-3 py-2 rounded-full border border-gray-300 shadow-sm hover:shadow-md transition-shadow justify-start text-left font-normal"
+      className="search-button h-10 px-3 py-2 rounded-full border border-gray-300 shadow-sm hover:shadow-md transition-shadow justify-start text-left font-normal cursor-pointer"
       aria-expanded={isSearchOpen}
       aria-controls="expanded-search"
       aria-label={isSearchOpen ? "Close search" : "Open search"}

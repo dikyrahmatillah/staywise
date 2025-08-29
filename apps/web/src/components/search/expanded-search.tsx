@@ -82,7 +82,7 @@ export function ExpandedSearch({
 
           <Button
             onClick={onSearch}
-            className="bg-rose-500 hover:bg-rose-600 text-white py-2 px-4 sm:px-6 rounded-full flex items-center justify-center gap-2 text-sm font-medium transition-colors border border-gray-300 h-12 sm:h-14 w-full sm:w-auto"
+            className="bg-rose-500 hover:bg-rose-600 text-white py-2 px-4 sm:px-6 rounded-full flex items-center justify-center gap-2 text-sm font-medium transition-colors border border-gray-300 h-12 sm:h-14 w-full sm:w-auto cursor-pointer"
           >
             <Search className="h-4 w-4" />
             <span>Search</span>
