@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Search } from "lucide-react";
+import { IoSearch } from "react-icons/io5";
 
 interface SearchButtonProps {
   isSearchOpen: boolean;
@@ -18,7 +18,7 @@ export function SearchButton({ isSearchOpen, onToggle }: SearchButtonProps) {
       aria-controls="expanded-search"
       aria-label={isSearchOpen ? "Close search" : "Open search"}
     >
-      <Search className="ml-auto h-4 w-4 font-sans text-rose-500" />
+      <IoSearch className="ml-auto h-4 w-4" />
       <span className="hidden sm:inline">Search</span>
     </Button>
   );

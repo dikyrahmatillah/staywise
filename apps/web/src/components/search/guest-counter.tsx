@@ -2,7 +2,7 @@
 
 import { memo } from "react";
 import { Button } from "@/components/ui/button";
-import { Minus, Plus } from "lucide-react";
+import { FiMinus, FiPlus } from "react-icons/fi";
 
 interface GuestCounterProps {
   label: string;
@@ -31,20 +31,20 @@ export const GuestCounter = memo(function GuestCounter({
         <Button
           variant="outline"
           size="icon"
-          className="h-8 w-8 rounded-full"
+          className="h-8 w-8 rounded-full cursor-pointer"
           onClick={onDec}
           disabled={disableDec}
         >
-          <Minus className="h-4 w-4" />
+          <FiMinus className="h-4 w-4" />
         </Button>
         <span className="w-8 text-center font-medium">{value}</span>
         <Button
           variant="outline"
           size="icon"
-          className="h-8 w-8 rounded-full"
+          className="h-8 w-8 rounded-full cursor-pointer"
           onClick={onInc}
         >
-          <Plus className="h-4 w-4" />
+          <FiPlus className="h-4 w-4" />
         </Button>
       </div>
     </div>
