@@ -1,4 +1,4 @@
-import ReservationCard from "@/components/reservation-card/page";
+import ReservationCard from "@/components/reservation-card/reservation-card";
 
 export default function PropertyDetail() {
   return (
