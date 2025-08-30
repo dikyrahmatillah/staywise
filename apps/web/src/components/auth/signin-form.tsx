@@ -9,7 +9,7 @@ import { FcGoogle } from "react-icons/fc";
 
 type Props = {
   title?: string;
-  registerHref?: string;
+  signupref?: string;
   primaryClass?: string;
   onSubmit?: (data: {
     email: string;
@@ -17,12 +17,7 @@ type Props = {
   }) => Promise<void> | void;
 };
 
-export default function SignInForm({
-  title = "Sign in",
-  registerHref = "/tenant-register",
-  primaryClass = "bg-rose-500 hover:bg-rose-600",
-  onSubmit,
-}: Props) {
+export default function SignInForm({ onSubmit }: Props) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -42,21 +37,6 @@ export default function SignInForm({
 
   return (
     <>
-      <div className="text-center space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">
-          {title}
-        </h1>
-        <p className="text-muted-foreground">
-          Not got an account?{" "}
-          <Link
-            href={registerHref}
-            className="text-primary hover:underline font-medium"
-          >
-            Register now
-          </Link>
-        </p>
-      </div>
-
       <div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
@@ -69,7 +49,7 @@ export default function SignInForm({
             <Input
               id="email"
               type="email"
-              placeholder=""
+              placeholder="email@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -88,7 +68,7 @@ export default function SignInForm({
             <Input
               id="password"
               type="password"
-              placeholder=""
+              placeholder="********"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -107,7 +87,7 @@ export default function SignInForm({
 
           <Button
             type="submit"
-            className={`w-full ${primaryClass} text-white cursor-pointer`}
+            className="w-full bg-rose-500 hover:bg-rose-600 text-white cursor-pointer"
             disabled={isLoading}
           >
             {isLoading ? "Signing in..." : "Sign in"}
