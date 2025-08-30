@@ -18,7 +18,6 @@ export default function TenantSignUpPage() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      // TODO: call tenant signup API
       console.log("Tenant sign up", {
         email,
         propertyName,
@@ -37,6 +36,7 @@ export default function TenantSignUpPage() {
           title="Tenant sign up"
           caption="Already have an account?"
           link="/tenant-signin"
+          linkWord="Sign in"
         />
 
         <div>
