@@ -1,20 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import React from "react";
+import React, { useState } from "react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
-  Building2,
-  Tags,
   ReceiptText,
-  BarChart3,
+  Star,
   UserCog,
   ChevronDown,
-  Star,
+  Heart,
 } from "lucide-react";
-import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 
@@ -31,39 +28,30 @@ type Group = {
 };
 
 const nav: Group[] = [
-  { label: "Overview", icon: LayoutDashboard, href: "/dashboard/tenant" },
-  {
-    label: "Property Managements",
-    icon: Building2,
-    items: [
-      { label: "List Property", href: "/dashboard/tenant/properties" },
-      { label: "Add Property", href: "/dashboard/tenant/properties/new" },
-      { label: "Property Categories", href: "/dashboard/tenant/categories" },
-      { label: "Room Management", href: "/dashboard/tenant/rooms" },
-    ],
-  },
+  { label: "Overview", icon: LayoutDashboard, href: "/dashboard/guest" },
 
   {
-    label: "Transactions",
+    label: "My Orders",
     icon: ReceiptText,
-    href: "/dashboard/tenant/transactions",
+    href: "/dashboard/guest/orders",
   },
   {
-    label: "Reports",
-    icon: BarChart3,
+    label: "Favorites / Wishlist",
+    icon: Heart,
+    href: "/dashboard/guest/wishlist",
+  },
+  {
+    label: "Review",
+    icon: Star,
     items: [
-      { label: "Sales Reports", href: "/dashboard/tenant/reports/sales" },
-      {
-        label: "Property Reports",
-        href: "/dashboard/tenant/reports/properties",
-      },
+      { label: "Write a Review", href: "/dashboard/guest/reviews/write" },
+      { label: "My Reviews", href: "/dashboard/guest/reviews" },
     ],
   },
-  { label: "Reviews", icon: Star, href: "/dashboard/tenant/reviews" },
   {
     label: "Profile & Account",
     icon: UserCog,
-    href: "/dashboard/tenant/account",
+    href: "/dashboard/guest/account",
   },
 ];
 
@@ -149,20 +137,18 @@ function GroupItem({ group }: { group: Group }) {
   );
 }
 
-export function TenantSidebar() {
+export function GuestSidebar() {
   return (
     <aside className="h-dvh w-72 shrink-0 border-r bg-background">
       <div className="h-14 border-b px-4 text-sm font-medium flex items-center">
-        Tenant Dashboard
+        Guest Dashboard
       </div>
       <ScrollArea className="h-[calc(100dvh-3.5rem)] px-2 py-3">
         <ul className="space-y-1">
           {nav.map((g, idx) => (
             <React.Fragment key={g.label}>
               <GroupItem group={g} />
-              {idx === 0 || idx === 2 || idx === 5 ? (
-                <Separator className="my-1" />
-              ) : null}
+              {idx === 0 || idx === 2 ? <Separator className="my-1" /> : null}
             </React.Fragment>
           ))}
         </ul>
