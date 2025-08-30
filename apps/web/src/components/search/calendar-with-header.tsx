@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { IoChevronBackOutline, IoChevronForward } from "react-icons/io5";
 import { format, subMonths } from "date-fns";
 import { cn } from "@/lib/utils";
 import React from "react";
@@ -38,9 +38,9 @@ export const CalendarWithHeader: React.FC<CalendarWithHeaderProps> = ({
           size="icon"
           onClick={() => navigateMonth("prev")}
           disabled={currentMonth <= new Date()}
-          className="h-8 w-8 rounded-full"
+          className="h-8 w-8 rounded-full cursor-pointer"
         >
-          <ChevronLeft />
+          <IoChevronBackOutline />
         </Button>
       )}
       <h4
@@ -58,9 +58,9 @@ export const CalendarWithHeader: React.FC<CalendarWithHeaderProps> = ({
           variant="ghost"
           size="icon"
           onClick={() => navigateMonth("next")}
-          className="h-8 w-8 rounded-full"
+          className="h-8 w-8 rounded-full cursor-pointer"
         >
-          <ChevronRight />
+          <IoChevronForward />
         </Button>
       )}
     </div>

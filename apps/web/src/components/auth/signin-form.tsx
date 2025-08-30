@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Chrome } from "lucide-react";
+import { FcGoogle } from "react-icons/fc";
 
 type Props = {
   title?: string;
@@ -125,7 +125,7 @@ export default function SignInForm({
           className="w-full cursor-pointer"
           disabled={isLoading}
         >
-          <Chrome className="w-5 h-5 mr-2" />
+          <FcGoogle className="w-5 h-5 mr-2" />
           Continue with Google
         </Button>
       </div>
