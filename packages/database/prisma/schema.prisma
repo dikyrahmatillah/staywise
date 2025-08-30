@@ -10,15 +10,277 @@ generator client {
 }
 
 datasource db {
-    provider  = "postgresql"
-    url       = env("DATABASE_URL")
-    directUrl = env("DIRECT_URL")
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+    USER
+    TENANT
+}
+
+enum OrderStatus {
+    WAITING_PAYMENT
+    WAITING_CONFIRMATION
+    PROCESSING
+    COMPLETED
+    CANCELED
+}
+
+enum PaymentMethod {
+    MANUAL_TRANSFER
+    PAYMENT_GATEWAY
+}
+
+enum PriceAdjustType {
+    PERCENTAGE
+    NOMINAL
+}
+
+enum Amenities {
+    WIFI
+    AIR_CONDITIONER
+    PARKING
+    SWIMMING_POOL
+    KITCHEN
+    TV
+    WATER_HEATER
+    WASHING_MACHINE
+    REFRIGERATOR
+    MICROWAVE
+    ELEVATOR
+    GYM
+    RECEPTION_24H
+    SECURITY
+    CCTV
+    PET_FRIENDLY
+    SMOKING_ALLOWED
+    NON_SMOKING
+    WHEELCHAIR_ACCESS
+    BREAKFAST
+    BALCONY
+    SEA_VIEW
+    MOUNTAIN_VIEW
+    GARDEN
+    BBQ
 }
 
 model User {
-    id        Int      @id @default(autoincrement())
-    name      String
-    email     String   @unique
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    id            String   @id @default(uuid())
+    role          UserRole @default(USER)
+    firstName     String   @db.VarChar(150)
+    lastName      String   @db.VarChar(150)
+    email         String   @unique @db.VarChar(255)
+    emailVerified Boolean  @default(false)
+    passwordHash  String?  @db.VarChar(255)
+    avatarUrl     String?  @db.Text
+    phone         String?  @db.VarChar(50)
+    createdAt     DateTime @default(now())
+    updatedAt     DateTime @updatedAt
+
+    SocialAccounts        SocialAccount[]
+    EmailVerifications    EmailVerification[]
+    PasswordResets        PasswordReset[]
+    PropertyCategories    PropertyCategory[]
+    Properties            Property[]
+    BookingsAsUser        Booking[]           @relation("BookingUser")
+    UploadedPaymentProofs PaymentProof[]      @relation("PaymentProofUploadedBy")
+    Reviews               Review[]            @relation("UserReviews")
+}
+
+model SocialAccount {
+    id          String   @id @default(uuid())
+    userId      String
+    provider    String   @db.VarChar(50)
+    providerUid String   @db.VarChar(255)
+    createdAt   DateTime @default(now())
+
+    User User @relation(fields: [userId], references: [id])
+}
+
+model EmailVerification {
+    id        String    @id @default(uuid())
+    userId    String
+    token     String    @unique @db.VarChar(255)
+    expiresAt DateTime
+    usedAt    DateTime?
+    createdAt DateTime  @default(now())
+
+    User User @relation(fields: [userId], references: [id])
+}
+
+model PasswordReset {
+    id        String    @id @default(uuid())
+    userId    String
+    token     String    @unique @db.VarChar(255)
+    expiresAt DateTime
+    usedAt    DateTime?
+    createdAt DateTime  @default(now())
+
+    User User @relation(fields: [userId], references: [id])
+}
+
+model PropertyCategory {
+    id          String   @id @default(uuid())
+    tenantId    String
+    name        String   @db.VarChar(100)
+    description String?  @db.Text
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    Tenant     User       @relation(fields: [tenantId], references: [id])
+    Properties Property[]
+}
+
+model Property {
+    id          String   @id @default(uuid())
+    tenantId    String
+    categoryId  String
+    name        String   @db.VarChar(150)
+    description String?  @db.Text
+    pictureUrl  String?  @db.Text
+    country     String?  @db.VarChar(100)
+    province    String?  @db.VarChar(100)
+    city        String   @db.VarChar(100)
+    address     String?  @db.Text
+    latitude    Decimal? @db.Decimal(10, 7)
+    longitude   Decimal? @db.Decimal(10, 7)
+    maxGuests   Int?
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    Tenant           User               @relation(fields: [tenantId], references: [id])
+    PropertyCategory PropertyCategory   @relation(fields: [categoryId], references: [id])
+    Rooms            Room[]
+    Facilities       PropertyFacility[]
+    Bookings         Booking[]
+    Reviews          Review[]           @relation("PropertyReviews")
+}
+
+model PropertyFacility {
+    id         String    @id @default(uuid())
+    propertyId String
+    facility   Amenities
+    note       String?   @db.Text
+    createdAt  DateTime  @default(now())
+
+    Property Property @relation(fields: [propertyId], references: [id])
+}
+
+model Room {
+    id          String   @id @default(uuid())
+    propertyId  String
+    name        String   @db.VarChar(150)
+    description String?  @db.Text
+    basePrice   Decimal  @db.Decimal(12, 2)
+    capacity    Int      @default(1)
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    Property           Property           @relation(fields: [propertyId], references: [id])
+    RoomAvailabilities RoomAvailability[]
+    PriceAdjustments   PriceAdjustment[]
+    Bookings           Booking[]
+}
+
+model RoomAvailability {
+    id          String   @id @default(uuid())
+    roomId      String
+    date        DateTime
+    isAvailable Boolean  @default(true)
+    createdAt   DateTime @default(now())
+
+    Room Room @relation(fields: [roomId], references: [id])
+}
+
+model PriceAdjustment {
+    id            String          @id @default(uuid())
+    roomId        String
+    title         String?         @db.VarChar(150)
+    startDate     DateTime
+    endDate       DateTime
+    adjustType    PriceAdjustType
+    adjustValue   Decimal         @db.Decimal(12, 2)
+    applyAllDates Boolean         @default(true)
+    createdAt     DateTime        @default(now())
+
+    Room  Room                  @relation(fields: [roomId], references: [id])
+    Dates PriceAdjustmentDate[]
+}
+
+model PriceAdjustmentDate {
+    id                String   @id @default(uuid())
+    priceAdjustmentId String
+    date              DateTime
+
+    PriceAdjustment PriceAdjustment @relation(fields: [priceAdjustmentId], references: [id])
+}
+
+model Booking {
+    id            String        @id @default(uuid())
+    userId        String
+    tenantId      String
+    propertyId    String
+    roomId        String
+    orderCode     String        @unique @db.VarChar(30)
+    status        OrderStatus   @default(WAITING_PAYMENT)
+    paymentMethod PaymentMethod @default(MANUAL_TRANSFER)
+    checkInDate   DateTime
+    checkOutDate  DateTime
+    nights        Int
+    qty           Int           @default(1)
+    pricePerNight Decimal       @db.Decimal(12, 2)
+    totalAmount   Decimal       @db.Decimal(12, 2)
+    expiresAt     DateTime?
+    createdAt     DateTime      @default(now())
+    updatedAt     DateTime      @updatedAt
+
+    User     User     @relation("BookingUser", fields: [userId], references: [id])
+    Property Property @relation(fields: [propertyId], references: [id])
+    Room     Room     @relation(fields: [roomId], references: [id])
+
+    paymentProof   PaymentProof?   @relation("BookingPaymentProof")
+    gatewayPayment GatewayPayment? @relation("BookingGatewayPayment")
+    review         Review?         @relation("BookingReview")
+}
+
+model PaymentProof {
+    id         String    @id @default(uuid())
+    orderId    String    @unique
+    uploadedBy String
+    imageUrl   String    @db.Text
+    uploadedAt DateTime  @default(now())
+    acceptedAt DateTime?
+    rejectedAt DateTime?
+    reviewedBy String?
+
+    Order      Booking @relation("BookingPaymentProof", fields: [orderId], references: [id])
+    UploadedBy User    @relation("PaymentProofUploadedBy", fields: [uploadedBy], references: [id])
+}
+
+model GatewayPayment {
+    id          String    @id @default(uuid())
+    orderId     String    @unique
+    provider    String    @db.VarChar(50)
+    providerRef String?   @db.VarChar(100)
+    paidAmount  Decimal?  @db.Decimal(12, 2)
+    paidAt      DateTime?
+    status      String?   @db.VarChar(30)
+    payload     Json?
+
+    Order Booking @relation("BookingGatewayPayment", fields: [orderId], references: [id])
+}
+
+model Review {
+    id         String   @id @default(uuid())
+    orderId    String   @unique
+    userId     String
+    propertyId String
+    rating     Int
+    comment    String   @db.Text
+    createdAt  DateTime @default(now())
+
+    Order    Booking  @relation("BookingReview", fields: [orderId], references: [id])
+    User     User     @relation("UserReviews", fields: [userId], references: [id])
+    Property Property @relation("PropertyReviews", fields: [propertyId], references: [id])
 }
