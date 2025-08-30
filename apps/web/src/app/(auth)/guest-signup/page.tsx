@@ -29,6 +29,7 @@ export default function GuestSignUpPage() {
           title="Create your account"
           caption="Already have an account?"
           link="/guest-signin"
+          linkWord="Sign in"
         />
 
         <div>

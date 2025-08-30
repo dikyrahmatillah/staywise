@@ -1,38 +1,34 @@
 "use client";
 
-import { useState } from "react";
+import React from "react";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { DateRangePicker } from "@/components/search/date-range-picker";
-import { format } from "date-fns";
+import { Calendar } from "../ui/calendar";
 
 export default function ReservationCard() {
-  const [checkIn, setCheckIn] = useState<Date | undefined>(undefined);
-  const [checkOut, setCheckOut] = useState<Date | undefined>(undefined);
-  const [isOpen, setIsOpen] = useState(false);
-
-  const dateText =
-    checkIn && checkOut
-      ? `${format(checkIn, "MMM d")} - ${format(checkOut, "MMM d")}`
-      : "Add dates for prices";
-
+  const [dates, setDates] = React.useState<Date[]>([
+    new Date(2025, 5, 12),
+    new Date(2025, 6, 24),
+  ]);
   return (
     <div>
       <Card className="w-[412px] px-6 shadow">
-        <CardTitle className="text-2xl font-medium">{dateText}</CardTitle>
+        <CardTitle className="text-2xl font-medium">
+          Add dates for prices
+        </CardTitle>
 
-        <div className="mt-4">
-          <DateRangePicker
-            checkIn={checkIn}
-            checkOut={checkOut}
-            onCheckInChange={setCheckIn}
-            onCheckOutChange={setCheckOut}
-            isOpen={isOpen}
-            onOpenChange={setIsOpen}
-          />
-        </div>
+        <Calendar
+          mode="multiple"
+          numberOfMonths={2}
+          defaultMonth={dates[0]}
+          required
+          selected={dates}
+          onSelect={setDates}
+          max={5}
+          className="rounded-lg border shadow-sm"
+        />
 
-        <Button className="text-[16px] rounded-full py-6 mt-6">
+        <Button className="text-[16px] rounded-full py-6">
           Check availability
         </Button>
       </Card>

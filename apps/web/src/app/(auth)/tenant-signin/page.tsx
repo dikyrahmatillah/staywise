@@ -7,8 +7,9 @@ export default function TenantSignInPage() {
       <div className="w-full max-w-md space-y-8">
         <AuthHeader
           title="Property owner sign in"
-          caption="Not got an account?"
+          caption="Don't have an account?"
           link="/tenant-signup"
+          linkWord="Sign up"
         />
         <SignInForm title="Property owner sign in" signupref="/tenant-signup" />
       </div>

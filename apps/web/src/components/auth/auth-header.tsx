@@ -7,9 +7,10 @@ type Props = {
   title: string;
   caption: string;
   link?: string;
+  linkWord?: string;
 };
 
-export default function AuthHeader({ title, link, caption }: Props) {
+export default function AuthHeader({ title, link, caption, linkWord }: Props) {
   return (
     <div className="text-center space-y-2">
       <h1 className="text-3xl font-bold text-foreground ">{title}</h1>
@@ -20,7 +21,7 @@ export default function AuthHeader({ title, link, caption }: Props) {
             href={link}
             className="text-primary hover:underline font-medium"
           >
-            Sign in
+            {linkWord}
           </Link>
         )}
       </p>

@@ -62,7 +62,7 @@ export default function VerifyPage() {
 
             <Button
               type="submit"
-              className="w-full"
+              className="w-full cursor-pointer"
               disabled={loading || !token}
             >
               {loading
