@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Home } from "lucide-react";
+import { HiHome } from "react-icons/hi";
 
 import { LoginButton } from "./signin-button";
 
@@ -24,7 +24,6 @@ export function Header() {
   const [datesOpen, setDatesOpen] = useState(false);
   const [guestsOpen, setGuestsOpen] = useState(false);
 
-  // Helper to open one section and close others
   const openSection = (section: "location" | "dates" | "guests" | null) => {
     setLocationOpen(section === "location");
     setDatesOpen(section === "dates");
@@ -79,7 +78,7 @@ export function Header() {
 
           <div className="flex items-center justify-center flex-shrink-0">
             <Link href="/" className="flex items-center space-x-1 sm:space-x-2">
-              <Home className="h-6 w-6 sm:h-8 sm:w-8 font-sans text-rose-500" />
+              <HiHome className="h-6 w-6 sm:h-8 sm:w-8 font-sans text-rose-500" />
               <span className="font-bold text-lg sm:text-xl text-rose-500 hidden sm:inline-block">
                 StayWise
               </span>

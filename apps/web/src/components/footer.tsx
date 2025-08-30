@@ -1,13 +1,7 @@
 "use client";
 
-import {
-  Home,
-  Instagram,
-  Facebook,
-  Twitter,
-  Youtube,
-  Mail,
-} from "lucide-react";
+import { HiHome, HiOutlineMail } from "react-icons/hi";
+import { FiInstagram, FiFacebook, FiTwitter, FiYoutube } from "react-icons/fi";
 import { Button } from "@/components/ui/button";
 
 interface FooterLinkProps {
@@ -72,7 +66,7 @@ export function Footer() {
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 mb-8">
           <div className="flex flex-col">
             <div className="flex items-center space-x-2 mb-4">
-              <Home className="h-6 w-6 font-sans text-rose-500" />
+              <HiHome className="h-6 w-6 font-sans text-rose-500" />
               <span className="font-bold text-lg text-rose-500">StayWise</span>
             </div>
             <p className="text-sm text-gray-600 mb-4">
@@ -85,7 +79,7 @@ export function Footer() {
                 className="h-8 w-8 rounded-full hover:text-rose-500"
                 disabled
               >
-                <Instagram className="h-5 w-5" />
+                <FiInstagram className="h-5 w-5" />
               </Button>
               <Button
                 variant="ghost"
@@ -93,7 +87,7 @@ export function Footer() {
                 className="h-8 w-8 rounded-full hover:text-rose-500"
                 disabled
               >
-                <Facebook className="h-5 w-5" />
+                <FiFacebook className="h-5 w-5" />
               </Button>
               <Button
                 variant="ghost"
@@ -101,7 +95,7 @@ export function Footer() {
                 className="h-8 w-8 rounded-full hover:text-rose-500"
                 disabled
               >
-                <Twitter className="h-5 w-5" />
+                <FiTwitter className="h-5 w-5" />
               </Button>
               <Button
                 variant="ghost"
@@ -109,7 +103,7 @@ export function Footer() {
                 className="h-8 w-8 rounded-full hover:text-rose-500"
                 disabled
               >
-                <Youtube className="h-5 w-5" />
+                <FiYoutube className="h-5 w-5" />
               </Button>
             </div>
           </div>
@@ -154,7 +148,7 @@ export function Footer() {
 
           <div className="flex items-center space-x-4">
             <div className="flex items-center">
-              <Mail className="h-4 w-4 mr-2" />
+              <HiOutlineMail className="h-4 w-4 mr-2" />
               <span className="font-medium">support@staywise.com</span>
             </div>
           </div>

@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverTrigger } from "@/components/ui/popover";
-import { X } from "lucide-react";
+import { IoClose } from "react-icons/io5";
 import { cn } from "@/lib/utils";
 
 interface LocationInputProps {
@@ -67,10 +67,10 @@ export function LocationInput({
                 variant="ghost"
                 size="icon"
                 onClick={() => onLocationChange("")}
-                className="h-5 w-5 sm:h-6 sm:w-6 flex-shrink-0"
+                className="h-5 w-5 sm:h-6 sm:w-6 flex-shrink-0 cursor-pointer"
                 aria-label="Clear location"
               >
-                <X className="h-3 w-3 sm:h-4 sm:w-4" />
+                <IoClose className="h-3 w-3 sm:h-4 sm:w-4" />
               </Button>
             )}
           </div>
