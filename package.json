@@ -16,5 +16,8 @@
         "turbo": "^2.5.5",
         "typescript": "^5.8.3",
         "zod": "^4.0.13"
+    },
+    "dependencies": {
+        "bcrypt": "^6.0.0"
     }
 }

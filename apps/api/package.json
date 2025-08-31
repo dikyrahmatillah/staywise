@@ -9,7 +9,6 @@
     "dependencies": {
         "@repo/database": "*",
         "@repo/schemas": "*",
-        "bcrypt": "^6.0.0",
         "cloudinary": "^2.7.0",
         "express": "^5.1.0",
         "handlebars": "^4.7.8",

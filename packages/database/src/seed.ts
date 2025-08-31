@@ -1,4 +1,5 @@
 import { faker } from "@faker-js/faker";
+import bcrypt from "bcrypt";
 import { prisma } from "./client.js";
 
 const addDays = (date: Date, days: number) => {
@@ -78,8 +79,8 @@ async function seed() {
   await clear();
 
   console.log("Seeding users (tenants and guests)...");
-  const tenantCount = 5;
-  const guestCount = 25;
+  const tenantCount = 3;
+  const guestCount = 10;
   const tenants: Tenant[] = [];
   const guests: Guest[] = [];
 
@@ -91,7 +92,7 @@ async function seed() {
         firstName: faker.person.firstName(),
         lastName: faker.person.lastName(),
         email: faker.internet.email().toLowerCase(),
-        passwordHash: faker.internet.password(),
+        password: await bcrypt.hash("Pass123!", 10),
         avatarUrl: faker.image.avatarGitHub(),
         phone: faker.phone.number(),
         emailVerified: faker.datatype.boolean(),
