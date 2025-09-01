@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { HiHome } from "react-icons/hi";
 import { LoginButton } from "./signin-button";
 import { useState, useEffect } from "react";
@@ -14,6 +14,7 @@ const closeThreshold = 120;
 
 export function Header() {
   const router = useRouter();
+  const pathname = usePathname();
   const [checkIn, setCheckIn] = useState<Date>();
   const [checkOut, setCheckOut] = useState<Date>();
   const [adults, setAdults] = useState(0);
@@ -34,12 +35,16 @@ export function Header() {
 
       if (isAtTop !== nearTop) setIsAtTop(nearTop);
 
+      // Only auto-open/close on homepage and properties page
+      const shouldAutoOpen = pathname === "/" || pathname === "/properties";
+
       if (scrollTop >= closeThreshold) {
-        if (isSearchOpen && !userClosedSearch) setIsSearchOpen(false);
+        if (isSearchOpen && !userClosedSearch && shouldAutoOpen)
+          setIsSearchOpen(false);
         return;
       }
 
-      if (nearTop && !isSearchOpen && !userClosedSearch) {
+      if (nearTop && !isSearchOpen && !userClosedSearch && shouldAutoOpen) {
         setIsSearchOpen(true);
       }
     };
@@ -50,7 +55,7 @@ export function Header() {
     return () => {
       window.removeEventListener("scroll", onScroll);
     };
-  }, [isSearchOpen, userClosedSearch, isAtTop]);
+  }, [isSearchOpen, userClosedSearch, isAtTop, pathname]);
 
   useEffect(() => {
     if (isAtTop) {
