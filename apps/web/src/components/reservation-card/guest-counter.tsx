@@ -3,7 +3,7 @@
 import { memo } from "react";
 import { Button } from "@/components/ui/button";
 import { FiMinus, FiPlus } from "react-icons/fi";
-import { GuestCounterProps } from "./types";
+import { GuestCounterProps } from "@/components/search/types";
 
 export const GuestCounter = memo(function GuestCounter({
   label,

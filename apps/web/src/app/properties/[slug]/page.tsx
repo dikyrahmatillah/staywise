@@ -32,7 +32,7 @@ export default function PropertyDetailPage({
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-24 py-8">
         <HeaderBlock name={property.name} />
 
         <ImageGallery name={property.name} images={details.images} />

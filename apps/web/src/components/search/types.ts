@@ -44,3 +44,26 @@ export interface SearchButtonProps {
   isSearchOpen: boolean;
   onToggle: () => void;
 }
+
+
+//Guest Selector Interface
+export interface GuestSelectorProps {
+  adults: number;
+  childrenCount: number;
+  pets: number;
+  onAdultsChange: (count: number) => void;
+  onChildrenChange: (count: number) => void;
+  onPetsChange: (count: number) => void;
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export interface GuestCounterProps {
+  label: string;
+  subtitle: string;
+  value: number;
+  onDec: () => void;
+  onInc: () => void;
+  disableDec: boolean;
+}
+
