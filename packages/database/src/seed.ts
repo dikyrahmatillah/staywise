@@ -180,6 +180,7 @@ async function seed() {
             min: 95,
             precision: 7,
           }),
+          maxGuests: faker.number.int({ min: 1, max: 16 }),
         },
         select: { id: true },
       });

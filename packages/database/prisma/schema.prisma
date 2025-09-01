@@ -137,15 +137,15 @@ model Property {
     tenantId    String
     categoryId  String
     name        String   @db.VarChar(150)
-    description String?  @db.Text
-    pictureUrl  String?  @db.Text
-    country     String?  @db.VarChar(100)
+    description String   @db.Text
+    pictureUrl  String   @db.Text
+    country     String   @db.VarChar(60)
     province    String?  @db.VarChar(100)
     city        String   @db.VarChar(100)
-    address     String?  @db.Text
+    address     String   @db.Text
     latitude    Decimal? @db.Decimal(10, 7)
     longitude   Decimal? @db.Decimal(10, 7)
-    maxGuests   Int?
+    maxGuests   Int
     createdAt   DateTime @default(now())
     updatedAt   DateTime @updatedAt
 
