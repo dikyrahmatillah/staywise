@@ -3,13 +3,14 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { HiHome } from "react-icons/hi";
-
 import { LoginButton } from "./signin-button";
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { SearchButton } from "./search/search-button";
 import { ExpandedSearch } from "./search/expanded-search";
+
+const openThreshold = 30;
+const closeThreshold = 120;
 
 export function Header() {
   const router = useRouter();
@@ -20,9 +21,45 @@ export function Header() {
   const [pets, setPets] = useState(0);
   const [location, setLocation] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isAtTop, setIsAtTop] = useState(true);
+  const [userClosedSearch, setUserClosedSearch] = useState(false);
   const [locationOpen, setLocationOpen] = useState(false);
   const [datesOpen, setDatesOpen] = useState(false);
   const [guestsOpen, setGuestsOpen] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => {
+      const scrollTop = window.pageYOffset;
+      const nearTop = scrollTop < openThreshold;
+
+      if (isAtTop !== nearTop) setIsAtTop(nearTop);
+
+      if (scrollTop >= closeThreshold) {
+        if (isSearchOpen && !userClosedSearch) setIsSearchOpen(false);
+        return;
+      }
+
+      if (nearTop && !isSearchOpen && !userClosedSearch) {
+        setIsSearchOpen(true);
+      }
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+    };
+  }, [isSearchOpen, userClosedSearch, isAtTop]);
+
+  useEffect(() => {
+    if (isAtTop) {
+      const timeoutId = setTimeout(() => {
+        setUserClosedSearch(false);
+      }, 500);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [isAtTop]);
 
   const openSection = (section: "location" | "dates" | "guests" | null) => {
     setLocationOpen(section === "location");
@@ -45,6 +82,15 @@ export function Header() {
     else setGuestsOpen(false);
   };
 
+  const setSearchOpenManual = (open: boolean) => {
+    setIsSearchOpen(open);
+    if (isAtTop) {
+      setUserClosedSearch(!open);
+    } else {
+      setUserClosedSearch(open);
+    }
+  };
+
   const handleSearch = () => {
     const searchParams = new URLSearchParams();
 
@@ -56,7 +102,15 @@ export function Header() {
     if (pets > 0) searchParams.set("pets", pets.toString());
 
     router.push(`/search?${searchParams.toString()}`);
-    setIsSearchOpen(false);
+    setSearchOpenManual(false);
+  };
+
+  const handleSearchToggle = () => {
+    setSearchOpenManual(!isSearchOpen);
+  };
+
+  const handleSearchClose = () => {
+    setSearchOpenManual(false);
   };
 
   return (
@@ -72,7 +126,7 @@ export function Header() {
           <div className="flex-1 min-w-0">
             <SearchButton
               isSearchOpen={isSearchOpen}
-              onToggle={() => setIsSearchOpen(!isSearchOpen)}
+              onToggle={handleSearchToggle}
             />
           </div>
 
@@ -111,7 +165,7 @@ export function Header() {
             onLocationOpenChange={handleLocationOpenChange}
             onDatesOpenChange={handleDatesOpenChange}
             onGuestsOpenChange={handleGuestsOpenChange}
-            onClose={() => setIsSearchOpen(false)}
+            onClose={handleSearchClose}
           />
         )}
       </div>

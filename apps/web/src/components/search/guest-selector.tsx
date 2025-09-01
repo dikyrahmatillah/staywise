@@ -32,7 +32,6 @@ export function GuestSelector({
   onOpenChange,
 }: GuestSelectorProps) {
   const totalGuests = adults + childrenCount + pets;
-  const guestsOnly = adults + childrenCount;
 
   const clearGuests = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -60,13 +59,24 @@ export function GuestSelector({
               <div
                 className={cn(
                   "text-sm truncate",
-                  guestsOnly === 0 ? "text-gray-400" : "text-gray-900"
+                  totalGuests === 0 ? "text-gray-400" : "text-gray-900"
                 )}
               >
-                {guestsOnly === 0
+                {totalGuests === 0
                   ? "Add guest"
-                  : `${guestsOnly} guest${guestsOnly > 1 ? "s" : ""}` +
-                    (pets > 0 ? `, ${pets} pet${pets > 1 ? "s" : ""}` : "")}
+                  : [
+                      adults > 0
+                        ? `${adults} adult${adults > 1 ? "s" : ""}`
+                        : null,
+                      childrenCount > 0
+                        ? `${childrenCount} child${
+                            childrenCount > 1 ? "ren" : ""
+                          }`
+                        : null,
+                      pets > 0 ? `${pets} pet${pets > 1 ? "s" : ""}` : null,
+                    ]
+                      .filter(Boolean)
+                      .join(", ")}
               </div>
             </div>
             {totalGuests > 0 && (
