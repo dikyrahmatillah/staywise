@@ -1,0 +1,52 @@
+"use client";
+
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Star } from "lucide-react";
+import type { ReviewItem } from "./types";
+
+export function Reviews({
+  reviews,
+  total,
+}: {
+  reviews: ReviewItem[];
+  total: number;
+}) {
+  return (
+    <section id="reviews">
+      <h3 className="text-xl font-semibold mb-4">Reviews</h3>
+      <div className="space-y-6">
+        {reviews.map((review) => (
+          <div key={review.id} className="border-b pb-6 last:border-b-0">
+            <div className="flex items-start gap-3">
+              <Avatar>
+                <AvatarImage src={review.avatar} alt={review.author} />
+                <AvatarFallback>{review.author.charAt(0)}</AvatarFallback>
+              </Avatar>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="font-medium">{review.author}</span>
+                  <div className="flex items-center">
+                    {Array.from({ length: review.rating }).map((_, i) => (
+                      <Star
+                        key={i}
+                        className="h-4 w-4 fill-yellow-400 text-yellow-400"
+                      />
+                    ))}
+                  </div>
+                  <span className="text-sm text-muted-foreground">
+                    {review.date}
+                  </span>
+                </div>
+                <p className="text-muted-foreground">{review.comment}</p>
+              </div>
+            </div>
+          </div>
+        ))}
+        <Button variant="outline" className="w-full">
+          Show all {total} reviews
+        </Button>
+      </div>
+    </section>
+  );
+}
