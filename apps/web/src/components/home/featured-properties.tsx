@@ -1,17 +1,17 @@
 import Link from "next/link";
-import Image from "next/image";
-import { Card, CardContent, CardTitle } from "@/components/ui/card";
-import { Users, Star } from "lucide-react";
-import { mockProperties } from "@/data/property.data";
+// import Image from "next/image";
+// import { Card, CardContent, CardTitle } from "@/components/ui/card";
+// import { Users, Star } from "lucide-react";
+// import { mockProperties } from "@/data/property.data";
 
 export default function FeaturedProperties() {
-  const featuredProperties = mockProperties.slice(0, 4);
+  // const featuredProperties = mockProperties.slice(0, 4);
 
   return (
     <section className="w-full py-6 md:py-12 bg-slate-50">
       <div className="container mx-auto max-w-7xl px-4 md:px-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {featuredProperties.map((property) => (
+          {/* {featuredProperties.map((property) => (
             <Card
               key={property.id}
               className="overflow-hidden hover:shadow-lg transition-shadow"
@@ -68,7 +68,7 @@ export default function FeaturedProperties() {
                 </div>
               </CardContent>
             </Card>
-          ))}
+          ))} */}
         </div>
 
         <div className="text-center mt-12">

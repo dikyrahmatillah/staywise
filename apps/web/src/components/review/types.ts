@@ -1,9 +1,7 @@
-// apps/web/src/types/review.ts
-
 export interface Review {
   id: number;
   userName: string;
-  userAvatar?: string; 
+  userAvatar?: string;
   timeAgo: string;
   rating: number;
   reviewText: string;
@@ -23,8 +21,10 @@ export interface ReviewData {
   reviews: Review[];
 }
 
+export interface ReviewCardProps {
+  review: Review;
+}
+
 export interface ReviewSectionProps {
   data: ReviewData;
 }
-
-

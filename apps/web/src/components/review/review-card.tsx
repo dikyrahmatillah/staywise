@@ -4,11 +4,7 @@ import { useState } from "react";
 import { Star } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Review } from "@/components/review/types";
-
-interface ReviewCardProps {
-  review: Review;
-}
+import { ReviewCardProps } from "@/components/review/types";
 
 export function ReviewCard({ review }: ReviewCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -25,7 +21,7 @@ export function ReviewCard({ review }: ReviewCardProps) {
         />
         <div className="flex-1 space-y-2">
           <div>
-            <h4 className="font-semibold">{review.userName}</h4>
+            <h4 className="font-sans font-semibold">{review.userName}</h4>
           </div>
           <div className="flex items-center gap-3">
             <div className="flex items-center">
@@ -38,8 +34,8 @@ export function ReviewCard({ review }: ReviewCardProps) {
                 />
               ))}
             </div>
-            <span className="text-sm text-muted-foreground">·</span>
-            <span className="text-sm text-muted-foreground">
+            <span className="font-sans text-sm text-muted-foreground">·</span>
+            <span className="font-sans text-sm text-muted-foreground">
               {review.timeAgo}
             </span>
           </div>
