@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Users, Star } from "lucide-react";
-import { mockProperties } from "@/data/property.data";
+import { mockProperties } from "@/app/properties/[slug]/mockDetails";
 
 export default function FeaturedProperties() {
   const featuredProperties = mockProperties.slice(0, 4);
