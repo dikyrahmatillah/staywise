@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Calendar as CalendarIcon } from "lucide-react";
+import { CalendarIcon } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import {
   Popover,
@@ -11,7 +11,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import { Input } from "@/components/ui/input";
+import { GuestSelector } from "@/components/reservation-card/guest-selector";
 
 export function BookingSidebar({
   pricePerNight,
@@ -22,7 +22,10 @@ export function BookingSidebar({
 }) {
   const [checkInDate, setCheckInDate] = useState<Date>();
   const [checkOutDate, setCheckOutDate] = useState<Date>();
-  const [guests, setGuests] = useState(0);
+  const [adults, setAdults] = useState(0);
+  const [childrenCount, setChildrenCount] = useState(0);
+  const [pets, setPets] = useState(0);
+  const [guestSelectorOpen, setGuestSelectorOpen] = useState(false);
 
   return (
     <div className="sticky top-20">
@@ -33,7 +36,7 @@ export function BookingSidebar({
             <span className="text-muted-foreground">per night</span>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6">
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="checkIn">Check-in</Label>
@@ -41,7 +44,7 @@ export function BookingSidebar({
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
-                    className="w-full justify-start text-left font-normal"
+                    className="w-full justify-start text-left font-normal bg-transparent"
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {checkInDate
@@ -65,7 +68,7 @@ export function BookingSidebar({
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
-                    className="w-full justify-start text-left font-normal"
+                    className="w-full justify-start text-left font-normal bg-transparent"
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {checkOutDate
@@ -86,18 +89,27 @@ export function BookingSidebar({
           </div>
 
           <div>
-            <Label htmlFor="guests">Guests</Label>
-            <Input
-              id="guests"
-              type="number"
-              min={1}
-              max={maxGuests ?? 10}
-              value={guests}
-              onChange={(e) => setGuests(parseInt(e.target.value))}
-            />
+            <div className="flex flex-row justify-between">
+              <Label>Guests</Label>
+              <Label>Max. guest: {maxGuests}</Label>
+            </div>
+            <div className="border rounded-md">
+              <GuestSelector
+                adults={adults}
+                childrenCount={childrenCount}
+                pets={pets}
+                onAdultsChange={setAdults}
+                onChildrenChange={setChildrenCount}
+                onPetsChange={setPets}
+                isOpen={guestSelectorOpen}
+                onOpenChange={setGuestSelectorOpen}
+              />
+            </div>
           </div>
 
-          <Button className="w-full">Book Now</Button>
+          <Button className="w-full text-[16px] rounded-full py-6">
+            Book Now
+          </Button>
         </CardContent>
       </Card>
     </div>
