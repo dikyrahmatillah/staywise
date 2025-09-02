@@ -106,7 +106,7 @@ export function Header() {
     if (children > 0) searchParams.set("children", children.toString());
     if (pets > 0) searchParams.set("pets", pets.toString());
 
-    router.push(`/search?${searchParams.toString()}`);
+    router.push(`/properties?${searchParams.toString()}`);
     setSearchOpenManual(false);
   };
 

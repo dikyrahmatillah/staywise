@@ -3,7 +3,6 @@ import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-// import { mockProperties } from "@/data/property.data";
 import { HeaderBlock } from "./components/HeaderBlock";
 import { ImageGallery } from "./components/ImageGallery";
 import { StatsHeader } from "./components/StatsHeader";
