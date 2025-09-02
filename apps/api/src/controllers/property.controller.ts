@@ -64,6 +64,22 @@ export class PropertyController {
       next(error);
     }
   };
+
+  getProperty = async (
+    request: Request,
+    response: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const slug = request.params.slug;
+      const property = await this.propertyService.getPropertyBySlug(slug);
+      response
+        .status(200)
+        .json({ message: "Property fetched successfully", data: property });
+    } catch (error) {
+      next(error);
+    }
+  };
 }
 
 export const propertyController = new PropertyController();

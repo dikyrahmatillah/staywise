@@ -12,7 +12,6 @@ export type Property = {
   id: string;
   name: string;
   city: string;
-  province: string;
   address: string;
   description?: string;
   maxGuests?: number;
@@ -89,7 +88,6 @@ export const mockProperties: Property[] = [
     id: "prop_1",
     name: "Beachside Apartment",
     city: "Kuta",
-    province: "Bali",
     address: "Jl. Pantai Kuta No.1",
     description: "A lovely beachside apartment with sea views.",
     maxGuests: 6,

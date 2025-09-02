@@ -65,6 +65,13 @@ enum Amenities {
     BBQ
 }
 
+enum BedType {
+    KING
+    QUEEN
+    SINGLE
+    TWIN
+}
+
 model User {
     id            String   @id @default(uuid())
     role          UserRole @default(USER)
@@ -136,16 +143,15 @@ model Property {
     id          String   @id @default(uuid())
     tenantId    String
     categoryId  String
-    name        String   @db.VarChar(150)
+    name        String   @db.VarChar(100)
+    slug        String   @unique @db.VarChar(150)
     description String   @db.Text
-    pictureUrl  String   @db.Text
     country     String   @db.VarChar(60)
-    province    String?  @db.VarChar(100)
     city        String   @db.VarChar(100)
     address     String   @db.Text
     latitude    Decimal? @db.Decimal(10, 7)
     longitude   Decimal? @db.Decimal(10, 7)
-    maxGuests   Int
+    maxGuests   Int      @default(1)
     createdAt   DateTime @default(now())
     updatedAt   DateTime @updatedAt
 
@@ -153,8 +159,19 @@ model Property {
     PropertyCategory PropertyCategory   @relation(fields: [categoryId], references: [id])
     Rooms            Room[]
     Facilities       PropertyFacility[]
+    Pictures         PropertyPicture[]
     Bookings         Booking[]
     Reviews          Review[]           @relation("PropertyReviews")
+}
+
+model PropertyPicture {
+    id         String   @id @default(uuid())
+    propertyId String
+    imageUrl   String   @db.Text
+    note       String?  @db.Text
+    createdAt  DateTime @default(now())
+
+    Property Property @relation(fields: [propertyId], references: [id])
 }
 
 model PropertyFacility {
@@ -168,14 +185,16 @@ model PropertyFacility {
 }
 
 model Room {
-    id          String   @id @default(uuid())
-    propertyId  String
-    name        String   @db.VarChar(150)
-    description String?  @db.Text
-    basePrice   Decimal  @db.Decimal(12, 2)
-    capacity    Int      @default(1)
-    createdAt   DateTime @default(now())
-    updatedAt   DateTime @updatedAt
+    id         String   @id @default(uuid())
+    propertyId String
+    name       String   @db.VarChar(150)
+    basePrice  Decimal  @db.Decimal(12, 2)
+    capacity   Int      @default(1)
+    bedType    BedType?
+    bedCount   Int      @default(1)
+    pictureUrl String?  @db.Text
+    createdAt  DateTime @default(now())
+    updatedAt  DateTime @updatedAt
 
     Property           Property           @relation(fields: [propertyId], references: [id])
     RoomAvailabilities RoomAvailability[]

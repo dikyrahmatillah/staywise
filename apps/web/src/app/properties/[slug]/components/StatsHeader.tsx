@@ -4,7 +4,6 @@ import { Users, Bed, Bath, Star } from "lucide-react";
 
 export function StatsHeader({
   city,
-  province,
   address,
   description,
   rating,
@@ -14,7 +13,6 @@ export function StatsHeader({
   bathrooms,
 }: {
   city: string;
-  province?: string | null;
   address?: string | null;
   description?: string | null;
   rating: number;
@@ -27,7 +25,7 @@ export function StatsHeader({
     <div className="mb-6">
       <div className="flex items-start gap-4">
         <div className="flex-1">
-          <h2 className="text-3xl font-serif mb-2">{province || city}</h2>
+          <h2 className="text-3xl font-serif mb-2">{city}</h2>
           <p className="text-lg text-muted-foreground mb-4">
             {address}, {city}
           </p>
