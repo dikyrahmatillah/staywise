@@ -1,7 +1,7 @@
 import { faker } from "@faker-js/faker";
 import bcrypt from "bcrypt";
 import { prisma } from "./client.js";
-import { r } from "node_modules/@faker-js/faker/dist/airline-CLphikKp.js";
+import { BedType } from "../generated/prisma/index.js";
 import { randomUUID } from "crypto";
 
 const addDays = (date: Date, days: number) => {
@@ -184,9 +184,7 @@ async function seed() {
             `${city} ${faker.location.country()}`
           )}-${randomUUID().replace(/-/g, "").slice(0, 8)}`,
           description: faker.lorem.paragraph(),
-          pictureUrl: faker.image.urlPicsumPhotos({ width: 1280, height: 720 }),
           country: faker.location.country(),
-          province: faker.location.state(),
           city,
           address: faker.location.streetAddress(),
           latitude: faker.location.latitude({ max: 6, min: -11, precision: 7 }),
@@ -195,7 +193,18 @@ async function seed() {
             min: 95,
             precision: 7,
           }),
-          maxGuests: faker.number.int({ min: 1, max: 16 }),
+          maxGuests: faker.number.int({ min: 2, max: 12 }),
+          Pictures: {
+            create: Array.from({ length: 5 }).map(() => ({
+              imageUrl: faker.image.urlPicsumPhotos({
+                width: 1280,
+                height: 720,
+              }),
+              note: faker.datatype.boolean()
+                ? faker.lorem.words({ min: 2, max: 8 })
+                : null,
+            })),
+          },
         },
         select: { id: true },
       });
@@ -225,9 +234,19 @@ async function seed() {
             name: `${faker.word.adjective({
               length: { min: 4, max: 8 },
             })} Room ${r + 1}`,
-            description: faker.lorem.paragraph(),
             basePrice: basePrice.toString(),
             capacity: faker.number.int({ min: 1, max: 6 }),
+            bedType: faker.helpers.arrayElement([
+              BedType.KING,
+              BedType.QUEEN,
+              BedType.SINGLE,
+              BedType.TWIN,
+            ]),
+            bedCount: faker.number.int({ min: 1, max: 4 }),
+            pictureUrl: faker.image.urlPicsumPhotos({
+              width: 800,
+              height: 600,
+            }),
           },
           select: { id: true },
         });

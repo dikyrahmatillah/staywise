@@ -66,7 +66,6 @@ export default function PropertiesPage() {
         {!isLoading && !isError && properties.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {properties.map((property) => {
-              const slug = property.name.toLowerCase().replace(/\s+/g, "-");
               const totalBedrooms = property.Rooms?.length || 1;
               const totalBathrooms = property.Rooms?.length || 1;
               const basePrice = property.Rooms?.[0]?.basePrice || 120;
@@ -78,17 +77,10 @@ export default function PropertiesPage() {
                 >
                   <div className="relative aspect-[16/9]">
                     <Image
-                      src={
-                        property.pictureUrl ||
-                        "/images/properties/placeholder.jpg"
-                      }
+                      src={property.Pictures[0]?.imageUrl}
                       alt={property.name}
                       fill
                       className="object-cover"
-                      onError={(e) => {
-                        (e.currentTarget as HTMLImageElement).src =
-                          "/images/properties/placeholder.jpg";
-                      }}
                     />
                     <Badge className="absolute top-3 left-3">Available</Badge>
                   </div>
@@ -97,10 +89,7 @@ export default function PropertiesPage() {
                       <CardTitle className="text-lg">{property.name}</CardTitle>
                       <div className="flex items-center gap-1 text-muted-foreground text-sm">
                         <MapPin className="h-4 w-4" />
-                        <span>
-                          {property.city}
-                          {property.province ? `, ${property.province}` : ""}
-                        </span>
+                        <span>{property.city}</span>
                       </div>
                     </CardHeader>
 
@@ -138,7 +127,7 @@ export default function PropertiesPage() {
                         <span className="text-xl font-bold">${basePrice}</span>
                         <span className="text-muted-foreground">/night</span>
                       </div>
-                      <Link href={`/properties/${slug}`}>
+                      <Link href={`/properties/${property.slug}`}>
                         <Button>View Details</Button>
                       </Link>
                     </div>

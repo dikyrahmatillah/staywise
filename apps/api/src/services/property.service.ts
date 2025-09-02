@@ -32,7 +32,7 @@ export class PropertyService {
 
     const where: any = {};
     if (destination) {
-      const fields = ["city", "country", "province", "address"];
+      const fields = ["city", "country", "address"];
       where.OR = fields.map((f) => ({
         [f]: { contains: destination, mode: "insensitive" },
       }));
@@ -79,7 +79,7 @@ export class PropertyService {
       skip,
       take,
       orderBy,
-      include: { PropertyCategory: true, Rooms: true },
+      include: { PropertyCategory: true, Rooms: true, Pictures: true },
     });
   }
 
@@ -90,6 +90,7 @@ export class PropertyService {
       where: { slug },
       include: {
         PropertyCategory: true,
+        Pictures: true,
         Rooms: true,
         Facilities: true,
         Bookings: true,
