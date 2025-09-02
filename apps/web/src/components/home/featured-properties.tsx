@@ -1,16 +1,40 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Users, Star } from "lucide-react";
-import { mockProperties } from "@/app/properties/[slug]/mockDetails";
+import { useProperties } from "@/hooks/useProperties";
+import type { Property } from "@/types/property";
 
 export default function FeaturedProperties() {
-  const featuredProperties = mockProperties.slice(0, 4);
+  const { data, isLoading, isError, error } = useProperties({ limit: 4 });
+  const featuredProperties: Property[] = data?.data ?? [];
 
   return (
     <section className="w-full py-6 md:py-12 bg-slate-50">
       <div className="container mx-auto max-w-7xl px-4 md:px-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {isLoading && (
+            <div className="col-span-4 text-center text-slate-500">
+              Loading featured properties...
+            </div>
+          )}
+          {isError && (
+            <div className="col-span-4 text-center text-red-500">
+              {(() => {
+                if (!error) return "Failed to load properties";
+                const e = error as unknown;
+                if (e && typeof e === "object" && "message" in e) {
+                  return String(
+                    (e as { message?: unknown }).message ??
+                      "Failed to load properties"
+                  );
+                }
+                return "Failed to load properties";
+              })()}
+            </div>
+          )}
           {featuredProperties.map((property) => (
             <Card
               key={property.id}
@@ -18,7 +42,10 @@ export default function FeaturedProperties() {
             >
               <div className="aspect-[4/3] bg-slate-200 relative overflow-hidden">
                 <Image
-                  src={`https://picsum.photos/400/300?random=${property.id}`}
+                  src={
+                    property.pictureUrl ||
+                    `https://picsum.photos/400/300?random=${property.id}`
+                  }
                   alt={property.name}
                   width={400}
                   height={300}
@@ -44,7 +71,7 @@ export default function FeaturedProperties() {
                     <span>{property.maxGuests} Guests</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <span>{property.rooms?.length || 0} Rooms</span>
+                    <span>{property.Rooms.length || 0} Rooms</span>
                   </div>
                 </div>
 
@@ -55,7 +82,7 @@ export default function FeaturedProperties() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-lg font-bold">
-                      ${property.rooms?.[0]?.basePrice || 0}
+                      ${property.Rooms[0]?.basePrice || 0}
                       <span className="text-sm font-normal text-slate-600">
                         /night
                       </span>
