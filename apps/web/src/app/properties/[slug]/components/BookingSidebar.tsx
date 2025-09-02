@@ -31,9 +31,11 @@ export function BookingSidebar({
     <div className="sticky top-20">
       <Card className="mb-6">
         <CardHeader>
-          <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-bold">${pricePerNight}</span>
-            <span className="text-muted-foreground">per night</span>
+          <div className="flex items-baseline gap-0.5">
+            <span className="font-sans text-3xl font-bold">
+              ${pricePerNight}
+            </span>
+            <span className="font-sans text-muted-foreground">/night</span>
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
