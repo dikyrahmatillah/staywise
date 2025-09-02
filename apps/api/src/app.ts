@@ -1,4 +1,5 @@
 import express, { Application, Request, Response } from "express";
+import cors from "cors";
 import { errorMiddleware } from "./middlewares/error.middleware.js";
 import logger from "./utils/logger.js";
 import authRouter from "./routers/auth.router.js";
@@ -15,6 +16,15 @@ export class App {
   }
 
   setupMiddleware() {
+    this.app.use(
+      cors({
+        origin:
+          process.env.API_CORS_ORIGIN ||
+          process.env.NEXT_PUBLIC_API_URL ||
+          true,
+        credentials: true,
+      })
+    );
     this.app.use(express.json());
   }
 
