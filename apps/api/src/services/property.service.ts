@@ -82,4 +82,22 @@ export class PropertyService {
       include: { PropertyCategory: true, Rooms: true },
     });
   }
+
+  async getPropertyBySlug(slug: string) {
+    if (!slug) throw new AppError("Missing property slug", 400);
+
+    const property = await prisma.property.findUnique({
+      where: { slug },
+      include: {
+        PropertyCategory: true,
+        Rooms: true,
+        Facilities: true,
+        Bookings: true,
+      },
+    });
+
+    if (!property) throw new AppError("Property not found", 404);
+
+    return property;
+  }
 }

@@ -136,7 +136,8 @@ model Property {
     id          String   @id @default(uuid())
     tenantId    String
     categoryId  String
-    name        String   @db.VarChar(150)
+    name        String   @db.VarChar(100)
+    slug        String   @unique @db.VarChar(150)
     description String   @db.Text
     pictureUrl  String   @db.Text
     country     String   @db.VarChar(60)

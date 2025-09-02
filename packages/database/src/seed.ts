@@ -1,6 +1,8 @@
 import { faker } from "@faker-js/faker";
 import bcrypt from "bcrypt";
 import { prisma } from "./client.js";
+import { r } from "node_modules/@faker-js/faker/dist/airline-CLphikKp.js";
+import { randomUUID } from "crypto";
 
 const addDays = (date: Date, days: number) => {
   const d = new Date(date);
@@ -9,6 +11,16 @@ const addDays = (date: Date, days: number) => {
 };
 
 const toISODate = (date: Date) => date.toISOString().slice(0, 10);
+
+// Minimal slugify helper to avoid the external dependency in seed files.
+const slugifyLocal = (s: string) =>
+  s
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/\p{Diacritic}/gu, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "")
+    .slice(0, 150);
 
 const AVAILABILITY_DAYS = 14;
 
@@ -168,6 +180,9 @@ async function seed() {
           tenantId: t.id,
           categoryId: category.id,
           name: `${city} ${faker.company.name()}`,
+          slug: `${slugifyLocal(
+            `${city} ${faker.location.country()}`
+          )}-${randomUUID().replace(/-/g, "").slice(0, 8)}`,
           description: faker.lorem.paragraph(),
           pictureUrl: faker.image.urlPicsumPhotos({ width: 1280, height: 720 }),
           country: faker.location.country(),
