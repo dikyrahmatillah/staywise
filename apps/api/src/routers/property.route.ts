@@ -5,5 +5,6 @@ const router = Router();
 
 router.post("/", propertyController.createProperty);
 router.get("/", propertyController.getProperties);
+router.get("/:slug", propertyController.getProperty);
 
 export default router;

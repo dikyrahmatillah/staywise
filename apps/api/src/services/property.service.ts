@@ -32,7 +32,7 @@ export class PropertyService {
 
     const where: any = {};
     if (destination) {
-      const fields = ["city", "country", "province", "address"];
+      const fields = ["city", "country", "address"];
       where.OR = fields.map((f) => ({
         [f]: { contains: destination, mode: "insensitive" },
       }));
@@ -79,7 +79,26 @@ export class PropertyService {
       skip,
       take,
       orderBy,
-      include: { PropertyCategory: true, Rooms: true },
+      include: { PropertyCategory: true, Rooms: true, Pictures: true },
     });
+  }
+
+  async getPropertyBySlug(slug: string) {
+    if (!slug) throw new AppError("Missing property slug", 400);
+
+    const property = await prisma.property.findUnique({
+      where: { slug },
+      include: {
+        PropertyCategory: true,
+        Pictures: true,
+        Rooms: true,
+        Facilities: true,
+        Bookings: true,
+      },
+    });
+
+    if (!property) throw new AppError("Property not found", 404);
+
+    return property;
   }
 }

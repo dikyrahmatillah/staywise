@@ -1,6 +1,8 @@
 import { faker } from "@faker-js/faker";
 import bcrypt from "bcrypt";
 import { prisma } from "./client.js";
+import { BedType } from "../generated/prisma/index.js";
+import { randomUUID } from "crypto";
 
 const addDays = (date: Date, days: number) => {
   const d = new Date(date);
@@ -9,6 +11,16 @@ const addDays = (date: Date, days: number) => {
 };
 
 const toISODate = (date: Date) => date.toISOString().slice(0, 10);
+
+// Minimal slugify helper to avoid the external dependency in seed files.
+const slugifyLocal = (s: string) =>
+  s
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/\p{Diacritic}/gu, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "")
+    .slice(0, 150);
 
 const AVAILABILITY_DAYS = 14;
 
@@ -168,10 +180,11 @@ async function seed() {
           tenantId: t.id,
           categoryId: category.id,
           name: `${city} ${faker.company.name()}`,
+          slug: `${slugifyLocal(
+            `${city} ${faker.location.country()}`
+          )}-${randomUUID().replace(/-/g, "").slice(0, 8)}`,
           description: faker.lorem.paragraph(),
-          pictureUrl: faker.image.urlPicsumPhotos({ width: 1280, height: 720 }),
           country: faker.location.country(),
-          province: faker.location.state(),
           city,
           address: faker.location.streetAddress(),
           latitude: faker.location.latitude({ max: 6, min: -11, precision: 7 }),
@@ -180,7 +193,18 @@ async function seed() {
             min: 95,
             precision: 7,
           }),
-          maxGuests: faker.number.int({ min: 1, max: 16 }),
+          maxGuests: faker.number.int({ min: 2, max: 12 }),
+          Pictures: {
+            create: Array.from({ length: 5 }).map(() => ({
+              imageUrl: faker.image.urlPicsumPhotos({
+                width: 1280,
+                height: 720,
+              }),
+              note: faker.datatype.boolean()
+                ? faker.lorem.words({ min: 2, max: 8 })
+                : null,
+            })),
+          },
         },
         select: { id: true },
       });
@@ -210,9 +234,19 @@ async function seed() {
             name: `${faker.word.adjective({
               length: { min: 4, max: 8 },
             })} Room ${r + 1}`,
-            description: faker.lorem.paragraph(),
             basePrice: basePrice.toString(),
             capacity: faker.number.int({ min: 1, max: 6 }),
+            bedType: faker.helpers.arrayElement([
+              BedType.KING,
+              BedType.QUEEN,
+              BedType.SINGLE,
+              BedType.TWIN,
+            ]),
+            bedCount: faker.number.int({ min: 1, max: 4 }),
+            pictureUrl: faker.image.urlPicsumPhotos({
+              width: 800,
+              height: 600,
+            }),
           },
           select: { id: true },
         });
