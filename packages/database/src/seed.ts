@@ -502,6 +502,87 @@ async function seed() {
     }
   }
 
+  console.log("Seeding additional reviews per property...");
+  const allProperties = await prisma.property.findMany({
+    select: { id: true },
+  });
+  const usedOrderCodesExtra = new Set<string>();
+
+  for (const prop of allProperties) {
+    const existingCount = await prisma.review.count({
+      where: { propertyId: prop.id },
+    });
+    const targetReviews = faker.number.int({ min: 1, max: 3 });
+    for (let rc = existingCount; rc < targetReviews; rc++) {
+      const existingBooking = await prisma.booking.findFirst({
+        where: { propertyId: prop.id, status: "COMPLETED" },
+        include: { review: true },
+        orderBy: { createdAt: "desc" },
+      });
+
+      let bookingToUse =
+        existingBooking && !existingBooking.review ? existingBooking : null;
+
+      if (!bookingToUse) {
+        const roomForProp = rooms.find((r) => r.propertyId === prop.id);
+        if (!roomForProp) continue;
+        const guest = faker.helpers.arrayElement(guests);
+        let orderCode = "";
+        do {
+          orderCode = `ORD-${faker.string
+            .alphanumeric({ length: 8 })
+            .toUpperCase()}`;
+        } while (usedOrderCodesExtra.has(orderCode));
+        usedOrderCodesExtra.add(orderCode);
+
+        const nights = 2;
+        const pricePerNight = roomForProp.basePrice;
+        const totalAmount = pricePerNight * nights;
+
+        const createdBooking = await prisma.booking.create({
+          data: {
+            userId: guest.id,
+            tenantId: roomForProp.tenantId,
+            propertyId: prop.id,
+            roomId: roomForProp.id,
+            orderCode,
+            status: "COMPLETED",
+            paymentMethod: "PAYMENT_GATEWAY",
+            checkInDate: addDays(new Date(), -10),
+            checkOutDate: addDays(new Date(), -8),
+            nights,
+            qty: 1,
+            pricePerNight: pricePerNight.toString(),
+            totalAmount: totalAmount.toString(),
+            expiresAt: null,
+          },
+          select: { id: true },
+        });
+
+        // Re-query to get the same shape as findFirst (include review)
+        const reloaded = await prisma.booking.findUnique({
+          where: { id: createdBooking.id },
+          include: { review: true, User: true },
+        });
+        bookingToUse = reloaded ?? null;
+      }
+
+      // Create review attached to the booking
+      if (!bookingToUse) continue;
+      try {
+        await prisma.review.create({
+          data: {
+            orderId: bookingToUse.id,
+            userId: bookingToUse.userId,
+            propertyId: prop.id,
+            rating: faker.number.int({ min: 3, max: 5 }),
+            comment: faker.lorem.sentences({ min: 1, max: 3 }),
+          },
+        });
+      } catch (e) {}
+    }
+  }
+
   console.log("Seeding finished");
 }
 

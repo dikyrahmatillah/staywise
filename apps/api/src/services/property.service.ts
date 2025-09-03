@@ -93,12 +93,29 @@ export class PropertyService {
         Pictures: true,
         Rooms: true,
         Facilities: true,
-        Bookings: true,
+        Reviews: {
+          include: { User: true },
+          orderBy: { createdAt: "desc" },
+          take: 3,
+        },
       },
     });
 
     if (!property) throw new AppError("Property not found", 404);
 
-    return property;
+    // compute totals/averages separately so we can expose summaries while returning a single review
+    const reviewCount = await prisma.review.count({
+      where: { propertyId: property.id },
+    });
+    const avg = await prisma.review.aggregate({
+      where: { propertyId: property.id },
+      _avg: { rating: true },
+    });
+
+    return {
+      ...property,
+      reviewCount,
+      averageRating: avg._avg.rating ?? 0,
+    };
   }
 }

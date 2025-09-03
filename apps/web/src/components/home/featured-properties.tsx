@@ -58,7 +58,7 @@ export default function FeaturedProperties() {
                 </div>
                 <CardTitle className="text-lg mb-2 line-clamp-1">
                   <Link
-                    href={`/property-detail?id=${property.id}`}
+                    href={`/properties/${property.slug}`}
                     className="hover:text-blue-600"
                   >
                     {property.name}
