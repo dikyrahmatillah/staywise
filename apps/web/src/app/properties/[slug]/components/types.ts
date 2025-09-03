@@ -1,10 +1,5 @@
 import type { Amenities } from "../mockDetails";
 
-export interface Landmark {
-  name: string;
-  distance: string;
-}
-
 export interface SleepingArrangement {
   room: string;
   beds: string;
