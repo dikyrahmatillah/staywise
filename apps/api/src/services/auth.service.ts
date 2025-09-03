@@ -1,5 +1,10 @@
 import { prisma } from "@repo/database";
-import { LoginInput, UserRegistrationInput } from "@repo/schemas";
+import {
+  CompleteRegistrationInput,
+  LoginInput,
+  RegistrationStartInput,
+  UpdateUserInput,
+} from "@repo/schemas";
 import { AppError } from "@/errors/app.error.js";
 import bcrypt from "bcrypt";
 import { generateToken } from "@/utils/jwt.js";
@@ -8,35 +13,109 @@ import { EmailService } from "./email.service.js";
 export class AuthService {
   private emailService = new EmailService();
 
-  async userRegistration(data: UserRegistrationInput) {
-    if (await prisma.user.findUnique({ where: { email: data.email } })) {
+  async startRegistration(input: RegistrationStartInput) {
+    const { email, role } = input;
+
+    const existing = await prisma.user.findUnique({ where: { email } });
+    if (existing?.emailVerified) {
       throw new AppError("User already exists", 409);
     }
 
-    const user = await prisma.user.create({
+    const user = existing
+      ? existing
+      : await prisma.user.create({
+          data: {
+            email,
+            firstName: "",
+            lastName: "",
+            role: role as any,
+            emailVerified: false,
+          },
+        });
+
+    const expiresAt = new Date(Date.now() + 1000 * 60 * 60); // 1 hour
+    const token = generateToken({ id: user.id, purpose: "verify" }, "1h");
+
+    await prisma.emailVerification.deleteMany({ where: { userId: user.id } });
+    await prisma.emailVerification.create({
       data: {
-        email: data.email,
-        firstName: data.firstName,
-        lastName: data.lastName,
+        userId: user.id,
+        token,
+        expiresAt,
       },
     });
-    return user;
+
+    await this.emailService.sendEmailVerification(email, token);
+    return { ok: true };
   }
 
-  async addPassword(userId: string, password: string, confirmation: string) {
-    if (password !== confirmation)
-      throw new AppError("Passwords do not match", 400);
-    const hashedPassword = await bcrypt.hash(password, 10);
-    await prisma.user.update({
-      where: { id: userId },
-      data: { password: hashedPassword },
+  async completeRegistration(input: CompleteRegistrationInput) {
+    const { token, firstName, lastName, phone, avatarUrl, password } = input;
+
+    const ver = await prisma.emailVerification.findUnique({
+      where: { token },
     });
+    if (!ver || ver.usedAt) throw new AppError("Invalid or used token", 400);
+    if (ver.expiresAt.getTime() < Date.now())
+      throw new AppError("Token expired", 400);
+
+    const user = await prisma.user.findUnique({ where: { id: ver.userId } });
+    if (!user) throw new AppError("User not found", 404);
+    if (user.emailVerified) throw new AppError("Email already verified", 400);
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    await prisma.$transaction([
+      prisma.user.update({
+        where: { id: user.id },
+        data: {
+          firstName,
+          lastName,
+          phone,
+          avatarUrl,
+          password: hashedPassword,
+          emailVerified: true,
+        },
+      }),
+      prisma.emailVerification.update({
+        where: { token },
+        data: { usedAt: new Date() },
+      }),
+    ]);
+
+    return { ok: true };
+  }
+
+  async resendVerification(email: string) {
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) throw new AppError("User not found", 404);
+    if (user.emailVerified) throw new AppError("Email already verified", 400);
+
+    await prisma.emailVerification.deleteMany({ where: { userId: user.id } });
+
+    const token = generateToken({ id: user.id, purpose: "verify" }, "1h");
+    const expiresAt = new Date(Date.now() + 1000 * 60 * 60);
+
+    await prisma.emailVerification.create({
+      data: {
+        userId: user.id,
+        token,
+        expiresAt,
+      },
+    });
+
+    await this.emailService.sendEmailVerification(email, token);
+    return { ok: true };
   }
 
   async login(data: LoginInput) {
     const user = await prisma.user.findUnique({ where: { email: data.email } });
 
     if (!user) throw new AppError("Invalid email or password", 401);
+
+    if (!user.emailVerified) {
+      throw new AppError("Email not verified", 403);
+    }
 
     if (!user.password) throw new AppError("Invalid email or password", 401);
 
@@ -57,7 +136,7 @@ export class AuthService {
     return user;
   }
 
-  async updateProfile(userId: string, data: Partial<UserRegistrationInput>) {
+  async updateProfile(userId: string, data: Partial<UpdateUserInput>) {
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new AppError("User not found", 404);
 
