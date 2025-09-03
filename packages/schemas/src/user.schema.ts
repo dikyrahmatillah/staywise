@@ -5,22 +5,16 @@ export const RegistrationStartSchema = z.object({
   role: z.enum(["USER", "TENANT"]),
 });
 
-export const changePasswordPassword = z
-  .object({
-    token: z.string().min(6, "Invalid or missing token"),
-    password: z
-      .string()
-      .min(8, "Password must be at least 8 characters")
-      .regex(/[a-z]/, "Password must contain at least one lowercase letter")
-      .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-      .regex(/[0-9]/, "Password must contain at least one number")
-      .regex(/[^\w\s]/, "Password must contain at least one special character"),
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    path: ["confirmPassword"],
-    message: "Passwords do not match",
-  });
+export const changePasswordPassword = z.object({
+  token: z.string().min(6, "Invalid or missing token"),
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters")
+    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .regex(/[0-9]/, "Password must contain at least one number")
+    .regex(/[^\w\s]/, "Password must contain at least one special character"),
+});
 
 export const CompleteRegistrationSchema = z.object({
   token: z.string().min(6, "Invalid or missing token"),

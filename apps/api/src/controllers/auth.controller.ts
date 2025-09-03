@@ -3,14 +3,18 @@ import {
   UpdateUserSchema,
   RegistrationStartSchema,
   CompleteRegistrationSchema,
+  ForgotPasswordSchema,
+  changePasswordPassword,
 } from "@repo/schemas";
 import { NextFunction, Request, Response } from "express";
 import { AuthService } from "../services/auth.service.js";
 import { FileService } from "@/services/file.service.js";
+import { PasswordResetService } from "@/services/password.service.js";
 
 export class AuthController {
   private authService = new AuthService();
   private fileService = new FileService();
+  private passwordResetService = new PasswordResetService();
 
   userLogin = async (
     request: Request,
@@ -24,6 +28,37 @@ export class AuthController {
         message: "User logged in successfully",
         data: user,
       });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  requestPasswordReset = async (
+    request: Request,
+    response: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const { email } = ForgotPasswordSchema.parse(request.body);
+      await this.passwordResetService.requestPasswordReset(email);
+      response.status(200).json({ message: "Password reset email sent" });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  changePassword = async (
+    request: Request,
+    response: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const data = changePasswordPassword.parse(request.body);
+      await this.passwordResetService.resetPasswordWithToken(
+        data.token,
+        data.password
+      );
+      response.status(200).json({ message: "Password changed successfully" });
     } catch (error) {
       next(error);
     }

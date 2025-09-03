@@ -7,6 +7,8 @@ router.post("/signup", authController.startRegistration);
 router.post("/signup/complete", authController.completeRegistration);
 router.post("/signup/resend", authController.resendVerification);
 router.post("/login", authController.userLogin);
+router.post("/forgot-password", authController.requestPasswordReset);
+router.post("/reset-password", authController.changePassword);
 router.get("/profile", authController.getProfile);
 router.put(
   "/profile",

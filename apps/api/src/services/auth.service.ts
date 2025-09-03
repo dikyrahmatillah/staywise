@@ -13,51 +13,49 @@ import { EmailService } from "./email.service.js";
 export class AuthService {
   private emailService = new EmailService();
 
+  private static readonly VERIFY_TTL_MS = 60 * 60 * 1000;
+
+  private async issueEmailVerificationToken(userId: string) {
+    await prisma.emailVerification.deleteMany({ where: { userId } });
+    const token = generateToken({ id: userId, purpose: "verify" }, "1h");
+    const expiresAt = new Date(Date.now() + AuthService.VERIFY_TTL_MS);
+
+    await prisma.emailVerification.create({
+      data: { userId, token, expiresAt },
+    });
+
+    return token;
+  }
+
+  private async assertValidVerifyToken(token: string) {
+    const ver = await prisma.emailVerification.findUnique({ where: { token } });
+    if (!ver || ver.usedAt) throw new AppError("Invalid or used token", 400);
+    if (ver.expiresAt.getTime() < Date.now())
+      throw new AppError("Token expired", 400);
+    return ver;
+  }
+
   async startRegistration(input: RegistrationStartInput) {
     const { email, role } = input;
-
     const existing = await prisma.user.findUnique({ where: { email } });
-    if (existing?.emailVerified) {
-      throw new AppError("User already exists", 409);
-    }
+    if (existing?.emailVerified) throw new AppError("User already exists", 409);
 
-    const user = existing
-      ? existing
-      : await prisma.user.create({
-          data: {
-            email,
-            firstName: "",
-            lastName: "",
-            role: role as any,
-            emailVerified: false,
-          },
-        });
-
-    const expiresAt = new Date(Date.now() + 1000 * 60 * 60); // 1 hour
-    const token = generateToken({ id: user.id, purpose: "verify" }, "1h");
-
-    await prisma.emailVerification.deleteMany({ where: { userId: user.id } });
-    await prisma.emailVerification.create({
+    const user = await prisma.user.create({
       data: {
-        userId: user.id,
-        token,
-        expiresAt,
+        email,
+        firstName: "",
+        role,
       },
     });
 
+    const token = await this.issueEmailVerificationToken(user.id);
     await this.emailService.sendEmailVerification(email, token);
     return { ok: true };
   }
 
   async completeRegistration(input: CompleteRegistrationInput) {
     const { token, firstName, lastName, phone, avatarUrl, password } = input;
-
-    const ver = await prisma.emailVerification.findUnique({
-      where: { token },
-    });
-    if (!ver || ver.usedAt) throw new AppError("Invalid or used token", 400);
-    if (ver.expiresAt.getTime() < Date.now())
-      throw new AppError("Token expired", 400);
+    const ver = await this.assertValidVerifyToken(token);
 
     const user = await prisma.user.findUnique({ where: { id: ver.userId } });
     if (!user) throw new AppError("User not found", 404);
@@ -91,19 +89,7 @@ export class AuthService {
     if (!user) throw new AppError("User not found", 404);
     if (user.emailVerified) throw new AppError("Email already verified", 400);
 
-    await prisma.emailVerification.deleteMany({ where: { userId: user.id } });
-
-    const token = generateToken({ id: user.id, purpose: "verify" }, "1h");
-    const expiresAt = new Date(Date.now() + 1000 * 60 * 60);
-
-    await prisma.emailVerification.create({
-      data: {
-        userId: user.id,
-        token,
-        expiresAt,
-      },
-    });
-
+    const token = await this.issueEmailVerificationToken(user.id);
     await this.emailService.sendEmailVerification(email, token);
     return { ok: true };
   }
@@ -147,12 +133,5 @@ export class AuthService {
       },
     });
     return updatedUser;
-  }
-
-  async sendPasswordResetEmail(email: string) {
-    const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) throw new AppError("User not found", 404);
-    const resetToken = generateToken({ id: user.id }, "1h");
-    await this.emailService.sendPasswordResetEmail(email, resetToken);
   }
 }
