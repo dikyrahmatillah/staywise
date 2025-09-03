@@ -10,19 +10,46 @@ export class EmailService {
   }
 
   async sendPasswordResetEmail(email: string, resetToken: string) {
+    const webUrl = process.env.WEB_APP_URL || "http://localhost:3000";
+    const resetLink = `${webUrl}/reset-password?token=${encodeURIComponent(
+      resetToken
+    )}`;
+
     const template = await fs.readFile(
-      "./src/templates/password-reset.hbs",
+      "./src/templates/emails/password-reset.hbs",
       "utf-8"
     );
     const compiledTemplate = Handlebars.compile(template);
-    const html = compiledTemplate({ resetToken });
+    const html = compiledTemplate({ email, token: resetToken, resetLink });
 
     await resend.emails.send({
       from: "StayWise <onboarding@resend.dev>",
       to: email,
       subject: "Password Reset",
       html,
-      text: `Use this link to reset your password: ${resetToken}`,
+      text: `Use this link to reset your password: ${resetLink}`,
+    });
+  }
+
+  async sendEmailVerification(email: string, verifyToken: string) {
+    const webUrl = process.env.WEB_APP_URL || "http://localhost:3000";
+    const verifyLink = `${webUrl}/verify?type=verify&token=${encodeURIComponent(
+      verifyToken
+    )}`;
+
+    const template = await fs.readFile(
+      "./src/templates/emails/verify-email.hbs",
+      "utf-8"
+    );
+    const compiledTemplate = Handlebars.compile(template);
+    const html = compiledTemplate({ verifyLink });
+
+    await resend.emails.send({
+      from: "StayWise <onboarding@resend.dev>",
+      to: email,
+      subject: "Verify your StayWise account",
+      html,
+      text: `Click to verify your email: ${verifyLink}`,
     });
   }
 }
