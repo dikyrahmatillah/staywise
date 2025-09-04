@@ -1,17 +1,51 @@
 import { prisma } from "@repo/database";
 import { AppError } from "@/errors/app.error.js";
-import { Property, propertySchema, GetPropertiesParams } from "@repo/schemas";
+import { GetPropertiesParams, CreatePropertyInput } from "@repo/schemas";
+import { nanoid } from "nanoid";
+import { resolveCategoryId } from "./category.service.js";
+import { mapFacilities, mapPictures, mapRooms } from "../utils/mappers.js";
+import slugify from "@sindresorhus/slugify";
 
 export class PropertyService {
-  async createProperty(data: Property) {
-    const validation = propertySchema.safeParse(data);
-    if (!validation.success) {
-      throw new AppError("Invalid property data", 400);
-    }
+  async createProperty(data: CreatePropertyInput) {
+    const slug = `${slugify(data.name)}-${nanoid(6)}`;
 
-    const property = await prisma.property.create({
-      data: validation.data,
+    const property = await prisma.$transaction(async (tx) => {
+      const categoryId = await resolveCategoryId(tx, data);
+
+      const created = await tx.property.create({
+        data: {
+          tenantId: data.tenantId,
+          categoryId,
+          name: data.name,
+          slug,
+          description: data.description,
+          country: data.country,
+          city: data.city,
+          address: data.address,
+          latitude: data.latitude ?? null,
+          longitude: data.longitude ?? null,
+          maxGuests: data.maxGuests,
+          Facilities: mapFacilities(data.facilities),
+          Pictures: mapPictures(data.pictures),
+          Rooms: mapRooms(data.rooms),
+        },
+        include: {
+          PropertyCategory: true,
+          Pictures: true,
+          Rooms: {
+            include: {
+              RoomAvailabilities: true,
+              PriceAdjustments: { include: { Dates: true } },
+            },
+          },
+          Facilities: true,
+        },
+      });
+
+      return created;
     });
+
     return property;
   }
 
@@ -103,7 +137,6 @@ export class PropertyService {
 
     if (!property) throw new AppError("Property not found", 404);
 
-    // compute totals/averages separately so we can expose summaries while returning a single review
     const reviewCount = await prisma.review.count({
       where: { propertyId: property.id },
     });

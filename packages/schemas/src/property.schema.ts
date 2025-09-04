@@ -1,4 +1,10 @@
 import z from "zod";
+import { createFacilitySchema } from "./facility.schema.js";
+import {
+  createRoomSchema,
+  createRoomAvailabilitySchema,
+  createPriceAdjustmentSchema,
+} from "./room.schema.js";
 
 export const propertySchema = z.object({
   tenantId: z.uuid(),
@@ -6,7 +12,7 @@ export const propertySchema = z.object({
   name: z.string().max(100, "Name must be 100 characters or less"),
   slug: z.string().max(150),
   description: z.string(),
-  pictureUrl: z.string(),
+  imageUrl: z.string(),
   country: z.string().max(60, "Country must be 60 characters or less"),
   city: z.string().max(100, "City must be 100 characters or less"),
   address: z.string(),
@@ -71,7 +77,51 @@ export type GetPropertiesParams = {
   sortOrder?: "asc" | "desc";
 };
 
-export type Property = z.infer<typeof propertySchema>;
+export const createPropertyPictureSchema = z.object({
+  imageUrl: z.string().url(),
+  note: z.string().optional().nullable(),
+});
+
+export const createPropertyCategoryInput = z.union([
+  z.object({ categoryId: z.string().uuid() }),
+  z.object({
+    category: z.object({
+      name: z.string().min(1),
+      description: z.string().optional(),
+    }),
+  }),
+]);
+
+export const createPropertyInputSchema = z
+  .object({
+    tenantId: z.string().uuid(),
+    name: z.string().max(100),
+    description: z.string(),
+    country: z.string().max(60),
+    city: z.string().max(100),
+    address: z.string(),
+    latitude: z.number().min(-90).max(90).optional(),
+    longitude: z.number().min(-180).max(180).optional(),
+    maxGuests: z.number().int().min(1),
+    slug: z.string().max(150).optional(),
+    pictures: z.array(createPropertyPictureSchema).default([]),
+    facilities: z.array(createFacilitySchema).default([]),
+    rooms: z
+      .array(
+        createRoomSchema.extend({
+          availabilities: z.array(createRoomAvailabilitySchema).default([]),
+          priceAdjustments: z.array(createPriceAdjustmentSchema).default([]),
+        })
+      )
+      .min(1, "At least one room is required"),
+  })
+  .and(createPropertyCategoryInput);
+
+export type CreatePropertyInput = z.infer<typeof createPropertyInputSchema>;
+export type CreatePropertyPictureInput = z.infer<
+  typeof createPropertyPictureSchema
+>;
+export type Property = z.infer<typeof createPropertyInputSchema>;
 export type GetPropertiesQuery = z.infer<typeof getPropertiesQuerySchema>;
 export type RoomResponse = z.infer<typeof roomSchema>;
 export type PropertyCategoryResponse = z.infer<typeof propertyCategorySchema>;

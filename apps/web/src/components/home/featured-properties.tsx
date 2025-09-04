@@ -43,7 +43,7 @@ export default function FeaturedProperties() {
               <div className="aspect-[4/3] bg-slate-200 relative overflow-hidden">
                 <Image
                   src={
-                    property.pictureUrl ||
+                    property.imageUrl ||
                     `https://picsum.photos/400/300?random=${property.id}`
                   }
                   alt={property.name}

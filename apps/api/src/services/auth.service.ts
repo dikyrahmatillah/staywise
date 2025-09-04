@@ -6,9 +6,9 @@ import {
   UpdateUserInput,
 } from "@repo/schemas";
 import { AppError } from "@/errors/app.error.js";
-import bcrypt from "bcrypt";
 import { generateToken } from "@/utils/jwt.js";
 import { EmailService } from "./email.service.js";
+import bcrypt from "bcrypt";
 
 export class AuthService {
   private emailService = new EmailService();
@@ -98,17 +98,11 @@ export class AuthService {
     const user = await prisma.user.findUnique({ where: { email: data.email } });
 
     if (!user) throw new AppError("Invalid email or password", 401);
-
-    if (!user.emailVerified) {
-      throw new AppError("Email not verified", 403);
-    }
-
+    if (!user.emailVerified) throw new AppError("Email not verified", 403);
     if (!user.password) throw new AppError("Invalid email or password", 401);
 
     const isValidPassword = await bcrypt.compare(data.password, user.password);
-    if (!isValidPassword) {
-      throw new AppError("Invalid email or password", 401);
-    }
+    if (!isValidPassword) throw new AppError("Invalid email or password", 401);
 
     return user;
   }

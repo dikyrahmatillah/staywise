@@ -7,7 +7,7 @@ import {
   changePasswordPassword,
 } from "@repo/schemas";
 import { NextFunction, Request, Response } from "express";
-import { AuthService } from "../services/auth.service.js";
+import { AuthService } from "@/services/auth.service.js";
 import { FileService } from "@/services/file.service.js";
 import { PasswordResetService } from "@/services/password.service.js";
 
@@ -84,7 +84,15 @@ export class AuthController {
     next: NextFunction
   ) => {
     try {
-      const data = CompleteRegistrationSchema.parse(request.body);
+      const profilePicture = request.file
+        ? await this.fileService.uploadPicture(request.file.path)
+        : undefined;
+
+      const data = CompleteRegistrationSchema.parse({
+        ...request.body,
+        avatarUrl: profilePicture,
+      });
+
       await this.authService.completeRegistration(data);
       response.status(200).json({ message: "Registration completed" });
     } catch (error) {
@@ -98,7 +106,6 @@ export class AuthController {
     next: NextFunction
   ) => {
     try {
-      // Reuse ResendVerificationSchema from packages/schemas
       const { email } = request.body as { email?: string };
       if (!email) throw new Error("Missing email");
       await this.authService.resendVerification(email);
@@ -137,7 +144,7 @@ export class AuthController {
 
       const data = UpdateUserSchema.parse({
         ...request.body,
-        profilePicture,
+        avatarUrl: profilePicture,
       });
 
       await this.authService.updateProfile(request.user.id, data);

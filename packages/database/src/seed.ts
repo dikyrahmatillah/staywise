@@ -11,8 +11,6 @@ const addDays = (date: Date, days: number) => {
 };
 
 const toISODate = (date: Date) => date.toISOString().slice(0, 10);
-
-// Minimal slugify helper to avoid the external dependency in seed files.
 const slugifyLocal = (s: string) =>
   s
     .toLowerCase()
@@ -243,7 +241,7 @@ async function seed() {
               BedType.TWIN,
             ]),
             bedCount: faker.number.int({ min: 1, max: 4 }),
-            pictureUrl: faker.image.urlPicsumPhotos({
+            imageUrl: faker.image.urlPicsumPhotos({
               width: 800,
               height: 600,
             }),

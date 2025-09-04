@@ -1,5 +1,8 @@
 import { NextFunction, Request, Response } from "express";
-import { propertySchema, getPropertiesQuerySchema } from "@repo/schemas";
+import {
+  getPropertiesQuerySchema,
+  createPropertyInputSchema,
+} from "@repo/schemas";
 import { PropertyService } from "@/services/property.service.js";
 
 export class PropertyController {
@@ -13,7 +16,7 @@ export class PropertyController {
     next: NextFunction
   ) => {
     try {
-      const data = propertySchema.parse(request.body);
+      const data = createPropertyInputSchema.parse(request.body);
       const property = await this.propertyService.createProperty(data);
       response.status(201).json({
         message: "Property created successfully",
