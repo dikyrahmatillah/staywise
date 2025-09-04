@@ -1,5 +1,12 @@
 import z from "zod";
 
+export const roomSchema = z.object({
+  name: z.string().optional(),
+  basePrice: z.number(),
+  beds: z.number().optional(),
+  bathrooms: z.number().optional(),
+});
+
 export const createRoomSchema = z.object({
   name: z.string().min(1),
   basePrice: z.number().positive(),

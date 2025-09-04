@@ -23,6 +23,7 @@ const slugifyLocal = (s: string) =>
 const AVAILABILITY_DAYS = 14;
 
 async function clear() {
+  // delete in dependency order
   await prisma.paymentProof.deleteMany();
   await prisma.gatewayPayment.deleteMany();
   await prisma.review.deleteMany();
@@ -32,10 +33,11 @@ async function clear() {
   await prisma.roomAvailability.deleteMany();
   await prisma.room.deleteMany();
   await prisma.propertyFacility.deleteMany();
+  await prisma.propertyPicture.deleteMany();
   await prisma.property.deleteMany();
+  await prisma.customCategory.deleteMany();
   await prisma.propertyCategory.deleteMany();
-  await prisma.passwordReset.deleteMany();
-  await prisma.emailVerification.deleteMany();
+  await prisma.authToken.deleteMany();
   await prisma.socialAccount.deleteMany();
   await prisma.user.deleteMany();
 }
@@ -148,21 +150,37 @@ async function seed() {
   const rooms: RoomRec[] = [];
   const roomAdjustments = new Map<string, AdjustmentRec[]>();
 
+  // create some global property categories (schema has global PropertyCategory)
+  const globalCategoryNames = [
+    "APARTMENT",
+    "HOUSE",
+    "VILLA",
+    "GUESTHOUSE",
+    "CONDO",
+  ];
+  const globalCategories: { id: string }[] = [];
+  for (const name of globalCategoryNames) {
+    const created = await prisma.propertyCategory.create({
+      data: {
+        name,
+      },
+      select: { id: true },
+    });
+    globalCategories.push(created);
+  }
+
   for (const t of tenants) {
     const catCount = faker.number.int({ min: 1, max: 2 });
     const categories = [] as { id: string }[];
-    for (let c = 0; c < catCount; c++) {
-      const category = await prisma.propertyCategory.create({
+    const chosenNames = faker.helpers.arrayElements(globalCategoryNames, {
+      min: 1,
+      max: catCount,
+    });
+    for (const name of chosenNames) {
+      const category = await prisma.customCategory.create({
         data: {
           tenantId: t.id,
-          name: faker.helpers.arrayElement([
-            "APARTMENT",
-            "HOUSE",
-            "VILLA",
-            "GUESTHOUSE",
-            "CONDO",
-          ]),
-          description: faker.lorem.sentence(),
+          name,
         },
         select: { id: true },
       });
@@ -171,12 +189,17 @@ async function seed() {
 
     const propCount = faker.number.int({ min: 2, max: 3 });
     for (let p = 0; p < propCount; p++) {
-      const category = faker.helpers.arrayElement(categories);
+      const customCategory = categories.length
+        ? faker.helpers.arrayElement(categories)
+        : undefined;
+      // pick a random global property category for propertyCategoryId
+      const globalCategory = faker.helpers.arrayElement(globalCategories);
       const city = faker.location.city();
       const property = await prisma.property.create({
         data: {
           tenantId: t.id,
-          categoryId: category.id,
+          propertyCategoryId: globalCategory.id,
+          customCategoryId: customCategory?.id ?? null,
           name: `${city} ${faker.company.name()}`,
           slug: `${slugifyLocal(
             `${city} ${faker.location.country()}`
