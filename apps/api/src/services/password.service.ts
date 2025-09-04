@@ -7,6 +7,7 @@ import bcrypt from "bcrypt";
 export class PasswordResetService {
   private emailService = new EmailService();
   private static readonly RESET_TTL_MS = 15 * 60 * 1000;
+
   private async assertValidResetToken(token: string) {
     const pr = await prisma.passwordReset.findUnique({ where: { token } });
     if (!pr || pr.usedAt) throw new AppError("Invalid or used token", 400);
@@ -33,7 +34,7 @@ export class PasswordResetService {
     });
 
     await this.emailService.sendPasswordResetEmail(email, token);
-    return { ok: true } as const;
+    return { ok: true };
   }
 
   async resetPasswordWithToken(token: string, newPassword: string) {
@@ -55,6 +56,6 @@ export class PasswordResetService {
       }),
     ]);
 
-    return { ok: true } as const;
+    return { ok: true };
   }
 }
