@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { email, z } from "zod";
 
 export const EmailSchema = z.email("Invalid email");
 export const CommonProfileSchema = z.object({
@@ -51,6 +51,15 @@ export const changePasswordSchema = z.object({
   newPassword: CompleteRegistrationSchema.shape.password,
 });
 
+export const changeEmailSchema = z.object({
+  token: CompleteRegistrationSchema.shape.token,
+  newEmail: EmailSchema,
+});
+
+export const changeEmailRequestSchema = z.object({
+  newEmail: EmailSchema,
+});
+
 export type LoginInput = z.infer<typeof LoginSchema>;
 export type RegistrationStartInput = z.infer<typeof RegistrationStartSchema>;
 export type CompleteRegistrationInput = z.infer<
@@ -61,3 +70,5 @@ export type ResetPasswordWithTokenInput = z.infer<
 >;
 export type UpdateUserInput = z.infer<typeof UpdateUserSchema>;
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
+export type changeEmailInput = z.infer<typeof changeEmailSchema>;
+export type changeEmailRequestInput = z.infer<typeof changeEmailRequestSchema>;

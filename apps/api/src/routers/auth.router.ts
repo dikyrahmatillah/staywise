@@ -26,4 +26,11 @@ router.put(
   authController.changePassword
 );
 
+router.post(
+  "/change-email",
+  verifyTokenMiddleware,
+  authController.requestChangeEmail
+);
+router.post("/change-email/confirm", authController.confirmChangeEmail);
+
 export default router;

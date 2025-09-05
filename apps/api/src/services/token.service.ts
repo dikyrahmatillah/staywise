@@ -6,13 +6,14 @@ import { enqueueTokenExpiration } from "@/queues/token.queue.js";
 export class TokenService {
   async generateEmailToken(
     userId: string,
-    type: "EMAIL_VERIFICATION" | "PASSWORD_RESET",
-    ttlMs: number
+    type: "EMAIL_VERIFICATION" | "PASSWORD_RESET" | "EMAIL_CHANGE",
+    ttlMs: number,
+    payload: Record<string, unknown> = {}
   ) {
     const expiresAt = new Date(Date.now() + ttlMs);
     const expiresInSeconds = Math.max(1, Math.floor(ttlMs / 1000));
     const token = generateToken(
-      { id: userId, purpose: "verify" },
+      { id: userId, purpose: "verify", ...payload },
       expiresInSeconds
     );
 
@@ -39,7 +40,7 @@ export class TokenService {
 
   async verifyEmailToken(
     token: string,
-    type: "EMAIL_VERIFICATION" | "PASSWORD_RESET"
+    type: "EMAIL_VERIFICATION" | "PASSWORD_RESET" | "EMAIL_CHANGE"
   ) {
     const tokenRecord = await prisma.authToken.findFirst({
       where: { token, type, status: "ACTIVE" },
