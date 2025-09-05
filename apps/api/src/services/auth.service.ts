@@ -15,7 +15,6 @@ export class AuthService {
   private emailService = new EmailService();
   private tokenService = new TokenService();
   private static readonly VERIFY_TTL_MS = 60 * 60 * 1000;
-  // Token operations are delegated to TokenService
 
   async startRegistration(input: RegistrationStartInput) {
     const { email, role } = input;
@@ -25,8 +24,10 @@ export class AuthService {
 
     if (user.emailVerified) throw new AppError("User already exists", 409);
 
-    const token = await this.tokenService.generateEmailVerificationToken(
-      user.id
+    const token = await this.tokenService.generateEmailToken(
+      user.id,
+      "EMAIL_VERIFICATION",
+      AuthService.VERIFY_TTL_MS
     );
     await this.emailService.sendEmailVerification(email, token);
     return { ok: true };
@@ -34,7 +35,10 @@ export class AuthService {
 
   async completeRegistration(input: CompleteRegistrationInput) {
     const { token, firstName, lastName, phone, avatarUrl, password } = input;
-    const ver = await this.tokenService.verifyEmailToken(token);
+    const ver = await this.tokenService.verifyEmailToken(
+      token,
+      "EMAIL_VERIFICATION"
+    );
 
     const user = await prisma.user.findUnique({ where: { id: ver.userId } });
     if (!user) throw new AppError("User not found", 404);

@@ -83,7 +83,7 @@ export class AuthController {
     }
   };
 
-  changePassword = async (
+  resetPassword = async (
     request: Request,
     response: Response,
     next: NextFunction

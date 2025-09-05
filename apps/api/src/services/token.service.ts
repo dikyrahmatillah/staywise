@@ -3,22 +3,24 @@ import { AppError } from "@/errors/app.error.js";
 import { generateToken } from "@/utils/jwt.js";
 
 export class TokenService {
-  private static readonly VERIFY_TTL_MS = 60 * 60 * 1000;
-
-  async generateEmailVerificationToken(userId: string) {
+  async generateEmailToken(
+    userId: string,
+    type: "EMAIL_VERIFICATION" | "PASSWORD_RESET",
+    ttlMs: number
+  ) {
     const token = generateToken({ id: userId, purpose: "verify" }, "1h");
-    const expiresAt = new Date(Date.now() + TokenService.VERIFY_TTL_MS);
+    const expiresAt = new Date(Date.now() + ttlMs);
 
     await prisma.$transaction(async (tx) => {
       await tx.authToken.updateMany({
-        where: { userId, type: "EMAIL_VERIFICATION", status: "ACTIVE" },
+        where: { userId, type, status: "ACTIVE" },
         data: { status: "REVOKED" },
       });
 
       await tx.authToken.create({
         data: {
           userId,
-          type: "EMAIL_VERIFICATION",
+          type,
           token,
           expiresAt,
         },
@@ -28,9 +30,12 @@ export class TokenService {
     return token;
   }
 
-  async verifyEmailToken(token: string) {
+  async verifyEmailToken(
+    token: string,
+    type: "EMAIL_VERIFICATION" | "PASSWORD_RESET"
+  ) {
     const tokenRecord = await prisma.authToken.findFirst({
-      where: { type: "EMAIL_VERIFICATION", status: "ACTIVE", token },
+      where: { token, type, status: "ACTIVE" },
     });
 
     if (!tokenRecord) throw new AppError("Invalid token", 400);
