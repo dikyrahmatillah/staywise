@@ -1,5 +1,6 @@
 import { prisma } from "@repo/database";
 import {
+  ChangePasswordInput,
   CompleteRegistrationInput,
   LoginInput,
   RegistrationStartInput,
@@ -9,6 +10,8 @@ import { AppError } from "@/errors/app.error.js";
 import { EmailService } from "./email.service.js";
 import { TokenService } from "./token.service.js";
 import bcrypt from "bcrypt";
+import { generateToken } from "@/utils/jwt.js";
+import { access } from "fs";
 
 export class AuthService {
   private emailService = new EmailService();
@@ -76,7 +79,16 @@ export class AuthService {
     const isValidPassword = await bcrypt.compare(data.password, user.password);
     if (!isValidPassword) throw new AppError("Invalid email or password", 401);
 
-    return user;
+    const token = generateToken({
+      id: user.id,
+      name: user.firstName,
+      email: user.email,
+      role: user.role,
+    });
+
+    return {
+      accessToken: token,
+    };
   }
 
   async userProfile(userId: string) {
@@ -99,5 +111,23 @@ export class AuthService {
       },
     });
     return updatedUser;
+  }
+
+  async changePassword(userId: string, data: ChangePasswordInput) {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new AppError("User not found", 404);
+    if (!user.password) throw new AppError("Password not set", 400);
+
+    const isValidPassword = await bcrypt.compare(
+      data.currentPassword,
+      user.password
+    );
+    if (!isValidPassword) throw new AppError("Invalid current password", 401);
+
+    const hashedPassword = await bcrypt.hash(data.newPassword, 10);
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { password: hashedPassword },
+    });
   }
 }
