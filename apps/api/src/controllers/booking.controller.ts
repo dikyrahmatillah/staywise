@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import * as bookingService from "@/services/booking.service.js";
+import * as bookingService from "../services/booking.service.js"; // Fix: Use relative path
 
 export async function createBooking(
   request: Request,
