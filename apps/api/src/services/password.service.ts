@@ -26,12 +26,14 @@ export class PasswordResetService {
   }
 
   async resetPasswordWithToken(token: string, newPassword: string) {
-    const pr = await this.tokenService.verifyEmailToken(
+    const tokenRecord = await this.tokenService.verifyEmailToken(
       token,
       "PASSWORD_RESET"
     );
 
-    const user = await prisma.user.findUnique({ where: { id: pr.userId } });
+    const user = await prisma.user.findUnique({
+      where: { id: tokenRecord.userId },
+    });
     if (!user) throw new AppError("User not found", 404);
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
@@ -41,7 +43,7 @@ export class PasswordResetService {
         data: { password: hashedPassword },
       }),
       prisma.authToken.update({
-        where: { id: pr.id },
+        where: { id: tokenRecord.id },
         data: { usedAt: new Date(), status: "USED" },
       }),
     ]);
