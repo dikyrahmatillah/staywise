@@ -82,18 +82,17 @@ model AuthToken {
     id        String      @id @default(uuid())
     userId    String
     type      TokenType
-    tokenHash String      @unique @db.VarChar(255)
+    token     String      @unique @db.VarChar(255)
     expiresAt DateTime
     usedAt    DateTime?
     status    TokenStatus @default(ACTIVE)
     createdAt DateTime    @default(now())
-    metadata  Json?
 
     User User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-    @@unique([userId, type, status], map: "uniq_active_token_per_user_type_status")
     @@index([userId, type, status])
     @@index([expiresAt])
+    @@index([token])
 }
 
 model User {

@@ -16,6 +16,42 @@ export class AuthController {
   private fileService = new FileService();
   private passwordResetService = new PasswordResetService();
 
+  startRegistration = async (
+    request: Request,
+    response: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const data = RegistrationStartSchema.parse(request.body);
+      await this.authService.startRegistration(data);
+      response.status(200).json({ message: "Verification email sent" });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  completeRegistration = async (
+    request: Request,
+    response: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const profilePicture = request.file
+        ? await this.fileService.uploadPicture(request.file.path)
+        : undefined;
+
+      const data = CompleteRegistrationSchema.parse({
+        ...request.body,
+        avatarUrl: profilePicture,
+      });
+
+      await this.authService.completeRegistration(data);
+      response.status(200).json({ message: "Registration completed" });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   userLogin = async (
     request: Request,
     response: Response,
@@ -59,57 +95,6 @@ export class AuthController {
         data.password
       );
       response.status(200).json({ message: "Password changed successfully" });
-    } catch (error) {
-      next(error);
-    }
-  };
-
-  startRegistration = async (
-    request: Request,
-    response: Response,
-    next: NextFunction
-  ) => {
-    try {
-      const data = RegistrationStartSchema.parse(request.body);
-      await this.authService.startRegistration(data);
-      response.status(200).json({ message: "Verification email sent" });
-    } catch (error) {
-      next(error);
-    }
-  };
-
-  completeRegistration = async (
-    request: Request,
-    response: Response,
-    next: NextFunction
-  ) => {
-    try {
-      const profilePicture = request.file
-        ? await this.fileService.uploadPicture(request.file.path)
-        : undefined;
-
-      const data = CompleteRegistrationSchema.parse({
-        ...request.body,
-        avatarUrl: profilePicture,
-      });
-
-      await this.authService.completeRegistration(data);
-      response.status(200).json({ message: "Registration completed" });
-    } catch (error) {
-      next(error);
-    }
-  };
-
-  resendVerification = async (
-    request: Request,
-    response: Response,
-    next: NextFunction
-  ) => {
-    try {
-      const { email } = request.body as { email?: string };
-      if (!email) throw new Error("Missing email");
-      await this.authService.resendVerification(email);
-      response.status(200).json({ message: "Verification email resent" });
     } catch (error) {
       next(error);
     }
