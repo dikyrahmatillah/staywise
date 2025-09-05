@@ -7,7 +7,6 @@ import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
   Building2,
-  Tags,
   ReceiptText,
   BarChart3,
   UserCog,
