@@ -1,6 +1,7 @@
 import { prisma } from "@repo/database";
 import { AppError } from "@/errors/app.error.js";
 import { generateToken } from "@/utils/jwt.js";
+import { enqueueTokenExpiration } from "@/queues/token.queue.js";
 
 export class TokenService {
   async generateEmailToken(
@@ -26,6 +27,8 @@ export class TokenService {
         },
       });
     });
+
+    await enqueueTokenExpiration(token, ttlMs);
 
     return token;
   }
