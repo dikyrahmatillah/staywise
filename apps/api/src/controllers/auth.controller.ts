@@ -16,54 +16,6 @@ export class AuthController {
   private fileService = new FileService();
   private passwordResetService = new PasswordResetService();
 
-  userLogin = async (
-    request: Request,
-    response: Response,
-    next: NextFunction
-  ) => {
-    try {
-      const data = LoginSchema.parse(request.body);
-      const user = await this.authService.login(data);
-      response.status(200).json({
-        message: "User logged in successfully",
-        data: user,
-      });
-    } catch (error) {
-      next(error);
-    }
-  };
-
-  requestPasswordReset = async (
-    request: Request,
-    response: Response,
-    next: NextFunction
-  ) => {
-    try {
-      const { email } = ForgotPasswordSchema.parse(request.body);
-      await this.passwordResetService.requestPasswordReset(email);
-      response.status(200).json({ message: "Password reset email sent" });
-    } catch (error) {
-      next(error);
-    }
-  };
-
-  changePassword = async (
-    request: Request,
-    response: Response,
-    next: NextFunction
-  ) => {
-    try {
-      const data = changePasswordPassword.parse(request.body);
-      await this.passwordResetService.resetPasswordWithToken(
-        data.token,
-        data.password
-      );
-      response.status(200).json({ message: "Password changed successfully" });
-    } catch (error) {
-      next(error);
-    }
-  };
-
   startRegistration = async (
     request: Request,
     response: Response,
@@ -100,16 +52,49 @@ export class AuthController {
     }
   };
 
-  resendVerification = async (
+  userLogin = async (
     request: Request,
     response: Response,
     next: NextFunction
   ) => {
     try {
-      const { email } = request.body as { email?: string };
-      if (!email) throw new Error("Missing email");
-      await this.authService.resendVerification(email);
-      response.status(200).json({ message: "Verification email resent" });
+      const data = LoginSchema.parse(request.body);
+      const user = await this.authService.login(data);
+      response.status(200).json({
+        message: "User logged in successfully",
+        data: user,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  requestPasswordReset = async (
+    request: Request,
+    response: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const { email } = ForgotPasswordSchema.parse(request.body);
+      await this.passwordResetService.requestPasswordReset(email);
+      response.status(200).json({ message: "Password reset email sent" });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  resetPassword = async (
+    request: Request,
+    response: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const data = changePasswordPassword.parse(request.body);
+      await this.passwordResetService.resetPasswordWithToken(
+        data.token,
+        data.password
+      );
+      response.status(200).json({ message: "Password changed successfully" });
     } catch (error) {
       next(error);
     }

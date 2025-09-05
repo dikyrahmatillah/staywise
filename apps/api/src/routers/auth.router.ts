@@ -9,10 +9,9 @@ router.post(
   upload.single("avatarUrl"),
   authController.completeRegistration
 );
-router.post("/signup/resend", authController.resendVerification);
 router.post("/login", authController.userLogin);
 router.post("/forgot-password", authController.requestPasswordReset);
-router.post("/reset-password", authController.changePassword);
+router.post("/reset-password", authController.resetPassword);
 router.get("/profile", authController.getProfile);
 router.put("/profile", upload.single("avatarUrl"), authController.editProfile);
 
