@@ -9,8 +9,12 @@ export class TokenService {
     type: "EMAIL_VERIFICATION" | "PASSWORD_RESET",
     ttlMs: number
   ) {
-    const token = generateToken({ id: userId, purpose: "verify" }, "1h");
     const expiresAt = new Date(Date.now() + ttlMs);
+    const expiresInSeconds = Math.max(1, Math.floor(ttlMs / 1000));
+    const token = generateToken(
+      { id: userId, purpose: "verify" },
+      expiresInSeconds
+    );
 
     await prisma.$transaction(async (tx) => {
       await tx.authToken.updateMany({
