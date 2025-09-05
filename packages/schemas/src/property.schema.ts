@@ -8,7 +8,8 @@ import {
 
 export const propertySchema = z.object({
   tenantId: z.uuid(),
-  categoryId: z.uuid(),
+  propertyCategoryId: z.uuid().optional(),
+  customCategoryId: z.uuid().optional(),
   name: z.string().max(100, "Name must be 100 characters or less"),
   slug: z.string().max(150),
   description: z.string(),
@@ -48,18 +49,22 @@ export const roomSchema = z.object({
   name: z.string().optional(),
   basePrice: z.number(),
   beds: z.number().optional(),
-  bathrooms: z.number().optional(),
 });
 
 export const propertyCategorySchema = z.object({
   name: z.string(),
 });
 
+export const customCategorySchema = z.object({
+  name: z.string(),
+});
+
 export const propertyResponseSchema = propertySchema
-  .omit({ tenantId: true, categoryId: true })
+  .omit({ tenantId: true, propertyCategoryId: true, customCategoryId: true })
   .extend({
     id: z.string(),
     PropertyCategory: propertyCategorySchema.optional().nullable(),
+    CustomCategory: customCategorySchema.optional().nullable(),
     Rooms: z.array(roomSchema),
   });
 
@@ -78,14 +83,15 @@ export type GetPropertiesParams = {
 };
 
 export const createPropertyPictureSchema = z.object({
-  imageUrl: z.string().url(),
+  imageUrl: z.url(),
   note: z.string().optional().nullable(),
 });
 
 export const createPropertyCategoryInput = z.union([
-  z.object({ categoryId: z.string().uuid() }),
+  z.object({ propertyCategoryId: z.uuid() }),
+  z.object({ customCategoryId: z.uuid() }),
   z.object({
-    category: z.object({
+    customCategory: z.object({
       name: z.string().min(1),
       description: z.string().optional(),
     }),
@@ -94,7 +100,7 @@ export const createPropertyCategoryInput = z.union([
 
 export const createPropertyInputSchema = z
   .object({
-    tenantId: z.string().uuid(),
+    tenantId: z.uuid(),
     name: z.string().max(100),
     description: z.string(),
     country: z.string().max(60),

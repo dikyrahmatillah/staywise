@@ -5,20 +5,12 @@ import type { CreatePropertyInput } from "@repo/schemas";
 export async function resolveCategoryId(
   tx: Prisma.TransactionClient,
   data: CreatePropertyInput
-): Promise<string> {
-  if ("categoryId" in data && typeof data.categoryId === "string") {
-    return data.categoryId;
-  }
-  if (
-    "category" in data &&
-    (data as { category?: { name?: unknown } }).category?.name
-  ) {
-    const { name, description } = (
-      data as {
-        category: { name: string; description?: string };
-      }
-    ).category;
-    const created = await tx.propertyCategory.create({
+) {
+  if ("categoryId" in data) return data.categoryId;
+
+  if ("category" in data) {
+    const { name, description } = data.category;
+    const { id } = await tx.propertyCategory.create({
       data: {
         tenantId: data.tenantId,
         name,
@@ -26,7 +18,8 @@ export async function resolveCategoryId(
       },
       select: { id: true },
     });
-    return created.id;
+    return id;
   }
+
   throw new AppError("Category is required", 400);
 }

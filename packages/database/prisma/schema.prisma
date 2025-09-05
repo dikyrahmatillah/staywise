@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
     provider = "prisma-client-js"
     output   = "../generated/prisma"
@@ -72,6 +66,36 @@ enum BedType {
     TWIN
 }
 
+enum TokenType {
+    EMAIL_VERIFICATION
+    PASSWORD_RESET
+}
+
+enum TokenStatus {
+    ACTIVE
+    USED
+    REVOKED
+    EXPIRED
+}
+
+model AuthToken {
+    id        String      @id @default(uuid())
+    userId    String
+    type      TokenType
+    tokenHash String      @unique @db.VarChar(255)
+    expiresAt DateTime
+    usedAt    DateTime?
+    status    TokenStatus @default(ACTIVE)
+    createdAt DateTime    @default(now())
+    metadata  Json?
+
+    User User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@unique([userId, type, status], map: "uniq_active_token_per_user_type_status")
+    @@index([userId, type, status])
+    @@index([expiresAt])
+}
+
 model User {
     id            String   @id @default(uuid())
     role          UserRole @default(USER)
@@ -86,13 +110,12 @@ model User {
     updatedAt     DateTime @updatedAt
 
     SocialAccounts        SocialAccount[]
-    EmailVerifications    EmailVerification[]
-    PasswordResets        PasswordReset[]
-    PropertyCategories    PropertyCategory[]
+    AuthTokens            AuthToken[]
+    CustomCategories      CustomCategory[]
     Properties            Property[]
-    BookingsAsUser        Booking[]           @relation("BookingUser")
-    UploadedPaymentProofs PaymentProof[]      @relation("PaymentProofUploadedBy")
-    Reviews               Review[]            @relation("UserReviews")
+    BookingsAsUser        Booking[]        @relation("BookingUser")
+    UploadedPaymentProofs PaymentProof[]   @relation("PaymentProofUploadedBy")
+    Reviews               Review[]         @relation("UserReviews")
 }
 
 model SocialAccount {
@@ -102,66 +125,67 @@ model SocialAccount {
     providerUid String   @db.VarChar(255)
     createdAt   DateTime @default(now())
 
-    User User @relation(fields: [userId], references: [id])
-}
+    User User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-model EmailVerification {
-    id        String    @id @default(uuid())
-    userId    String
-    token     String    @unique @db.VarChar(255)
-    expiresAt DateTime
-    usedAt    DateTime?
-    createdAt DateTime  @default(now())
-
-    User User @relation(fields: [userId], references: [id])
-}
-
-model PasswordReset {
-    id        String    @id @default(uuid())
-    userId    String
-    token     String    @unique @db.VarChar(255)
-    expiresAt DateTime
-    usedAt    DateTime?
-    createdAt DateTime  @default(now())
-
-    User User @relation(fields: [userId], references: [id])
+    @@unique([provider, providerUid])
+    @@index([userId])
 }
 
 model PropertyCategory {
-    id          String   @id @default(uuid())
-    tenantId    String
-    name        String   @db.VarChar(100)
-    description String?  @db.Text
-    createdAt   DateTime @default(now())
-    updatedAt   DateTime @updatedAt
+    id        String   @id @default(uuid())
+    name      String   @db.VarChar(100)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 
-    Tenant     User       @relation(fields: [tenantId], references: [id])
     Properties Property[]
+
+    @@unique([name])
+}
+
+model CustomCategory {
+    id        String   @id @default(uuid())
+    tenantId  String
+    name      String   @db.VarChar(100)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    Tenant     User       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+    Properties Property[]
+
+    @@unique([tenantId, name])
 }
 
 model Property {
-    id          String   @id @default(uuid())
-    tenantId    String
-    categoryId  String
-    name        String   @db.VarChar(100)
-    slug        String   @unique @db.VarChar(150)
-    description String   @db.Text
-    country     String   @db.VarChar(60)
-    city        String   @db.VarChar(100)
-    address     String   @db.Text
-    latitude    Decimal? @db.Decimal(10, 7)
-    longitude   Decimal? @db.Decimal(10, 7)
-    maxGuests   Int      @default(1)
-    createdAt   DateTime @default(now())
-    updatedAt   DateTime @updatedAt
+    id                 String   @id @default(uuid())
+    tenantId           String
+    propertyCategoryId String
+    customCategoryId   String?
+    name               String   @db.VarChar(100)
+    slug               String   @unique @db.VarChar(150)
+    description        String   @db.Text
+    country            String   @db.VarChar(60)
+    city               String   @db.VarChar(100)
+    address            String   @db.Text
+    latitude           Decimal? @db.Decimal(10, 7)
+    longitude          Decimal? @db.Decimal(10, 7)
+    maxGuests          Int      @default(1)
+    createdAt          DateTime @default(now())
+    updatedAt          DateTime @updatedAt
 
-    Tenant           User               @relation(fields: [tenantId], references: [id])
-    PropertyCategory PropertyCategory   @relation(fields: [categoryId], references: [id])
-    Rooms            Room[]
-    Facilities       PropertyFacility[]
-    Pictures         PropertyPicture[]
-    Bookings         Booking[]
-    Reviews          Review[]           @relation("PropertyReviews")
+    Tenant           User             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+    PropertyCategory PropertyCategory @relation(fields: [propertyCategoryId], references: [id])
+    CustomCategory   CustomCategory?  @relation(fields: [customCategoryId], references: [id])
+
+    Rooms      Room[]
+    Facilities PropertyFacility[]
+    Pictures   PropertyPicture[]
+    Bookings   Booking[]
+    Reviews    Review[]           @relation("PropertyReviews")
+
+    @@index([tenantId])
+    @@index([propertyCategoryId])
+    @@index([customCategoryId])
+    @@index([city])
 }
 
 model PropertyPicture {
@@ -171,7 +195,9 @@ model PropertyPicture {
     note       String?  @db.Text
     createdAt  DateTime @default(now())
 
-    Property Property @relation(fields: [propertyId], references: [id])
+    Property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+    @@index([propertyId])
 }
 
 model PropertyFacility {
@@ -181,7 +207,10 @@ model PropertyFacility {
     note       String?   @db.Text
     createdAt  DateTime  @default(now())
 
-    Property Property @relation(fields: [propertyId], references: [id])
+    Property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+    @@unique([propertyId, facility])
+    @@index([propertyId])
 }
 
 model Room {
@@ -196,10 +225,12 @@ model Room {
     createdAt  DateTime @default(now())
     updatedAt  DateTime @updatedAt
 
-    Property           Property           @relation(fields: [propertyId], references: [id])
+    Property           Property           @relation(fields: [propertyId], references: [id], onDelete: Cascade)
     RoomAvailabilities RoomAvailability[]
     PriceAdjustments   PriceAdjustment[]
     Bookings           Booking[]
+
+    @@index([propertyId])
 }
 
 model RoomAvailability {
@@ -209,7 +240,10 @@ model RoomAvailability {
     isAvailable Boolean  @default(true)
     createdAt   DateTime @default(now())
 
-    Room Room @relation(fields: [roomId], references: [id])
+    Room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+    @@unique([roomId, date])
+    @@index([roomId])
 }
 
 model PriceAdjustment {
@@ -223,8 +257,11 @@ model PriceAdjustment {
     applyAllDates Boolean         @default(true)
     createdAt     DateTime        @default(now())
 
-    Room  Room                  @relation(fields: [roomId], references: [id])
+    Room  Room                  @relation(fields: [roomId], references: [id], onDelete: Cascade)
     Dates PriceAdjustmentDate[]
+
+    @@index([roomId])
+    @@index([startDate, endDate])
 }
 
 model PriceAdjustmentDate {
@@ -232,7 +269,10 @@ model PriceAdjustmentDate {
     priceAdjustmentId String
     date              DateTime
 
-    PriceAdjustment PriceAdjustment @relation(fields: [priceAdjustmentId], references: [id])
+    PriceAdjustment PriceAdjustment @relation(fields: [priceAdjustmentId], references: [id], onDelete: Cascade)
+
+    @@unique([priceAdjustmentId, date])
+    @@index([priceAdjustmentId])
 }
 
 model Booking {
@@ -254,13 +294,19 @@ model Booking {
     createdAt     DateTime      @default(now())
     updatedAt     DateTime      @updatedAt
 
-    User     User     @relation("BookingUser", fields: [userId], references: [id])
+    User     User     @relation("BookingUser", fields: [userId], references: [id], onDelete: Cascade)
     Property Property @relation(fields: [propertyId], references: [id])
     Room     Room     @relation(fields: [roomId], references: [id])
 
     paymentProof   PaymentProof?   @relation("BookingPaymentProof")
     gatewayPayment GatewayPayment? @relation("BookingGatewayPayment")
     review         Review?         @relation("BookingReview")
+
+    @@index([tenantId])
+    @@index([userId])
+    @@index([propertyId])
+    @@index([roomId])
+    @@index([status])
 }
 
 model PaymentProof {
@@ -273,8 +319,10 @@ model PaymentProof {
     rejectedAt DateTime?
     reviewedBy String?
 
-    Order      Booking @relation("BookingPaymentProof", fields: [orderId], references: [id])
-    UploadedBy User    @relation("PaymentProofUploadedBy", fields: [uploadedBy], references: [id])
+    Order      Booking @relation("BookingPaymentProof", fields: [orderId], references: [id], onDelete: Cascade)
+    UploadedBy User    @relation("PaymentProofUploadedBy", fields: [uploadedBy], references: [id], onDelete: Cascade)
+
+    @@index([uploadedBy])
 }
 
 model GatewayPayment {
@@ -287,7 +335,7 @@ model GatewayPayment {
     status      String?   @db.VarChar(30)
     payload     Json?
 
-    Order Booking @relation("BookingGatewayPayment", fields: [orderId], references: [id])
+    Order Booking @relation("BookingGatewayPayment", fields: [orderId], references: [id], onDelete: Cascade)
 }
 
 model Review {
@@ -299,7 +347,10 @@ model Review {
     comment    String   @db.Text
     createdAt  DateTime @default(now())
 
-    Order    Booking  @relation("BookingReview", fields: [orderId], references: [id])
-    User     User     @relation("UserReviews", fields: [userId], references: [id])
-    Property Property @relation("PropertyReviews", fields: [propertyId], references: [id])
+    Order    Booking  @relation("BookingReview", fields: [orderId], references: [id], onDelete: Cascade)
+    User     User     @relation("UserReviews", fields: [userId], references: [id], onDelete: Cascade)
+    Property Property @relation("PropertyReviews", fields: [propertyId], references: [id], onDelete: Cascade)
+
+    @@index([propertyId])
+    @@index([userId])
 }

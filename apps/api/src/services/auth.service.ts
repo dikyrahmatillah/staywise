@@ -16,23 +16,44 @@ export class AuthService {
   private static readonly VERIFY_TTL_MS = 60 * 60 * 1000;
 
   private async issueEmailVerificationToken(userId: string) {
-    await prisma.emailVerification.deleteMany({ where: { userId } });
+    await prisma.authToken.updateMany({
+      where: { userId, type: "EMAIL_VERIFICATION", status: "ACTIVE" },
+      data: { status: "REVOKED" },
+    });
+
     const token = generateToken({ id: userId, purpose: "verify" }, "1h");
+    const tokenHash = await bcrypt.hash(token, 10);
     const expiresAt = new Date(Date.now() + AuthService.VERIFY_TTL_MS);
 
-    await prisma.emailVerification.create({
-      data: { userId, token, expiresAt },
+    await prisma.authToken.create({
+      data: {
+        userId,
+        type: "EMAIL_VERIFICATION",
+        tokenHash,
+        expiresAt,
+      },
     });
 
     return token;
   }
 
   private async assertValidVerifyToken(token: string) {
-    const ver = await prisma.emailVerification.findUnique({ where: { token } });
-    if (!ver || ver.usedAt) throw new AppError("Invalid or used token", 400);
-    if (ver.expiresAt.getTime() < Date.now())
-      throw new AppError("Token expired", 400);
-    return ver;
+    const candidates = await prisma.authToken.findMany({
+      where: { type: "EMAIL_VERIFICATION", status: "ACTIVE" },
+    });
+
+    for (const c of candidates) {
+      if (!c.tokenHash) continue;
+      const ok = await bcrypt.compare(token, c.tokenHash);
+      if (!ok) continue;
+
+      if (c.usedAt) throw new AppError("Invalid or used token", 400);
+      if (c.expiresAt.getTime() < Date.now())
+        throw new AppError("Token expired", 400);
+      return c;
+    }
+
+    throw new AppError("Invalid or used token", 400);
   }
 
   async startRegistration(input: RegistrationStartInput) {
@@ -75,9 +96,9 @@ export class AuthService {
           emailVerified: true,
         },
       }),
-      prisma.emailVerification.update({
-        where: { token },
-        data: { usedAt: new Date() },
+      prisma.authToken.update({
+        where: { id: ver.id },
+        data: { usedAt: new Date(), status: "USED" },
       }),
     ]);
 

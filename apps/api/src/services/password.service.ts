@@ -9,26 +9,41 @@ export class PasswordResetService {
   private static readonly RESET_TTL_MS = 15 * 60 * 1000;
 
   private async assertValidResetToken(token: string) {
-    const pr = await prisma.passwordReset.findUnique({ where: { token } });
-    if (!pr || pr.usedAt) throw new AppError("Invalid or used token", 400);
-    if (pr.expiresAt.getTime() < Date.now())
-      throw new AppError("Token expired", 400);
-    return pr;
+    const candidates = await prisma.authToken.findMany({
+      where: { type: "PASSWORD_RESET", status: "ACTIVE" },
+    });
+
+    for (const c of candidates) {
+      if (!c.tokenHash) continue;
+      const ok = await bcrypt.compare(token, c.tokenHash);
+      if (!ok) continue;
+
+      if (c.usedAt) throw new AppError("Invalid or used token", 400);
+      if (c.expiresAt.getTime() < Date.now())
+        throw new AppError("Token expired", 400);
+      return c;
+    }
+
+    throw new AppError("Invalid or used token", 400);
   }
 
   async requestPasswordReset(email: string) {
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) throw new AppError("User not found", 404);
-
-    await prisma.passwordReset.deleteMany({ where: { userId: user.id } });
+    await prisma.authToken.updateMany({
+      where: { userId: user.id, type: "PASSWORD_RESET", status: "ACTIVE" },
+      data: { status: "REVOKED" },
+    });
 
     const token = generateToken({ id: user.id, purpose: "reset" }, "15m");
+    const tokenHash = await bcrypt.hash(token, 10);
     const expiresAt = new Date(Date.now() + PasswordResetService.RESET_TTL_MS);
 
-    await prisma.passwordReset.create({
+    await prisma.authToken.create({
       data: {
         userId: user.id,
-        token,
+        type: "PASSWORD_RESET",
+        tokenHash,
         expiresAt,
       },
     });
@@ -50,9 +65,9 @@ export class PasswordResetService {
         where: { id: user.id },
         data: { password: hashedPassword },
       }),
-      prisma.passwordReset.update({
-        where: { token },
-        data: { usedAt: new Date() },
+      prisma.authToken.update({
+        where: { id: pr.id },
+        data: { usedAt: new Date(), status: "USED" },
       }),
     ]);
 
