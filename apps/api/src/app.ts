@@ -4,8 +4,8 @@ import { errorMiddleware } from "./middlewares/error.middleware.js";
 import logger from "./utils/logger.js";
 import authRouter from "./routers/auth.router.js";
 import propertyRouter from "./routers/property.route.js";
-import bookingsRouter  from "./routers/booking.router.js"
-
+import bookingsRouter from "./routers/booking.router.js";
+import emailRouter from "./routers/email.router.js";
 export class App {
   app: Application;
 
@@ -30,6 +30,7 @@ export class App {
   }
 
   setupRoutes() {
+    this.app.use("/emails", emailRouter); //test
     this.app.use("/api/v1/auth", authRouter);
     this.app.use("/api/v1/properties", propertyRouter);
     this.app.use("/api/v1/bookings", bookingsRouter);
