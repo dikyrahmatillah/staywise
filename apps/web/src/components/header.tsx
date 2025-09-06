@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { HiHome } from "react-icons/hi";
-import { LoginButton } from "./signin-button";
+import { UserMenu } from "./user-menu";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { SearchButton } from "./search/search-button";
@@ -145,7 +145,7 @@ export function Header() {
           </div>
 
           <div className="flex items-center flex-1 justify-end min-w-0">
-            <LoginButton />
+            <UserMenu />
           </div>
         </div>
 

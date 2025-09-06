@@ -4,6 +4,7 @@ import "./globals.css";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import QueryProvider from "@/components/providers/query-provider";
+import AuthProvider from "@/components/providers/auth-provider";
 
 const figtree = Figtree({
   variable: "--font-figtree",
@@ -28,11 +29,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${figtree.variable} ${geistMono.variable} antialiased`}>
-        <QueryProvider>
-          <Header />
-          <main className="min-h-[calc(100vh-12rem)]">{children}</main>
-          <Footer />
-        </QueryProvider>
+        <AuthProvider>
+          <QueryProvider>
+            <Header />
+            <main className="min-h-[calc(100vh-12rem)]">{children}</main>
+            <Footer />
+          </QueryProvider>
+        </AuthProvider>
       </body>
     </html>
   );

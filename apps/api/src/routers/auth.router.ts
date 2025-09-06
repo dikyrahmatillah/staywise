@@ -10,7 +10,7 @@ router.post(
   upload.single("avatarUrl"),
   authController.completeRegistration
 );
-router.post("/login", authController.userLogin);
+router.post("/signin", authController.userLogin);
 router.post("/forgot-password", authController.requestPasswordReset);
 router.post("/reset-password", authController.resetPassword);
 router.get("/profile", verifyTokenMiddleware, authController.getProfile);
