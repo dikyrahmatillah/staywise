@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import * as bookingService from "../services/booking.service.js"; // Fix: Use relative path
+import * as bookingService from "../services/booking.service.js";
 
 export async function createBooking(
   request: Request,
@@ -25,7 +25,7 @@ export async function getAllBookings(req: Request, res: Response) {
     });
   } catch (error) {
     console.error("Get all bookings error:", error);
-    res.status(500).json({
+    res.status(400).json({
       success: false,
       error: "Failed to fetch bookings",
     });
