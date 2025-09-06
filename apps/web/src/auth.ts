@@ -1,6 +1,7 @@
 import nextAuth, { DefaultSession } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { jwtDecode } from "jwt-decode";
+import { api } from "@/lib/axios";
 
 type DecodeToken = {
   id: string;
@@ -36,22 +37,9 @@ export const { handlers, signIn, signOut, auth } = nextAuth({
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
         try {
-          const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/auth/signin`,
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(credentials),
-            }
-          );
-          if (!response.ok) return null;
-
-          const data = await response.json();
-
-          const token = data?.accessToken?.data?.accessToken;
-
+          const response = await api.post("/auth/signin", credentials);
+          const token = response?.data?.data?.accessToken;
           if (!token) return null;
-
           return {
             accessToken: token,
           };

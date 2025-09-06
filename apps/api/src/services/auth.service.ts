@@ -85,9 +85,7 @@ export class AuthService {
       role: user.role,
     });
 
-    return {
-      accessToken: token,
-    };
+    return { accessToken: token };
   }
 
   async userProfile(userId: string) {
