@@ -189,6 +189,18 @@ export async function checkRoomAvailability(
   };
 }
 
+export async function getAllBookings() {
+  return prisma.booking.findMany({
+        include: {
+          Property: { select: { name: true, city: true } },
+          Room: { select: { name: true } },
+          User: { select: { firstName: true, lastName: true, email: true } },
+        },
+        orderBy: { createdAt: "desc" },
+      });
+
+}
+
 export async function getBookingById(id: string) {
   return prisma.booking.findUnique({
     where: { id },
