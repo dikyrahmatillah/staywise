@@ -94,6 +94,7 @@ Amount Paid: ${bookingData.currency}${bookingData.amountPaid}.
 Manage your booking here: ${bookingData.manageBookingUrl}`,
     });
   }
+
   async sendEmailChangeVerification(newEmail: string, token: string) {
     const webUrl = process.env.WEB_APP_URL || "http://localhost:3000";
     const verifyLink = `${webUrl}/verify-email-change?token=${encodeURIComponent(
