@@ -1,82 +1,45 @@
 import { prisma } from "@repo/database";
 import {
+  ChangePasswordInput,
   CompleteRegistrationInput,
   LoginInput,
   RegistrationStartInput,
   UpdateUserInput,
 } from "@repo/schemas";
 import { AppError } from "@/errors/app.error.js";
-import { generateToken } from "@/utils/jwt.js";
 import { EmailService } from "./email.service.js";
+import { TokenService } from "./token.service.js";
+import { generateToken, verifyToken } from "@/utils/jwt.js";
 import bcrypt from "bcrypt";
 
 export class AuthService {
   private emailService = new EmailService();
-
+  private tokenService = new TokenService();
   private static readonly VERIFY_TTL_MS = 60 * 60 * 1000;
-
-  private async issueEmailVerificationToken(userId: string) {
-    await prisma.authToken.updateMany({
-      where: { userId, type: "EMAIL_VERIFICATION", status: "ACTIVE" },
-      data: { status: "REVOKED" },
-    });
-
-    const token = generateToken({ id: userId, purpose: "verify" }, "1h");
-    const tokenHash = await bcrypt.hash(token, 10);
-    const expiresAt = new Date(Date.now() + AuthService.VERIFY_TTL_MS);
-
-    await prisma.authToken.create({
-      data: {
-        userId,
-        type: "EMAIL_VERIFICATION",
-        tokenHash,
-        expiresAt,
-      },
-    });
-
-    return token;
-  }
-
-  private async assertValidVerifyToken(token: string) {
-    const candidates = await prisma.authToken.findMany({
-      where: { type: "EMAIL_VERIFICATION", status: "ACTIVE" },
-    });
-
-    for (const c of candidates) {
-      if (!c.tokenHash) continue;
-      const ok = await bcrypt.compare(token, c.tokenHash);
-      if (!ok) continue;
-
-      if (c.usedAt) throw new AppError("Invalid or used token", 400);
-      if (c.expiresAt.getTime() < Date.now())
-        throw new AppError("Token expired", 400);
-      return c;
-    }
-
-    throw new AppError("Invalid or used token", 400);
-  }
 
   async startRegistration(input: RegistrationStartInput) {
     const { email, role } = input;
-    const existing = await prisma.user.findUnique({ where: { email } });
-    if (existing?.emailVerified) throw new AppError("User already exists", 409);
+    const user =
+      (await prisma.user.findUnique({ where: { email } })) ??
+      (await prisma.user.create({ data: { email, firstName: "", role } }));
 
-    const user = await prisma.user.create({
-      data: {
-        email,
-        firstName: "",
-        role,
-      },
-    });
+    if (user.emailVerified) throw new AppError("User already exists", 409);
 
-    const token = await this.issueEmailVerificationToken(user.id);
+    const token = await this.tokenService.generateEmailToken(
+      user.id,
+      "EMAIL_VERIFICATION",
+      AuthService.VERIFY_TTL_MS
+    );
     await this.emailService.sendEmailVerification(email, token);
     return { ok: true };
   }
 
   async completeRegistration(input: CompleteRegistrationInput) {
     const { token, firstName, lastName, phone, avatarUrl, password } = input;
-    const ver = await this.assertValidVerifyToken(token);
+    const ver = await this.tokenService.verifyEmailToken(
+      token,
+      "EMAIL_VERIFICATION"
+    );
 
     const user = await prisma.user.findUnique({ where: { id: ver.userId } });
     if (!user) throw new AppError("User not found", 404);
@@ -105,16 +68,6 @@ export class AuthService {
     return { ok: true };
   }
 
-  async resendVerification(email: string) {
-    const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) throw new AppError("User not found", 404);
-    if (user.emailVerified) throw new AppError("Email already verified", 400);
-
-    const token = await this.issueEmailVerificationToken(user.id);
-    await this.emailService.sendEmailVerification(email, token);
-    return { ok: true };
-  }
-
   async login(data: LoginInput) {
     const user = await prisma.user.findUnique({ where: { email: data.email } });
 
@@ -125,7 +78,16 @@ export class AuthService {
     const isValidPassword = await bcrypt.compare(data.password, user.password);
     if (!isValidPassword) throw new AppError("Invalid email or password", 401);
 
-    return user;
+    const token = generateToken({
+      id: user.id,
+      name: user.firstName,
+      email: user.email,
+      role: user.role,
+    });
+
+    return {
+      accessToken: token,
+    };
   }
 
   async userProfile(userId: string) {
@@ -148,5 +110,74 @@ export class AuthService {
       },
     });
     return updatedUser;
+  }
+
+  async changePassword(userId: string, data: ChangePasswordInput) {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new AppError("User not found", 404);
+    if (!user.password) throw new AppError("Password not set", 400);
+
+    const isValidPassword = await bcrypt.compare(
+      data.currentPassword,
+      user.password
+    );
+    if (!isValidPassword) throw new AppError("Invalid current password", 401);
+
+    const hashedPassword = await bcrypt.hash(data.newPassword, 10);
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { password: hashedPassword },
+    });
+  }
+
+  async requestChangeEmail(userId: string, newEmail: string) {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new AppError("User not found", 404);
+    if (!user.emailVerified) throw new AppError("Email not verified", 400);
+
+    const existing = await prisma.user.findUnique({
+      where: { email: newEmail },
+    });
+    if (existing) throw new AppError("Email already in use", 409);
+
+    const token = await this.tokenService.generateEmailToken(
+      user.id,
+      "EMAIL_CHANGE",
+      AuthService.VERIFY_TTL_MS,
+      { newEmail }
+    );
+
+    await this.emailService.sendEmailChangeVerification(newEmail, token);
+  }
+
+  async confirmChangeEmail(token: string) {
+    const ver = await this.tokenService.verifyEmailToken(token, "EMAIL_CHANGE");
+
+    const payload = verifyToken(token) as {
+      id: string;
+      purpose: string;
+      newEmail?: string;
+    };
+
+    if (!payload.newEmail) throw new AppError("Invalid token payload", 400);
+
+    const user = await prisma.user.findUnique({ where: { id: ver.userId } });
+    if (!user) throw new AppError("User not found", 404);
+
+    const emailTaken = await prisma.user.findUnique({
+      where: { email: payload.newEmail },
+    });
+    if (emailTaken) throw new AppError("Email already in use", 409);
+
+    await prisma.$transaction([
+      prisma.user.update({
+        where: { id: user.id },
+        data: { email: payload.newEmail },
+      }),
+      prisma.authToken.update({
+        where: { id: ver.id },
+        data: { usedAt: new Date(), status: "USED" },
+      }),
+    ]);
   }
 }

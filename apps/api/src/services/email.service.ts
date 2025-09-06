@@ -33,7 +33,7 @@ export class EmailService {
 
   async sendEmailVerification(email: string, verifyToken: string) {
     const webUrl = process.env.WEB_APP_URL || "http://localhost:3000";
-    const verifyLink = `${webUrl}/verify?type=verify&token=${encodeURIComponent(
+    const verifyLink = `${webUrl}/verify?token=${encodeURIComponent(
       verifyToken
     )}`;
 
@@ -92,6 +92,26 @@ Check-in: ${bookingData.checkInDate} ${bookingData.checkInTime},
 Check-out: ${bookingData.checkOutDate} ${bookingData.checkOutTime}. 
 Amount Paid: ${bookingData.currency}${bookingData.amountPaid}.
 Manage your booking here: ${bookingData.manageBookingUrl}`,
+
+  async sendEmailChangeVerification(newEmail: string, token: string) {
+    const webUrl = process.env.WEB_APP_URL || "http://localhost:3000";
+    const verifyLink = `${webUrl}/verify-email-change?token=${encodeURIComponent(
+      token
+    )}`;
+
+    const template = await fs.readFile(
+      "./src/templates/emails/verify-email-change.hbs",
+      "utf-8"
+    );
+    const compiledTemplate = Handlebars.compile(template);
+    const html = compiledTemplate({ verifyLink });
+
+    await resend.emails.send({
+      from: "StayWise <onboarding@resend.dev>",
+      to: newEmail,
+      subject: "Confirm your new email",
+      html,
+      text: `Click to confirm your new email: ${verifyLink}`,
     });
   }
 }
