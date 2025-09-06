@@ -1,8 +1,8 @@
 import { prisma } from "@repo/database";
+import { AppError } from "@/errors/app.error.js";
 import { CreateBookingInput } from "@repo/schemas";
 
 export async function createBooking(data: CreateBookingInput) {
-  // Validate that user exists
   const user = await prisma.user.findUnique({
     where: { id: data.userId },
   });
@@ -11,33 +11,28 @@ export async function createBooking(data: CreateBookingInput) {
     throw new Error("User not found. Please log in to make a booking.");
   }
 
-  // Generate order code
   const orderCode = `ORD-${Date.now()}-${Math.random()
     .toString(36)
     .substr(2, 5)
     .toUpperCase()}`;
 
-  // Set expiration (1 hour from now)
-  const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
+  const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1h
 
-  // Get tenantId from property
   const property = await prisma.property.findUnique({
     where: { id: data.propertyId },
     select: { tenantId: true },
   });
 
   if (!property) {
-    throw new Error("Property not found");
+    throw new AppError("Property not found", 400);
   }
 
-  // Calculate nights
   const checkInDate = new Date(data.checkIn);
   const checkOutDate = new Date(data.checkOut);
   const nights = Math.ceil(
     (checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24)
-  );
+  ); //calculate night
 
-  // Double-check availability before creating
   const availability = await checkRoomAvailability(
     data.propertyId,
     data.roomId,
@@ -46,7 +41,7 @@ export async function createBooking(data: CreateBookingInput) {
   );
 
   if (!availability.available) {
-    throw new Error("Room is no longer available for selected dates");
+    throw new AppError("Room is no longer available for selected dates", 400);
   }
 
   return prisma.booking.create({
@@ -73,7 +68,6 @@ export async function createBooking(data: CreateBookingInput) {
   });
 }
 
-// Keep the availability function as is...
 export async function checkRoomAvailability(
   propertyId: string,
   roomId: string,
@@ -85,14 +79,14 @@ export async function checkRoomAvailability(
 
   // Validate dates
   if (checkIn >= checkOut) {
-    throw new Error("Check-out must be after check-in");
+    throw new AppError("Check-out must be after check-in", 400);
   }
 
   // Check if dates are in the past
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   if (checkIn < today) {
-    throw new Error("Cannot book dates in the past");
+    throw new AppError("Cannot book dates in the past", 400);
   }
 
   // Check room availability settings
@@ -191,14 +185,13 @@ export async function checkRoomAvailability(
 
 export async function getAllBookings() {
   return prisma.booking.findMany({
-        include: {
-          Property: { select: { name: true, city: true } },
-          Room: { select: { name: true } },
-          User: { select: { firstName: true, lastName: true, email: true } },
-        },
-        orderBy: { createdAt: "desc" },
-      });
-
+    include: {
+      Property: { select: { name: true, city: true } },
+      Room: { select: { name: true } },
+      User: { select: { firstName: true, lastName: true, email: true } },
+    },
+    orderBy: { createdAt: "desc" },
+  });
 }
 
 export async function getBookingById(id: string) {
