@@ -92,6 +92,8 @@ Check-in: ${bookingData.checkInDate} ${bookingData.checkInTime},
 Check-out: ${bookingData.checkOutDate} ${bookingData.checkOutTime}. 
 Amount Paid: ${bookingData.currency}${bookingData.amountPaid}.
 Manage your booking here: ${bookingData.manageBookingUrl}`,
+    });
+  }
 
   async sendEmailChangeVerification(newEmail: string, token: string) {
     const webUrl = process.env.WEB_APP_URL || "http://localhost:3000";

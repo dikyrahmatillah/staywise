@@ -14,6 +14,24 @@ export async function createBooking(
   }
 }
 
+export async function getAllBookings(req: Request, res: Response) {
+  try {
+    const bookings = await bookingService.getAllBookings();
+
+    res.json({
+      success: true,
+      count: bookings.length,
+      data: bookings,
+    });
+  } catch (error) {
+    console.error("Get all bookings error:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to fetch bookings",
+    });
+  }
+}
+
 export async function getBookingById(
   request: Request,
   response: Response,
