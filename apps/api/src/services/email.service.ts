@@ -33,7 +33,7 @@ export class EmailService {
 
   async sendEmailVerification(email: string, verifyToken: string) {
     const webUrl = process.env.WEB_APP_URL || "http://localhost:3000";
-    const verifyLink = `${webUrl}/verify?token=${encodeURIComponent(
+    const verifyLink = `${webUrl}/complete-profile?token=${encodeURIComponent(
       verifyToken
     )}`;
 

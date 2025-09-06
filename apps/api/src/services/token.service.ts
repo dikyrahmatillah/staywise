@@ -43,7 +43,7 @@ export class TokenService {
     type: "EMAIL_VERIFICATION" | "PASSWORD_RESET" | "EMAIL_CHANGE"
   ) {
     const tokenRecord = await prisma.authToken.findFirst({
-      where: { token, type, status: "ACTIVE" },
+      where: { token, type },
     });
 
     if (!tokenRecord) throw new AppError("Invalid token", 400);
