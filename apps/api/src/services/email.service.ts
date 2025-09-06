@@ -52,4 +52,26 @@ export class EmailService {
       text: `Click to verify your email: ${verifyLink}`,
     });
   }
+
+  async sendEmailChangeVerification(newEmail: string, token: string) {
+    const webUrl = process.env.WEB_APP_URL || "http://localhost:3000";
+    const verifyLink = `${webUrl}/verify-email-change?token=${encodeURIComponent(
+      token
+    )}`;
+
+    const template = await fs.readFile(
+      "./src/templates/emails/verify-email-change.hbs",
+      "utf-8"
+    );
+    const compiledTemplate = Handlebars.compile(template);
+    const html = compiledTemplate({ verifyLink });
+
+    await resend.emails.send({
+      from: "StayWise <onboarding@resend.dev>",
+      to: newEmail,
+      subject: "Confirm your new email",
+      html,
+      text: `Click to confirm your new email: ${verifyLink}`,
+    });
+  }
 }

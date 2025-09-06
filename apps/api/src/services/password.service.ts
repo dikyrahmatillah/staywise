@@ -1,6 +1,6 @@
 import { prisma } from "@repo/database";
+import { ResetPasswordWithTokenInput } from "@repo/schemas";
 import { AppError } from "@/errors/app.error.js";
-import { generateToken } from "@/utils/jwt.js";
 import { EmailService } from "./email.service.js";
 import { TokenService } from "./token.service.js";
 import bcrypt from "bcrypt";
@@ -25,9 +25,9 @@ export class PasswordResetService {
     return { ok: true };
   }
 
-  async resetPasswordWithToken(token: string, newPassword: string) {
+  async resetPasswordWithToken(data: ResetPasswordWithTokenInput) {
     const tokenRecord = await this.tokenService.verifyEmailToken(
-      token,
+      data.token,
       "PASSWORD_RESET"
     );
 
@@ -36,7 +36,7 @@ export class PasswordResetService {
     });
     if (!user) throw new AppError("User not found", 404);
 
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const hashedPassword = await bcrypt.hash(data.password, 10);
     await prisma.$transaction([
       prisma.user.update({
         where: { id: user.id },
