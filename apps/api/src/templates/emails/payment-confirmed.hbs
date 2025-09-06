@@ -1,0 +1,120 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Payment Confirmed</title>
+  </head>
+  <body
+    style="margin:0; padding:0; background:#f8fafc; font-family:Arial, Helvetica, sans-serif; color:#0f172a;"
+  >
+    <table
+      role="presentation"
+      width="100%"
+      cellpadding="0"
+      cellspacing="0"
+      style="background:#f8fafc; padding:20px 0;"
+    >
+      <tr>
+        <td align="center">
+          <table
+            role="presentation"
+            width="600"
+            cellpadding="0"
+            cellspacing="0"
+            style="background:#ffffff; border-radius:12px; border:1px solid #e2e8f0; padding:24px;"
+          >
+            <tr>
+              <td align="left" style="padding-bottom:16px;">
+                <h2
+                  style="margin:0; font-size:20px; font-weight:bold; color:#2563eb;"
+                >
+                  {{brandName}}
+                </h2>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p
+                  style="margin:0 0 12px; font-size:14px; color:#047857; background:#ecfdf5; display:inline-block; padding:6px 10px; border-radius:999px;"
+                >
+                  Payment Confirmed
+                </p>
+                <h1 style="margin:8px 0 12px; font-size:22px;">Your booking is
+                  confirmed,
+                  {{customerName}}
+                  🎉</h1>
+                <p style="margin:0 0 16px; font-size:14px; color:#475569;">
+                  We’ve received your payment of
+                  <strong>{{currency}}{{amountPaid}}</strong>
+                  for booking
+                  <strong>#{{bookingCode}}</strong>.
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <h3 style="margin:0 0 8px; font-size:16px;">Booking Details</h3>
+                <p style="margin:0; font-size:14px;"><strong>Property:</strong>
+                  {{propertyName}}</p>
+                <p style="margin:0; font-size:14px;"><strong>Address:</strong>
+                  {{propertyAddress}}</p>
+                <p style="margin:0; font-size:14px;"><strong>Guests:</strong>
+                  {{guestCount}}</p>
+                <p style="margin:0; font-size:14px;"><strong>Check-in:</strong>
+                  {{checkInDate}}
+                  {{checkInTime}}</p>
+                <p style="margin:0; font-size:14px;"><strong>Check-out:</strong>
+                  {{checkOutDate}}
+                  {{checkOutTime}}</p>
+                <p style="margin:0; font-size:14px;"><strong>Payment Method:</strong>
+                  {{paymentMethod}}</p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding-top:20px;">
+                <h3 style="margin:0 0 8px; font-size:16px;">House Rules</h3>
+                <ul
+                  style="margin:0; padding-left:18px; font-size:14px; line-height:1.5;"
+                >
+                  <li>Check-in from
+                    {{checkInTime}}; check-out by
+                    {{checkOutTime}}.</li>
+                  <li>No smoking inside the property.</li>
+                  <li>Only registered guests may stay overnight.</li>
+                </ul>
+              </td>
+            </tr>
+            <tr>
+              <td align="center" style="padding:24px 0;">
+                <a
+                  href="{{manageBookingUrl}}"
+                  style="background:#2563eb; color:#ffffff; padding:12px 20px; border-radius:999px; font-size:16px; font-weight:bold; text-decoration:none; display:inline-block;"
+                >
+                  View / Manage Booking
+                </a>
+              </td>
+            </tr>
+            <tr>
+              <td
+                align="center"
+                style="padding-top:16px; border-top:1px solid #e2e8f0;"
+              >
+                <p style="margin:8px 0 0; font-size:12px; color:#64748b;">
+                  Need help? Email us at
+                  <a
+                    href="mailto:{{supportEmail}}"
+                    style="color:#2563eb;"
+                  >{{supportEmail}}</a>
+                </p>
+                <p style="margin:8px 0 0; font-size:12px; color:#94a3b8;">
+                  ©
+                  {{year}}
+                  {{brandName}}. All rights reserved.
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
