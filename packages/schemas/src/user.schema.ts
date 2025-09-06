@@ -28,6 +28,14 @@ export const CompleteRegistrationSchema = CommonProfileSchema.extend({
     .regex(/[^\w\s]/, "Password must contain at least one special character"),
 });
 
+export const CompleteRegistrationClientSchema =
+  CompleteRegistrationSchema.extend({
+    confirmPassword: z.string(),
+  }).refine((d) => d.password === d.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
+
 export const UpdateUserSchema = CommonProfileSchema.partial().extend({
   email: EmailSchema.optional(),
 });
@@ -64,6 +72,9 @@ export type LoginInput = z.infer<typeof LoginSchema>;
 export type RegistrationStartInput = z.infer<typeof RegistrationStartSchema>;
 export type CompleteRegistrationInput = z.infer<
   typeof CompleteRegistrationSchema
+>;
+export type CompleteRegistrationClientInput = z.infer<
+  typeof CompleteRegistrationClientSchema
 >;
 export type ResetPasswordWithTokenInput = z.infer<
   typeof ResetPasswordWithTokenSchema
