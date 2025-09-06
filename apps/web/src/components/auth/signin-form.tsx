@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { LoginInput, LoginSchema } from "@repo/schemas";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
+import { extractErrorMessage } from "@/lib/auth-error.utils";
 
 type Props = {
   title?: string;
@@ -21,11 +22,7 @@ type Props = {
 };
 
 export default function SignInForm({}: Props) {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({
+  const { register, handleSubmit } = useForm({
     resolver: zodResolver(LoginSchema),
   });
 
@@ -45,20 +42,7 @@ export default function SignInForm({}: Props) {
       });
 
       if (result?.error) {
-        let message = "";
-        if (
-          result.error.toLowerCase().includes("credentials") ||
-          result.error.toLowerCase().includes("invalid")
-        ) {
-          message = "Email or password is incorrect. Please try again.";
-        } else if (result.error.toLowerCase().includes("network")) {
-          message =
-            "Network error. Please check your connection and try again.";
-        } else if (result.error.toLowerCase().includes("server")) {
-          message = "Server error. Please try again later.";
-        } else {
-          message = result.error || "Login failed. Please try again.";
-        }
+        const message = "Sign in failed";
         toast.error(message);
         setError(message);
         setIsLoading(false);
@@ -69,11 +53,13 @@ export default function SignInForm({}: Props) {
 
       router.push("/dashboard");
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
+      const message =
+        extractErrorMessage(error) ||
+        (error instanceof Error ? error.message : String(error));
       toast.error(
-        "An error occurred during sign in. Please try again. " + message
+        "An error occurred during sign in. Please try again. " + (message || "")
       );
-      setError(message);
+      setError(message || "An unknown error occurred");
     } finally {
       setIsLoading(false);
     }
@@ -82,11 +68,6 @@ export default function SignInForm({}: Props) {
   return (
     <>
       <div>
-        {error && (
-          <div className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-800">
-            {error}
-          </div>
-        )}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
             <Label

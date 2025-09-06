@@ -1,22 +1,39 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FcGoogle } from "react-icons/fc";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { EmailSchema } from "@repo/schemas";
+import { extractErrorMessage } from "@/lib/auth-error.utils";
 import AuthHeader from "@/components/auth/auth-header";
+import api from "@/lib/axios";
 
 export default function GuestSignUpPage() {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  const router = useRouter();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      console.log("Guest sign up", { email });
+      const parsed = EmailSchema.safeParse(email);
+      if (!parsed.success) {
+        toast.error(parsed.error.issues[0]?.message || "Invalid email");
+        return;
+      }
+      const payload = { email, role: "USER" };
+      await api.post("/auth/signup", payload);
+      toast.success("Verification email sent. Please check your inbox.");
+      router.push("/guest-signin");
+    } catch (err: unknown) {
+      const message = extractErrorMessage(err) || "Signup failed";
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }
