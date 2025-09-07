@@ -6,19 +6,23 @@ export async function resolveCategoryId(
   tx: Prisma.TransactionClient,
   data: CreatePropertyInput
 ) {
-  if ("categoryId" in data) return data.categoryId;
+  if ("propertyCategoryId" in data) return (data as any).propertyCategoryId;
 
   if ("category" in data) {
-    const { name, description } = data.category;
-    const { id } = await tx.propertyCategory.create({
-      data: {
-        tenantId: data.tenantId,
-        name,
-        description: description ?? null,
-      },
-      select: { id: true },
-    });
-    return id;
+    const category: any = (data as any).category;
+    if (category && typeof category === "object") {
+      const { name, description } = category as {
+        name: string;
+        description?: string;
+      };
+      const { id } = await tx.propertyCategory.create({
+        data: {
+          name,
+        },
+        select: { id: true },
+      });
+      return id;
+    }
   }
 
   throw new AppError("Category is required", 400);

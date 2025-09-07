@@ -54,9 +54,9 @@ export class AuthService {
           firstName,
           lastName,
           phone,
-          avatarUrl,
+          image: avatarUrl,
           password: hashedPassword,
-          emailVerified: true,
+          emailVerified: new Date(),
         },
       }),
       prisma.authToken.update({
@@ -91,6 +91,15 @@ export class AuthService {
   async userProfile(userId: string) {
     const user = await prisma.user.findUnique({
       where: { id: userId },
+      omit: { password: true, createdAt: true, updatedAt: true },
+    });
+    if (!user) throw new AppError("User not found", 404);
+    return user;
+  }
+
+  async userByEmail(email: string) {
+    const user = await prisma.user.findUnique({
+      where: { email },
       omit: { password: true, createdAt: true, updatedAt: true },
     });
     if (!user) throw new AppError("User not found", 404);

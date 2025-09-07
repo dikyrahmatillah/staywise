@@ -148,6 +148,7 @@ export default function SignInForm({}: Props) {
           variant="outline"
           className="w-full cursor-pointer"
           disabled={isLoading}
+          onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
         >
           <FcGoogle className="w-5 h-5 mr-2" />
           Continue with Google
