@@ -8,7 +8,7 @@ export async function createBooking(data: CreateBookingInput) {
   });
 
   if (!user) {
-    throw new Error("User not found. Please log in to make a booking.");
+    throw new AppError("User not found. Please log in to make a booking.", 400);
   }
 
   const orderCode = `ORD-${Date.now()}-${Math.random()
