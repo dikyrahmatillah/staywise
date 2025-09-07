@@ -116,6 +116,26 @@ export class AuthController {
     }
   };
 
+  getUserByEmail = async (
+    request: Request,
+    response: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const email = String(request.query.email || "");
+      if (!email) {
+        response.status(400).json({ message: "Email is required" });
+        return;
+      }
+      const user = await this.authService.userByEmail(email);
+      response
+        .status(200)
+        .json({ message: "User fetched successfully", data: user });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   editProfile = async (
     request: Request,
     response: Response,
