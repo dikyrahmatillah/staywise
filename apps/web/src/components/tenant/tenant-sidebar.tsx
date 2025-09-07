@@ -38,8 +38,8 @@ const nav: Group[] = [
     items: [
       { label: "List Property", href: "/dashboard/tenant/properties" },
       { label: "Add Property", href: "/dashboard/tenant/properties/new" },
-      { label: "Property Categories", href: "/dashboard/tenant/categories" },
-      { label: "Room Management", href: "/dashboard/tenant/rooms" },
+      { label: "Property Categories", href: "/dashboard/tenant/properties/categories" },
+      { label: "Room Management", href: "/dashboard/tenant/properties/rooms" },
     ],
   },
 
