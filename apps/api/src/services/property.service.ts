@@ -11,12 +11,12 @@ export class PropertyService {
     const slug = `${slugify(data.name)}-${nanoid(6)}`;
 
     const property = await prisma.$transaction(async (tx) => {
-      const categoryId = await resolveCategoryId(tx, data);
+      const propertyCategoryId = await resolveCategoryId(tx, data);
 
       const created = await tx.property.create({
         data: {
           tenantId: data.tenantId,
-          categoryId,
+          propertyCategoryId,
           name: data.name,
           slug,
           description: data.description,
