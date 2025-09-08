@@ -54,14 +54,15 @@ export class PropertyController {
         sortOrder: parsed.sortOrder,
       };
 
-      const properties = await this.propertyService.getProperties(params);
+      const result = await this.propertyService.getProperties(params);
 
       response.status(200).json({
         message: "Properties fetched successfully",
-        data: properties,
+        data: result.properties,
         page,
         limit,
-        totalPage: Math.ceil(properties.length / limit),
+        total: result.total,
+        totalPage: Math.ceil(result.total / limit),
       });
     } catch (error) {
       next(error);
