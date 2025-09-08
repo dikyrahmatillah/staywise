@@ -3,6 +3,7 @@ export type ApiListResponse<T> = {
   data: T[];
   page: number;
   limit: number;
+  total: number;
   totalPage: number;
 };
 

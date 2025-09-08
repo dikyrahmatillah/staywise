@@ -108,13 +108,18 @@ export class PropertyService {
       orderBy = { Rooms: { _min: { basePrice: sortOrder || "asc" } } };
     }
 
-    return prisma.property.findMany({
+    // Get total count for pagination
+    const total = await prisma.property.count({ where });
+
+    const properties = await prisma.property.findMany({
       where,
       skip,
       take,
       orderBy,
       include: { PropertyCategory: true, Rooms: true, Pictures: true },
     });
+
+    return { properties, total };
   }
 
   async getPropertyBySlug(slug: string) {
