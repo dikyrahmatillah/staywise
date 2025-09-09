@@ -14,7 +14,7 @@ export const CommonProfileSchema = z.object({
 
 export const RegistrationStartSchema = z.object({
   email: EmailSchema,
-  role: z.enum(["USER", "TENANT"]),
+  role: z.enum(["GUEST", "TENANT"]),
 });
 
 export const CompleteRegistrationSchema = CommonProfileSchema.extend({
