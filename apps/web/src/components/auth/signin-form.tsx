@@ -138,6 +138,12 @@ export default function SignInForm({}: Props) {
           </Button>
         </form>
 
+        {error && (
+          <p className="mt-3 text-sm text-red-600" role="alert">
+            {error}
+          </p>
+        )}
+
         <div className="flex items-center gap-4 my-6">
           <div className="flex-1 h-px bg-border"></div>
           <span className="text-sm text-muted-foreground">or</span>

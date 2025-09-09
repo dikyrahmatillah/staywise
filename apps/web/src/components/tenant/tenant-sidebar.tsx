@@ -7,7 +7,6 @@ import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
   Building2,
-  Tags,
   ReceiptText,
   BarChart3,
   UserCog,
@@ -38,7 +37,10 @@ const nav: Group[] = [
     items: [
       { label: "List Property", href: "/dashboard/tenant/properties" },
       { label: "Add Property", href: "/dashboard/tenant/properties/new" },
-      { label: "Property Categories", href: "/dashboard/tenant/properties/categories" },
+      {
+        label: "Property Categories",
+        href: "/dashboard/tenant/properties/categories",
+      },
       { label: "Room Management", href: "/dashboard/tenant/properties/rooms" },
     ],
   },
