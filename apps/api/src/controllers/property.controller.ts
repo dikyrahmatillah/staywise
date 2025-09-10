@@ -84,6 +84,55 @@ export class PropertyController {
       next(error);
     }
   };
+
+  getPropertiesByTenant = async (
+    request: Request,
+    response: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const tenantId = request.params.tenantId;
+
+      if (request.user?.id !== tenantId) {
+        return response.status(403).json({
+          message: "Access denied: You can only view your own properties",
+        });
+      }
+
+      const properties = await this.propertyService.getPropertiesByTenant(
+        tenantId
+      );
+      response.status(200).json({
+        message: "Tenant properties fetched successfully",
+        data: properties,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  deleteProperty = async (
+    request: Request,
+    response: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const propertyId = request.params.propertyId;
+      const tenantId = request.user?.id;
+
+      if (!tenantId) {
+        return response.status(401).json({ message: "Unauthorized" });
+      }
+
+      const result = await this.propertyService.deleteProperty(
+        propertyId,
+        tenantId
+      );
+      response.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
+  };
 }
 
 export const propertyController = new PropertyController();
