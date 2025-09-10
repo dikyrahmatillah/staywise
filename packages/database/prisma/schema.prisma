@@ -9,7 +9,7 @@ datasource db {
 }
 
 enum UserRole {
-    USER
+    GUEST
     TENANT
 }
 
@@ -98,7 +98,7 @@ model AuthToken {
 
 model User {
     id            String    @id @default(uuid())
-    role          UserRole  @default(USER)
+    role          UserRole  @default(GUEST)
     firstName     String?   @db.VarChar(150)
     lastName      String?   @db.VarChar(150)
     name          String?   @db.VarChar(255)

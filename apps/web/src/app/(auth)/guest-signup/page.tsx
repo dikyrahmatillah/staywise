@@ -28,7 +28,7 @@ export default function GuestSignUpPage() {
         toast.error(parsed.error.issues[0]?.message || "Invalid email");
         return;
       }
-      const payload = { email, role: "USER" };
+  const payload = { email, role: "GUEST" };
       await api.post("/auth/signup", payload);
       toast.success("Verification email sent. Please check your inbox.");
       router.push("/guest-signin");
