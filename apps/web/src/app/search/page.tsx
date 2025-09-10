@@ -1,9 +1,10 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import { format } from "date-fns";
 
-export default function SearchPage() {
+function SearchPageInner() {
   const searchParams = useSearchParams();
 
   const location = searchParams.get("location") || "";
@@ -73,5 +74,15 @@ export default function SearchPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense
+      fallback={<div className="p-8 text-center">Loading search...</div>}
+    >
+      <SearchPageInner />
+    </Suspense>
   );
 }

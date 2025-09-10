@@ -9,7 +9,6 @@ import { HeaderBlock } from "./components/HeaderBlock";
 import { ImageGallery } from "./components/ImageGallery";
 import { StatsHeader } from "./components/StatsHeader";
 import { AmenitiesSection } from "./components/AmenitiesSection";
-import { SleepingArrangements } from "./components/SleepingArrangements";
 import { LocationSection } from "./components/LocationSection";
 import { Reviews } from "./components/Reviews";
 import { BookingSidebar } from "./components/BookingSidebar";

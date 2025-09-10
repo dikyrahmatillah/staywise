@@ -54,14 +54,15 @@ export class PropertyController {
         sortOrder: parsed.sortOrder,
       };
 
-      const properties = await this.propertyService.getProperties(params);
+      const result = await this.propertyService.getProperties(params);
 
       response.status(200).json({
         message: "Properties fetched successfully",
-        data: properties,
+        data: result.properties,
         page,
         limit,
-        totalPage: Math.ceil(properties.length / limit),
+        total: result.total,
+        totalPage: Math.ceil(result.total / limit),
       });
     } catch (error) {
       next(error);
@@ -79,6 +80,55 @@ export class PropertyController {
       response
         .status(200)
         .json({ message: "Property fetched successfully", data: property });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  getPropertiesByTenant = async (
+    request: Request,
+    response: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const tenantId = request.params.tenantId;
+
+      if (request.user?.id !== tenantId) {
+        return response.status(403).json({
+          message: "Access denied: You can only view your own properties",
+        });
+      }
+
+      const properties = await this.propertyService.getPropertiesByTenant(
+        tenantId
+      );
+      response.status(200).json({
+        message: "Tenant properties fetched successfully",
+        data: properties,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  deleteProperty = async (
+    request: Request,
+    response: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const propertyId = request.params.propertyId;
+      const tenantId = request.user?.id;
+
+      if (!tenantId) {
+        return response.status(401).json({ message: "Unauthorized" });
+      }
+
+      const result = await this.propertyService.deleteProperty(
+        propertyId,
+        tenantId
+      );
+      response.status(200).json(result);
     } catch (error) {
       next(error);
     }

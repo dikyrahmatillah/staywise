@@ -11,12 +11,12 @@ export class PropertyService {
     const slug = `${slugify(data.name)}-${nanoid(6)}`;
 
     const property = await prisma.$transaction(async (tx) => {
-      const categoryId = await resolveCategoryId(tx, data);
+      const propertyCategoryId = await resolveCategoryId(tx, data);
 
       const created = await tx.property.create({
         data: {
           tenantId: data.tenantId,
-          categoryId,
+          propertyCategoryId,
           name: data.name,
           slug,
           description: data.description,
@@ -108,13 +108,18 @@ export class PropertyService {
       orderBy = { Rooms: { _min: { basePrice: sortOrder || "asc" } } };
     }
 
-    return prisma.property.findMany({
+    // Get total count for pagination
+    const total = await prisma.property.count({ where });
+
+    const properties = await prisma.property.findMany({
       where,
       skip,
       take,
       orderBy,
       include: { PropertyCategory: true, Rooms: true, Pictures: true },
     });
+
+    return { properties, total };
   }
 
   async getPropertyBySlug(slug: string) {
@@ -150,5 +155,68 @@ export class PropertyService {
       reviewCount,
       averageRating: avg._avg.rating ?? 0,
     };
+  }
+
+  async getPropertiesByTenant(tenantId: string) {
+    const properties = await prisma.property.findMany({
+      where: { tenantId },
+      include: {
+        PropertyCategory: true,
+        CustomCategory: true,
+        Pictures: true,
+        Rooms: {
+          include: {
+            RoomAvailabilities: true,
+            PriceAdjustments: true,
+          },
+        },
+        Facilities: true,
+        _count: {
+          select: {
+            Bookings: true,
+            Reviews: true,
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    return properties;
+  }
+
+  async deleteProperty(propertyId: string, tenantId: string) {
+    // First check if the property belongs to the tenant
+    const property = await prisma.property.findFirst({
+      where: { id: propertyId, tenantId },
+    });
+
+    if (!property) {
+      throw new AppError(
+        "Property not found or you don't have permission to delete it",
+        404
+      );
+    }
+
+    // Check if there are any active bookings
+    const activeBookings = await prisma.booking.count({
+      where: {
+        propertyId,
+        checkOutDate: { gte: new Date() },
+        status: {
+          in: ["WAITING_PAYMENT", "WAITING_CONFIRMATION", "PROCESSING"],
+        },
+      },
+    });
+
+    if (activeBookings > 0) {
+      throw new AppError("Cannot delete property with active bookings", 400);
+    }
+
+    // Delete the property (cascading will handle related data)
+    await prisma.property.delete({
+      where: { id: propertyId },
+    });
+
+    return { message: "Property deleted successfully" };
   }
 }

@@ -38,7 +38,6 @@ async function clear() {
   await prisma.customCategory.deleteMany();
   await prisma.propertyCategory.deleteMany();
   await prisma.authToken.deleteMany();
-  await prisma.socialAccount.deleteMany();
   await prisma.user.deleteMany();
 }
 
@@ -100,14 +99,15 @@ async function seed() {
     const isTenant = i < tenantCount;
     const user = await prisma.user.create({
       data: {
-        role: isTenant ? ("TENANT" as any) : ("USER" as any),
+  role: isTenant ? ("TENANT" as any) : ("GUEST" as any),
         firstName: faker.person.firstName(),
         lastName: faker.person.lastName(),
+        name: faker.person.fullName(),
         email: faker.internet.email().toLowerCase(),
         password: await bcrypt.hash("Pass123!", 10),
-        avatarUrl: faker.image.avatarGitHub(),
+        image: faker.image.avatarGitHub(),
         phone: faker.phone.number(),
-        emailVerified: faker.datatype.boolean(),
+        emailVerified: new Date(),
       },
       select: { id: true },
     });

@@ -1,7 +1,10 @@
 import nextAuth, { DefaultSession } from "next-auth";
-import CredentialsProvider from "next-auth/providers/credentials";
+import { PrismaAdapter } from "@auth/prisma-adapter";
 import { jwtDecode } from "jwt-decode";
 import { api } from "@/lib/axios";
+import { prisma } from "@repo/database";
+import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
 
 type DecodeToken = {
   id: string;
@@ -23,11 +26,17 @@ declare module "next-auth" {
   }
   interface User {
     accessToken?: string;
+    role?: string;
   }
 }
 
 export const { handlers, signIn, signOut, auth } = nextAuth({
+  adapter: PrismaAdapter(prisma),
   providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    }),
     CredentialsProvider({
       name: "credentials",
       credentials: {
@@ -52,10 +61,27 @@ export const { handlers, signIn, signOut, auth } = nextAuth({
   ],
 
   callbacks: {
-    async jwt({ token, user }) {
-      if (user?.accessToken) {
+    async signIn() {
+      return true;
+    },
+    async jwt({ token, user, account }) {
+      if (account?.provider === "google") {
+        try {
+          const resp = await api.get(`/auth/user`, {
+            params: { email: token.email },
+          }); 
+          const dbUser = resp?.data?.data;
+          if (dbUser) {
+            token.id = dbUser.id;
+            token.name = dbUser.name;
+            token.email = dbUser.email;
+            token.role = dbUser.role;
+          }
+        } catch (error) {
+          console.error("Error fetching user from API:", error);
+        }
+      } else if (user?.accessToken) {
         token.accessToken = user.accessToken;
-
         try {
           const decoded = jwtDecode<DecodeToken>(user.accessToken);
           token.id = decoded.id;
@@ -80,6 +106,13 @@ export const { handlers, signIn, signOut, auth } = nextAuth({
       return session;
     },
   },
-  session: { strategy: "jwt" },
-  pages: { signIn: "/signin" },
+  session: {
+    strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60,
+  },
+  pages: {
+    signIn: "/signin",
+    error: "/error",
+  },
+  debug: process.env.NODE_ENV === "development",
 });

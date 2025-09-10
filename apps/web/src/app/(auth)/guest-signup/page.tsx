@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { EmailSchema } from "@repo/schemas";
 import { extractErrorMessage } from "@/lib/auth-error.utils";
+import { signIn } from "next-auth/react";
 import AuthHeader from "@/components/auth/auth-header";
 import api from "@/lib/axios";
 
@@ -27,7 +28,7 @@ export default function GuestSignUpPage() {
         toast.error(parsed.error.issues[0]?.message || "Invalid email");
         return;
       }
-      const payload = { email, role: "USER" };
+  const payload = { email, role: "GUEST" };
       await api.post("/auth/signup", payload);
       toast.success("Verification email sent. Please check your inbox.");
       router.push("/guest-signin");
@@ -89,6 +90,7 @@ export default function GuestSignUpPage() {
             variant="outline"
             className="w-full cursor-pointer"
             disabled={isLoading}
+            onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
           >
             <FcGoogle className="w-5 h-5 mr-2" />
             Continue with Google

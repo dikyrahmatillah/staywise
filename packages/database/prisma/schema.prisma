@@ -9,7 +9,7 @@ datasource db {
 }
 
 enum UserRole {
-    USER
+    GUEST
     TENANT
 }
 
@@ -97,38 +97,27 @@ model AuthToken {
 }
 
 model User {
-    id            String   @id @default(uuid())
-    role          UserRole @default(USER)
-    firstName     String   @db.VarChar(150)
-    lastName      String?  @db.VarChar(150)
-    email         String   @unique @db.VarChar(255)
-    emailVerified Boolean  @default(false)
-    password      String?  @db.VarChar(255)
-    avatarUrl     String?  @db.Text
-    phone         String?  @db.VarChar(50)
-    createdAt     DateTime @default(now())
-    updatedAt     DateTime @updatedAt
+    id            String    @id @default(uuid())
+    role          UserRole  @default(GUEST)
+    firstName     String?   @db.VarChar(150)
+    lastName      String?   @db.VarChar(150)
+    name          String?   @db.VarChar(255)
+    email         String    @unique @db.VarChar(255)
+    emailVerified DateTime?
+    password      String?   @db.VarChar(255)
+    image         String?   @db.Text
+    phone         String?   @db.VarChar(50)
+    createdAt     DateTime  @default(now())
+    updatedAt     DateTime  @updatedAt
 
-    SocialAccounts        SocialAccount[]
     AuthTokens            AuthToken[]
     CustomCategories      CustomCategory[]
     Properties            Property[]
     BookingsAsUser        Booking[]        @relation("BookingUser")
     UploadedPaymentProofs PaymentProof[]   @relation("PaymentProofUploadedBy")
     Reviews               Review[]         @relation("UserReviews")
-}
 
-model SocialAccount {
-    id          String   @id @default(uuid())
-    userId      String
-    provider    String   @db.VarChar(50)
-    providerUid String   @db.VarChar(255)
-    createdAt   DateTime @default(now())
-
-    User User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-    @@unique([provider, providerUid])
-    @@index([userId])
+    Account Account[]
 }
 
 model PropertyCategory {
@@ -353,4 +342,23 @@ model Review {
 
     @@index([propertyId])
     @@index([userId])
+}
+
+model Account {
+    id                String  @id @default(uuid())
+    userId            String
+    type              String
+    provider          String
+    providerAccountId String
+    refresh_token     String? @db.Text
+    access_token      String? @db.Text
+    expires_at        Int?
+    token_type        String?
+    scope             String?
+    id_token          String? @db.Text
+    session_state     String?
+
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@unique([provider, providerAccountId])
 }
