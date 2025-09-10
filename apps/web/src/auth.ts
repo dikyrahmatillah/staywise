@@ -69,7 +69,7 @@ export const { handlers, signIn, signOut, auth } = nextAuth({
         try {
           const resp = await api.get(`/auth/user`, {
             params: { email: token.email },
-          });
+          }); 
           const dbUser = resp?.data?.data;
           if (dbUser) {
             token.id = dbUser.id;
