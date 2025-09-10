@@ -156,4 +156,67 @@ export class PropertyService {
       averageRating: avg._avg.rating ?? 0,
     };
   }
+
+  async getPropertiesByTenant(tenantId: string) {
+    const properties = await prisma.property.findMany({
+      where: { tenantId },
+      include: {
+        PropertyCategory: true,
+        CustomCategory: true,
+        Pictures: true,
+        Rooms: {
+          include: {
+            RoomAvailabilities: true,
+            PriceAdjustments: true,
+          },
+        },
+        Facilities: true,
+        _count: {
+          select: {
+            Bookings: true,
+            Reviews: true,
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    return properties;
+  }
+
+  async deleteProperty(propertyId: string, tenantId: string) {
+    // First check if the property belongs to the tenant
+    const property = await prisma.property.findFirst({
+      where: { id: propertyId, tenantId },
+    });
+
+    if (!property) {
+      throw new AppError(
+        "Property not found or you don't have permission to delete it",
+        404
+      );
+    }
+
+    // Check if there are any active bookings
+    const activeBookings = await prisma.booking.count({
+      where: {
+        propertyId,
+        checkOutDate: { gte: new Date() },
+        status: {
+          in: ["WAITING_PAYMENT", "WAITING_CONFIRMATION", "PROCESSING"],
+        },
+      },
+    });
+
+    if (activeBookings > 0) {
+      throw new AppError("Cannot delete property with active bookings", 400);
+    }
+
+    // Delete the property (cascading will handle related data)
+    await prisma.property.delete({
+      where: { id: propertyId },
+    });
+
+    return { message: "Property deleted successfully" };
+  }
 }
