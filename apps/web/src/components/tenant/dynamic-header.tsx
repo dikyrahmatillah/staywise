@@ -5,9 +5,8 @@ import { usePathname } from "next/navigation";
 const routeTitleMap: Record<string, string> = {
   "/dashboard/tenant": "Overview",
   "/dashboard/tenant/properties": "List Property",
-  "/dashboard/tenant/properties/new": "Add Property",
-  "/dashboard/tenant/properties/categories":
-    "Property Categories",
+  "/dashboard/tenant/properties/add": "Add Property",
+  "/dashboard/tenant/properties/categories": "Property Categories",
   "/dashboard/tenant/properties/rooms": "Room Management",
   "/dashboard/tenant/transactions": "Transactions",
   "/dashboard/tenant/reports/sales": "Sales Reports",

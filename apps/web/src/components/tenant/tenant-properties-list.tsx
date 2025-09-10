@@ -78,7 +78,7 @@ export function TenantPropertiesList({ tenantId }: TenantPropertiesListProps) {
             You haven&apos;t added any properties to your portfolio yet.
           </p>
           <Button asChild>
-            <Link href="/dashboard/tenant/properties/new">
+            <Link href="/dashboard/tenant/properties/add">
               Add Your First Property
             </Link>
           </Button>

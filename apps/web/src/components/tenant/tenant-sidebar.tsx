@@ -36,7 +36,7 @@ const nav: Group[] = [
     icon: Building2,
     items: [
       { label: "List Property", href: "/dashboard/tenant/properties" },
-      { label: "Add Property", href: "/dashboard/tenant/properties/new" },
+      { label: "Add Property", href: "/dashboard/tenant/properties/add" },
       {
         label: "Property Categories",
         href: "/dashboard/tenant/properties/categories",
