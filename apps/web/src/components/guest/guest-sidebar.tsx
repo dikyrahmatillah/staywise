@@ -4,14 +4,7 @@ import Link from "next/link";
 import React, { useState } from "react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import {
-  LayoutDashboard,
-  ReceiptText,
-  Star,
-  UserCog,
-  ChevronDown,
-  Heart,
-} from "lucide-react";
+import { LayoutDashboard, ReceiptText, UserCog, Heart } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 
@@ -31,27 +24,19 @@ const nav: Group[] = [
   { label: "Overview", icon: LayoutDashboard, href: "/dashboard/guest" },
 
   {
-    label: "My Orders",
+    label: "Profile & Account",
+    icon: UserCog,
+    href: "/dashboard/guest/account",
+  },
+  {
+    label: "Booking History",
     icon: ReceiptText,
-    href: "/dashboard/guest/orders",
+    href: "/dashboard/guest/bookings",
   },
   {
     label: "Favorites / Wishlist",
     icon: Heart,
     href: "/dashboard/guest/wishlist",
-  },
-  {
-    label: "Review",
-    icon: Star,
-    items: [
-      { label: "Write a Review", href: "/dashboard/guest/reviews/write" },
-      { label: "My Reviews", href: "/dashboard/guest/reviews" },
-    ],
-  },
-  {
-    label: "Profile & Account",
-    icon: UserCog,
-    href: "/dashboard/guest/account",
   },
 ];
 
@@ -97,23 +82,6 @@ function GroupItem({ group }: { group: Group }) {
 
   return (
     <li>
-      <button
-        type="button"
-        onClick={() => setOpen((s) => !s)}
-        className={cn(
-          "w-full select-none rounded-md px-3 py-2 text-left text-sm text-foreground/90",
-          "hover:bg-accent hover:text-foreground flex items-center gap-2 justify-between"
-        )}
-        aria-expanded={open}
-      >
-        <span className="flex items-center gap-2">
-          <Icon className="size-4" />
-          {group.label}
-        </span>
-        <ChevronDown
-          className={cn("size-4 transition-transform", open && "rotate-180")}
-        />
-      </button>
       <div
         className={cn(
           "overflow-hidden transition-[grid-template-rows]",
