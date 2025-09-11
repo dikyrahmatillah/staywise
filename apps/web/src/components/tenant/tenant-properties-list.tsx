@@ -18,6 +18,8 @@ import {
   ImageIcon,
 } from "lucide-react";
 import { useTenantProperties } from "@/hooks/useTenantProperties";
+import type { RoomResponse } from "@repo/schemas";
+import { Ellipsis } from "@/components/ui/ellipsis";
 
 interface TenantPropertiesListProps {
   tenantId: string;
@@ -36,21 +38,8 @@ export function TenantPropertiesList({ tenantId }: TenantPropertiesListProps) {
 
   if (loading) {
     return (
-      <div className="space-y-4">
-        {[...Array(3)].map((_, i) => (
-          <Card key={i} className="animate-pulse">
-            <CardContent className="p-6">
-              <div className="flex gap-4">
-                <div className="w-32 h-24 bg-gray-200 rounded-lg"></div>
-                <div className="flex-1 space-y-2">
-                  <div className="h-4 bg-gray-200 rounded w-1/3"></div>
-                  <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                  <div className="h-3 bg-gray-200 rounded w-1/4"></div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+      <div className="flex items-center justify-center py-12">
+        <Ellipsis className="text-muted-foreground" />
       </div>
     );
   }
@@ -93,16 +82,40 @@ export function TenantPropertiesList({ tenantId }: TenantPropertiesListProps) {
         const totalRooms = property.Rooms?.length || 0;
         const minPrice =
           property.Rooms?.length > 0
-            ? Math.min(...property.Rooms.map((room) => room.basePrice))
+            ? Math.min(
+                ...property.Rooms.map((room: RoomResponse) => room.basePrice)
+              )
             : 0;
         const maxPrice =
           property.Rooms?.length > 0
-            ? Math.max(...property.Rooms.map((room) => room.basePrice))
+            ? Math.max(
+                ...property.Rooms.map((room: RoomResponse) => room.basePrice)
+              )
             : 0;
         const priceDisplay =
           minPrice === maxPrice
             ? `$${minPrice}`
             : `$${minPrice} - $${maxPrice}`;
+        const minGuests =
+          property.Rooms?.length > 0
+            ? Math.min(
+                ...property.Rooms.map(
+                  (room: RoomResponse) => room.capacity ?? 1
+                )
+              )
+            : property.maxGuests ?? 0;
+        const maxGuests =
+          property.Rooms?.length > 0
+            ? Math.max(
+                ...property.Rooms.map(
+                  (room: RoomResponse) => room.capacity ?? 1
+                )
+              )
+            : property.maxGuests ?? 0;
+        const guestDisplay =
+          minGuests === maxGuests
+            ? `${minGuests}`
+            : `${minGuests} - ${maxGuests}`;
 
         return (
           <Card
@@ -155,7 +168,7 @@ export function TenantPropertiesList({ tenantId }: TenantPropertiesListProps) {
                       <div className="flex items-center gap-4 text-sm text-muted-foreground">
                         <div className="flex items-center gap-1">
                           <Users className="h-4 w-4" />
-                          <span>{property.maxGuests} Guests</span>
+                          <span>{guestDisplay} Guests</span>
                         </div>
                         <div className="flex items-center gap-1">
                           <Bed className="h-4 w-4" />

@@ -4,40 +4,13 @@ import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import axios from "axios";
 import { toast } from "sonner";
+import type { PropertyResponse, RoomResponse } from "@repo/schemas";
 
-interface PropertyPicture {
-  imageUrl: string;
-  note?: string;
-}
-
-interface PropertyRoom {
-  name?: string;
-  basePrice: number;
-  beds?: number;
-}
-
-interface PropertyCategory {
-  name: string;
-}
-
-interface TenantProperty {
-  id: string;
-  name: string;
-  slug: string;
-  description: string;
-  city: string;
-  country: string;
-  maxGuests: number;
-  createdAt: string;
-  Pictures: PropertyPicture[];
-  Rooms: PropertyRoom[];
-  PropertyCategory?: PropertyCategory;
-  CustomCategory?: PropertyCategory;
-  _count?: {
-    Bookings?: number;
-    Reviews?: number;
-  };
-}
+type TenantProperty = PropertyResponse & {
+  Pictures?: { imageUrl: string; note?: string }[];
+  Rooms?: RoomResponse[];
+  _count?: { Bookings?: number; Reviews?: number };
+};
 
 const createApiInstance = (accessToken?: string) => {
   const api = axios.create({
