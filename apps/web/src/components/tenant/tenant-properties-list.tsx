@@ -6,6 +6,13 @@ import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import {
   MapPin,
   Users,
   Bed,
@@ -16,6 +23,9 @@ import {
   DollarSign,
   Building2,
   ImageIcon,
+  MoreHorizontal,
+  CalendarDays,
+  Tags,
 } from "lucide-react";
 import { useTenantProperties } from "@/hooks/useTenantProperties";
 import type { RoomResponse } from "@repo/schemas";
@@ -196,19 +206,64 @@ export function TenantPropertiesList({ tenantId }: TenantPropertiesListProps) {
                           href={`/dashboard/tenant/properties/${property.id}/edit`}
                         >
                           <Edit className="h-4 w-4 mr-1" />
-                          Edit
+                          Edit Property
                         </Link>
                       </Button>
 
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleDeleteProperty(property.id)}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                      >
-                        <Trash2 className="h-4 w-4 mr-1" />
-                        Delete
-                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button size="sm" variant="outline">
+                            <MoreHorizontal className="h-4 w-4 mr-1" />
+                            More
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48">
+                          <DropdownMenuItem asChild>
+                            <Link
+                              href={`/dashboard/tenant/properties/${property.id}/rooms`}
+                              className="w-full flex items-center gap-2"
+                            >
+                              <Bed className="h-4 w-4" />
+                              Edit Rooms
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <Link
+                              href={`/dashboard/tenant/properties/${property.id}/availability`}
+                              className="w-full flex items-center gap-2"
+                            >
+                              <CalendarDays className="h-4 w-4" />
+                              Room Availability
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <Link
+                              href={`/dashboard/tenant/properties/${property.id}/category`}
+                              className="w-full flex items-center gap-2"
+                            >
+                              <Tags className="h-4 w-4" />
+                              Category
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <Link
+                              href={`/dashboard/tenant/properties/${property.id}/pricing`}
+                              className="w-full flex items-center gap-2"
+                            >
+                              <DollarSign className="h-4 w-4" />
+                              Price Adjustment
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={() => handleDeleteProperty(property.id)}
+                            className="text-red-600 focus:text-red-600 cursor-pointer flex items-center gap-2"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            Delete Property
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </div>
 
