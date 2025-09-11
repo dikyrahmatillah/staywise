@@ -1,8 +1,8 @@
 import nextAuth, { DefaultSession } from "next-auth";
-import { PrismaAdapter } from "@auth/prisma-adapter";
+// import { PrismaAdapter } from "@auth/prisma-adapter";
 import { jwtDecode } from "jwt-decode";
 import { api } from "@/lib/axios";
-import { prisma } from "@repo/database";
+// import { prisma } from "@repo/database";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 
@@ -31,7 +31,8 @@ declare module "next-auth" {
 }
 
 export const { handlers, signIn, signOut, auth } = nextAuth({
-  adapter: PrismaAdapter(prisma),
+  // Comment out PrismaAdapter since we're using JWT sessions
+  // adapter: PrismaAdapter(prisma),
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -69,7 +70,7 @@ export const { handlers, signIn, signOut, auth } = nextAuth({
         try {
           const resp = await api.get(`/auth/user`, {
             params: { email: token.email },
-          }); 
+          });
           const dbUser = resp?.data?.data;
           if (dbUser) {
             token.id = dbUser.id;

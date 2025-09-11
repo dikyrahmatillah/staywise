@@ -41,7 +41,6 @@ const nav: Group[] = [
         label: "Property Categories",
         href: "/dashboard/tenant/properties/categories",
       },
-      { label: "Room Management", href: "/dashboard/tenant/properties/rooms" },
     ],
   },
 
