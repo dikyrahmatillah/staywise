@@ -130,7 +130,7 @@ export function UserMenu() {
         {isTenant && (
           <DropdownMenuItem asChild>
             <Link
-              href="/dashboard/properties"
+              href="/dashboard/tenant/properties"
               className="w-full flex items-center gap-2"
             >
               <HiOutlineViewGrid className="h-4 w-4" /> My Listings

@@ -1,5 +1,4 @@
 import { auth } from "@/auth";
-import { redirect } from "next/navigation";
 import { TenantPropertiesList } from "@/components/tenant/tenant-properties-list";
 import { PropertyStats } from "@/components/tenant/property-stats";
 import { Button } from "@/components/ui/button";
@@ -8,10 +7,6 @@ import Link from "next/link";
 
 export default async function TenantPropertiesPage() {
   const session = await auth();
-
-  if (!session?.user || session.user.role !== "TENANT") {
-    redirect("/auth/signin");
-  }
 
   return (
     <div className="space-y-6">
@@ -30,9 +25,9 @@ export default async function TenantPropertiesPage() {
         </Button>
       </div>
 
-      <PropertyStats tenantId={session.user.id} />
+      <PropertyStats tenantId={session!.user.id} />
 
-      <TenantPropertiesList tenantId={session.user.id} />
+      <TenantPropertiesList tenantId={session!.user.id} />
     </div>
   );
 }

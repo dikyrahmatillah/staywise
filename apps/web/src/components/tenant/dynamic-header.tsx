@@ -7,7 +7,6 @@ const routeTitleMap: Record<string, string> = {
   "/dashboard/tenant/properties": "List Property",
   "/dashboard/tenant/properties/add": "Add Property",
   "/dashboard/tenant/properties/categories": "Property Categories",
-  "/dashboard/tenant/properties/rooms": "Room Management",
   "/dashboard/tenant/transactions": "Transactions",
   "/dashboard/tenant/reports/sales": "Sales Reports",
   "/dashboard/tenant/reports/properties": "Property Reports",

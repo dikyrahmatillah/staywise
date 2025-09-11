@@ -83,6 +83,7 @@ export class AuthService {
       name: user.firstName,
       email: user.email,
       role: user.role,
+      expiresIn: "7d",
     });
 
     return { accessToken: token };
