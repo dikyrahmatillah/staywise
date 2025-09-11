@@ -6,6 +6,13 @@ import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import {
   MapPin,
   Users,
   Bed,
@@ -16,8 +23,13 @@ import {
   DollarSign,
   Building2,
   ImageIcon,
+  MoreHorizontal,
+  CalendarDays,
+  Tags,
 } from "lucide-react";
 import { useTenantProperties } from "@/hooks/useTenantProperties";
+import type { RoomResponse } from "@repo/schemas";
+import { Ellipsis } from "@/components/ui/ellipsis";
 
 interface TenantPropertiesListProps {
   tenantId: string;
@@ -36,21 +48,8 @@ export function TenantPropertiesList({ tenantId }: TenantPropertiesListProps) {
 
   if (loading) {
     return (
-      <div className="space-y-4">
-        {[...Array(3)].map((_, i) => (
-          <Card key={i} className="animate-pulse">
-            <CardContent className="p-6">
-              <div className="flex gap-4">
-                <div className="w-32 h-24 bg-gray-200 rounded-lg"></div>
-                <div className="flex-1 space-y-2">
-                  <div className="h-4 bg-gray-200 rounded w-1/3"></div>
-                  <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                  <div className="h-3 bg-gray-200 rounded w-1/4"></div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+      <div className="flex items-center justify-center py-12">
+        <Ellipsis className="text-muted-foreground" />
       </div>
     );
   }
@@ -78,7 +77,7 @@ export function TenantPropertiesList({ tenantId }: TenantPropertiesListProps) {
             You haven&apos;t added any properties to your portfolio yet.
           </p>
           <Button asChild>
-            <Link href="/dashboard/tenant/properties/new">
+            <Link href="/dashboard/tenant/properties/add">
               Add Your First Property
             </Link>
           </Button>
@@ -93,16 +92,40 @@ export function TenantPropertiesList({ tenantId }: TenantPropertiesListProps) {
         const totalRooms = property.Rooms?.length || 0;
         const minPrice =
           property.Rooms?.length > 0
-            ? Math.min(...property.Rooms.map((room) => room.basePrice))
+            ? Math.min(
+                ...property.Rooms.map((room: RoomResponse) => room.basePrice)
+              )
             : 0;
         const maxPrice =
           property.Rooms?.length > 0
-            ? Math.max(...property.Rooms.map((room) => room.basePrice))
+            ? Math.max(
+                ...property.Rooms.map((room: RoomResponse) => room.basePrice)
+              )
             : 0;
         const priceDisplay =
           minPrice === maxPrice
             ? `$${minPrice}`
             : `$${minPrice} - $${maxPrice}`;
+        const minGuests =
+          property.Rooms?.length > 0
+            ? Math.min(
+                ...property.Rooms.map(
+                  (room: RoomResponse) => room.capacity ?? 1
+                )
+              )
+            : property.maxGuests ?? 0;
+        const maxGuests =
+          property.Rooms?.length > 0
+            ? Math.max(
+                ...property.Rooms.map(
+                  (room: RoomResponse) => room.capacity ?? 1
+                )
+              )
+            : property.maxGuests ?? 0;
+        const guestDisplay =
+          minGuests === maxGuests
+            ? `${minGuests}`
+            : `${minGuests} - ${maxGuests}`;
 
         return (
           <Card
@@ -155,7 +178,7 @@ export function TenantPropertiesList({ tenantId }: TenantPropertiesListProps) {
                       <div className="flex items-center gap-4 text-sm text-muted-foreground">
                         <div className="flex items-center gap-1">
                           <Users className="h-4 w-4" />
-                          <span>{property.maxGuests} Guests</span>
+                          <span>{guestDisplay} Guests</span>
                         </div>
                         <div className="flex items-center gap-1">
                           <Bed className="h-4 w-4" />
@@ -183,19 +206,64 @@ export function TenantPropertiesList({ tenantId }: TenantPropertiesListProps) {
                           href={`/dashboard/tenant/properties/${property.id}/edit`}
                         >
                           <Edit className="h-4 w-4 mr-1" />
-                          Edit
+                          Edit Property
                         </Link>
                       </Button>
 
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleDeleteProperty(property.id)}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                      >
-                        <Trash2 className="h-4 w-4 mr-1" />
-                        Delete
-                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button size="sm" variant="outline">
+                            <MoreHorizontal className="h-4 w-4 mr-1" />
+                            More
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48">
+                          <DropdownMenuItem asChild>
+                            <Link
+                              href={`/dashboard/tenant/properties/${property.id}/rooms`}
+                              className="w-full flex items-center gap-2"
+                            >
+                              <Bed className="h-4 w-4" />
+                              Edit Rooms
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <Link
+                              href={`/dashboard/tenant/properties/${property.id}/availability`}
+                              className="w-full flex items-center gap-2"
+                            >
+                              <CalendarDays className="h-4 w-4" />
+                              Room Availability
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <Link
+                              href={`/dashboard/tenant/properties/${property.id}/category`}
+                              className="w-full flex items-center gap-2"
+                            >
+                              <Tags className="h-4 w-4" />
+                              Category
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <Link
+                              href={`/dashboard/tenant/properties/${property.id}/pricing`}
+                              className="w-full flex items-center gap-2"
+                            >
+                              <DollarSign className="h-4 w-4" />
+                              Price Adjustment
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={() => handleDeleteProperty(property.id)}
+                            className="text-red-600 focus:text-red-600 cursor-pointer flex items-center gap-2"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            Delete Property
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </div>
 

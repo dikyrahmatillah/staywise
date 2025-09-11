@@ -15,7 +15,6 @@ export default async function TenantPropertiesPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header Section */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="space-y-1">
           <h1 className="text-3xl font-bold tracking-tight">My Properties</h1>
@@ -24,17 +23,15 @@ export default async function TenantPropertiesPage() {
           </p>
         </div>
         <Button asChild>
-          <Link href="/dashboard/tenant/properties/new">
+          <Link href="/dashboard/tenant/properties/add">
             <Plus className="h-4 w-4 mr-2" />
             Add New Property
           </Link>
         </Button>
       </div>
 
-      {/* Stats Cards */}
       <PropertyStats tenantId={session.user.id} />
 
-      {/* Properties List */}
       <TenantPropertiesList tenantId={session.user.id} />
     </div>
   );
