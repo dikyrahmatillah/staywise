@@ -1,3 +1,5 @@
-export default function ProfileAccount() {
-  return <div></div>;
+import { AccountPageContent } from "@/components/profile/account-page-content";
+
+export default async function TenantAccountPage() {
+  return <AccountPageContent />;
 }

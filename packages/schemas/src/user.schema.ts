@@ -9,7 +9,7 @@ export const CommonProfileSchema = z.object({
     .min(8, "Invalid phone number")
     .max(20, "Invalid phone number")
     .optional(),
-  avatarUrl: z.url("Invalid avatar URL").optional(),
+  image: z.url("Invalid avatar").optional(),
 });
 
 export const RegistrationStartSchema = z.object({

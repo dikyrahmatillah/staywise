@@ -7,7 +7,7 @@ const router = Router();
 router.post("/signup", authController.startRegistration);
 router.post(
   "/signup/complete",
-  upload.single("avatarUrl"),
+  upload.single("image"),
   authController.completeRegistration
 );
 router.post("/signin", authController.userLogin);
@@ -18,7 +18,7 @@ router.get("/user", authController.getUserByEmail);
 router.put(
   "/profile",
   verifyTokenMiddleware,
-  upload.single("avatarUrl"),
+  upload.single("image"),
   authController.editProfile
 );
 router.put(

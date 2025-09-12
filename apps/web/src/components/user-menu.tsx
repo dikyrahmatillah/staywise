@@ -88,19 +88,24 @@ export function UserMenu() {
     user.name?.charAt(0)?.toUpperCase() ||
     user.email?.charAt(0)?.toUpperCase() ||
     "U";
-  const userImage = (user as { image?: string } | undefined)?.image;
+  // Prefer `user.image` (NextAuth), then `user.avatarUrl` (app profile), fallback to initials
+  const userImage =
+    (user as { image?: string; avatarUrl?: string } | undefined)?.image ||
+    (user as { image?: string; avatarUrl?: string } | undefined)?.avatarUrl ||
+    undefined;
+
+  console.log("userImage", user);
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
           className={cn(
-            "flex items-center gap-2 rounded-full border border-gray-200 bg-white pl-2 pr-3 py-1 shadow-sm hover:shadow-md transition-shadow",
+            "flex items-center gap-2 rounded-full border border-gray-200 bg-white pl-2 pr-3 py-1 shadow-sm hover:shadow-md transition-shadow cursor-pointer",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
           )}
         >
           <Avatar className="size-8">
-            {/* Optionally supply user image later */}
             <AvatarImage
               src={userImage || undefined}
               alt={user.name || "User"}
