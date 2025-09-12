@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
-import { redirect } from "next/navigation";
 import { CategoryManagement } from "@/components/tenant/category-management";
+import { redirect } from "next/navigation";
 
 interface PageProps {
   params: {
