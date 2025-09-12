@@ -5,7 +5,12 @@ import { verifyRoleMiddleware } from "../middlewares/verifyRole.middleware.js";
 
 const router = Router();
 
-router.get("/custom", categoryController.getCustomCategories);
+router.get(
+  "/custom",
+  verifyTokenMiddleware,
+  verifyRoleMiddleware,
+  categoryController.getCustomCategories
+);
 router.post(
   "/custom",
   verifyTokenMiddleware,

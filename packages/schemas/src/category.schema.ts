@@ -6,8 +6,6 @@ export const baseCategorySchema = z.object({
     .string()
     .min(1, "Category name is required")
     .max(100, "Category name must be less than 100 characters"),
-  createdAt: z.date(),
-  updatedAt: z.date(),
 });
 export const customCategoryResponseSchema = baseCategorySchema.extend({
   tenantId: z.uuid(),

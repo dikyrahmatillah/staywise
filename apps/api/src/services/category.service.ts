@@ -6,8 +6,6 @@ import type {
   CreateCustomCategoryInput,
   UpdateCustomCategoryInput,
   GetCategoriesQuery,
-  CustomCategoryListResponse,
-  PropertyCategoryListResponse,
 } from "@repo/schemas";
 
 export async function resolveCategoryId(
