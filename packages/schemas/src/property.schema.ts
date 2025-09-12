@@ -45,7 +45,7 @@ export const getPropertiesQuerySchema = z.object({
   sortOrder: z.union([z.literal("asc"), z.literal("desc")]).optional(),
 });
 
-export const roomSchema = z.object({
+export const roomSummarySchema = z.object({
   name: z.string().optional(),
   basePrice: z.number(),
   beds: z.number().optional(),
@@ -65,7 +65,7 @@ export const propertyResponseSchema = propertySchema
     id: z.string(),
     PropertyCategory: propertyCategorySchema.optional().nullable(),
     CustomCategory: customCategorySchema.optional().nullable(),
-    Rooms: z.array(roomSchema),
+    Rooms: z.array(roomSummarySchema),
   });
 
 export type GetPropertiesParams = {
@@ -129,6 +129,6 @@ export type CreatePropertyPictureInput = z.infer<
 >;
 export type Property = z.infer<typeof createPropertyInputSchema>;
 export type GetPropertiesQuery = z.infer<typeof getPropertiesQuerySchema>;
-export type RoomResponse = z.infer<typeof roomSchema>;
+export type RoomResponse = z.infer<typeof roomSummarySchema>;
 export type PropertyCategoryResponse = z.infer<typeof propertyCategorySchema>;
 export type PropertyResponse = z.infer<typeof propertyResponseSchema>;

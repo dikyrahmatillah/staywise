@@ -41,7 +41,6 @@ const nav: Group[] = [
         label: "Property Categories",
         href: "/dashboard/tenant/properties/categories",
       },
-      { label: "Room Management", href: "/dashboard/tenant/properties/rooms" },
     ],
   },
 
@@ -116,7 +115,7 @@ function GroupItem({ group }: { group: Group }) {
         onClick={() => setOpen((s) => !s)}
         className={cn(
           "w-full select-none rounded-md px-3 py-2 text-left text-sm text-foreground/90",
-          "hover:bg-accent hover:text-foreground flex items-center gap-2 justify-between"
+          "hover:bg-accent hover:text-foreground flex items-center gap-2 justify-between cursor-pointer"
         )}
         aria-expanded={open}
       >

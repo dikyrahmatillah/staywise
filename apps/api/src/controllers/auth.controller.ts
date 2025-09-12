@@ -44,7 +44,7 @@ export class AuthController {
 
       const data = CompleteRegistrationSchema.parse({
         ...request.body,
-        avatarUrl: profilePicture,
+        image: profilePicture,
       });
 
       await this.authService.completeRegistration(data);
@@ -148,13 +148,17 @@ export class AuthController {
 
       const data = UpdateUserSchema.parse({
         ...request.body,
-        avatarUrl: profilePicture,
+        image: profilePicture,
       });
 
-      await this.authService.updateProfile(request.user.id, data);
+      const updatedUser = await this.authService.updateProfile(
+        request.user.id,
+        data
+      );
 
       response.status(200).json({
         message: "Profile updated successfully",
+        user: updatedUser,
       });
     } catch (error) {
       next(error);

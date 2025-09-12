@@ -35,7 +35,6 @@ export function Header() {
 
       if (isAtTop !== nearTop) setIsAtTop(nearTop);
 
-      // Only auto-open/close on homepage and properties page
       const shouldAutoOpen = pathname === "/" || pathname === "/properties";
 
       if (scrollTop >= closeThreshold) {
