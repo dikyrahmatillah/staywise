@@ -30,6 +30,6 @@ export function buildCompleteProfileFormData(
   if (data.lastName?.trim()) formData.append("lastName", data.lastName.trim());
   if (data.phone?.trim()) formData.append("phone", data.phone.trim());
   formData.append("password", data.password);
-  if (avatarFile) formData.append("avatarUrl", avatarFile);
+  if (avatarFile) formData.append("image", avatarFile);
   return formData;
 }

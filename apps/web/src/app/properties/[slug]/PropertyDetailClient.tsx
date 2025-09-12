@@ -42,7 +42,7 @@ type DetailResponse = {
     User: {
       firstName: string | null;
       lastName: string | null;
-      avatarUrl?: string | null;
+      image?: string | null;
     };
   }[];
   // summary fields added by the API service
@@ -76,7 +76,7 @@ export function PropertyDetailClient({ slug }: { slug: string }) {
     author:
       [rv.User.firstName, rv.User.lastName].filter(Boolean).join(" ") ||
       "Anonymous",
-    avatar: rv.User.avatarUrl || "",
+    avatar: rv.User.image || "",
     rating: rv.rating,
     date: rv.createdAt,
     comment: rv.comment,

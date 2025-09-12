@@ -28,7 +28,7 @@ interface ProfileEditFormProps {
     firstName: string;
     lastName?: string | null;
     phone?: string | null;
-    avatarUrl?: string | null;
+    image?: string | null;
   };
   onProfileUpdated?: () => void;
 }
@@ -40,7 +40,7 @@ export function ProfileEditForm({
   const { data: session } = useSession();
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(
-    user.avatarUrl || null
+    user.image || null
   );
   const [isUploading, setIsUploading] = useState(false);
 
@@ -76,7 +76,7 @@ export function ProfileEditForm({
       const file = e.target.files?.[0];
       if (!file) {
         setAvatarFile(null);
-        setAvatarPreview(user.avatarUrl || null);
+        setAvatarPreview(user.image || null);
         return;
       }
 
@@ -85,7 +85,7 @@ export function ProfileEditForm({
         toast.error(error);
         e.target.value = "";
         setAvatarFile(null);
-        setAvatarPreview(user.avatarUrl || null);
+        setAvatarPreview(user.image || null);
         return;
       }
 
@@ -97,7 +97,7 @@ export function ProfileEditForm({
       };
       reader.readAsDataURL(file);
     },
-    [user.avatarUrl]
+    [user.image]
   );
 
   const onSubmit = useCallback(
@@ -118,7 +118,7 @@ export function ProfileEditForm({
         if (data.email) formData.append("email", data.email);
 
         if (avatarFile) {
-          formData.append("avatarUrl", avatarFile);
+          formData.append("image", avatarFile);
         }
 
         await api.put("/auth/profile", formData, {
@@ -206,7 +206,6 @@ export function ProfileEditForm({
 
             <Separator />
 
-            {/* Form Fields */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="firstName">First Name *</Label>

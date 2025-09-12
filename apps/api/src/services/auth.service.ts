@@ -35,7 +35,7 @@ export class AuthService {
   }
 
   async completeRegistration(input: CompleteRegistrationInput) {
-    const { token, firstName, lastName, phone, avatarUrl, password } = input;
+    const { token, firstName, lastName, phone, image, password } = input;
     const ver = await this.tokenService.verifyEmailToken(
       token,
       "EMAIL_VERIFICATION"
@@ -54,7 +54,7 @@ export class AuthService {
           firstName,
           lastName,
           phone,
-          image: avatarUrl,
+          image,
           password: hashedPassword,
           emailVerified: new Date(),
         },

@@ -10,7 +10,7 @@ export interface UserProfile {
   firstName: string;
   lastName?: string | null;
   phone?: string | null;
-  avatarUrl?: string | null;
+  image?: string | null;
   role: string;
 }
 

@@ -44,7 +44,7 @@ export class AuthController {
 
       const data = CompleteRegistrationSchema.parse({
         ...request.body,
-        avatarUrl: profilePicture,
+        image: profilePicture,
       });
 
       await this.authService.completeRegistration(data);
@@ -148,7 +148,7 @@ export class AuthController {
 
       const data = UpdateUserSchema.parse({
         ...request.body,
-        avatarUrl: profilePicture,
+        image: profilePicture,
       });
 
       const updatedUser = await this.authService.updateProfile(
