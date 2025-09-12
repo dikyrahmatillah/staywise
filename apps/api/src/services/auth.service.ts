@@ -82,6 +82,7 @@ export class AuthService {
       id: user.id,
       name: user.firstName,
       email: user.email,
+      image: user.image,
       role: user.role,
       expiresIn: "7d",
     });

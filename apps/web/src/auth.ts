@@ -8,6 +8,7 @@ type DecodeToken = {
   id: string;
   name: string;
   email: string;
+  image?: string;
   role: string;
   accessToken?: string;
 };
@@ -18,6 +19,7 @@ declare module "next-auth" {
       id: string;
       name: string;
       email: string;
+      image?: string;
       role: string;
       accessToken?: string;
     } & DefaultSession["user"];
@@ -74,6 +76,7 @@ export const { handlers, signIn, signOut, auth } = nextAuth({
             token.id = dbUser.id;
             token.name = dbUser.name;
             token.email = dbUser.email;
+            token.image = dbUser.image;
             token.role = dbUser.role;
           }
         } catch (error) {
@@ -86,6 +89,7 @@ export const { handlers, signIn, signOut, auth } = nextAuth({
           token.id = decoded.id;
           token.name = decoded.name;
           token.email = decoded.email;
+          token.image = decoded.image;
           token.role = decoded.role;
         } catch (error) {
           console.error("Error decoding token:", error);
@@ -99,6 +103,7 @@ export const { handlers, signIn, signOut, auth } = nextAuth({
         session.user.id = user.id;
         session.user.name = user.name;
         session.user.email = user.email;
+        session.user.image = user.image;
         session.user.role = user.role;
         session.user.accessToken = user.accessToken;
       }
