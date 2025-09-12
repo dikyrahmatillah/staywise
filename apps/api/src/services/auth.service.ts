@@ -78,14 +78,16 @@ export class AuthService {
     const isValidPassword = await bcrypt.compare(data.password, user.password);
     if (!isValidPassword) throw new AppError("Invalid email or password", 401);
 
-    const token = generateToken({
-      id: user.id,
-      name: user.firstName,
-      email: user.email,
-      image: user.image,
-      role: user.role,
-      expiresIn: "7d",
-    });
+    const token = generateToken(
+      {
+        id: user.id,
+        name: user.firstName,
+        email: user.email,
+        image: user.image,
+        role: user.role,
+      },
+      "7d"
+    );
 
     return { accessToken: token };
   }
