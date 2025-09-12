@@ -1,8 +1,6 @@
 import nextAuth, { DefaultSession } from "next-auth";
-// import { PrismaAdapter } from "@auth/prisma-adapter";
 import { jwtDecode } from "jwt-decode";
 import { api } from "@/lib/axios";
-// import { prisma } from "@repo/database";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 

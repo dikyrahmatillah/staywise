@@ -37,7 +37,7 @@ export default function TenantLayout({ children }: TenantLayoutProps) {
             <DynamicHeader />
           </div>
         </header>
-        <section className="flex-1 p-4">{children}</section>
+        <section className="flex-1">{children}</section>
       </main>
     </div>
   );

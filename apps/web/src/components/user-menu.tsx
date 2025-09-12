@@ -95,12 +95,11 @@ export function UserMenu() {
       <DropdownMenuTrigger asChild>
         <button
           className={cn(
-            "flex items-center gap-2 rounded-full border border-gray-200 bg-white pl-2 pr-3 py-1 shadow-sm hover:shadow-md transition-shadow",
+            "flex items-center gap-2 rounded-full border border-gray-200 bg-white pl-2 pr-3 py-1 shadow-sm hover:shadow-md transition-shadow cursor-pointer",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
           )}
         >
           <Avatar className="size-8">
-            {/* Optionally supply user image later */}
             <AvatarImage
               src={userImage || undefined}
               alt={user.name || "User"}

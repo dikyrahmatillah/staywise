@@ -151,10 +151,14 @@ export class AuthController {
         avatarUrl: profilePicture,
       });
 
-      await this.authService.updateProfile(request.user.id, data);
+      const updatedUser = await this.authService.updateProfile(
+        request.user.id,
+        data
+      );
 
       response.status(200).json({
         message: "Profile updated successfully",
+        user: updatedUser,
       });
     } catch (error) {
       next(error);
