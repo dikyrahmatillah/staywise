@@ -13,7 +13,7 @@ export const createRoomSchema = z.object({
   capacity: z.number().int().min(1).default(1),
   bedType: z.enum(["KING", "QUEEN", "SINGLE", "TWIN"]).optional(),
   bedCount: z.number().int().min(1).default(1),
-  imageUrl: z.string().url().optional(),
+  imageUrl: z.url().optional(),
 });
 
 export const createRoomAvailabilitySchema = z.object({
@@ -35,7 +35,14 @@ export const createPriceAdjustmentSchema = z.object({
   dates: z.array(z.string()).optional(),
 });
 
+export const updateRoomSchema = createRoomSchema.partial();
+
+export const deleteRoomSchema = z.object({
+  roomId: z.uuid(),
+});
+
 export type CreateRoomInput = z.infer<typeof createRoomSchema>;
+export type UpdateRoomInput = z.infer<typeof updateRoomSchema>;
 export type CreateRoomAvailabilityInput = z.infer<
   typeof createRoomAvailabilitySchema
 >;
