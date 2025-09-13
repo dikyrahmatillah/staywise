@@ -88,13 +88,10 @@ export function UserMenu() {
     user.name?.charAt(0)?.toUpperCase() ||
     user.email?.charAt(0)?.toUpperCase() ||
     "U";
-  // Prefer `user.image` (NextAuth), then `user.avatarUrl` (app profile), fallback to initials
   const userImage =
     (user as { image?: string; avatarUrl?: string } | undefined)?.image ||
     (user as { image?: string; avatarUrl?: string } | undefined)?.avatarUrl ||
     undefined;
-
-  console.log("userImage", user);
 
   return (
     <DropdownMenu>
