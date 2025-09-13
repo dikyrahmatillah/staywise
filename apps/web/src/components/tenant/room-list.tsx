@@ -31,8 +31,10 @@ import {
   MoreHorizontal,
   ImageIcon,
   Calendar,
+  CalendarDays,
 } from "lucide-react";
 import type { Room } from "@/types/room";
+import { RoomAvailabilityCalendar } from "./room-availability-calendar";
 
 interface RoomListProps {
   rooms: Room[];
@@ -43,6 +45,10 @@ interface RoomListProps {
 
 export function RoomList({ rooms, loading, onEdit, onDelete }: RoomListProps) {
   const [deleteRoomId, setDeleteRoomId] = useState<string | null>(null);
+  const [availabilityRoomId, setAvailabilityRoomId] = useState<string | null>(
+    null
+  );
+  const [availabilityRoomName, setAvailabilityRoomName] = useState<string>("");
 
   if (loading) {
     return (
@@ -109,6 +115,16 @@ export function RoomList({ rooms, loading, onEdit, onDelete }: RoomListProps) {
     }
   };
 
+  const handleManageAvailability = (room: Room) => {
+    setAvailabilityRoomId(room.id);
+    setAvailabilityRoomName(room.name);
+  };
+
+  const handleCloseAvailability = () => {
+    setAvailabilityRoomId(null);
+    setAvailabilityRoomName("");
+  };
+
   return (
     <>
       <div className="space-y-4">
@@ -148,6 +164,12 @@ export function RoomList({ rooms, loading, onEdit, onDelete }: RoomListProps) {
                     <div className="space-y-2 flex-1">
                       <CardTitle className="text-xl">{room.name}</CardTitle>
 
+                      {room.description && (
+                        <p className="text-sm text-muted-foreground line-clamp-3">
+                          {room.description}
+                        </p>
+                      )}
+
                       <div className="flex items-center gap-2">
                         <DollarSign className="h-4 w-4 text-green-600" />
                         <span className="font-semibold text-green-600 text-lg">
@@ -185,6 +207,15 @@ export function RoomList({ rooms, loading, onEdit, onDelete }: RoomListProps) {
                         Edit Room
                       </Button>
 
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleManageAvailability(room)}
+                      >
+                        <CalendarDays className="h-4 w-4 mr-1" />
+                        Block Dates
+                      </Button>
+
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button size="sm" variant="outline">
@@ -196,6 +227,12 @@ export function RoomList({ rooms, loading, onEdit, onDelete }: RoomListProps) {
                           <DropdownMenuItem onClick={() => onEdit(room)}>
                             <Edit className="h-4 w-4 mr-2" />
                             Edit Room Details
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleManageAvailability(room)}
+                          >
+                            <CalendarDays className="h-4 w-4 mr-2" />
+                            Block Dates
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
@@ -262,6 +299,15 @@ export function RoomList({ rooms, loading, onEdit, onDelete }: RoomListProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {availabilityRoomId && (
+        <RoomAvailabilityCalendar
+          roomId={availabilityRoomId}
+          roomName={availabilityRoomName}
+          open={!!availabilityRoomId}
+          onOpenChange={handleCloseAvailability}
+        />
+      )}
     </>
   );
 }

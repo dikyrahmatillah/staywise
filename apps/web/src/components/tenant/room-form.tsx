@@ -61,6 +61,7 @@ export function RoomForm({
     bedType: "" as BedType | "",
     bedCount: 1,
     imageUrl: "",
+    description: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -73,6 +74,7 @@ export function RoomForm({
         bedType: room.bedType || "",
         bedCount: room.bedCount,
         imageUrl: room.imageUrl || "",
+        description: room.description || "",
       });
     } else {
       setFormData({
@@ -82,12 +84,16 @@ export function RoomForm({
         bedType: "",
         bedCount: 1,
         imageUrl: "",
+        description: "",
       });
     }
   }, [room, open]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const target = e.target as HTMLInputElement | HTMLTextAreaElement;
+    const { name, value } = target;
     setFormData((prev) => ({
       ...prev,
       [name]:
@@ -110,6 +116,7 @@ export function RoomForm({
         ...formData,
         bedType: formData.bedType || undefined,
         imageUrl: formData.imageUrl || undefined,
+        description: formData.description || undefined,
       });
       setErrors({});
       return validatedData;
@@ -146,6 +153,7 @@ export function RoomForm({
         bedType: "",
         bedCount: 1,
         imageUrl: "",
+        description: "",
       });
       setErrors({});
       onOpenChange(false);
@@ -177,6 +185,22 @@ export function RoomForm({
             />
             {errors.name && (
               <p className="text-sm text-red-500">{errors.name}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="description">Description (optional)</Label>
+            <textarea
+              id="description"
+              name="description"
+              placeholder="A short description of the room"
+              className="w-full rounded-md border bg-transparent px-3 py-2 text-sm shadow-sm focus:outline-none"
+              value={formData.description}
+              onChange={handleInputChange}
+              disabled={isSubmitting}
+            />
+            {errors.description && (
+              <p className="text-sm text-red-500">{errors.description}</p>
             )}
           </div>
 
