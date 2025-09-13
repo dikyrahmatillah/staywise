@@ -203,16 +203,17 @@ model PropertyFacility {
 }
 
 model Room {
-    id         String   @id @default(uuid())
-    propertyId String
-    name       String   @db.VarChar(150)
-    basePrice  Decimal  @db.Decimal(12, 2)
-    capacity   Int      @default(1)
-    bedType    BedType?
-    bedCount   Int      @default(1)
-    imageUrl   String?  @db.Text
-    createdAt  DateTime @default(now())
-    updatedAt  DateTime @updatedAt
+    id          String   @id @default(uuid())
+    propertyId  String
+    name        String   @db.VarChar(150)
+    description String?  @db.Text
+    basePrice   Decimal  @db.Decimal(12, 2)
+    capacity    Int      @default(1)
+    bedType     BedType?
+    bedCount    Int      @default(1)
+    imageUrl    String?  @db.Text
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
 
     Property           Property           @relation(fields: [propertyId], references: [id], onDelete: Cascade)
     RoomAvailabilities RoomAvailability[]

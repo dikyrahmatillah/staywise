@@ -1,5 +1,11 @@
 import { NextFunction, Request, Response } from "express";
-import { createRoomSchema, CreateRoomInput } from "@repo/schemas";
+import {
+  createRoomSchema,
+  CreateRoomInput,
+  blockRoomDatesSchema,
+  unblockRoomDatesSchema,
+  getRoomAvailabilitySchema,
+} from "@repo/schemas";
 import { roomService } from "@/services/room.service.js";
 
 export class RoomController {
@@ -88,6 +94,63 @@ export class RoomController {
 
       response.status(200).json({
         message: "Room deleted successfully",
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  getRoomAvailability = async (
+    request: Request,
+    response: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const { roomId } = request.params;
+      const query = getRoomAvailabilitySchema.parse(request.query);
+      const availability = await roomService.getRoomAvailability(roomId, query);
+
+      response.status(200).json({
+        message: "Room availability retrieved successfully",
+        data: availability,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  blockRoomDates = async (
+    request: Request,
+    response: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const { roomId } = request.params;
+      const data = blockRoomDatesSchema.parse(request.body);
+      const result = await roomService.blockRoomDates(roomId, data);
+
+      response.status(200).json({
+        message: "Room dates blocked successfully",
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  unblockRoomDates = async (
+    request: Request,
+    response: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const { roomId } = request.params;
+      const data = unblockRoomDatesSchema.parse(request.body);
+      const result = await roomService.unblockRoomDates(roomId, data);
+
+      response.status(200).json({
+        message: "Room dates unblocked successfully",
+        data: result,
       });
     } catch (error) {
       next(error);
