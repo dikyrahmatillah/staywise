@@ -1,4 +1,24 @@
 export type BedType = "KING" | "QUEEN" | "SINGLE" | "TWIN";
+export type PriceAdjustType = "PERCENTAGE" | "NOMINAL";
+
+export interface PriceAdjustmentDate {
+  id: string;
+  priceAdjustmentId: string;
+  date: string;
+}
+
+export interface PriceAdjustment {
+  id: string;
+  roomId: string;
+  title?: string;
+  startDate: string;
+  endDate: string;
+  adjustType: PriceAdjustType;
+  adjustValue: number;
+  applyAllDates: boolean;
+  createdAt: string;
+  Dates?: PriceAdjustmentDate[];
+}
 
 export interface RoomAvailability {
   id: string;
@@ -20,6 +40,7 @@ export interface Room {
   createdAt: string;
   updatedAt: string;
   RoomAvailabilities?: RoomAvailability[];
+  PriceAdjustments?: PriceAdjustment[];
 }
 
 export interface RoomApiResponse {
@@ -43,4 +64,24 @@ export interface BlockDatesRequest {
 
 export interface UnblockDatesRequest {
   dates: string[];
+}
+
+export interface CreatePriceAdjustmentRequest {
+  title?: string;
+  startDate: string;
+  endDate: string;
+  adjustType: PriceAdjustType;
+  adjustValue: number;
+  applyAllDates?: boolean;
+  dates?: string[];
+}
+
+export interface PriceAdjustmentApiResponse {
+  message: string;
+  data: PriceAdjustment;
+}
+
+export interface PriceAdjustmentsApiResponse {
+  message: string;
+  data: PriceAdjustment[];
 }
