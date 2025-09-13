@@ -17,8 +17,5 @@ export default async function RoomManagementPage({
     redirect("/auth/signin");
   }
 
-  // TODO: Use property id to fetch and manage specific property rooms
-  console.log("Property ID:", id);
-
   return <RoomManagement />;
 }
