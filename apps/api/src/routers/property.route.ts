@@ -5,7 +5,12 @@ import { verifyRoleMiddleware } from "../middlewares/verifyRole.middleware.js";
 
 const router = Router();
 
-router.post("/", propertyController.createProperty);
+router.post(
+  "/",
+  verifyTokenMiddleware,
+  verifyRoleMiddleware,
+  propertyController.createProperty
+);
 router.get("/", propertyController.getProperties);
 router.get(
   "/tenant/:tenantId",
