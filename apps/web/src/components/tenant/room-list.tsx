@@ -148,6 +148,12 @@ export function RoomList({ rooms, loading, onEdit, onDelete }: RoomListProps) {
                     <div className="space-y-2 flex-1">
                       <CardTitle className="text-xl">{room.name}</CardTitle>
 
+                      {room.description && (
+                        <p className="text-sm text-muted-foreground line-clamp-3">
+                          {room.description}
+                        </p>
+                      )}
+
                       <div className="flex items-center gap-2">
                         <DollarSign className="h-4 w-4 text-green-600" />
                         <span className="font-semibold text-green-600 text-lg">

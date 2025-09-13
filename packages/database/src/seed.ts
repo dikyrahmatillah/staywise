@@ -99,7 +99,7 @@ async function seed() {
     const isTenant = i < tenantCount;
     const user = await prisma.user.create({
       data: {
-  role: isTenant ? ("TENANT" as any) : ("GUEST" as any),
+        role: isTenant ? ("TENANT" as any) : ("GUEST" as any),
         firstName: faker.person.firstName(),
         lastName: faker.person.lastName(),
         name: faker.person.fullName(),
@@ -255,6 +255,7 @@ async function seed() {
             name: `${faker.word.adjective({
               length: { min: 4, max: 8 },
             })} Room ${r + 1}`,
+            description: faker.lorem.paragraph(),
             basePrice: basePrice.toString(),
             capacity: faker.number.int({ min: 1, max: 6 }),
             bedType: faker.helpers.arrayElement([

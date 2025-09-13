@@ -16,6 +16,7 @@ export class RoomService {
       data: {
         propertyId,
         name: data.name,
+        description: data.description,
         basePrice: data.basePrice,
         capacity: data.capacity,
         bedType: data.bedType,
@@ -103,6 +104,9 @@ export class RoomService {
       where: { id: roomId },
       data: {
         ...(data.name && { name: data.name }),
+        ...(data.description !== undefined && {
+          description: data.description,
+        }),
         ...(data.basePrice !== undefined && { basePrice: data.basePrice }),
         ...(data.capacity !== undefined && { capacity: data.capacity }),
         ...(data.bedType && { bedType: data.bedType }),

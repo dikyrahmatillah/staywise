@@ -2,13 +2,14 @@ import z from "zod";
 
 export const roomSchema = z.object({
   name: z.string().optional(),
+  description: z.string().optional(),
   basePrice: z.number(),
   beds: z.number().optional(),
-  bathrooms: z.number().optional(),
 });
 
 export const createRoomSchema = z.object({
   name: z.string().min(1),
+  description: z.string().optional(),
   basePrice: z.number().positive(),
   capacity: z.number().int().min(1).default(1),
   bedType: z.enum(["KING", "QUEEN", "SINGLE", "TWIN"]).optional(),

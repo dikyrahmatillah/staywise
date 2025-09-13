@@ -3,6 +3,7 @@ export type BedType = "KING" | "QUEEN" | "SINGLE" | "TWIN";
 export interface Room {
   id: string;
   name: string;
+  description?: string;
   basePrice: number;
   capacity: number;
   bedType?: BedType;
