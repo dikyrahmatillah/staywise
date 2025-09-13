@@ -22,6 +22,19 @@ export const createRoomAvailabilitySchema = z.object({
   isAvailable: z.boolean().optional().default(true),
 });
 
+export const blockRoomDatesSchema = z.object({
+  dates: z.array(z.string()).min(1),
+});
+
+export const unblockRoomDatesSchema = z.object({
+  dates: z.array(z.string()).min(1),
+});
+
+export const getRoomAvailabilitySchema = z.object({
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
+});
+
 export const createPriceAdjustmentDateSchema = z.object({
   date: z.string(),
 });
@@ -46,6 +59,11 @@ export type CreateRoomInput = z.infer<typeof createRoomSchema>;
 export type UpdateRoomInput = z.infer<typeof updateRoomSchema>;
 export type CreateRoomAvailabilityInput = z.infer<
   typeof createRoomAvailabilitySchema
+>;
+export type BlockRoomDatesInput = z.infer<typeof blockRoomDatesSchema>;
+export type UnblockRoomDatesInput = z.infer<typeof unblockRoomDatesSchema>;
+export type GetRoomAvailabilityInput = z.infer<
+  typeof getRoomAvailabilitySchema
 >;
 export type CreatePriceAdjustmentInput = z.infer<
   typeof createPriceAdjustmentSchema

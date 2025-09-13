@@ -1,6 +1,12 @@
 import { prisma } from "@repo/database";
 import { AppError } from "@/errors/app.error.js";
-import { CreateRoomInput, UpdateRoomInput } from "@repo/schemas";
+import {
+  CreateRoomInput,
+  UpdateRoomInput,
+  BlockRoomDatesInput,
+  UnblockRoomDatesInput,
+  GetRoomAvailabilityInput,
+} from "@repo/schemas";
 
 export class RoomService {
   async createRoom(propertyId: string, data: CreateRoomInput) {
@@ -151,6 +157,124 @@ export class RoomService {
     });
 
     return { message: "Room deleted successfully" };
+  }
+
+  async getRoomAvailability(roomId: string, params: GetRoomAvailabilityInput) {
+    const room = await prisma.room.findUnique({
+      where: { id: roomId },
+    });
+
+    if (!room) {
+      throw new AppError("Room not found", 404);
+    }
+
+    const whereClause: any = {
+      roomId,
+      isAvailable: false, // Only get blocked dates
+    };
+
+    if (params.startDate || params.endDate) {
+      whereClause.date = {};
+      if (params.startDate) {
+        whereClause.date.gte = new Date(params.startDate);
+      }
+      if (params.endDate) {
+        whereClause.date.lte = new Date(params.endDate);
+      }
+    }
+
+    const blockedDates = await prisma.roomAvailability.findMany({
+      where: whereClause,
+      orderBy: { date: "asc" },
+      select: {
+        id: true,
+        roomId: true,
+        date: true,
+        isAvailable: true,
+        createdAt: true,
+      },
+    });
+
+    // Format dates to YYYY-MM-DD format for frontend consistency
+    const formattedDates = blockedDates.map((item) => ({
+      ...item,
+      date: item.date.toISOString().split("T")[0],
+      createdAt: item.createdAt.toISOString(),
+    }));
+
+    return formattedDates;
+  }
+
+  async blockRoomDates(roomId: string, data: BlockRoomDatesInput) {
+    const room = await prisma.room.findUnique({
+      where: { id: roomId },
+    });
+
+    if (!room) {
+      throw new AppError("Room not found", 404);
+    }
+
+    // Create blocked date records
+    const results = await Promise.all(
+      data.dates.map(async (dateString: string) => {
+        return prisma.roomAvailability.upsert({
+          where: {
+            roomId_date: {
+              roomId,
+              date: new Date(dateString),
+            },
+          },
+          update: {
+            isAvailable: false,
+          },
+          create: {
+            roomId,
+            date: new Date(dateString),
+            isAvailable: false,
+          },
+          select: {
+            id: true,
+            roomId: true,
+            date: true,
+            isAvailable: true,
+            createdAt: true,
+          },
+        });
+      })
+    );
+
+    // Format dates to YYYY-MM-DD format for frontend consistency
+    const formattedResults = results.map((item) => ({
+      ...item,
+      date: item.date.toISOString().split("T")[0],
+      createdAt: item.createdAt.toISOString(),
+    }));
+
+    return formattedResults;
+  }
+
+  async unblockRoomDates(roomId: string, data: UnblockRoomDatesInput) {
+    const room = await prisma.room.findUnique({
+      where: { id: roomId },
+    });
+
+    if (!room) {
+      throw new AppError("Room not found", 404);
+    }
+
+    // Delete blocked date records (makes them available by default)
+    const results = await Promise.all(
+      data.dates.map(async (dateString: string) => {
+        return prisma.roomAvailability.deleteMany({
+          where: {
+            roomId,
+            date: new Date(dateString),
+          },
+        });
+      })
+    );
+
+    return results;
   }
 }
 
