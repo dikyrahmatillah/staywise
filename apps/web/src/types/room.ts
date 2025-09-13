@@ -1,5 +1,13 @@
 export type BedType = "KING" | "QUEEN" | "SINGLE" | "TWIN";
 
+export interface RoomAvailability {
+  id: string;
+  roomId: string;
+  date: string;
+  isAvailable: boolean;
+  createdAt: string;
+}
+
 export interface Room {
   id: string;
   name: string;
@@ -11,6 +19,7 @@ export interface Room {
   imageUrl?: string;
   createdAt: string;
   updatedAt: string;
+  RoomAvailabilities?: RoomAvailability[];
 }
 
 export interface RoomApiResponse {
@@ -21,4 +30,17 @@ export interface RoomApiResponse {
 export interface RoomsApiResponse {
   message: string;
   data: Room[];
+}
+
+export interface RoomAvailabilityApiResponse {
+  message: string;
+  data: RoomAvailability[];
+}
+
+export interface BlockDatesRequest {
+  dates: string[];
+}
+
+export interface UnblockDatesRequest {
+  dates: string[];
 }
