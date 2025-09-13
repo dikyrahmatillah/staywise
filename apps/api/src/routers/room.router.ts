@@ -19,4 +19,15 @@ router.get("/:roomId/availability", roomController.getRoomAvailability);
 router.post("/:roomId/block", roomController.blockRoomDates);
 router.post("/:roomId/unblock", roomController.unblockRoomDates);
 
+router.get("/:roomId/price-adjustments", roomController.getPriceAdjustments);
+router.post("/:roomId/price-adjustments", roomController.createPriceAdjustment);
+router.put(
+  "/price-adjustments/:adjustmentId",
+  roomController.updatePriceAdjustment
+);
+router.delete(
+  "/price-adjustments/:adjustmentId",
+  roomController.deletePriceAdjustment
+);
+
 export default router;
