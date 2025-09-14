@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import React from "react";
 import { usePropertyCreation } from "../property-creation-context";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { LocationPicker } from "@/components/ui/location-picker";
 
 export function LocationStep() {
   const { formData, updateFormData } = usePropertyCreation();
@@ -13,12 +14,50 @@ export function LocationStep() {
     updateFormData({ [field]: value });
   };
 
+  const handleLocationSelect = (location: {
+    lat: number;
+    lng: number;
+    address: string;
+    city: string;
+    country: string;
+  }) => {
+    updateFormData({
+      latitude: location.lat,
+      longitude: location.lng,
+      address: location.address,
+      city: location.city,
+      country: location.country,
+    });
+  };
+
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Location Details</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
+        {apiKey && (
+          <div className="space-y-4">
+            <div>
+              <LocationPicker
+                onLocationSelect={handleLocationSelect}
+                apiKey={apiKey}
+                initialLocation={
+                  formData.latitude && formData.longitude
+                    ? {
+                        lat: formData.latitude,
+                        lng: formData.longitude,
+                      }
+                    : undefined
+                }
+                className="border rounded-lg p-4"
+              />
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="country">Country *</Label>
@@ -53,42 +92,6 @@ export function LocationStep() {
             rows={3}
             className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="latitude">Latitude (Optional)</Label>
-            <Input
-              id="latitude"
-              type="number"
-              step="any"
-              min={-90}
-              max={90}
-              value={formData.latitude || ""}
-              onChange={(e) =>
-                handleChange("latitude", parseFloat(e.target.value) || 0)
-              }
-              placeholder="e.g., -6.2088"
-            />
-            <p className="text-sm text-gray-500">Between -90 and 90</p>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="longitude">Longitude (Optional)</Label>
-            <Input
-              id="longitude"
-              type="number"
-              step="any"
-              min={-180}
-              max={180}
-              value={formData.longitude || ""}
-              onChange={(e) =>
-                handleChange("longitude", parseFloat(e.target.value) || 0)
-              }
-              placeholder="e.g., 106.8456"
-            />
-            <p className="text-sm text-gray-500">Between -180 and 180</p>
-          </div>
         </div>
       </CardContent>
     </Card>
