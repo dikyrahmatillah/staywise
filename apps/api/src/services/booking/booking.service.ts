@@ -1,8 +1,14 @@
 import { prisma } from "@repo/database";
 import { AppError } from "@/errors/app.error.js";
 import { CreateBookingInput } from "@repo/schemas";
+import { BookingCronService } from "./booking-cron.service.js";
 
 export class BookingService {
+  private cronService: BookingCronService;
+
+  constructor() {
+    this.cronService = new BookingCronService();
+  }
   async createBooking(data: CreateBookingInput) {
     const user = await prisma.user.findUnique({
       where: { id: data.userId },
@@ -231,6 +237,30 @@ export class BookingService {
         User: { select: { firstName: true, lastName: true, email: true } },
       },
     });
+  }
+  startAllCronJobs(): void {
+    this.cronService.startAllJobs();
+  }
+
+  stopAllCronJobs(): void {
+    this.cronService.stopAllJobs();
+  }
+
+  getCronJobsStatus() {
+    return this.cronService.getJobsStatus();
+  }
+
+  // Manual execution methods for testing
+  async runAllMaintenanceTasks() {
+    return this.cronService.runAllMaintenanceTasks();
+  }
+
+  async runExpirationTask() {
+    return this.cronService.runExpirationJob();
+  }
+
+  shutdown(): void {
+    this.cronService.shutdown();
   }
 }
 export const bookingService = new BookingService();
