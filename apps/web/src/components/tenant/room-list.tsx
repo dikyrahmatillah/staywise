@@ -32,9 +32,11 @@ import {
   ImageIcon,
   Calendar,
   CalendarDays,
+  TrendingUp,
 } from "lucide-react";
 import type { Room } from "@/types/room";
 import { RoomAvailabilityCalendar } from "./room-availability-calendar";
+import { PriceAdjustmentModal } from "./price-adjustment-modal";
 
 interface RoomListProps {
   rooms: Room[];
@@ -49,6 +51,13 @@ export function RoomList({ rooms, loading, onEdit, onDelete }: RoomListProps) {
     null
   );
   const [availabilityRoomName, setAvailabilityRoomName] = useState<string>("");
+  const [priceAdjustmentRoomId, setPriceAdjustmentRoomId] = useState<
+    string | null
+  >(null);
+  const [priceAdjustmentRoomName, setPriceAdjustmentRoomName] =
+    useState<string>("");
+  const [priceAdjustmentBasePrice, setPriceAdjustmentBasePrice] =
+    useState<number>(0);
 
   if (loading) {
     return (
@@ -123,6 +132,18 @@ export function RoomList({ rooms, loading, onEdit, onDelete }: RoomListProps) {
   const handleCloseAvailability = () => {
     setAvailabilityRoomId(null);
     setAvailabilityRoomName("");
+  };
+
+  const handleManagePriceAdjustment = (room: Room) => {
+    setPriceAdjustmentRoomId(room.id);
+    setPriceAdjustmentRoomName(room.name);
+    setPriceAdjustmentBasePrice(room.basePrice);
+  };
+
+  const handleClosePriceAdjustment = () => {
+    setPriceAdjustmentRoomId(null);
+    setPriceAdjustmentRoomName("");
+    setPriceAdjustmentBasePrice(0);
   };
 
   return (
@@ -216,6 +237,15 @@ export function RoomList({ rooms, loading, onEdit, onDelete }: RoomListProps) {
                         Block Dates
                       </Button>
 
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleManagePriceAdjustment(room)}
+                      >
+                        <TrendingUp className="h-4 w-4 mr-1" />
+                        Price Rules
+                      </Button>
+
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button size="sm" variant="outline">
@@ -233,6 +263,12 @@ export function RoomList({ rooms, loading, onEdit, onDelete }: RoomListProps) {
                           >
                             <CalendarDays className="h-4 w-4 mr-2" />
                             Block Dates
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleManagePriceAdjustment(room)}
+                          >
+                            <TrendingUp className="h-4 w-4 mr-2" />
+                            Price Rules
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
@@ -306,6 +342,16 @@ export function RoomList({ rooms, loading, onEdit, onDelete }: RoomListProps) {
           roomName={availabilityRoomName}
           open={!!availabilityRoomId}
           onOpenChange={handleCloseAvailability}
+        />
+      )}
+
+      {priceAdjustmentRoomId && (
+        <PriceAdjustmentModal
+          roomId={priceAdjustmentRoomId}
+          roomName={priceAdjustmentRoomName}
+          basePrice={priceAdjustmentBasePrice}
+          open={!!priceAdjustmentRoomId}
+          onOpenChange={handleClosePriceAdjustment}
         />
       )}
     </>

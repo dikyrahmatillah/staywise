@@ -34,3 +34,4 @@ export const createFacilitySchema = z.object({
 });
 
 export type CreateFacilityInput = z.infer<typeof createFacilitySchema>;
+export type AmenityType = z.infer<typeof amenitiesEnum>;

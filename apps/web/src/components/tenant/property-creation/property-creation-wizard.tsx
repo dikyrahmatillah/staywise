@@ -7,6 +7,11 @@ import {
 import { StepNavigation } from "./step-navigation";
 import { BasicInfoStep } from "./steps/basic-info-step";
 import { LocationStep } from "./steps/location-step";
+import { CategoryStep } from "./steps/category-step";
+import { RoomsStep } from "./steps/rooms-step";
+import { FacilitiesStep } from "./steps/facilities-step";
+import { PhotosStep } from "./steps/photos-step";
+import { ReviewStep } from "./steps/review-step";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
@@ -64,15 +69,15 @@ function PropertyCreationWizardContent() {
       case 2:
         return <LocationStep />;
       case 3:
-        return <div className="text-center">Coming soon...</div>;
+        return <CategoryStep />;
       case 4:
-        return <div className="text-center">Coming soon...</div>;
+        return <RoomsStep />;
       case 5:
-        return <div className="text-center">Coming soon...</div>;
+        return <FacilitiesStep />;
       case 6:
-        return <div className="text-center">Coming soon...</div>;
+        return <PhotosStep />;
       case 7:
-        return <div className="text-center">Coming soon...</div>;
+        return <ReviewStep />;
       default:
         return <BasicInfoStep />;
     }

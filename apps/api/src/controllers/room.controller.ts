@@ -5,6 +5,7 @@ import {
   blockRoomDatesSchema,
   unblockRoomDatesSchema,
   getRoomAvailabilitySchema,
+  createPriceAdjustmentSchema,
 } from "@repo/schemas";
 import { roomService } from "@/services/room.service.js";
 
@@ -150,6 +151,83 @@ export class RoomController {
 
       response.status(200).json({
         message: "Room dates unblocked successfully",
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  createPriceAdjustment = async (
+    request: Request,
+    response: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const { roomId } = request.params;
+      const data = createPriceAdjustmentSchema.parse(request.body);
+      const result = await roomService.createPriceAdjustment(roomId, data);
+
+      response.status(201).json({
+        message: "Price adjustment created successfully",
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  getPriceAdjustments = async (
+    request: Request,
+    response: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const { roomId } = request.params;
+      const result = await roomService.getPriceAdjustments(roomId);
+
+      response.status(200).json({
+        message: "Price adjustments retrieved successfully",
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  updatePriceAdjustment = async (
+    request: Request,
+    response: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const { adjustmentId } = request.params;
+      const data = createPriceAdjustmentSchema.partial().parse(request.body);
+      const result = await roomService.updatePriceAdjustment(
+        adjustmentId,
+        data
+      );
+
+      response.status(200).json({
+        message: "Price adjustment updated successfully",
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  deletePriceAdjustment = async (
+    request: Request,
+    response: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const { adjustmentId } = request.params;
+      const result = await roomService.deletePriceAdjustment(adjustmentId);
+
+      response.status(200).json({
+        message: "Price adjustment deleted successfully",
         data: result,
       });
     } catch (error) {
