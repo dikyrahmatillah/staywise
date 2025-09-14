@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { bookingService } from "../services/booking.service.js";
+import { bookingService } from "../services/booking/booking.service.js";
 
 export class BookingController {
   async createBooking(
@@ -67,7 +67,40 @@ export class BookingController {
       next(error);
     }
   }
+
+    async checkRoomAvailability(
+    request: Request,
+    response: Response,
+    next: NextFunction
+  ) {
+    try {
+      const { propertyId, roomId } = request.params;
+      const { checkIn, checkOut } = request.query;
+
+      if (!checkIn || !checkOut) {
+        return response.status(400).json({
+          success: false,
+          message: "checkIn and checkOut dates are required",
+          data: null,
+        });
+      }
+
+      const availability = await bookingService.checkRoomAvailability(
+        propertyId,
+        roomId,
+        checkIn as string,
+        checkOut as string
+      );
+
+      return response.json({
+        success: true,
+        data: availability,
+      });
+    } catch (error: any) {
+      next(error);
+    }
+  }
 }
 
-// Export a singleton instance for easy usage
+
 export const bookingController = new BookingController();
