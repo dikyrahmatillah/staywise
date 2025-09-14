@@ -1,11 +1,17 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Popover, PopoverTrigger } from "@/components/ui/popover";
-import { IoClose } from "react-icons/io5";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { IoClose, IoLocationOutline } from "react-icons/io5";
 import { cn } from "@/lib/utils";
+import { useLocationAutocomplete } from "@/hooks/use-location-autocomplete";
+import { PlacePrediction } from "@/types/google-places";
 
 interface LocationInputProps {
   location: string;
@@ -23,6 +29,9 @@ export function LocationInput({
   onOpenChange,
 }: LocationInputProps) {
   const locationInputRef = useRef<HTMLInputElement | null>(null);
+  const [inputValue, setInputValue] = useState(location);
+  const { suggestions, isLoading, error, fetchSuggestions, clearSuggestions } =
+    useLocationAutocomplete();
 
   useEffect(() => {
     if (isOpen) {
@@ -32,6 +41,44 @@ export function LocationInput({
       return () => cancelAnimationFrame(id);
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    setInputValue(location);
+  }, [location]);
+
+  const handleInputChange = (value: string) => {
+    setInputValue(value);
+    onLocationChange(value);
+
+    if (value.length >= 3) {
+      fetchSuggestions(value);
+    } else {
+      clearSuggestions();
+    }
+  };
+
+  const handleSuggestionSelect = (suggestion: PlacePrediction) => {
+    const selectedLocation = suggestion.description;
+    setInputValue(selectedLocation);
+    onLocationChange(selectedLocation);
+    clearSuggestions();
+    onOpenChange(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (suggestions.length > 0) {
+        handleSuggestionSelect(suggestions[0]);
+      }
+      onSearch();
+    } else if (e.key === "Escape") {
+      onOpenChange(false);
+    }
+  };
+
+  const showSuggestions =
+    isOpen && (suggestions.length > 0 || isLoading || error);
 
   return (
     <Popover open={isOpen} onOpenChange={onOpenChange} modal={false}>
@@ -52,21 +99,22 @@ export function LocationInput({
               <Input
                 ref={locationInputRef}
                 placeholder="Search destinations"
-                value={location}
-                onChange={(e) => onLocationChange(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    onSearch();
-                  }
-                }}
+                value={inputValue}
+                onChange={(e) => handleInputChange(e.target.value)}
+                onKeyDown={handleKeyDown}
                 className="rounded-none border-0 bg-transparent p-0 text-sm placeholder:text-gray-400 focus-visible:ring-0 h-auto w-full truncate min-w-0"
               />
             </div>
-            {location && (
+            {inputValue && (
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => onLocationChange("")}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setInputValue("");
+                  onLocationChange("");
+                  clearSuggestions();
+                }}
                 className="h-5 w-5 sm:h-6 sm:w-6 flex-shrink-0 cursor-pointer"
                 aria-label="Clear location"
               >
@@ -76,6 +124,55 @@ export function LocationInput({
           </div>
         </div>
       </PopoverTrigger>
+
+      {showSuggestions && (
+        <PopoverContent
+          className="w-full p-0 mt-1"
+          align="start"
+          side="bottom"
+          sideOffset={4}
+        >
+          <div className="max-h-64 overflow-y-auto">
+            {isLoading && (
+              <div className="p-3 text-sm text-gray-500 text-center">
+                Searching locations...
+              </div>
+            )}
+
+            {error && (
+              <div className="p-3 text-sm text-red-500 text-center">
+                {error}
+              </div>
+            )}
+
+            {suggestions.length > 0 && (
+              <div className="py-1">
+                {suggestions.map((suggestion) => (
+                  <button
+                    key={suggestion.place_id}
+                    onClick={() => handleSuggestionSelect(suggestion)}
+                    className="w-full px-3 py-2 text-left hover:bg-gray-100 focus:bg-gray-100 focus:outline-none transition-colors"
+                  >
+                    <div className="flex items-start gap-3">
+                      <IoLocationOutline className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium text-gray-900 truncate">
+                          {suggestion.structured_formatting.main_text}
+                        </div>
+                        {suggestion.structured_formatting.secondary_text && (
+                          <div className="text-xs text-gray-500 truncate">
+                            {suggestion.structured_formatting.secondary_text}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </PopoverContent>
+      )}
     </Popover>
   );
 }
