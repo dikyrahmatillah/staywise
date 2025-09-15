@@ -3,25 +3,26 @@
 import { Button } from "@/components/ui/button";
 import { useState, useMemo } from "react";
 import type { BookingTransaction } from "@/types/booking";
-import { mockBookingTransactions } from "@/components/guest/my-bookings/mock-bookings";
 import { BookingTransactionsTable } from "@/components/guest/my-bookings/booking-transactions-table";
+import { useBookings } from "@/hooks/useBookings";
+import { RefreshCw } from "lucide-react";
 
 export default function GuestBookingPage() {
   const [activeTab, setActiveTab] = useState("all");
-
+  const { bookings, loading, error, fetchBookings } = useBookings();
   const filteredBookings = useMemo(() => {
-    if (activeTab === "all") return mockBookingTransactions;
+    if (activeTab === "all") return bookings;
 
     const statusMap: Record<string, string[]> = {
       pending: ["WAITING_PAYMENT", "WAITING_CONFIRMATION", "PROCESSING"],
       complete: ["COMPLETED"],
-      cancelled: ["CANCELLED"],
+      cancelled: ["CANCELLED", "EXPIRED"],
     };
 
-    return mockBookingTransactions.filter((booking) =>
+    return bookings.filter((booking) =>
       statusMap[activeTab]?.includes(booking.status)
     );
-  }, [activeTab]);
+  }, [activeTab, bookings]);
 
   const handleViewDetails = (booking: BookingTransaction) => {
     console.log("Viewing details for booking:", booking.orderCode);
@@ -31,9 +32,34 @@ export default function GuestBookingPage() {
   const tabs = [
     { key: "all", label: "All Bookings" },
     { key: "pending", label: "Pending" },
-    { key: "complete", label: "Complete" },
+    { key: "completed", label: "Completed" },
     { key: "cancelled", label: "Cancelled" },
   ];
+
+  if (loading) {
+    return (
+      <div className="p-6 flex justify-center items-center min-h-[400px]">
+        <div className="text-center">
+          <RefreshCw className="animate-spin h-8 w-8 mx-auto text-gray-600" />
+          <p className="mt-2 text-gray-600">Loading your bookings...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6 flex justify-center items-center min-h-[400px]">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">{error}</p>
+          <Button onClick={fetchBookings}>
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Retry
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">

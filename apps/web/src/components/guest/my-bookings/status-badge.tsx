@@ -32,6 +32,12 @@ const statusConfigs: Record<OrderStatus, StatusConfig> = {
     dot: "bg-gray-500",
     label: "Cancelled",
   },
+  EXPIRED: {
+    variant: "secondary",
+    className: "bg-orange-100 text-orange-800 hover:bg-orange-100",
+    dot: "bg-orange-500",
+    label: "Expired",
+  },
 };
 
 interface StatusBadgeProps {

@@ -17,11 +17,15 @@ export const BookingTableRow = ({
   booking,
   onViewDetails,
 }: BookingTableRowProps) => {
+  if (!booking?.Property?.name || !booking?.Room?.name) {
+    console.warn("BookingTableRow received incomplete data:", booking);
+    return null; // Don't render this row
+  }
   return (
     <TableRow className="hover:bg-muted/50">
       {/* Property & Room Info */}
       <TableCell colSpan={2} className="py-4">
-        <PropertyInfo property={booking.property} room={booking.room} />
+        <PropertyInfo property={booking.Property} room={booking.Room} />
       </TableCell>
 
       {/* Booking Details */}

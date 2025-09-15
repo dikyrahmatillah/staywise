@@ -15,23 +15,52 @@ export class BookingController {
     }
   }
 
-  async getAllBookings(req: Request, res: Response, next: NextFunction) {
+  async getAllBookings(request: Request, response: Response, next: NextFunction) {
     try {
-      const bookings = await bookingService.getAllBookings();
+const userRole = (request as any).user?.role;
+    const userId = (request as any).user?.id;
+    const { propertyId } = request.query;
 
-      res.json({
-        success: true,
-        count: bookings.length,
-        data: bookings,
+    let bookings;
+
+    if (userRole === 'GUEST') {
+      bookings = await bookingService.getBookings({
+        userId,
+        propertyId: propertyId as string || undefined
       });
-    } catch (error) {
-      console.error("Get all bookings error:", error);
-      res.status(400).json({
+    } else if (userRole === 'TENANT') {
+      if (propertyId) {
+        // Verify tenant owns this property
+        const hasAccess = await bookingService.verifyTenantPropertyAccess(userId, propertyId as string);
+        if (!hasAccess) {
+          return response.status(403).json({
+            success: false,
+            message: "Access denied: You don't own this property",
+            data: null,
+          });
+        }
+        bookings = await bookingService.getBookings({ propertyId: propertyId as string });
+      } else {
+        bookings = await bookingService.getBookings({ tenantId: userId });
+      }
+    } else {
+      return response.status(403).json({
         success: false,
-        error: "Failed to fetch bookings",
+        message: "Unauthorized: Invalid user role",
+        data: null,
       });
     }
+
+    return response.json({
+      success: true,
+      count: bookings.length,
+      data: bookings,
+      propertyId: propertyId || null,
+    });
+  } catch (error: any) {
+    next(error);
   }
+}
 
   async getBookingById(
     request: Request,
