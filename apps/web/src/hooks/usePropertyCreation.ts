@@ -25,7 +25,7 @@ export function usePropertyCreation() {
   const [isCreating, setIsCreating] = useState(false);
 
   const createProperty = useCallback(
-    async (data: CreatePropertyInput) => {
+    async (data: CreatePropertyInput | FormData) => {
       if (!session?.user?.accessToken) {
         toast.error("You must be logged in to create a property");
         return null;
@@ -36,20 +36,39 @@ export function usePropertyCreation() {
         const api = createApiInstance(session.user.accessToken);
 
         // Debug the data being sent
-        console.log("Sending property data:", JSON.stringify(data, null, 2));
+        if (data instanceof FormData) {
+          console.log("Sending FormData with files");
+          // Log FormData entries for debugging
+          for (const [key, value] of data.entries()) {
+            if (value instanceof File) {
+              console.log(`${key}: File(${value.name}, ${value.size} bytes)`);
+            } else {
+              console.log(`${key}: ${value}`);
+            }
+          }
+        } else {
+          console.log("Sending property data:", JSON.stringify(data, null, 2));
+        }
 
-        const response = await api.post("/properties", data);
+        const config =
+          data instanceof FormData
+            ? {
+                headers: {
+                  "Content-Type": "multipart/form-data",
+                },
+              }
+            : {};
+
+        const response = await api.post("/properties", data, config);
 
         toast.success("Property created successfully!");
 
-        // Redirect to tenant dashboard or property list
-        router.push("/dashboard/properties");
+        router.push("/dashboard/tenant/properties");
 
         return response.data.data;
       } catch (error: unknown) {
         console.error("Error creating property:", error);
 
-        // Type guard for axios error
         if (error && typeof error === "object" && "response" in error) {
           const axiosError = error as {
             response?: { data?: { message?: string }; status?: number };

@@ -2,6 +2,7 @@ import { Router } from "express";
 import { propertyController } from "../controllers/property.controller.js";
 import { verifyTokenMiddleware } from "../middlewares/verifyToken.middleware.js";
 import { verifyRoleMiddleware } from "../middlewares/verifyRole.middleware.js";
+import { upload } from "../middlewares/upload.middleware.js";
 
 const router = Router();
 
@@ -9,6 +10,10 @@ router.post(
   "/",
   verifyTokenMiddleware,
   verifyRoleMiddleware,
+  upload.fields([
+    { name: "propertyImages", maxCount: 10 },
+    { name: "roomImages", maxCount: 20 },
+  ]),
   propertyController.createProperty
 );
 router.get("/", propertyController.getProperties);

@@ -1,31 +1,83 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { usePropertyCreation } from "../property-creation-context";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2, Image as ImageIcon, ExternalLink } from "lucide-react";
+import { Plus, Trash2, Image as ImageIcon, Upload, X } from "lucide-react";
 import Image from "next/image";
-import { CreatePropertyPictureInput } from "@repo/schemas";
+
+type PhotoFormData = {
+  file?: File;
+  note?: string;
+  preview?: string;
+};
+
+type PictureItem =
+  | string
+  | {
+      file?: File;
+      note?: string;
+      description?: string;
+      preview?: string;
+      imageUrl?: string;
+    };
 
 export function PhotosStep() {
   const { formData, updateFormData } = usePropertyCreation();
-  const [newPhoto, setNewPhoto] = useState<CreatePropertyPictureInput>({
-    imageUrl: "",
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [newPhoto, setNewPhoto] = useState<PhotoFormData>({
     note: "",
   });
 
   const pictures = formData.pictures || [];
 
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith("image/")) {
+        alert("Please select an image file");
+        return;
+      }
+
+      if (file.size > 1024 * 1024) {
+        alert("File size must be less than 1MB");
+        return;
+      }
+
+      const previewUrl = URL.createObjectURL(file);
+
+      setNewPhoto((prev) => ({
+        ...prev,
+        file,
+        preview: previewUrl,
+      }));
+    }
+  };
+
+  const handleRemoveNewImage = () => {
+    if (newPhoto.preview) {
+      URL.revokeObjectURL(newPhoto.preview);
+    }
+    setNewPhoto({
+      note: "",
+    });
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
   const handleAddPhoto = () => {
-    if (!newPhoto.imageUrl.trim()) {
+    if (!newPhoto.file) {
       return;
     }
 
-    const photoToAdd: CreatePropertyPictureInput = {
-      imageUrl: newPhoto.imageUrl.trim(),
+    const photoToAdd = {
+      file: newPhoto.file,
+      description: newPhoto.note?.trim() || undefined,
       note: newPhoto.note?.trim() || undefined,
     };
 
@@ -33,24 +85,28 @@ export function PhotosStep() {
       pictures: [...pictures, photoToAdd],
     });
 
-    // Reset form
-    setNewPhoto({ imageUrl: "", note: "" });
+    if (newPhoto.preview) {
+      URL.revokeObjectURL(newPhoto.preview);
+    }
+
+    setNewPhoto({
+      note: "",
+    });
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
   const handleRemovePhoto = (index: number) => {
-    const updatedPictures = pictures.filter(
-      (_: CreatePropertyPictureInput, i: number) => i !== index
-    );
-    updateFormData({ pictures: updatedPictures });
-  };
+    const photoToRemove = pictures[index] as PictureItem;
 
-  const isValidUrl = (url: string) => {
-    try {
-      new URL(url);
-      return true;
-    } catch {
-      return false;
+    if (typeof photoToRemove === "object" && photoToRemove.preview) {
+      URL.revokeObjectURL(photoToRemove.preview);
     }
+
+    const updatedPictures = pictures.filter((_: PictureItem, i: number) => i !== index);
+    updateFormData({ pictures: updatedPictures });
   };
 
   return (
@@ -59,62 +115,42 @@ export function PhotosStep() {
         <CardTitle>Property Photos</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Existing Photos */}
         {pictures.length > 0 && (
           <div className="space-y-4">
             <Label className="text-base font-medium">Added Photos:</Label>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {pictures.map(
-                (picture: CreatePropertyPictureInput, index: number) => (
+                (
+                  picture: { file?: File; note?: string; description?: string },
+                  index: number
+                ) => (
                   <div key={index} className="relative group">
                     <div className="aspect-video rounded-lg border overflow-hidden bg-gray-100">
-                      {isValidUrl(picture.imageUrl) ? (
+                      {picture.file ? (
                         <Image
-                          src={picture.imageUrl}
+                          src={URL.createObjectURL(picture.file)}
                           alt={picture.note || `Property photo ${index + 1}`}
                           width={400}
                           height={225}
                           className="w-full h-full object-cover"
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            target.style.display = "none";
-                            target.parentElement!.classList.add(
-                              "flex",
-                              "items-center",
-                              "justify-center"
-                            );
-                            target.parentElement!.innerHTML = `
-                            <div class="text-center text-gray-500">
-                              <svg class="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                              </svg>
-                              <p class="text-xs">Failed to load</p>
-                            </div>
-                          `;
-                          }}
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-gray-500">
                           <div className="text-center">
                             <ImageIcon className="w-8 h-8 mx-auto mb-2" />
-                            <p className="text-xs">Invalid URL</p>
+                            <p className="text-xs">No preview</p>
                           </div>
                         </div>
                       )}
                     </div>
 
                     <div className="mt-2 space-y-1">
-                      <div className="flex items-center gap-2">
-                        <ExternalLink className="w-3 h-3 text-gray-400" />
-                        <a
-                          href={picture.imageUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-xs text-blue-600 hover:underline truncate"
-                        >
-                          {picture.imageUrl}
-                        </a>
-                      </div>
+                      {picture.file && (
+                        <p className="text-xs text-gray-600">
+                          📷 {picture.file.name} (
+                          {(picture.file.size / 1024).toFixed(1)} KB)
+                        </p>
+                      )}
                       {picture.note && (
                         <p className="text-xs text-gray-600">{picture.note}</p>
                       )}
@@ -141,25 +177,58 @@ export function PhotosStep() {
           <Label className="text-base font-medium">Add New Photo:</Label>
 
           <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="imageUrl">Image URL *</Label>
-              <Input
-                id="imageUrl"
-                type="url"
-                value={newPhoto.imageUrl}
-                onChange={(e) =>
-                  setNewPhoto((prev: CreatePropertyPictureInput) => ({
-                    ...prev,
-                    imageUrl: e.target.value,
-                  }))
-                }
-                placeholder="https://example.com/image.jpg"
-              />
-              <p className="text-sm text-gray-500">
-                Enter a direct link to your image. Supported formats: JPG, PNG,
-                WebP
-              </p>
-            </div>
+            {!newPhoto.file ? (
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                <Upload className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                <p className="text-gray-600 mb-2">
+                  Upload a property image (Max 1MB)
+                </p>
+                <p className="text-sm text-gray-500 mb-4">
+                  Supported formats: JPG, PNG, WebP
+                </p>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  Choose File
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="relative inline-block">
+                  <div className="w-full max-w-md aspect-video border rounded-lg overflow-hidden">
+                    <Image
+                      src={newPhoto.preview!}
+                      alt="Photo preview"
+                      width={400}
+                      height={225}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    className="absolute top-2 right-2 h-8 w-8 rounded-full p-0"
+                    onClick={handleRemoveNewImage}
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+                <p className="text-sm text-green-600">
+                  📷 {newPhoto.file.name} (
+                  {(newPhoto.file.size / 1024).toFixed(1)} KB)
+                </p>
+              </div>
+            )}
 
             <div className="space-y-2">
               <Label htmlFor="photoNote">Description (Optional)</Label>
@@ -167,7 +236,7 @@ export function PhotosStep() {
                 id="photoNote"
                 value={newPhoto.note || ""}
                 onChange={(e) =>
-                  setNewPhoto((prev: CreatePropertyPictureInput) => ({
+                  setNewPhoto((prev) => ({
                     ...prev,
                     note: e.target.value,
                   }))
@@ -176,45 +245,10 @@ export function PhotosStep() {
               />
             </div>
 
-            {/* Preview */}
-            {newPhoto.imageUrl && isValidUrl(newPhoto.imageUrl) && (
-              <div className="space-y-2">
-                <Label>Preview:</Label>
-                <div className="aspect-video w-full max-w-md rounded-lg border overflow-hidden bg-gray-100">
-                  <Image
-                    src={newPhoto.imageUrl}
-                    alt="Preview"
-                    width={400}
-                    height={225}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.style.display = "none";
-                      target.parentElement!.classList.add(
-                        "flex",
-                        "items-center",
-                        "justify-center"
-                      );
-                      target.parentElement!.innerHTML = `
-                        <div class="text-center text-gray-500">
-                          <svg class="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                          </svg>
-                          <p class="text-xs">Failed to load image</p>
-                        </div>
-                      `;
-                    }}
-                  />
-                </div>
-              </div>
-            )}
-
             <Button
               type="button"
               onClick={handleAddPhoto}
-              disabled={
-                !newPhoto.imageUrl.trim() || !isValidUrl(newPhoto.imageUrl)
-              }
+              disabled={!newPhoto.file}
               className="flex items-center gap-2"
             >
               <Plus className="w-4 h-4" />
