@@ -19,7 +19,7 @@ export const BookingCard = ({ booking, onViewDetails }: BookingCardProps) => {
       <CardContent className="p-4">
         <div className="space-y-4">
           {/* Property & Room Info */}
-          <PropertyInfo property={booking.property} room={booking.room} />
+          <PropertyInfo property={booking.Property} room={booking.Room} />
 
           {/* Booking Details */}
           <div className="grid grid-cols-2 gap-4">

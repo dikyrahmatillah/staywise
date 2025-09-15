@@ -19,6 +19,7 @@ enum OrderStatus {
     PROCESSING
     COMPLETED
     CANCELED
+    EXPIRED
 }
 
 enum PaymentMethod {

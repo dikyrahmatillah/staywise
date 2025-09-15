@@ -203,6 +203,49 @@ export class BookingService {
     });
   }
 
+  async getBookings(
+    filters: {
+      userId?: string;
+      tenantId?: string;
+      propertyId?: string;
+      status?: string[];
+      includeExpired?: boolean;
+    } = {}
+  ) {
+    const whereClause: any = {};
+
+    if (filters.userId) whereClause.userId = filters.userId;
+    if (filters.tenantId) whereClause.tenantId = filters.tenantId;
+    if (filters.propertyId) whereClause.propertyId = filters.propertyId;
+    if (filters.status) whereClause.status = { in: filters.status };
+
+    // By default, exclude expired bookings unless specifically requested
+    if (!filters.includeExpired) {
+      whereClause.status = whereClause.status
+        ? { in: filters.status?.filter((s) => s !== "EXPIRED") }
+        : { not: "EXPIRED" };
+    }
+
+    return prisma.booking.findMany({
+      where: whereClause,
+      include: {
+        Property: { select: { name: true, city: true } },
+        Room: { select: { name: true } },
+        User: { select: { firstName: true, lastName: true, email: true } },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+  }
+
+  async verifyTenantPropertyAccess(
+    tenantId: string,
+    propertyId: string
+  ): Promise<boolean> {
+    const property = await prisma.property.findFirst({
+      where: { id: propertyId, tenantId },
+    });
+    return !!property;
+  }
   async getBookingById(id: string) {
     return prisma.booking.findUnique({
       where: { id },

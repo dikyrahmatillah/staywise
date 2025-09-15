@@ -3,7 +3,8 @@ export type OrderStatus =
   | "WAITING_CONFIRMATION"
   | "PROCESSING"
   | "COMPLETED"
-  | "CANCELLED";
+  | "CANCELLED"
+  | "EXPIRED";
 export type PaymentMethod = "MANUAL_TRANSFER" | "GATEWAY";
 
 export interface Property {
@@ -35,12 +36,22 @@ export interface BookingTransaction {
   expiresAt?: Date;
   createdAt: Date;
   updatedAt: Date;
-  property: Property;
-  room: Room;
+  Property: {
+    name: string;
+    city: string;
+  };
+  Room: {
+    name: string;
+  };
+  User: {
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
 }
 
 export interface StatusConfig {
-  variant: "secondary" | "destructive";
+  variant: "default" | "secondary" | "destructive" | "outline";
   className: string;
   dot: string;
   label: string;
