@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { usePropertyCreation } from "../property-creation-context";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -13,8 +13,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Trash2, Bed } from "lucide-react";
-import type { CreateRoomInput } from "@repo/schemas";
+import { Plus, Trash2, Bed, Upload, X } from "lucide-react";
+import Image from "next/image";
+
+type RoomFormData = {
+  name: string;
+  description?: string;
+  basePrice: number;
+  capacity?: number;
+  bedType?: "KING" | "QUEEN" | "SINGLE" | "TWIN";
+  bedCount?: number;
+  imageFile?: File;
+  imagePreview?: string;
+};
 
 const BED_TYPES = [
   { value: "KING", label: "King" },
@@ -25,7 +36,9 @@ const BED_TYPES = [
 
 export function RoomsStep() {
   const { formData, updateFormData } = usePropertyCreation();
-  const [newRoom, setNewRoom] = useState<Partial<CreateRoomInput>>({
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [newRoom, setNewRoom] = useState<RoomFormData>({
     name: "",
     description: "",
     basePrice: 0,
@@ -36,26 +49,70 @@ export function RoomsStep() {
 
   const rooms = formData.rooms || [];
 
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith("image/")) {
+        alert("Please select an image file");
+        return;
+      }
+
+      // Validate file size (1MB limit)
+      if (file.size > 1024 * 1024) {
+        alert("File size must be less than 1MB");
+        return;
+      }
+
+      // Create preview URL
+      const previewUrl = URL.createObjectURL(file);
+
+      setNewRoom((prev) => ({
+        ...prev,
+        imageFile: file,
+        imagePreview: previewUrl,
+      }));
+    }
+  };
+
+  const handleRemoveImage = () => {
+    if (newRoom.imagePreview) {
+      URL.revokeObjectURL(newRoom.imagePreview);
+    }
+    setNewRoom((prev) => ({
+      ...prev,
+      imageFile: undefined,
+      imagePreview: undefined,
+    }));
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
   const handleAddRoom = () => {
     if (!newRoom.name || !newRoom.basePrice || newRoom.basePrice <= 0) {
       return;
     }
 
-    const roomToAdd: CreateRoomInput = {
+    const roomToAdd = {
       name: newRoom.name,
       description: newRoom.description || undefined,
       basePrice: newRoom.basePrice,
       capacity: newRoom.capacity || 1,
       bedType: newRoom.bedType,
       bedCount: newRoom.bedCount || 1,
-      imageUrl: newRoom.imageUrl || undefined,
+      imageFile: newRoom.imageFile,
     };
 
     updateFormData({
       rooms: [...rooms, roomToAdd],
     });
 
-    // Reset form
+    // Reset form but keep preview URL for cleanup
+    if (newRoom.imagePreview) {
+      URL.revokeObjectURL(newRoom.imagePreview);
+    }
+
     setNewRoom({
       name: "",
       description: "",
@@ -64,17 +121,21 @@ export function RoomsStep() {
       bedType: "KING",
       bedCount: 1,
     });
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
   const handleRemoveRoom = (index: number) => {
     const updatedRooms = rooms.filter(
-      (_: CreateRoomInput, i: number) => i !== index
+      (_: RoomFormData, i: number) => i !== index
     );
     updateFormData({ rooms: updatedRooms });
   };
 
   const handleNewRoomChange = (field: string, value: string | number) => {
-    setNewRoom((prev: Partial<CreateRoomInput>) => ({
+    setNewRoom((prev) => ({
       ...prev,
       [field]: value,
     }));
@@ -91,36 +152,54 @@ export function RoomsStep() {
           <div className="space-y-4">
             <Label className="text-base font-medium">Added Rooms:</Label>
             <div className="space-y-3">
-              {rooms.map((room: CreateRoomInput, index: number) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between p-4 border rounded-lg"
-                >
-                  <div className="flex items-center gap-4">
-                    <Bed className="w-5 h-5 text-gray-500" />
-                    <div>
-                      <p className="font-medium">{room.name}</p>
-                      <p className="text-sm text-gray-500">
-                        ${room.basePrice}/night • {room.capacity} guests •{" "}
-                        {room.bedCount} {room.bedType?.toLowerCase()} bed(s)
-                      </p>
-                      {room.description && (
-                        <p className="text-sm text-gray-600 mt-1">
-                          {room.description}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => handleRemoveRoom(index)}
+              {rooms.map(
+                (
+                  room: {
+                    name: string;
+                    basePrice: number;
+                    capacity?: number;
+                    bedCount?: number;
+                    bedType?: string;
+                    description?: string;
+                    imageFile?: File;
+                  },
+                  index: number
+                ) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-4 border rounded-lg"
                   >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-              ))}
+                    <div className="flex items-center gap-4">
+                      <Bed className="w-5 h-5 text-gray-500" />
+                      <div className="flex-1">
+                        <p className="font-medium">{room.name}</p>
+                        <p className="text-sm text-gray-500">
+                          ${room.basePrice}/night • {room.capacity} guests •{" "}
+                          {room.bedCount} {room.bedType?.toLowerCase()} bed(s)
+                        </p>
+                        {room.description && (
+                          <p className="text-sm text-gray-600 mt-1">
+                            {room.description}
+                          </p>
+                        )}
+                        {room.imageFile && (
+                          <p className="text-sm text-green-600 mt-1">
+                            📷 Image selected: {room.imageFile.name}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => handleRemoveRoom(index)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                )
+              )}
             </div>
           </div>
         )}
@@ -221,14 +300,59 @@ export function RoomsStep() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="imageUrl">Room Image URL (Optional)</Label>
-            <Input
-              id="imageUrl"
-              type="url"
-              value={newRoom.imageUrl || ""}
-              onChange={(e) => handleNewRoomChange("imageUrl", e.target.value)}
-              placeholder="https://example.com/room-image.jpg"
-            />
+            <Label>Room Image (Optional)</Label>
+            <div className="space-y-3">
+              {!newRoom.imageFile ? (
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                  <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                  <p className="text-sm text-gray-600 mb-2">
+                    Upload a room image (Max 1MB)
+                  </p>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    Choose File
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <div className="relative inline-block">
+                    <div className="w-32 h-20 border rounded overflow-hidden">
+                      <Image
+                        src={newRoom.imagePreview!}
+                        alt="Room preview"
+                        width={128}
+                        height={80}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0"
+                      onClick={handleRemoveImage}
+                    >
+                      <X className="w-3 h-3" />
+                    </Button>
+                  </div>
+                  <p className="text-sm text-green-600">
+                    📷 {newRoom.imageFile.name} (
+                    {(newRoom.imageFile.size / 1024).toFixed(1)} KB)
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
 
           <Button
