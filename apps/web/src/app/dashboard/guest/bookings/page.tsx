@@ -15,8 +15,8 @@ export default function GuestBookingPage() {
 
     const statusMap: Record<string, string[]> = {
       pending: ["WAITING_PAYMENT", "WAITING_CONFIRMATION", "PROCESSING"],
-      complete: ["COMPLETED"],
-      cancelled: ["CANCELLED", "EXPIRED"],
+      completed: ["COMPLETED"],
+      canceled: ["CANCELED", "EXPIRED"],
     };
 
     return bookings.filter((booking) =>
@@ -33,7 +33,7 @@ export default function GuestBookingPage() {
     { key: "all", label: "All Bookings" },
     { key: "pending", label: "Pending" },
     { key: "completed", label: "Completed" },
-    { key: "cancelled", label: "Cancelled" },
+    { key: "canceled", label: "Canceled" },
   ];
 
   if (loading) {

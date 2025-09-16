@@ -19,7 +19,7 @@ type DetailResponse = {
   city: string;
   address: string;
   description?: string | null;
-  maxGuests?: number | null;
+  maxGuests?: number;
   Rooms: {
     id: string;
     name: string;
