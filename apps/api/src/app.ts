@@ -33,7 +33,7 @@ export class App {
   }
 
   setupRoutes() {
-    this.app.use("/emails", emailRouter); //test
+    this.app.use("/emails", emailRouter);
     this.app.use("/api/v1/auth", authRouter);
     this.app.use("/api/v1/properties", propertyRouter);
     this.app.use("/api/v1/bookings", bookingsRouter);

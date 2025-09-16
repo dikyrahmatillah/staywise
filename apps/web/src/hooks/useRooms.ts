@@ -3,21 +3,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import axios from "axios";
+import { api } from "@/lib/axios";
 import { toast } from "sonner";
 import type { Room, RoomsApiResponse, RoomApiResponse } from "@/types/room";
 import { CreateRoomInput, UpdateRoomInput } from "@repo/schemas";
-
-const createApiInstance = (accessToken?: string) => {
-  const api = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1",
-  });
-
-  if (accessToken) {
-    api.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
-  }
-
-  return api;
-};
 
 export function useRooms(propertyId: string) {
   const { data: session } = useSession();
@@ -32,7 +21,7 @@ export function useRooms(propertyId: string) {
     setError(null);
 
     try {
-      const api = createApiInstance(session.user.accessToken);
+      api.defaults.headers.common.Authorization = `Bearer ${session.user.accessToken}`;
       const response = await api.get<RoomsApiResponse>(
         `/rooms/property/${propertyId}`
       );
@@ -46,23 +35,32 @@ export function useRooms(propertyId: string) {
       setError(errorMessage);
       toast.error(errorMessage);
     } finally {
+      delete api.defaults.headers.common.Authorization;
       setLoading(false);
     }
   }, [propertyId, session?.user?.accessToken]);
 
   const createRoom = useCallback(
-    async (roomData: CreateRoomInput) => {
+    async (roomData: CreateRoomInput | FormData) => {
       if (!session?.user?.accessToken) {
         toast.error("Authentication required");
         return;
       }
 
       try {
-        const api = createApiInstance(session.user.accessToken);
-        const response = await api.post<RoomApiResponse>(
-          `/rooms/property/${propertyId}`,
-          roomData
-        );
+        api.defaults.headers.common.Authorization = `Bearer ${session.user.accessToken}`;
+        let response;
+        if (roomData instanceof FormData) {
+          response = await api.post<RoomApiResponse>(
+            `/rooms/property/${propertyId}`,
+            roomData
+          );
+        } else {
+          response = await api.post<RoomApiResponse>(
+            `/rooms/property/${propertyId}`,
+            roomData
+          );
+        }
         setRooms((prevRooms) => [...prevRooms, response.data.data]);
         toast.success("Room created successfully");
         return response.data.data;
@@ -74,24 +72,34 @@ export function useRooms(propertyId: string) {
             : "Failed to create room";
         toast.error(errorMessage);
         throw err;
+      } finally {
+        delete api.defaults.headers.common.Authorization;
       }
     },
     [propertyId, session?.user?.accessToken]
   );
 
   const updateRoom = useCallback(
-    async (roomId: string, roomData: UpdateRoomInput) => {
+    async (roomId: string, roomData: UpdateRoomInput | FormData) => {
       if (!session?.user?.accessToken) {
         toast.error("Authentication required");
         return;
       }
 
       try {
-        const api = createApiInstance(session.user.accessToken);
-        const response = await api.put<RoomApiResponse>(
-          `/rooms/${roomId}`,
-          roomData
-        );
+        api.defaults.headers.common.Authorization = `Bearer ${session.user.accessToken}`;
+        let response;
+        if (roomData instanceof FormData) {
+          response = await api.put<RoomApiResponse>(
+            `/rooms/${roomId}`,
+            roomData
+          );
+        } else {
+          response = await api.put<RoomApiResponse>(
+            `/rooms/${roomId}`,
+            roomData
+          );
+        }
         setRooms((prevRooms) =>
           prevRooms.map((room) =>
             room.id === roomId ? response.data.data : room
@@ -107,6 +115,8 @@ export function useRooms(propertyId: string) {
             : "Failed to update room";
         toast.error(errorMessage);
         throw err;
+      } finally {
+        delete api.defaults.headers.common.Authorization;
       }
     },
     [session?.user?.accessToken]
@@ -120,7 +130,7 @@ export function useRooms(propertyId: string) {
       }
 
       try {
-        const api = createApiInstance(session.user.accessToken);
+        api.defaults.headers.common.Authorization = `Bearer ${session.user.accessToken}`;
         await api.delete(`/rooms/${roomId}`);
         setRooms((prevRooms) => prevRooms.filter((room) => room.id !== roomId));
         toast.success("Room deleted successfully");
@@ -132,6 +142,8 @@ export function useRooms(propertyId: string) {
             : "Failed to delete room";
         toast.error(errorMessage);
         throw err;
+      } finally {
+        delete api.defaults.headers.common.Authorization;
       }
     },
     [session?.user?.accessToken]

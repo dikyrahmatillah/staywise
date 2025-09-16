@@ -105,7 +105,9 @@ export function PhotosStep() {
       URL.revokeObjectURL(photoToRemove.preview);
     }
 
-    const updatedPictures = pictures.filter((_: PictureItem, i: number) => i !== index);
+    const updatedPictures = pictures.filter(
+      (_: PictureItem, i: number) => i !== index
+    );
     updateFormData({ pictures: updatedPictures });
   };
 
