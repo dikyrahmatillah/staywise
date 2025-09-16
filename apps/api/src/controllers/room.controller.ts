@@ -1,15 +1,17 @@
 import { NextFunction, Request, Response } from "express";
 import {
   createRoomSchema,
-  CreateRoomInput,
   blockRoomDatesSchema,
   unblockRoomDatesSchema,
   getRoomAvailabilitySchema,
   createPriceAdjustmentSchema,
 } from "@repo/schemas";
 import { roomService } from "@/services/room.service.js";
+import { FileService } from "@/services/file.service.js";
 
 export class RoomController {
+  private fileService = new FileService();
+
   createRoom = async (
     request: Request,
     response: Response,
@@ -17,6 +19,13 @@ export class RoomController {
   ) => {
     try {
       const data = createRoomSchema.parse(request.body);
+
+      if (request.file) {
+        const secureUrl = await this.fileService.uploadPicture(
+          request.file.path
+        );
+        data.imageUrl = secureUrl;
+      }
       const { propertyId } = request.params;
 
       const room = await roomService.createRoom(propertyId, data);
@@ -73,6 +82,13 @@ export class RoomController {
     try {
       const { roomId } = request.params;
       const data = createRoomSchema.partial().parse(request.body);
+
+      if (request.file) {
+        const secureUrl = await this.fileService.uploadPicture(
+          request.file.path
+        );
+        data.imageUrl = secureUrl;
+      }
 
       const room = await roomService.updateRoom(roomId, data);
       response.status(200).json({

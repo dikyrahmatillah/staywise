@@ -3,17 +3,17 @@ import z from "zod";
 export const roomSchema = z.object({
   name: z.string().optional(),
   description: z.string().optional(),
-  basePrice: z.number(),
-  beds: z.number().optional(),
+  basePrice: z.coerce.number(),
+  beds: z.coerce.number().optional(),
 });
 
 export const createRoomSchema = z.object({
   name: z.string().min(1),
   description: z.string().optional(),
-  basePrice: z.number().positive(),
-  capacity: z.number().int().min(1).default(1),
+  basePrice: z.coerce.number().positive(),
+  capacity: z.coerce.number().int().min(1).default(1),
   bedType: z.enum(["KING", "QUEEN", "SINGLE", "TWIN"]).optional(),
-  bedCount: z.number().int().min(1).default(1),
+  bedCount: z.coerce.number().int().min(1).default(1),
   imageUrl: z.url().optional(),
 });
 
@@ -44,7 +44,7 @@ export const createPriceAdjustmentSchema = z.object({
   startDate: z.string(),
   endDate: z.string(),
   adjustType: z.enum(["PERCENTAGE", "NOMINAL"]),
-  adjustValue: z.number(),
+  adjustValue: z.coerce.number(),
   applyAllDates: z.boolean().optional().default(true),
   dates: z.array(z.string()).optional(),
 });
