@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft, Diamond } from "lucide-react";
+import { ArrowLeft} from "lucide-react";
 
 function BookingContent() {
   const router = useRouter();
