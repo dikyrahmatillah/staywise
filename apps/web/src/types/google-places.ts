@@ -1,32 +1,17 @@
-export interface PlacePrediction {
-  description: string;
-  matched_substrings: MatchedSubstring[];
-  place_id: string;
-  reference: string;
-  structured_formatting: StructuredFormatting;
-  terms: Term[];
-  types: string[];
-}
-
-export interface MatchedSubstring {
-  length: number;
-  offset: number;
-}
-
-export interface StructuredFormatting {
-  main_text: string;
-  main_text_matched_substrings?: MatchedSubstring[];
-  secondary_text?: string;
-  secondary_text_matched_substrings?: MatchedSubstring[];
-}
-
-export interface Term {
-  offset: number;
-  value: string;
-}
+export type PlacesAutocompleteSuggestion = {
+  placePrediction?: {
+    placeId?: string;
+    structuredFormat?: {
+      mainText?: { text?: string };
+      secondaryText?: { text?: string };
+    };
+    text?: { text?: string };
+    types?: string[];
+  };
+};
 
 export interface AutocompleteResponse {
-  predictions: PlacePrediction[];
+  suggestions?: PlacesAutocompleteSuggestion[];
   status: string;
   error_message?: string;
 }
@@ -35,7 +20,7 @@ export interface AutocompleteErrorResponse {
   error: string;
 }
 
-export type LocationSearchResult = PlacePrediction & {
+export type LocationSearchResult = PlacesAutocompleteSuggestion & {
   id: string;
 };
 
