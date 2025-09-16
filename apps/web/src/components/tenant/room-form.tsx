@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { z } from "zod";
 import {
   Dialog,
@@ -32,7 +33,9 @@ import {
 interface RoomFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (data: CreateRoomInput | UpdateRoomInput) => Promise<void>;
+  onSubmit: (
+    data: CreateRoomInput | UpdateRoomInput | FormData
+  ) => Promise<void>;
   room?: Room;
   title: string;
   description: string;
@@ -63,6 +66,8 @@ export function RoomForm({
     imageUrl: "",
     description: "",
   });
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string>("");
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -76,6 +81,8 @@ export function RoomForm({
         imageUrl: room.imageUrl || "",
         description: room.description || "",
       });
+      setPreviewUrl(room.imageUrl || "");
+      setImageFile(null);
     } else {
       setFormData({
         name: "",
@@ -86,8 +93,20 @@ export function RoomForm({
         imageUrl: "",
         description: "",
       });
+      setPreviewUrl("");
+      setImageFile(null);
     }
   }, [room, open]);
+
+  useEffect(() => {
+    if (!imageFile) return;
+    const url = URL.createObjectURL(imageFile);
+    setPreviewUrl(url);
+    setFormData((prev) => ({ ...prev, imageUrl: url }));
+    return () => {
+      URL.revokeObjectURL(url);
+    };
+  }, [imageFile]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -108,6 +127,14 @@ export function RoomForm({
 
   const handleSelectChange = (value: BedType) => {
     setFormData((prev) => ({ ...prev, bedType: value }));
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files && e.target.files[0];
+    if (file) {
+      setImageFile(file);
+      if (errors.imageUrl) setErrors((prev) => ({ ...prev, imageUrl: "" }));
+    }
   };
 
   const validateForm = () => {
@@ -145,7 +172,22 @@ export function RoomForm({
 
     setIsSubmitting(true);
     try {
-      await onSubmit(validatedData);
+      if (imageFile) {
+        const form = new FormData();
+        form.append("name", String(validatedData.name));
+        form.append("basePrice", String(validatedData.basePrice));
+        form.append("capacity", String(validatedData.capacity));
+        if (validatedData.bedType)
+          form.append("bedType", String(validatedData.bedType));
+        form.append("bedCount", String(validatedData.bedCount));
+        if (validatedData.description)
+          form.append("description", String(validatedData.description));
+        form.append("imageFile", imageFile);
+
+        await onSubmit(form);
+      } else {
+        await onSubmit(validatedData);
+      }
       setFormData({
         name: "",
         basePrice: 0,
@@ -278,15 +320,27 @@ export function RoomForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="imageUrl">Image URL (Optional)</Label>
-            <Input
-              id="imageUrl"
-              name="imageUrl"
-              placeholder="https://example.com/image.jpg"
-              value={formData.imageUrl}
-              onChange={handleInputChange}
+            <Label htmlFor="imageFile">Image (Optional)</Label>
+            <input
+              id="imageFile"
+              name="imageFile"
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
               disabled={isSubmitting}
+              className="block w-full text-sm text-slate-600"
             />
+            {previewUrl && (
+              <div className="mt-2 relative h-40 w-full">
+                <Image
+                  src={previewUrl}
+                  alt="Selected preview"
+                  fill
+                  sizes="(max-width: 640px) 100vw, 40rem"
+                  className="rounded-md object-cover"
+                />
+              </div>
+            )}
             {errors.imageUrl && (
               <p className="text-sm text-red-500">{errors.imageUrl}</p>
             )}

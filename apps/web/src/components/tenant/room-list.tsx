@@ -254,10 +254,6 @@ export function RoomList({ rooms, loading, onEdit, onDelete }: RoomListProps) {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-48">
-                          <DropdownMenuItem onClick={() => onEdit(room)}>
-                            <Edit className="h-4 w-4 mr-2" />
-                            Edit Room Details
-                          </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() => handleManageAvailability(room)}
                           >
