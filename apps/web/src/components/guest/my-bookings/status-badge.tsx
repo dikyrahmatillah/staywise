@@ -26,11 +26,11 @@ const statusConfigs: Record<OrderStatus, StatusConfig> = {
     dot: "bg-green-500",
     label: "Completed",
   },
-  CANCELLED: {
+  CANCELED: {
     variant: "secondary",
     className: "bg-gray-100 text-gray-800 hover:bg-gray-100",
     dot: "bg-gray-500",
-    label: "Cancelled",
+    label: "Canceled",
   },
   EXPIRED: {
     variant: "secondary",
@@ -40,12 +40,23 @@ const statusConfigs: Record<OrderStatus, StatusConfig> = {
   },
 };
 
+const defaultConfig: StatusConfig = {
+  variant: "secondary",
+  className: "bg-gray-100 text-gray-800 hover:bg-gray-100",
+  dot: "bg-gray-500",
+  label: "Unknown Status",
+};
+
 interface StatusBadgeProps {
   status: OrderStatus;
 }
 
 export const StatusBadge = ({ status }: StatusBadgeProps) => {
-  const config = statusConfigs[status];
+  const config = statusConfigs[status] || defaultConfig;
+
+  if (!statusConfigs[status]) {
+    console.warn("StatusBadge received invalid status:", status);
+  }
 
   return (
     <Badge variant={config.variant} className={config.className}>

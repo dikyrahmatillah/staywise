@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import React, { useState } from "react";
+import React from "react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { LayoutDashboard, ReceiptText, UserCog, Heart } from "lucide-react";
@@ -64,47 +64,6 @@ function NavLink({
   );
 }
 
-function GroupItem({ group }: { group: Group }) {
-  const [open, setOpen] = useState(false);
-  const hasChildren = group.items && group.items.length > 0;
-  const Icon = group.icon;
-
-  if (!hasChildren && group.href) {
-    return (
-      <li>
-        <NavLink href={group.href}>
-          <Icon className="size-4" />
-          <span>{group.label}</span>
-        </NavLink>
-      </li>
-    );
-  }
-
-  return (
-    <li>
-      <div
-        className={cn(
-          "overflow-hidden transition-[grid-template-rows]",
-          open ? "grid grid-rows-[1fr]" : "grid grid-rows-[0fr]"
-        )}
-      >
-        <ul className="ml-2 border-l pl-2 text-sm text-muted-foreground overflow-hidden">
-          {group.items?.map((item) => (
-            <li key={item.href}>
-              <NavLink href={item.href}>
-                <span className="relative pl-4">
-                  <span className="absolute left-0 top-1/2 -translate-y-1/2 size-1.5 rounded-full bg-foreground/50" />
-                  {item.label}
-                </span>
-              </NavLink>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </li>
-  );
-}
-
 export function GuestSidebar() {
   return (
     <aside className="h-dvh w-72 shrink-0 border-r bg-background">
@@ -113,9 +72,14 @@ export function GuestSidebar() {
       </div>
       <ScrollArea className="h-[calc(100dvh-3.5rem)] px-2 py-3">
         <ul className="space-y-1">
-          {nav.map((g, idx) => (
-            <React.Fragment key={g.label}>
-              <GroupItem group={g} />
+          {nav.map((group, idx) => (
+            <React.Fragment key={group.label}>
+              <li>
+                <NavLink href={group.href!}>
+                  <group.icon className="size-4" />
+                  <span>{group.label}</span>
+                </NavLink>
+              </li>
               {idx === 0 || idx === 2 ? <Separator className="my-1" /> : null}
             </React.Fragment>
           ))}

@@ -3,7 +3,7 @@ export type OrderStatus =
   | "WAITING_CONFIRMATION"
   | "PROCESSING"
   | "COMPLETED"
-  | "CANCELLED"
+  | "CANCELED"
   | "EXPIRED";
 export type PaymentMethod = "MANUAL_TRANSFER" | "GATEWAY";
 
