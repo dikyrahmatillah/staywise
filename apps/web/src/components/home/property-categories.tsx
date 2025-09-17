@@ -1,0 +1,121 @@
+"use client";
+
+import Link from "next/link";
+import Image from "next/image";
+import { Card } from "@/components/ui/card";
+
+const categories = [
+  {
+    id: 1,
+    name: "Hotels",
+    image:
+      "https://images.unsplash.com/photo-1468824357306-a439d58ccb1c?auto=format&fit=crop&w=1200&q=80",
+    href: "/properties?categoryName=hotels",
+  },
+  {
+    id: 2,
+    name: "Apartments",
+    image:
+      "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1200&q=80",
+    href: "/properties?categoryName=apartments",
+  },
+  {
+    id: 3,
+    name: "Villas",
+    image:
+      "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=1200&q=80",
+    href: "/properties?categoryName=villas",
+  },
+  {
+    id: 4,
+    name: "Resorts",
+    image:
+      "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=1200&q=80",
+    href: "/properties?categoryName=resorts",
+  },
+  {
+    id: 5,
+    name: "Cabins",
+    image:
+      "https://images.unsplash.com/photo-1510798831971-661eb04b3739?auto=format&fit=crop&w=1200&q=80",
+    href: "/properties?categoryName=cabins",
+  },
+  {
+    id: 6,
+    name: "Cottages",
+    image:
+      "https://images.unsplash.com/photo-1478689373814-b2f9a1150a4c?auto=format&fit=crop&w=1200&q=80",
+    href: "/properties?categoryName=cottages",
+  },
+  {
+    id: 8,
+    name: "Hostels",
+    image:
+      "https://images.unsplash.com/photo-1709805619372-40de3f158e83?auto=format&fit=crop&w=1200&q=80",
+    href: "/properties?categoryName=hostels",
+  },
+  {
+    id: 9,
+    name: "House",
+    image:
+      "https://images.unsplash.com/photo-1572120360610-d971b9d7767c?auto=format&fit=crop&w=1200&q=80",
+    href: "/properties?categoryName=house",
+  },
+];
+
+export default function PropertyCategories() {
+  return (
+    <section className="w-full py-12 md:py-20 bg-white">
+      <div className="container mx-auto max-w-7xl px-4 md:px-6">
+        <div className="mb-6">
+          <h2 className="text-3xl font-bold sm:text-4xl mb-2 text-slate-900">
+            Property Categories
+          </h2>
+          <p className="text-slate-600">
+            Browse properties by popular categories
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6 items-stretch">
+          {categories.map((c) => (
+            <Card
+              key={c.id}
+              className="overflow-hidden transition-all duration-300 group cursor-pointer shadow-none border-0 bg-transparent my-0 !p-0"
+            >
+              <Link href={c.href} className="block">
+                <div className="relative overflow-hidden rounded-lg h-40 md:h-44 lg:h-44">
+                  <Image
+                    src={c.image}
+                    alt={c.name}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+
+                  <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors duration-300"></div>
+
+                  <div className="absolute left-4 bottom-4 pr-4">
+                    <h3 className="text-lg md:text-xl font-semibold text-white leading-tight">
+                      {c.name}
+                    </h3>
+                  </div>
+                </div>
+              </Link>
+            </Card>
+          ))}
+          <div className="col-span-2 sm:col-span-1 lg:col-span-2 ">
+            <div className="h-40 md:h-44 rounded-lg border border-slate-200 flex items-center justify-center p-6">
+              <Link
+                href="/search"
+                className="w-full h-full flex items-center justify-center"
+              >
+                <span className="text-lg md:text-xl font-semibold text-slate-900">
+                  Browse all
+                </span>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
