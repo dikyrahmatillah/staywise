@@ -152,11 +152,15 @@ async function seed() {
 
   // create some global property categories (schema has global PropertyCategory)
   const globalCategoryNames = [
-    "APARTMENT",
+    "HOTELS",
+    "APARTMENTS",
+    "VILLAS",
+    "RESORTS",
+    "CABINS",
+    "COTTAGES",
+    "GLAMPING",
+    "HOSTELS",
     "HOUSE",
-    "VILLA",
-    "GUESTHOUSE",
-    "CONDO",
   ];
   const globalCategories: { id: string }[] = [];
   for (const name of globalCategoryNames) {
