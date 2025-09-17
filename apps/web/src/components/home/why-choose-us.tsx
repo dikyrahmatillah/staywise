@@ -1,63 +1,61 @@
-import { Calendar, Users, Star, Search } from "lucide-react";
+import { Card, CardContent, CardTitle } from "@/components/ui/card";
+import { Search, Star, Users } from "lucide-react";
 
 export default function WhyChooseUs() {
+  const items = [
+    {
+      id: "curated",
+      title: "Curated stays",
+      desc: "Only quality properties, vetted by our team.",
+      img: "https://images.unsplash.com/photo-1505691723518-36a2f6f3a8b7?auto=format&fit=crop&w=800&q=80",
+    },
+    {
+      id: "trusted",
+      title: "Trusted hosts",
+      desc: "Hosts rated for reliability and great service.",
+      img: "https://images.unsplash.com/photo-1527980965255-d3b416303d12?auto=format&fit=crop&w=800&q=80",
+    },
+    {
+      id: "prices",
+      title: "Best prices",
+      desc: "Transparent pricing — no hidden fees.",
+      img: "https://images.unsplash.com/photo-1496412705862-e0088f16f791?auto=format&fit=crop&w=800&q=80",
+    },
+  ];
+
   return (
-    <section className="w-full py-16 md:py-24">
-      <div className="container mx-auto max-w-7xl px-4 md:px-6">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-4">
-            Why choose us for your stay?
-          </h2>
-          <p className="text-xl text-slate-600 max-w-2xl mx-auto">
-            We make it simple to find and book the right property for your
-            needs.
-          </p>
+    <section className="w-full py-12 md:py-16">
+      <div className="container mx-auto max-w-6xl px-4 md:px-6">
+        <div className="text-center mb-8">
+          <h2 className="text-xl md:text-3xl font-bold mb-2">Why choose us?</h2>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-24">
-          <div className="text-center">
-            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Search className="w-8 h-8 text-blue-600" />
-            </div>
-            <h3 className="text-xl font-semibold mb-2">Curated Properties</h3>
-            <p className="text-slate-600">
-              Every property is personally selected — from modern apartments to
-              luxury villas — so you know it&apos;s special before you book.
-            </p>
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+          {items.map((it) => (
+            <Card key={it.id} className="flex flex-row items-center gap-2 p-0">
+              <div
+                className="flex items-center justify-center w-16 h-16 border-r border-slate-100"
+                aria-hidden
+              >
+                {it.id === "curated" && (
+                  <Search className="w-6 h-6 text-sky-600" />
+                )}
+                {it.id === "trusted" && (
+                  <Star className="w-6 h-6 text-purple-600" />
+                )}
+                {it.id === "prices" && (
+                  <Users className="w-6 h-6 text-orange-600" />
+                )}
+              </div>
 
-          <div className="text-center">
-            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Calendar className="w-8 h-8 text-green-600" />
-            </div>
-            <h3 className="text-xl font-semibold mb-2">Instant Booking</h3>
-            <p className="text-slate-600">
-              Book directly with property owners and get fast, personal
-              responses. No call centers, no middlemen.
-            </p>
-          </div>
-
-          <div className="text-center">
-            <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Star className="w-8 h-8 text-purple-600" />
-            </div>
-            <h3 className="text-xl font-semibold mb-2">Trusted Hosts</h3>
-            <p className="text-slate-600">
-              Our hosts know their properties inside out and offer local tips to
-              make your stay memorable.
-            </p>
-          </div>
-
-          <div className="text-center">
-            <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Users className="w-8 h-8 text-orange-600" />
-            </div>
-            <h3 className="text-xl font-semibold mb-2">Best Prices</h3>
-            <p className="text-slate-600">
-              Pay the property owner directly. No agency fees, no added extras —
-              just the best price for the property you want.
-            </p>
-          </div>
+              <CardContent className="flex-1 py-3 px-3">
+                <CardTitle className="text-lg text-left">{it.title}</CardTitle>
+                <p className="text-sm text-slate-600 mt-1 text-left">
+                  {it.desc}
+                </p>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </div>
     </section>
