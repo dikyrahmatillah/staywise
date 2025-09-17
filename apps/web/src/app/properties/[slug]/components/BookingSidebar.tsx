@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { CalendarIcon, Loader2, CheckCircle } from "lucide-react";
@@ -34,6 +35,7 @@ export function BookingSidebar({
   unavailableDates = [],
 }: BookingSidebarProps) {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const [checkInDate, setCheckInDate] = useState<Date>();
   const [checkOutDate, setCheckOutDate] = useState<Date>();
   const [adults, setAdults] = useState(1);
@@ -158,6 +160,25 @@ export function BookingSidebar({
   };
 
   const handleBookNow = async () => {
+    if (status === "loading") {
+      toast.info("Checking authentication...");
+      return;
+    }
+
+    if (status === "unauthenticated" || !session) {
+      toast.error("Please log in to continue with your booking");
+
+      // Build return URL for post-login redirect
+      const currentUrl = window.location.pathname + window.location.search;
+      const returnUrl = encodeURIComponent(currentUrl);
+
+      // Delay redirect slightly to let user see the toast
+      setTimeout(() => {
+        router.push(`/guest-signin?callbackUrl=${returnUrl}`);
+      }, 1500);
+      return;
+    }
+
     // Always allow booking attempt, but validate first
     if (!checkInDate || !checkOutDate) {
       toast.error("Please select check-in and check-out dates");
@@ -208,6 +229,8 @@ export function BookingSidebar({
         pricePerNight: pricePerNight.toString(),
         totalPrice: totalPrice.toString(),
         nights: nights.toString(),
+        userId: session.user.id,
+        userEmail: session.user.email,
       });
 
       // Dismiss loading toast
@@ -372,12 +395,20 @@ export function BookingSidebar({
           <Button
             className="w-full text-[16px] rounded-full py-6"
             onClick={handleBookNow}
+            disabled={status === "loading"}
           >
             {isBooking ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Processing...
               </>
+            ) : status === "loading" ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Loading...
+              </>
+            ) : !session ? (
+              "Log in to Book"
             ) : (
               "Book Now"
             )}

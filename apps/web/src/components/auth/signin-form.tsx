@@ -19,9 +19,12 @@ type Props = {
   title?: string;
   signupref?: string;
   primaryClass?: string;
+  callbackUrl?: string;
 };
 
-export default function SignInForm({}: Props) {
+export default function SignInForm({ 
+  callbackUrl = "/dashboard" 
+}: Props) {
   const { register, handleSubmit } = useForm({
     resolver: zodResolver(LoginSchema),
   });
@@ -34,11 +37,12 @@ export default function SignInForm({}: Props) {
   async function onSubmit(data: LoginInput) {
     setIsLoading(true);
     setError("");
+    
     try {
       const result = await signIn("credentials", {
         email: data.email,
         password: data.password,
-        redirect: false,
+        redirect: false, // Don't let NextAuth handle redirect
       });
 
       if (result?.error) {
@@ -49,9 +53,14 @@ export default function SignInForm({}: Props) {
         return;
       }
 
-      toast.success("Successfully signed in!");
-
-      router.push("/dashboard");
+      if (result?.ok) {
+        toast.success("Successfully signed in!");
+        
+        // Manual redirect to the callback URL
+        setTimeout(() => {
+          router.push(callbackUrl);
+        }, 100);
+      }
     } catch (error) {
       const message =
         extractErrorMessage(error) ||
@@ -64,6 +73,14 @@ export default function SignInForm({}: Props) {
       setIsLoading(false);
     }
   }
+
+  // Handle Google sign-in with callback URL
+  const handleGoogleSignIn = () => {
+    signIn("google", { 
+      callbackUrl: callbackUrl,
+      redirect: true 
+    });
+  };
 
   return (
     <>
@@ -154,7 +171,7 @@ export default function SignInForm({}: Props) {
           variant="outline"
           className="w-full cursor-pointer"
           disabled={isLoading}
-          onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+          onClick={handleGoogleSignIn}
         >
           <FcGoogle className="w-5 h-5 mr-2" />
           Continue with Google
