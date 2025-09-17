@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState, useCallback, useRef } from "react";
-import { toast } from "sonner";
-import axios from "axios";
+import React from "react";
 import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
+import { LocationSearchInput } from "@/components/ui/location-search-input";
+import { LocationSuggestionList } from "@/components/ui/location-suggestion-list";
+import { useLocationPicker } from "@/hooks/use-location-picker";
 
 interface LocationPickerProps {
   onLocationSelect: (location: {
@@ -21,111 +22,71 @@ interface LocationPickerProps {
   className?: string;
 }
 
-const mapContainerStyle = {
-  width: "100%",
-  height: "400px",
-};
-
-const defaultCenter = {
-  lat: -6.2088,
-  lng: 106.8456,
-};
-
-const libraries: "places"[] = ["places"];
-
 export function LocationPicker({
   onLocationSelect,
   initialLocation,
   apiKey,
   className = "",
 }: LocationPickerProps) {
-  const [selectedLocation, setSelectedLocation] = useState<{
-    lat: number;
-    lng: number;
-  } | null>(initialLocation || null);
-  const [isLoading, setIsLoading] = useState(false);
-  const mapRef = useRef<google.maps.Map | null>(null);
-
-  const extractLocationDetails = useCallback(
-    async (lat: number, lng: number) => {
-      setIsLoading(true);
-      try {
-        const { data } = await axios.get(`/api/google-places/geocode`, {
-          params: { lat, lng },
-        });
-
-        if (data.results && data.results.length > 0) {
-          const result = data.results[0];
-          const addressComponents = result.address_components;
-
-          let city = "";
-          let country = "";
-
-          addressComponents.forEach(
-            (component: {
-              long_name: string;
-              short_name: string;
-              types: string[];
-            }) => {
-              if (component.types.includes("locality")) {
-                city = component.long_name;
-              } else if (
-                component.types.includes("administrative_area_level_1")
-              ) {
-                if (!city) city = component.long_name;
-              } else if (component.types.includes("country")) {
-                country = component.long_name;
-              }
-            }
-          );
-
-          onLocationSelect({
-            lat,
-            lng,
-            address: result.formatted_address,
-            city: city || "Unknown",
-            country: country || "Unknown",
-          });
-        }
-      } catch {
-        toast.error("Failed to retrieve address details. Please try again.");
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [onLocationSelect]
-  );
-
-  const handleMapClick = useCallback(
-    (event: google.maps.MapMouseEvent) => {
-      if (event.latLng) {
-        const lat = event.latLng.lat();
-        const lng = event.latLng.lng();
-        setSelectedLocation({ lat, lng });
-        extractLocationDetails(lat, lng);
-      }
-    },
-    [extractLocationDetails]
-  );
-
-  const onMapLoad = useCallback((map: google.maps.Map) => {
-    mapRef.current = map;
-  }, []);
+  const {
+    selectedLocation,
+    isLoading,
+    searchValue,
+    setSearchValue,
+    suggestions,
+    suggestionsLoading,
+    suggestionsError,
+    handleSuggestionSelect,
+    handleCurrentLocation,
+    handleMapClick,
+    onMapLoad,
+  } = useLocationPicker({ onLocationSelect, initialLocation });
 
   return (
     <div className={`space-y-4 ${className}`}>
-      <LoadScript googleMapsApiKey={apiKey} libraries={libraries}>
+      <LoadScript googleMapsApiKey={apiKey} libraries={["places"]}>
         <div className="space-y-4">
+          <div className="flex gap-2">
+            <div className="flex-1">
+              <div className="relative">
+                <LocationSearchInput
+                  value={searchValue}
+                  onChange={setSearchValue}
+                  onUseCurrentLocation={handleCurrentLocation}
+                  isLoading={isLoading}
+                />
+
+                {searchValue.length >= 3 && (
+                  <LocationSuggestionList
+                    suggestions={suggestions}
+                    isLoading={suggestionsLoading}
+                    error={suggestionsError}
+                    onSelect={handleSuggestionSelect}
+                  />
+                )}
+              </div>
+            </div>
+          </div>
+
           <div>
             <p className="text-sm text-gray-600">
-              Click anywhere on the map to set the location for your property.
+              Search for a location or click anywhere on the map to set the
+              location for your property.
             </p>
           </div>
 
           <div className="border rounded-lg overflow-hidden">
             <GoogleMap
-              mapContainerStyle={mapContainerStyle}
-              center={selectedLocation || defaultCenter}
+              mapContainerStyle={{
+                width: "100%",
+                height: "400px",
+              }}
+              center={
+                selectedLocation || {
+                  lat: -6.2088,
+                  lng: 106.8456,
+                }
+              }
               zoom={selectedLocation ? 15 : 10}
               onClick={handleMapClick}
               onLoad={onMapLoad}

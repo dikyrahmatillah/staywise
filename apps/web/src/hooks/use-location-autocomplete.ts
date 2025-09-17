@@ -1,13 +1,29 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
-import { AutocompleteResponse, PlacePrediction } from "@/types/google-places";
+import { useState, useCallback, useRef, useEffect } from "react";
+import axios from "axios";
+import {
+  AutocompleteResponse,
+  PlacesAutocompleteSuggestion,
+} from "@/types/google-places";
+
+function hasErrorMessage(obj: unknown): obj is { error_message: string } {
+  if (typeof obj !== "object" || obj === null) return false;
+  const rec = obj as Record<string, unknown>;
+  return (
+    Object.prototype.hasOwnProperty.call(rec, "error_message") &&
+    typeof rec["error_message"] === "string"
+  );
+}
 
 export function useLocationAutocomplete() {
-  const [suggestions, setSuggestions] = useState<PlacePrediction[]>([]);
+  const [suggestions, setSuggestions] = useState<
+    PlacesAutocompleteSuggestion[]
+  >([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const debounceTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const fetchSuggestions = useCallback(async (input: string) => {
     if (!input || input.length < 3) {
@@ -19,22 +35,34 @@ export function useLocationAutocomplete() {
     setError(null);
 
     try {
-      const response = await fetch(
-        `/api/google-places/autocomplete?input=${encodeURIComponent(input)}`
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
+
+      const resp = await axios.get<AutocompleteResponse>(
+        "/api/google-places/autocomplete",
+        {
+          params: { input },
+          signal: controller.signal,
+        }
       );
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data: AutocompleteResponse = await response.json();
-
-      if (data.error_message) {
+      const data = resp.data as unknown;
+      if (hasErrorMessage(data)) {
         throw new Error(data.error_message);
       }
 
-      setSuggestions(data.predictions || []);
+      const responseObj = data as {
+        suggestions?: PlacesAutocompleteSuggestion[];
+      };
+      setSuggestions(responseObj.suggestions || []);
     } catch (err) {
+      if (axios.isAxiosError(err) && err.code === "ERR_CANCELED") {
+        return;
+      }
+
       setError(
         err instanceof Error ? err.message : "Failed to fetch suggestions"
       );
@@ -44,7 +72,6 @@ export function useLocationAutocomplete() {
     }
   }, []);
 
-  // Debounced fetch function
   const debouncedFetchSuggestions = useCallback(
     (input: string) => {
       if (debounceTimeoutRef.current) {
@@ -61,6 +88,15 @@ export function useLocationAutocomplete() {
   const clearSuggestions = useCallback(() => {
     setSuggestions([]);
     setError(null);
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) abortControllerRef.current.abort();
+    };
   }, []);
 
   return {
