@@ -11,7 +11,7 @@ import {
 import { IoClose, IoLocationOutline } from "react-icons/io5";
 import { cn } from "@/lib/utils";
 import { useLocationAutocomplete } from "@/hooks/use-location-autocomplete";
-import { PlacePrediction } from "@/types/google-places";
+import { PlacesAutocompleteSuggestion } from "@/types/google-places";
 
 interface LocationInputProps {
   location: string;
@@ -57,8 +57,12 @@ export function LocationInput({
     }
   };
 
-  const handleSuggestionSelect = (suggestion: PlacePrediction) => {
-    const selectedLocation = suggestion.description;
+  const handleSuggestionSelect = (suggestion: PlacesAutocompleteSuggestion) => {
+    const main =
+      suggestion.placePrediction?.structuredFormat?.mainText?.text ||
+      suggestion.placePrediction?.text?.text ||
+      "";
+    const selectedLocation = main || "";
     setInputValue(selectedLocation);
     onLocationChange(selectedLocation);
     clearSuggestions();
@@ -147,27 +151,37 @@ export function LocationInput({
 
             {suggestions.length > 0 && (
               <div className="py-1">
-                {suggestions.map((suggestion) => (
-                  <button
-                    key={suggestion.place_id}
-                    onClick={() => handleSuggestionSelect(suggestion)}
-                    className="w-full px-3 py-2 text-left hover:bg-gray-100 focus:bg-gray-100 focus:outline-none transition-colors"
-                  >
-                    <div className="flex items-start gap-3">
-                      <IoLocationOutline className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm font-medium text-gray-900 truncate">
-                          {suggestion.structured_formatting.main_text}
-                        </div>
-                        {suggestion.structured_formatting.secondary_text && (
-                          <div className="text-xs text-gray-500 truncate">
-                            {suggestion.structured_formatting.secondary_text}
+                {suggestions.map((suggestion, idx) => {
+                  const main =
+                    suggestion.placePrediction?.structuredFormat?.mainText
+                      ?.text ||
+                    suggestion.placePrediction?.text?.text ||
+                    "";
+                  const secondary =
+                    suggestion.placePrediction?.structuredFormat?.secondaryText
+                      ?.text || "";
+                  return (
+                    <button
+                      key={suggestion.placePrediction?.placeId || idx}
+                      onClick={() => handleSuggestionSelect(suggestion)}
+                      className="w-full px-3 py-2 text-left hover:bg-gray-100 focus:bg-gray-100 focus:outline-none transition-colors"
+                    >
+                      <div className="flex items-start gap-3">
+                        <IoLocationOutline className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-medium text-gray-900 truncate">
+                            {main}
                           </div>
-                        )}
+                          {secondary && (
+                            <div className="text-xs text-gray-500 truncate">
+                              {secondary}
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  </button>
-                ))}
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>
