@@ -12,7 +12,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { LoginInput, LoginSchema } from "@repo/schemas";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { signIn, getSession } from "next-auth/react";
 import { extractErrorMessage } from "@/lib/auth-error.utils";
 
 type Props = {
@@ -22,9 +22,7 @@ type Props = {
   callbackUrl?: string;
 };
 
-export default function SignInForm({ 
-  callbackUrl = "/dashboard" 
-}: Props) {
+export default function SignInForm({ callbackUrl = "/dashboard" }: Props) {
   const { register, handleSubmit } = useForm({
     resolver: zodResolver(LoginSchema),
   });
@@ -37,12 +35,12 @@ export default function SignInForm({
   async function onSubmit(data: LoginInput) {
     setIsLoading(true);
     setError("");
-    
+
     try {
       const result = await signIn("credentials", {
         email: data.email,
         password: data.password,
-        redirect: false, // Don't let NextAuth handle redirect
+        redirect: false,
       });
 
       if (result?.error) {
@@ -55,11 +53,24 @@ export default function SignInForm({
 
       if (result?.ok) {
         toast.success("Successfully signed in!");
-        
-        // Manual redirect to the callback URL
-        setTimeout(() => {
+
+        // Wait briefly for the session to be established, then decide redirect
+        let session = await getSession();
+        const maxAttempts = 5;
+        let attempt = 0;
+        while ((!session || !session.user) && attempt < maxAttempts) {
+          // Wait 200ms and retry
+          await new Promise((res) => setTimeout(res, 200));
+          session = await getSession();
+          attempt += 1;
+        }
+
+        // If user is tenant, always go to dashboard; otherwise follow callbackUrl
+        if (session?.user?.role === "TENANT") {
+          router.push("/dashboard");
+        } else {
           router.push(callbackUrl);
-        }, 100);
+        }
       }
     } catch (error) {
       const message =
@@ -74,12 +85,11 @@ export default function SignInForm({
     }
   }
 
-  // Handle Google sign-in with callback URL
   const handleGoogleSignIn = () => {
-    signIn("google", { 
-      callbackUrl: callbackUrl,
-      redirect: true 
-    });
+    const redirectTo = `/oauth-redirect?callbackUrl=${encodeURIComponent(
+      callbackUrl
+    )}`;
+    signIn("google", { callbackUrl: redirectTo, redirect: true });
   };
 
   return (

@@ -47,36 +47,25 @@ export function UserMenu() {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-40">
           <DropdownMenuItem asChild>
-            <Link
-              href="/guest-signin"
-              className="w-full h-full block cursor-pointer"
-            >
-              Sign in as Guest
+            <Link href="/signin" className="w-full h-full block cursor-pointer">
+              Sign in
             </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link
-              href="/tenant-signin"
-              className="w-full h-full block cursor-pointer"
-            >
-              Sign in as Tenant
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
           <DropdownMenuItem asChild>
             <Link
               href="/guest-signup"
               className="w-full h-full block cursor-pointer"
             >
-              Sign up as Guest
+              Sign up
             </Link>
           </DropdownMenuItem>
+          <DropdownMenuSeparator />
           <DropdownMenuItem asChild>
             <Link
               href="/tenant-signup"
               className="w-full h-full block cursor-pointer"
             >
-              Sign up as Tenant
+              Become a Tenant
             </Link>
           </DropdownMenuItem>
         </DropdownMenuContent>

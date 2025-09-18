@@ -2,21 +2,29 @@
 
 import SignInForm from "@/components/auth/signin-form";
 import AuthHeader from "@/components/auth/auth-header";
-import { Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
-// Separate component to handle searchParams (must be in Suspense boundary)
 function GuestSignContent() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+  const { data: session } = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (session?.user?.role === "TENANT") {
+      router.replace("/dashboard");
+    }
+  }, [session, router]);
 
   return (
     <div className="flex items-center justify-center px-4 py-12 mb-10">
       <div className="w-full max-w-md space-y-8">
         <AuthHeader
-          title="Guest sign in"
+          title="Sign in"
           caption="Don't have an account?"
-          link={`/guest-signup${
+          link={`/signup${
             callbackUrl !== "/dashboard"
               ? `?callbackUrl=${encodeURIComponent(callbackUrl)}`
               : ""
@@ -24,8 +32,8 @@ function GuestSignContent() {
           linkWord="Sign up"
         />
         <SignInForm
-          title="Guest sign in"
-          signupref={`/guest-signup${
+          title="Sign in"
+          signupref={`/signup${
             callbackUrl !== "/dashboard"
               ? `?callbackUrl=${encodeURIComponent(callbackUrl)}`
               : ""
@@ -33,7 +41,6 @@ function GuestSignContent() {
           callbackUrl={callbackUrl}
         />
 
-        {/* Optional: Show where user will be redirected */}
         {callbackUrl !== "/dashboard" && (
           <div className="text-center">
             <p className="text-sm text-muted-foreground">

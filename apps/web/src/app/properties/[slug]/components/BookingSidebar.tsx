@@ -174,7 +174,7 @@ export function BookingSidebar({
 
       // Delay redirect slightly to let user see the toast
       setTimeout(() => {
-        router.push(`/guest-signin?callbackUrl=${returnUrl}`);
+        router.push(`/signin?callbackUrl=${returnUrl}`);
       }, 1500);
       return;
     }

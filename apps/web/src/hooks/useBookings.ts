@@ -99,7 +99,7 @@ export function useBookings(propertyId?: string) {
         setBookings((prevBookings) =>
           prevBookings.map((booking) =>
             booking.id === bookingId
-              ? { ...booking, status: "CANCELLED" as const }
+              ? { ...booking, status: "CANCELED" as const }
               : booking
           )
         );
