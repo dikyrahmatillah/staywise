@@ -31,7 +31,7 @@ export default function TenantSignUpPage() {
       const payload = { email, role: "TENANT" };
       await api.post("/auth/signup", payload);
       toast.success("Verification email sent. Please check your inbox.");
-      router.push("/guest-signin");
+      router.push("/signin");
     } catch (err: unknown) {
       const message = extractErrorMessage(err) || "Signup failed";
       toast.error(message);
@@ -46,7 +46,7 @@ export default function TenantSignUpPage() {
         <AuthHeader
           title="Tenant sign up"
           caption="Already have an account?"
-          link="/tenant-signin"
+          link="/signin"
           linkWord="Sign in"
         />
 

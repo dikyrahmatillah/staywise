@@ -28,10 +28,10 @@ export default function GuestSignUpPage() {
         toast.error(parsed.error.issues[0]?.message || "Invalid email");
         return;
       }
-  const payload = { email, role: "GUEST" };
+      const payload = { email, role: "GUEST" };
       await api.post("/auth/signup", payload);
       toast.success("Verification email sent. Please check your inbox.");
-      router.push("/guest-signin");
+      router.push("/signin");
     } catch (err: unknown) {
       const message = extractErrorMessage(err) || "Signup failed";
       toast.error(message);
@@ -46,7 +46,7 @@ export default function GuestSignUpPage() {
         <AuthHeader
           title="Create your account"
           caption="Already have an account?"
-          link="/guest-signin"
+          link="/signin"
           linkWord="Sign in"
         />
 
