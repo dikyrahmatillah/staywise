@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Card } from "@/components/ui/card";
 import { useEffect, useRef, useState } from "react";
+import PagerControls from "@/components/ui/pager-controls";
 
 const destinations = [
   {
@@ -11,28 +12,28 @@ const destinations = [
     name: "BALI BEACHES",
     image:
       "https://images.unsplash.com/photo-1537953773345-d172ccf13cf1?auto=format&fit=crop&w=800&q=80",
-    href: "/search?location=bali",
+    href: "/properties?location=bali",
   },
   {
     id: 2,
     name: "JAKARTA CITY",
     image:
       "https://images.unsplash.com/photo-1555993539-1732b0258ff1?auto=format&fit=crop&w=800&q=80",
-    href: "/search?location=jakarta",
+    href: "/properties?location=jakarta",
   },
   {
     id: 3,
     name: "YOGYAKARTA CULTURE",
     image:
       "https://images.unsplash.com/photo-1596402184320-417e7178b2cd?auto=format&fit=crop&w=800&q=80",
-    href: "/search?location=yogyakarta",
+    href: "/properties?location=yogyakarta",
   },
   {
     id: 4,
     name: "BANDUNG HILLS",
     image:
       "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=800&q=80",
-    href: "/search?location=bandung",
+    href: "/properties?location=bandung",
   },
 ];
 
@@ -85,35 +86,12 @@ export default function PopularDestinations() {
                 Discover the most sought-after destinations across Indonesia
               </p>
             </div>
-
-            <div className="flex gap-2">
-              {slidesPerView === 1 && (
-                <>
-                  <button
-                    aria-label="Previous"
-                    onClick={prev}
-                    disabled={current === 0}
-                    className="h-9 w-9 rounded bg-white flex items-center justify-center disabled:opacity-50"
-                  >
-                    ‹
-                  </button>
-                  <button
-                    aria-label="Next"
-                    onClick={next}
-                    disabled={current === maxIndex}
-                    className="h-9 w-9 rounded bg-white flex items-center justify-center disabled:opacity-50"
-                  >
-                    ›
-                  </button>
-                </>
-              )}
-            </div>
           </div>
 
           {slidesPerView === 2 ? (
             <div className="grid grid-cols-2 gap-4 md:gap-0">
               {destinations.map((destination) => (
-                <div key={destination.id} className="p-2">
+                <div key={destination.id}>
                   <Card className="overflow-hidden transition-all duration-300 group cursor-pointer shadow-none border-0 bg-transparent my-0 !p-0">
                     <Link href={destination.href} className="block">
                       <div className="relative overflow-hidden aspect-[2/3] md:aspect-[16/9] lg:aspect-[2/3]">
@@ -180,6 +158,15 @@ export default function PopularDestinations() {
                 ))}
               </div>
             </div>
+          )}
+          {/* Mobile controls + progress bar (matches FeaturedProperties) */}
+          {slidesPerView === 1 && (
+            <PagerControls
+              current={current}
+              maxIndex={maxIndex}
+              onPrev={prev}
+              onNext={next}
+            />
           )}
         </div>
       </div>
