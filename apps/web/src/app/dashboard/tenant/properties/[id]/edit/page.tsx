@@ -15,8 +15,5 @@ export default async function EditPropertyPage({ params: { id } }: PageProps) {
     redirect("/auth/signin");
   }
 
-  // TODO: Fetch property data and pass to form
-  // const property = await getPropertyById(id);
-
   return <EditPropertyForm propertyId={id} />;
 }
