@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft} from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 function BookingContent() {
   const router = useRouter();
@@ -77,7 +77,7 @@ function BookingContent() {
                       <span>Pay ${totalPrice.toLocaleString()} now</span>
                     </div>
                     <div className="flex items-center gap-3">
-                      <div className="w-4 h-4 border-2 border-muted-foreground rounded-full"></div>
+                      <div className="w-4 h-4 border-2 border-muted-foreground text-muted-foreground rounded-full"></div>
                       <div>
                         <div>Pay part now, part later</div>
                         <div className="text-sm text-muted-foreground">

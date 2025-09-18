@@ -236,13 +236,6 @@ export function BookingSidebar({
       // Dismiss loading toast
       toast.dismiss(loadingToast);
 
-      // Show success toast
-      toast.success("Redirecting to booking page...", {
-        description: `${nights} night${nights > 1 ? "s" : ""} • ${
-          adults + childrenCount
-        } guest${adults + childrenCount > 1 ? "s" : ""} • ${totalPrice}`,
-      });
-
       router.push(`/booking?${bookingParams.toString()}`);
     } catch (error) {
       console.error("Booking processing error:", error);
