@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
@@ -41,27 +40,7 @@ export default function HeroSection() {
               Find Your Perfect Rental Property
             </h1>
             <p className="mx-auto max-w-[700px] text-xl text-slate-200 md:text-2xl">
-              for{" "}
-              <Link
-                href="/search?type=holidays"
-                className="text-blue-400 hover:underline"
-              >
-                holidays
-              </Link>
-              ,{" "}
-              <Link
-                href="/search?type=business"
-                className="text-blue-400 hover:underline"
-              >
-                business trips
-              </Link>{" "}
-              and{" "}
-              <Link
-                href="/search?type=family"
-                className="text-blue-400 hover:underline"
-              >
-                family stays
-              </Link>
+              for holidays, business trips and family stays
             </p>
           </div>
         </div>

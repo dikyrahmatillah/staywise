@@ -1,5 +1,6 @@
-import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+"use client";
+
+import React from "react";
 import type { GetPropertiesQuery } from "@repo/schemas";
 
 interface PaginationProps {
@@ -9,54 +10,80 @@ interface PaginationProps {
 }
 
 export function Pagination({ totalPages, params, onPage }: PaginationProps) {
-  if (totalPages <= 1) return null;
   const currentPage = params.page || 1;
+  const currentIndex = currentPage - 1; // Convert to 0-based index for progress calculation
+  const maxIndex = totalPages - 1; // Convert to 0-based index
+
+  const trackRef = React.useRef<HTMLDivElement | null>(null);
+
+  if (totalPages <= 1) return null;
+
+  const handleProgressClick = (e: React.MouseEvent) => {
+    if (!trackRef.current) return;
+    const rect = trackRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const ratio = Math.max(0, Math.min(1, x / rect.width));
+    const targetPage = Math.round(ratio * maxIndex) + 1; // Convert back to 1-based page
+    onPage(targetPage);
+  };
+
+  const handlePrev = () => {
+    if (currentPage > 1) {
+      onPage(currentPage - 1);
+    }
+  };
+
+  const handleNext = () => {
+    if (currentPage < totalPages) {
+      onPage(currentPage + 1);
+    }
+  };
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-      <div className="text-sm text-muted-foreground">
+    <div className="flex flex-col gap-4">
+      <div className="text-sm text-muted-foreground text-center">
         Page {currentPage} of {totalPages}
       </div>
-      <div className="flex items-center gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => onPage(currentPage - 1)}
-          disabled={currentPage <= 1}
-        >
-          <ChevronLeft className="h-4 w-4 mr-1" />
-          Previous
-        </Button>
-        <div className="flex items-center gap-1">
-          {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-            let pageNumber: number;
-            if (totalPages <= 5) pageNumber = i + 1;
-            else if (currentPage <= 3) pageNumber = i + 1;
-            else if (currentPage >= totalPages - 2)
-              pageNumber = totalPages - 4 + i;
-            else pageNumber = currentPage - 2 + i;
-            return (
-              <Button
-                key={pageNumber}
-                variant={pageNumber === currentPage ? "default" : "outline"}
-                size="sm"
-                className="w-10 h-10"
-                onClick={() => onPage(pageNumber)}
-              >
-                {pageNumber}
-              </Button>
-            );
-          })}
+
+      <div className="flex items-center gap-4">
+        <div className="flex-1">
+          <div
+            ref={trackRef}
+            onClick={handleProgressClick}
+            role="progressbar"
+            aria-valuemin={1}
+            aria-valuemax={totalPages}
+            aria-valuenow={currentPage}
+            className="w-full h-2 bg-slate-100 rounded overflow-hidden cursor-pointer"
+          >
+            <div
+              className="h-2 bg-primary transition-[width] duration-300"
+              style={{
+                width:
+                  maxIndex > 0 ? `${(currentIndex / maxIndex) * 100}%` : "0%",
+              }}
+            />
+          </div>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => onPage(currentPage + 1)}
-          disabled={currentPage >= totalPages}
-        >
-          Next
-          <ChevronRight className="h-4 w-4 ml-1" />
-        </Button>
+
+        <div className="flex gap-2">
+          <button
+            aria-label="Previous page"
+            onClick={handlePrev}
+            disabled={currentPage <= 1}
+            className="h-9 w-9 rounded bg-white flex items-center justify-center disabled:opacity-50"
+          >
+            ‹
+          </button>
+          <button
+            aria-label="Next page"
+            onClick={handleNext}
+            disabled={currentPage >= totalPages}
+            className="h-9 w-9 rounded bg-primary text-primary-foreground flex items-center justify-center disabled:opacity-50 hover:bg-primary/90"
+          >
+            ›
+          </button>
+        </div>
       </div>
     </div>
   );

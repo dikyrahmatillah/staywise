@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Users, Star } from "lucide-react";
+import PagerControls from "@/components/ui/pager-controls";
 import { useProperties } from "@/hooks/useProperties";
 import type { Property } from "@/types/property";
 import { useEffect, useState } from "react";
@@ -42,15 +43,15 @@ export default function FeaturedProperties() {
   return (
     <section className="w-full py-6 md:py-12">
       <div className="container mx-auto max-w-7xl px-4 md:px-6">
-        <div className="mb-4">
-          <div className="mb-2">
-            <h2 className="text-2xl font-bold sm:text-4xl mb-0 text-slate-900">
-              Featured Properties
-            </h2>
-            <p className="text-slate-600">Handpicked stays for you</p>
+        <div className="relative">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-2xl font-bold sm:text-4xl text-slate-900">
+                Featured Properties
+              </h2>
+              <p className="text-slate-600">Handpicked stays for you</p>
+            </div>
           </div>
-
-          {/* top area (title) */}
         </div>
 
         <div className="overflow-hidden">
@@ -78,8 +79,8 @@ export default function FeaturedProperties() {
                 style={{ flex: `0 0 ${100 / slidesPerView}%` }}
                 className="px-2"
               >
-                <Card className="overflow-hidden hover:shadow-lg transition-shadow">
-                  <div className="aspect-[4/3] bg-slate-200 relative overflow-hidden">
+                <Card className="overflow-hidden transition-shadow border-none shadow-none bg-transparent">
+                  <div className="aspect-[4/3] bg-slate-200 relative rounded-xl overflow-hidden">
                     <Image
                       src={
                         property.imageUrl ||
@@ -91,11 +92,11 @@ export default function FeaturedProperties() {
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  <CardContent className="p-4">
-                    <div className="text-sm text-slate-500 mb-2">
+                  <CardContent className="p-1">
+                    <div className="text-sm text-slate-500 mb-0.5">
                       {property.city}
                     </div>
-                    <CardTitle className="text-lg mb-2 line-clamp-1">
+                    <CardTitle className="text-lg mb-0.5 line-clamp-1">
                       <Link
                         href={`/properties/${property.slug}`}
                         className="hover:text-blue-600"
@@ -103,8 +104,7 @@ export default function FeaturedProperties() {
                         {property.name}
                       </Link>
                     </CardTitle>
-
-                    <div className="flex items-center gap-4 text-sm text-slate-600 mb-3">
+                    <div className="flex items-center gap-2 text-sm text-slate-600 mb-1">
                       <div className="flex items-center gap-1">
                         <Users className="w-4 h-4" />
                         <span>{property.maxGuests} Guests</span>
@@ -113,8 +113,7 @@ export default function FeaturedProperties() {
                         <span>{property.Rooms.length || 0} Rooms</span>
                       </div>
                     </div>
-
-                    <p className="text-sm text-slate-600 mb-4 line-clamp-2">
+                    <p className="text-sm text-slate-600 mb-1 line-clamp-2">
                       {property.description}
                     </p>
 
@@ -138,37 +137,12 @@ export default function FeaturedProperties() {
             ))}
           </div>
         </div>
-        <div className="flex items-center gap-4 mt-4">
-          <div className="flex-1">
-            <div className="w-full h-2 bg-slate-100 rounded overflow-hidden">
-              <div
-                className="h-2 bg-primary transition-[width] duration-300"
-                style={{
-                  width: maxIndex > 0 ? `${(current / maxIndex) * 100}%` : "0%",
-                }}
-              />
-            </div>
-          </div>
-
-          <div className="flex gap-2">
-            <button
-              aria-label="Previous"
-              onClick={prev}
-              disabled={current === 0}
-              className="h-9 w-9 rounded bg-white flex items-center justify-center disabled:opacity-50"
-            >
-              ‹
-            </button>
-            <button
-              aria-label="Next"
-              onClick={next}
-              disabled={current === maxIndex}
-              className="h-9 w-9 rounded bg-primary text-primary-foreground flex items-center justify-center disabled:opacity-50 hover:bg-primary/90"
-            >
-              ›
-            </button>
-          </div>
-        </div>
+        <PagerControls
+          current={current}
+          maxIndex={maxIndex}
+          onPrev={prev}
+          onNext={next}
+        />
       </div>
     </section>
   );
