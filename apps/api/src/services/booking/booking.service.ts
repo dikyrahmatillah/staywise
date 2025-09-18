@@ -1,13 +1,14 @@
 import { prisma } from "@repo/database";
 import { AppError } from "@/errors/app.error.js";
-import { 
+import {
   validateBookingDataSafe,
   bookingValidationUtils,
   type BookingFormData,
-  type BookingValidationResult
+  type BookingValidationResult,
 } from "@repo/schemas";
 import { BookingCronService } from "./booking-cron.service.js";
-import type { Decimal } from '@prisma/client/runtime/library';
+import { midtransService } from "@/services/midtrans.service.js";
+import { BookingPaymentMethod } from "@repo/database/generated/prisma/index.js";
 
 // Define booking input interface since CreateBookingInput doesn't exist
 interface CreateBookingInput {
@@ -21,6 +22,7 @@ interface CreateBookingInput {
   pets?: number;
   pricePerNight: number;
   totalAmount: number;
+  paymentMethod?: BookingPaymentMethod;
 }
 
 interface RoomAvailabilityResult {
@@ -38,9 +40,11 @@ interface RoomAvailabilityResult {
   }>;
 }
 
-interface BookingCreationData extends Omit<CreateBookingInput, 'checkIn' | 'checkOut'> {
+interface BookingCreationData
+  extends Omit<CreateBookingInput, "checkIn" | "checkOut"> {
   checkIn: string | Date;
   checkOut: string | Date;
+  paymentMethod?: BookingPaymentMethod;
 }
 
 // Extended interface for validation that includes guest info
@@ -61,10 +65,32 @@ export class BookingService {
     this.cronService = new BookingCronService();
   }
 
-  /**
-   * Validate booking data using the comprehensive schema validation
-   */
-  private validateBookingInput(data: BookingCreationData): BookingValidationResult {
+  private async initializeMidtransPayment(booking: any) {
+    try {
+      const snapToken = await midtransService.createSnapToken(booking);
+      console.log(
+        "Initializing Midtrans payment for booking:",
+        booking.orderCode
+      );
+      return snapToken;
+    } catch (error) {
+      console.error("Failed to initialize Midtrans payment:", error);
+
+      // Revert to manual transfer
+      await prisma.booking.update({
+        where: { id: booking.id },
+        data: { paymentMethod: "MANUAL_TRANSFER" },
+      });
+
+      throw new AppError(
+        "Payment gateway unavailable. Booking converted to manual transfer.",
+        400
+      );
+    }
+  }
+  private validateBookingInput(
+    data: BookingCreationData
+  ): BookingValidationResult {
     const checkInDate = new Date(data.checkIn);
     const checkOutDate = new Date(data.checkOut);
 
@@ -84,11 +110,13 @@ export class BookingService {
   async createBooking(data: BookingCreationData) {
     // First, validate the booking data using our schema
     const validation = this.validateBookingInput(data);
-    
+
     if (!validation.success) {
-      const errorMessages = bookingValidationUtils.formatValidationErrors(validation.errors || {});
+      const errorMessages = bookingValidationUtils.formatValidationErrors(
+        validation.errors || {}
+      );
       throw new AppError(
-        `Booking validation failed: ${errorMessages.join(', ')}`,
+        `Booking validation failed: ${errorMessages.join(", ")}`,
         400
       );
     }
@@ -150,8 +178,13 @@ export class BookingService {
     }
 
     // Validate booking period using our utilities
-    if (!bookingValidationUtils.isValidBookingPeriod(checkInDate, checkOutDate)) {
-      throw new AppError("Invalid booking period. Check-in must be today or in the future, and check-out must be after check-in", 400);
+    if (
+      !bookingValidationUtils.isValidBookingPeriod(checkInDate, checkOutDate)
+    ) {
+      throw new AppError(
+        "Invalid booking period. Check-in must be today or in the future, and check-out must be after check-in",
+        400
+      );
     }
 
     // Calculate total amount using our validation utilities
@@ -169,7 +202,7 @@ export class BookingService {
       );
     }
 
-    return prisma.booking.create({
+    const booking = await prisma.booking.create({
       data: {
         userId: data.userId,
         tenantId: property.tenantId,
@@ -183,7 +216,7 @@ export class BookingService {
         totalAmount: data.totalAmount,
         expiresAt,
         status: "WAITING_PAYMENT",
-        paymentMethod: "MANUAL_TRANSFER",
+        paymentMethod: data.paymentMethod || "MANUAL_TRANSFER",
       },
       include: {
         Property: { select: { name: true, maxGuests: true } },
@@ -191,6 +224,11 @@ export class BookingService {
         User: { select: { firstName: true, lastName: true, email: true } },
       },
     });
+    if (data.paymentMethod === "PAYMENT_GATEWAY") {
+      await this.initializeMidtransPayment(booking);
+    }
+
+    return booking;
   }
 
   async checkRoomAvailability(
@@ -204,14 +242,17 @@ export class BookingService {
 
     // Use our validation utilities for date validation
     if (!bookingValidationUtils.isValidBookingPeriod(checkIn, checkOut)) {
-      throw new AppError("Invalid date range. Check-out must be after check-in and dates cannot be in the past", 400);
+      throw new AppError(
+        "Invalid date range. Check-out must be after check-in and dates cannot be in the past",
+        400
+      );
     }
 
     // Calculate nights using standard calculation
     const nights = Math.ceil(
       (checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24)
     );
-    
+
     if (nights > 365) {
       throw new AppError("Maximum stay is 365 nights", 400);
     }
@@ -339,12 +380,12 @@ export class BookingService {
     };
 
     const validation = validateBookingDataSafe(bookingData, 10);
-    
+
     if (!validation.success) {
       return {
         available: false,
         validationErrors: validation.errors,
-        message: "Booking parameters are invalid"
+        message: "Booking parameters are invalid",
       };
     }
 
@@ -379,7 +420,11 @@ export class BookingService {
     return {
       ...availability,
       nights,
-      totalPrice: bookingValidationUtils.calculateTotalPrice(checkInDate, checkOutDate, pricePerNight),
+      totalPrice: bookingValidationUtils.calculateTotalPrice(
+        checkInDate,
+        checkOutDate,
+        pricePerNight
+      ),
       validationPassed: true,
     };
   }
@@ -446,6 +491,8 @@ export class BookingService {
         Property: { select: { name: true, city: true } },
         Room: { select: { name: true } },
         User: { select: { firstName: true, lastName: true, email: true } },
+        paymentProof: true,
+        gatewayPayment: true,
       },
     });
   }
@@ -478,17 +525,15 @@ export class BookingService {
   /**
    * Validate booking data for updates or new bookings
    */
-  async validateBookingData(
-    data: {
-      checkInDate: Date;
-      checkOutDate: Date;
-      adults?: number;
-      children?: number;
-      pets?: number;
-      propertyId: string;
-      pricePerNight: number;
-    }
-  ): Promise<BookingValidationResult> {
+  async validateBookingData(data: {
+    checkInDate: Date;
+    checkOutDate: Date;
+    adults?: number;
+    children?: number;
+    pets?: number;
+    propertyId: string;
+    pricePerNight: number;
+  }): Promise<BookingValidationResult> {
     const bookingData: Partial<BookingFormData> = {
       checkInDate: data.checkInDate,
       checkOutDate: data.checkOutDate,
@@ -505,11 +550,15 @@ export class BookingService {
   /**
    * Calculate booking totals using validation utilities
    */
-  calculateBookingTotals(checkInDate: Date, checkOutDate: Date, pricePerNight: number) {
+  calculateBookingTotals(
+    checkInDate: Date,
+    checkOutDate: Date,
+    pricePerNight: number
+  ) {
     const nights = Math.ceil(
       (checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24)
     );
-    
+
     const totalPrice = bookingValidationUtils.calculateTotalPrice(
       checkInDate,
       checkOutDate,
@@ -519,7 +568,10 @@ export class BookingService {
     return {
       nights,
       totalPrice,
-      isValidPeriod: bookingValidationUtils.isValidBookingPeriod(checkInDate, checkOutDate)
+      isValidPeriod: bookingValidationUtils.isValidBookingPeriod(
+        checkInDate,
+        checkOutDate
+      ),
     };
   }
 

@@ -22,7 +22,7 @@ enum OrderStatus {
     EXPIRED
 }
 
-enum PaymentMethod {
+enum BookingPaymentMethod {
     MANUAL_TRANSFER
     PAYMENT_GATEWAY
 }
@@ -267,23 +267,23 @@ model PriceAdjustmentDate {
 }
 
 model Booking {
-    id            String        @id @default(uuid())
+    id            String               @id @default(uuid())
     userId        String
     tenantId      String
     propertyId    String
     roomId        String
-    orderCode     String        @unique @db.VarChar(30)
-    status        OrderStatus   @default(WAITING_PAYMENT)
-    paymentMethod PaymentMethod @default(MANUAL_TRANSFER)
+    orderCode     String               @unique @db.VarChar(30)
+    status        OrderStatus          @default(WAITING_PAYMENT)
+    paymentMethod BookingPaymentMethod @default(MANUAL_TRANSFER)
     checkInDate   DateTime
     checkOutDate  DateTime
     nights        Int
-    qty           Int           @default(1)
-    pricePerNight Decimal       @db.Decimal(12, 2)
-    totalAmount   Decimal       @db.Decimal(12, 2)
+    qty           Int                  @default(1)
+    pricePerNight Decimal              @db.Decimal(12, 2)
+    totalAmount   Decimal              @db.Decimal(12, 2)
     expiresAt     DateTime?
-    createdAt     DateTime      @default(now())
-    updatedAt     DateTime      @updatedAt
+    createdAt     DateTime             @default(now())
+    updatedAt     DateTime             @updatedAt
 
     User     User     @relation("BookingUser", fields: [userId], references: [id], onDelete: Cascade)
     Property Property @relation(fields: [propertyId], references: [id])
@@ -321,6 +321,8 @@ model GatewayPayment {
     orderId     String    @unique
     provider    String    @db.VarChar(50)
     providerRef String?   @db.VarChar(100)
+    snapToken   String?   @db.Text // Midtrans Snap token
+    redirectUrl String?   @db.Text
     paidAmount  Decimal?  @db.Decimal(12, 2)
     paidAt      DateTime?
     status      String?   @db.VarChar(30)
