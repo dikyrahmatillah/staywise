@@ -1,24 +1,24 @@
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
-import { Search, Star, Users } from "lucide-react";
+import { CalendarCheck, Gift, Headphones } from "lucide-react";
 
 export default function WhyChooseUs() {
   const items = [
     {
-      id: "curated",
-      title: "Curated stays",
-      desc: "Only quality properties, vetted by our team.",
+      id: "flexible",
+      title: "Flexible bookings",
+      desc: "Change or cancel your reservation with minimal fuss and clear policies.",
       img: "https://images.unsplash.com/photo-1505691723518-36a2f6f3a8b7?auto=format&fit=crop&w=800&q=80",
     },
     {
-      id: "trusted",
-      title: "Trusted hosts",
-      desc: "Hosts rated for reliability and great service.",
+      id: "perks",
+      title: "Perks & savings",
+      desc: "Unlock exclusive discounts, bundled extras, and member-only offers.",
       img: "https://images.unsplash.com/photo-1527980965255-d3b416303d12?auto=format&fit=crop&w=800&q=80",
     },
     {
-      id: "prices",
-      title: "Best prices",
-      desc: "Transparent pricing — no hidden fees.",
+      id: "support",
+      title: "24/7 customer support",
+      desc: "Get help any time, from booking to check-out — we're always available.",
       img: "https://images.unsplash.com/photo-1496412705862-e0088f16f791?auto=format&fit=crop&w=800&q=80",
     },
   ];
@@ -37,14 +37,14 @@ export default function WhyChooseUs() {
                 className="flex items-center justify-center w-16 h-16 border-r border-slate-100"
                 aria-hidden
               >
-                {it.id === "curated" && (
-                  <Search className="w-6 h-6 text-sky-600" />
+                {it.id === "flexible" && (
+                  <CalendarCheck className="w-6 h-6 text-sky-600" />
                 )}
-                {it.id === "trusted" && (
-                  <Star className="w-6 h-6 text-purple-600" />
+                {it.id === "perks" && (
+                  <Gift className="w-6 h-6 text-purple-600" />
                 )}
-                {it.id === "prices" && (
-                  <Users className="w-6 h-6 text-orange-600" />
+                {it.id === "support" && (
+                  <Headphones className="w-6 h-6 text-orange-600" />
                 )}
               </div>
 

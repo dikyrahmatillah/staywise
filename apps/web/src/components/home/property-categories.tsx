@@ -67,23 +67,25 @@ export default function PropertyCategories() {
   return (
     <section className="w-full py-12 md:py-20 bg-white">
       <div className="container mx-auto max-w-7xl px-4 md:px-6">
-        <div className="mb-6">
-          <h2 className="text-3xl font-bold sm:text-4xl mb-2 text-slate-900">
-            Property Categories
-          </h2>
-          <p className="text-slate-600">
-            Browse properties by popular categories
-          </p>
+        <div className="relative">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-3xl font-bold sm:text-4xl text-slate-900">
+                Property Categories
+              </h2>
+              <p className="text-slate-600">Browse properties by popular categories</p>
+            </div>
+          </div>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6 items-stretch">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4 items-stretch">
           {categories.map((c) => (
             <Card
               key={c.id}
               className="overflow-hidden transition-all duration-300 group cursor-pointer shadow-none border-0 bg-transparent my-0 !p-0"
             >
               <Link href={c.href} className="block">
-                <div className="relative overflow-hidden rounded-lg h-40 md:h-44 lg:h-44">
+                <div className="relative overflow-hidden rounded-md h-36 md:h-40 lg:h-40">
                   <Image
                     src={c.image}
                     alt={c.name}
@@ -93,8 +95,8 @@ export default function PropertyCategories() {
 
                   <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors duration-300"></div>
 
-                  <div className="absolute left-4 bottom-4 pr-4">
-                    <h3 className="text-lg md:text-xl font-semibold text-white leading-tight">
+                  <div className="absolute left-3 bottom-3 pr-2">
+                    <h3 className="text-base md:text-lg font-semibold text-white leading-tight">
                       {c.name}
                     </h3>
                   </div>
@@ -103,9 +105,9 @@ export default function PropertyCategories() {
             </Card>
           ))}
           <div className="col-span-2 sm:col-span-1 lg:col-span-2 ">
-            <div className="h-40 md:h-44 rounded-lg border border-slate-200 flex items-center justify-center p-6">
+            <div className="h-36 md:h-40 rounded-md border border-slate-200 flex items-center justify-center p-4">
               <Link
-                href="/search"
+                href="/properties"
                 className="w-full h-full flex items-center justify-center"
               >
                 <span className="text-lg md:text-xl font-semibold text-slate-900">
