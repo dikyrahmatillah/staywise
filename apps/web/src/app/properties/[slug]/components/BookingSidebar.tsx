@@ -20,6 +20,7 @@ import {
   validateBookingDataSafe,
   type BookingFormData,
 } from "@repo/schemas";
+import { formatCurrency } from "@/lib/booking-formatters";
 
 interface BookingSidebarProps {
   pricePerNight: number;
@@ -261,7 +262,7 @@ export function BookingSidebar({
         <CardHeader>
           <div className="flex items-baseline gap-0.5">
             <span className="font-sans text-3xl font-bold">
-              ${pricePerNight}
+              {formatCurrency(pricePerNight)}
             </span>
             <span className="font-sans text-muted-foreground">/night</span>
           </div>

@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { TableCell, TableRow } from "@/components/ui/table";
-import type { BookingTransaction } from "@/types/booking";
+import type { BookingTransaction } from "@repo/types";
 import { PropertyInfo } from "@/components/guest/my-bookings/property-info";
 import { BookingInfo } from "@/components/guest/my-bookings/booking-info";
 import { PaymentInfo } from "@/components/guest/my-bookings/payment-info";

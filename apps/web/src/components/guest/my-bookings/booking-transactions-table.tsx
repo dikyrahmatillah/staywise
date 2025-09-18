@@ -5,7 +5,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import type { BookingTransaction } from "@/types/booking";
+import type { BookingTransaction } from "@repo/types";
 import { BookingTableRow } from "./booking-table-row";
 import { BookingCard } from "./booking-card";
 

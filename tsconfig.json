@@ -8,7 +8,8 @@
     "baseUrl": ".",
     "paths": {
       "@repo/schemas": ["packages/schemas"],
-      "@repo/database": ["packages/database"]
+      "@repo/database": ["packages/database"],
+      "@repo/types": ["packages/types/src"]
     },
 
     "forceConsistentCasingInFileNames": true,

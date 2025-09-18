@@ -2,6 +2,7 @@ import { prisma } from "@repo/database";
 import { AppError } from "@/errors/app.error.js";
 import { cloudinary } from "@/configs/cloudinary.config.js";
 import { uploadToCloudinary } from "@/middlewares/upload-payment-proof.middleware.js";
+import type { PaymentProofStatus, OrderStatus } from "@repo/types";
 
 export class PaymentProofService {
   async uploadPaymentProof(
@@ -125,6 +126,60 @@ export class PaymentProofService {
     } catch (error) {
       return null;
     }
+  }
+
+   async reviewPaymentProof(orderId: string, reviewerId: string, status: PaymentProofStatus) {
+    const booking = await prisma.booking.findUnique({
+      where: { id: orderId },
+      include: { paymentProof: true },
+    });
+
+    if (!booking) {
+      throw new AppError("Booking not found", 404);
+    }
+
+    if (!booking.paymentProof) {
+      throw new AppError("No payment proof uploaded yet", 400);
+    }
+
+    if (status === "accepted") {
+      return prisma.$transaction([
+        prisma.paymentProof.update({
+          where: { orderId },
+          data: {
+            acceptedAt: new Date(),
+            rejectedAt: null,
+            reviewedBy: reviewerId,
+          },
+        }),
+        prisma.booking.update({
+          where: { id: orderId },
+          data: { status: "COMPLETED" as OrderStatus },
+        }),
+      ]);
+    }
+
+    if (status === "rejected") {
+      return prisma.$transaction([
+        prisma.paymentProof.update({
+          where: { orderId },
+          data: {
+            rejectedAt: new Date(),
+            acceptedAt: null,
+            reviewedBy: reviewerId,
+          },
+        }),
+        prisma.booking.update({
+          where: { id: orderId },
+          data: { status: "WAITING_PAYMENT" as OrderStatus },
+        }),
+      ]);
+    }
+
+    return prisma.paymentProof.update({
+      where: { orderId },
+      data: { acceptedAt: null, rejectedAt: null, reviewedBy: reviewerId },
+    });
   }
 }
 

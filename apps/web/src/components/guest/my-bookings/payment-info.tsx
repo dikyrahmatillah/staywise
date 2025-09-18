@@ -1,9 +1,9 @@
 import { formatCurrency, formatPaymentMethod } from "@/lib/booking-formatters"
-import type { PaymentMethod } from "@/types/booking"
+import type { BookingPaymentMethod } from "@repo/types"
 
 interface PaymentInfoProps {
   totalAmount: number
-  paymentMethod: PaymentMethod
+  paymentMethod: BookingPaymentMethod
 }
 
 export const PaymentInfo = ({ totalAmount, paymentMethod }: PaymentInfoProps) => {
