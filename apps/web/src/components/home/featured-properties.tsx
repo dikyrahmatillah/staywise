@@ -8,6 +8,7 @@ import PagerControls from "@/components/ui/pager-controls";
 import { useProperties } from "@/hooks/useProperties";
 import type { Property } from "@/types/property";
 import { useEffect, useState } from "react";
+import { formatCurrency } from "@/lib/booking-formatters";
 
 export default function FeaturedProperties() {
   const { data, isLoading, isError } = useProperties({ limit: 8 });
@@ -119,7 +120,7 @@ export default function FeaturedProperties() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-lg font-bold">
-                          ${property.Rooms[0]?.basePrice || 0}
+                          {formatCurrency(property.Rooms[0]?.basePrice || 0)}
                           <span className="text-sm font-normal text-slate-600">
                             /night
                           </span>

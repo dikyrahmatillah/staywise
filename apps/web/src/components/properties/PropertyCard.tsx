@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { Property } from "@/types/property";
+import { formatCurrency } from "@/lib/booking-formatters";
 
 interface PropertyCardProps {
   property: Property;
@@ -72,7 +73,9 @@ export function PropertyCard({ property }: PropertyCardProps) {
 
         <div className="flex items-center justify-between">
           <div>
-            <span className="text-xl font-bold">${basePrice}</span>
+            <span className="text-xl font-bold">
+              {formatCurrency(basePrice)}
+            </span>
             <span className="text-muted-foreground">/night</span>
           </div>
           <Link href={`/properties/${property.slug}`}>

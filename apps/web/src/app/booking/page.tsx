@@ -1,14 +1,26 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, CreditCard, Building2, Loader2 } from "lucide-react";
+import { FileDropzone } from "@/components/guest/file-dropzone";
+import { ImagePreview } from "@/components/guest/image-preview";
 
 function BookingContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  const [currentStep, setCurrentStep] = useState(1);
+  const [selectedPaymentType, setSelectedPaymentType] = useState<
+    "full" | "partial"
+  >("full");
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<
+    "bank" | "midtrans" | null
+  >(null);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const getBookingDetails = () => {
     const checkInParam = searchParams.get("checkIn");
@@ -24,7 +36,7 @@ function BookingContent() {
       children: Number.parseInt(searchParams.get("children") || "0"),
       pets: Number.parseInt(searchParams.get("pets") || "0"),
       pricePerNight: Number.parseInt(
-        searchParams.get("pricePerNight") || "xxxxx"
+        searchParams.get("pricePerNight") || "250"
       ),
     };
   };
@@ -37,6 +49,30 @@ function BookingContent() {
   );
   const totalPrice = bookingDetails.pricePerNight * nights;
   const totalGuests = bookingDetails.adults + bookingDetails.children;
+
+  const handleStep1Continue = () => {
+    setCurrentStep(2);
+  };
+
+  const handlePaymentMethodSelect = (method: "bank" | "midtrans") => {
+    setSelectedPaymentMethod(method);
+    if (method === "midtrans") {
+      setCurrentStep(3);
+    }
+  };
+
+  const handleFileSelect = (file: File) => {
+    setUploadedFile(file);
+  };
+
+  const handleProcessPayment = async () => {
+    setIsProcessing(true);
+    // Simulate payment processing
+    setTimeout(() => {
+      setIsProcessing(false);
+      setCurrentStep(3);
+    }, 2000);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -60,7 +96,13 @@ function BookingContent() {
             {/* Step 1 - Payment Selection */}
             <Card className="p-6">
               <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-8 h-8 bg-foreground text-background rounded-full flex items-center justify-center text-sm font-semibold">
+                <div
+                  className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
+                    currentStep >= 1
+                      ? "bg-foreground text-background"
+                      : "border-2 border-muted-foreground text-muted-foreground"
+                  }`}
+                >
                   1
                 </div>
                 <div className="flex-1">
@@ -73,11 +115,25 @@ function BookingContent() {
 
                   <div className="space-y-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-4 h-4 border-2 border-foreground rounded-full bg-foreground"></div>
+                      <div
+                        className={`w-4 h-4 border-2 rounded-full cursor-pointer ${
+                          selectedPaymentType === "full"
+                            ? "border-foreground bg-foreground"
+                            : "border-muted-foreground"
+                        }`}
+                        onClick={() => setSelectedPaymentType("full")}
+                      ></div>
                       <span>Pay ${totalPrice.toLocaleString()} now</span>
                     </div>
                     <div className="flex items-center gap-3">
-                      <div className="w-4 h-4 border-2 border-muted-foreground text-muted-foreground rounded-full"></div>
+                      <div
+                        className={`w-4 h-4 border-2 rounded-full cursor-pointer ${
+                          selectedPaymentType === "partial"
+                            ? "border-foreground bg-foreground"
+                            : "border-muted-foreground"
+                        }`}
+                        onClick={() => setSelectedPaymentType("partial")}
+                      ></div>
                       <div>
                         <div>Pay part now, part later</div>
                         <div className="text-sm text-muted-foreground">
@@ -89,8 +145,12 @@ function BookingContent() {
                     </div>
                   </div>
 
-                  <Button className="w-full mt-4 bg-foreground text-background hover:bg-foreground/90">
-                    Continue
+                  <Button
+                    className="w-full mt-4 bg-foreground text-background hover:bg-foreground/90"
+                    onClick={handleStep1Continue}
+                    disabled={currentStep > 1}
+                  >
+                    {currentStep > 1 ? "Completed" : "Continue"}
                   </Button>
                 </div>
               </div>
@@ -99,13 +159,120 @@ function BookingContent() {
             {/* Step 2 - Payment Method */}
             <Card className="p-6">
               <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-8 h-8 border-2 border-muted-foreground rounded-full flex items-center justify-center text-sm font-semibold text-muted-foreground">
+                <div
+                  className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
+                    currentStep >= 2
+                      ? "bg-foreground text-background"
+                      : "border-2 border-muted-foreground text-muted-foreground"
+                  }`}
+                >
                   2
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-muted-foreground">
+                  <h3
+                    className={`text-lg font-semibold mb-2 ${
+                      currentStep < 2 ? "text-muted-foreground" : ""
+                    }`}
+                  >
                     Add payment method
                   </h3>
+
+                  {currentStep >= 2 && (
+                    <div className="space-y-4 mt-4">
+                      {/* Manual Bank Transfer Option */}
+                      <div
+                        className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${
+                          selectedPaymentMethod === "bank"
+                            ? "border-foreground bg-muted/50"
+                            : "border-muted-foreground hover:border-foreground/50"
+                        }`}
+                        onClick={() => handlePaymentMethodSelect("bank")}
+                      >
+                        <div className="flex items-center gap-3">
+                          <Building2 className="h-5 w-5" />
+                          <div>
+                            <div className="font-medium">
+                              Manual Transfer via Bank
+                            </div>
+                            <div className="text-sm text-muted-foreground">
+                              Upload payment proof after transfer
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Payment Gateway Option */}
+                      <div
+                        className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${
+                          selectedPaymentMethod === "midtrans"
+                            ? "border-foreground bg-muted/50"
+                            : "border-muted-foreground hover:border-foreground/50"
+                        }`}
+                        onClick={() => handlePaymentMethodSelect("midtrans")}
+                      >
+                        <div className="flex items-center gap-3">
+                          <CreditCard className="h-5 w-5" />
+                          <div>
+                            <div className="font-medium">
+                              Payment Gateway (Midtrans)
+                            </div>
+                            <div className="text-sm text-muted-foreground">
+                              Pay instantly with credit card or e-wallet
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {selectedPaymentMethod === "bank" && (
+                        <div className="mt-6 space-y-4">
+                          <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                            <p className="text-sm text-blue-800 font-medium mb-2">
+                              Bank Transfer Details:
+                            </p>
+                            <div className="text-sm text-blue-700 space-y-1">
+                              <p>Bank: BCA</p>
+                              <p>Account: 1234567890</p>
+                              <p>Name: Villa Booking Indonesia</p>
+                              <p>
+                                Amount: $
+                                {selectedPaymentType === "full"
+                                  ? totalPrice.toLocaleString()
+                                  : Math.round(
+                                      totalPrice * 0.5
+                                    ).toLocaleString()}
+                              </p>
+                            </div>
+                          </div>
+
+                          {!uploadedFile ? (
+                            <FileDropzone onFileSelect={handleFileSelect} />
+                          ) : (
+                            <div className="space-y-4">
+                              <ImagePreview
+                                file={uploadedFile}
+                                onRemove={() => setUploadedFile(null)}
+                                title="Payment Proof"
+                              />
+                              <Button
+                                className="w-full"
+                                onClick={handleProcessPayment}
+                                disabled={isProcessing}
+                              >
+                                {isProcessing ? (
+                                  <>
+                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                    Processing...
+                                  </>
+                                ) : (
+                                  "Submit Payment Proof"
+                                )}
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </Card>
@@ -113,13 +280,34 @@ function BookingContent() {
             {/* Step 3 - Review Request */}
             <Card className="p-6">
               <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-8 h-8 border-2 border-muted-foreground rounded-full flex items-center justify-center text-sm font-semibold text-muted-foreground">
+                <div
+                  className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
+                    currentStep >= 3
+                      ? "bg-foreground text-background"
+                      : "border-2 border-muted-foreground text-muted-foreground"
+                  }`}
+                >
                   3
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-muted-foreground">
+                  <h3
+                    className={`text-lg font-semibold ${
+                      currentStep < 3 ? "text-muted-foreground" : ""
+                    }`}
+                  >
                     Review your request
                   </h3>
+                  {currentStep >= 3 && (
+                    <div className="mt-4">
+                      <p className="text-green-600 font-medium">
+                        Payment submitted successfully!
+                      </p>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Your booking request has been sent to the host for
+                        approval.
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             </Card>
@@ -130,7 +318,7 @@ function BookingContent() {
             <Card className="p-6">
               <div className="flex gap-4 mb-6">
                 <img
-                  src="/luxury-villa-pool.png"
+                  src="/luxury-villa-pool.jpg"
                   alt="Villa Bali"
                   className="w-24 h-24 rounded-lg object-cover"
                 />
@@ -216,6 +404,33 @@ function BookingContent() {
                   </div>
                 </div>
               </div>
+
+              {(isProcessing || currentStep >= 3) && (
+                <div className="border-t pt-4 mt-6">
+                  <h4 className="font-medium mb-4">Transaction Status</h4>
+                  {isProcessing ? (
+                    <div className="flex items-center gap-2 text-blue-600">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span className="text-sm">
+                        Processing payment proof...
+                      </span>
+                    </div>
+                  ) : currentStep >= 3 ? (
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-green-600">
+                        <div className="w-2 h-2 bg-green-600 rounded-full"></div>
+                        <span className="text-sm font-medium">
+                          Payment submitted
+                        </span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Awaiting host confirmation. You&apos;ll receive an email
+                        once approved.
+                      </p>
+                    </div>
+                  ) : null}
+                </div>
+              )}
             </Card>
           </div>
         </div>
