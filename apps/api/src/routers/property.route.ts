@@ -23,6 +23,19 @@ router.get(
   verifyRoleMiddleware,
   propertyController.getPropertiesByTenant
 );
+router.get(
+  "/:id",
+  verifyTokenMiddleware,
+  verifyRoleMiddleware,
+  propertyController.getPropertyById
+);
+router.put(
+  "/:id",
+  verifyTokenMiddleware,
+  verifyRoleMiddleware,
+  upload.fields([{ name: "propertyImages", maxCount: 10 }]),
+  propertyController.updateProperty
+);
 router.delete(
   "/:propertyId",
   verifyTokenMiddleware,

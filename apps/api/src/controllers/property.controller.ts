@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import {
   getPropertiesQuerySchema,
   createPropertyInputSchema,
+  updatePropertyInputSchema,
 } from "@repo/schemas";
 import { PropertyService } from "@/services/property.service.js";
 import { FileService } from "@/services/file.service.js";
@@ -225,6 +226,142 @@ export class PropertyController {
         tenantId
       );
       response.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  getPropertyById = async (
+    request: Request,
+    response: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const propertyId = request.params.id;
+      const tenantId = request.user?.id;
+
+      const property = await this.propertyService.getPropertyById(
+        propertyId,
+        tenantId
+      );
+      response.status(200).json({
+        message: "Property fetched successfully",
+        data: property,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  updateProperty = async (
+    request: Request,
+    response: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const propertyId = request.params.id;
+      const tenantId = request.user?.id;
+
+      if (!tenantId) {
+        return response.status(401).json({ message: "Unauthorized" });
+      }
+
+      const files = request.files as
+        | { [fieldname: string]: Express.Multer.File[] }
+        | undefined;
+      const propertyImages = files?.["propertyImages"] || [];
+
+      const updateData: any = {};
+
+      // Basic property data
+      if (request.body.name) updateData.name = request.body.name;
+      if (request.body.description)
+        updateData.description = request.body.description;
+      if (request.body.country) updateData.country = request.body.country;
+      if (request.body.city) updateData.city = request.body.city;
+      if (request.body.address) updateData.address = request.body.address;
+      if (request.body.maxGuests)
+        updateData.maxGuests = parseInt(request.body.maxGuests);
+      if (request.body.latitude)
+        updateData.latitude = parseFloat(request.body.latitude);
+      if (request.body.longitude)
+        updateData.longitude = parseFloat(request.body.longitude);
+
+      // Category data
+      if (request.body.propertyCategoryId) {
+        updateData.propertyCategoryId = request.body.propertyCategoryId;
+      } else if (request.body.customCategoryId) {
+        updateData.customCategoryId = request.body.customCategoryId;
+      } else if (request.body.customCategory) {
+        updateData.customCategory = JSON.parse(request.body.customCategory);
+      }
+
+      // Facilities
+      if (request.body.facilities) {
+        updateData.facilities = JSON.parse(request.body.facilities);
+      }
+
+      // Handle property images
+      // Strategy: keep any existing pictures provided by `existingPictures` and
+      // append newly uploaded files. Only remove pictures if the client sends
+      // an explicit list that omits them (client should send full desired list
+      // via `existingPictures`) or include a deletion mechanism in the future.
+      const finalPictures: Array<{ imageUrl: string; note?: string | null }> =
+        [];
+
+      // Start with existing pictures if provided
+      if (request.body.existingPictures) {
+        try {
+          const existing = JSON.parse(request.body.existingPictures);
+          if (Array.isArray(existing)) {
+            for (const p of existing) {
+              // Expect existing pictures to at least contain imageUrl
+              if (p && p.imageUrl) {
+                finalPictures.push({
+                  imageUrl: p.imageUrl,
+                  note: p.note ?? null,
+                });
+              }
+            }
+          }
+        } catch (err) {
+          // ignore parse errors and continue with new uploads only
+        }
+      }
+
+      // Upload any new images and append
+      if (propertyImages.length > 0) {
+        const propertyPicturesData = request.body.propertyPictures
+          ? JSON.parse(request.body.propertyPictures)
+          : [];
+
+        for (let i = 0; i < propertyImages.length; i++) {
+          const imageUrl = await this.fileService.uploadPicture(
+            propertyImages[i].path
+          );
+          const pictureData = propertyPicturesData.find(
+            (p: any) => p.fileIndex === i
+          );
+          finalPictures.push({ imageUrl, note: pictureData?.note || null });
+        }
+      }
+
+      if (finalPictures.length > 0) {
+        updateData.pictures = finalPictures;
+      }
+
+      const validatedData = updatePropertyInputSchema.parse(updateData);
+
+      const property = await this.propertyService.updateProperty(
+        propertyId,
+        tenantId,
+        validatedData
+      );
+
+      response.status(200).json({
+        message: "Property updated successfully",
+        data: property,
+      });
     } catch (error) {
       next(error);
     }
