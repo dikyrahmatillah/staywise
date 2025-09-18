@@ -68,7 +68,7 @@ export default function CompleteProfileForm({ token }: Props) {
           headers: { "Content-Type": "multipart/form-data" },
         });
         toast.success("Registration completed. Please sign in.");
-        router.replace("/guest-signin");
+        router.replace("/signin");
       } catch (err: unknown) {
         const message =
           extractErrorMessage(err) || "Failed to complete registration";
