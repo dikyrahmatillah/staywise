@@ -6,7 +6,6 @@ import { Footer } from "@/components/footer";
 import QueryProvider from "@/components/providers/query-provider";
 import AuthProvider from "@/components/providers/auth-provider";
 import { Toaster } from "@/components/ui/sonner";
-import { SessionProvider } from "next-auth/react";
 
 const figtree = Figtree({
   variable: "--font-figtree",
@@ -32,14 +31,12 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${figtree.variable} ${geistMono.variable} antialiased`}>
         <AuthProvider>
-          <SessionProvider>
-            <QueryProvider>
-              <Toaster />
-              <Header />
-              <main className="min-h-[calc(100vh-12rem)]">{children}</main>
-              <Footer />
-            </QueryProvider>
-          </SessionProvider>
+          <QueryProvider>
+            <Toaster />
+            <Header />
+            <main className="min-h-[calc(100vh-12rem)]">{children}</main>
+            <Footer />
+          </QueryProvider>
         </AuthProvider>
       </body>
     </html>
