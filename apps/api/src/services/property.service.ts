@@ -63,7 +63,7 @@ export class PropertyService {
       guest,
       pets,
       name: nameFilter,
-      categoryName,
+      category,
       sortBy,
       sortOrder,
     } = params;
@@ -78,9 +78,9 @@ export class PropertyService {
 
     if (nameFilter) where.name = { contains: nameFilter, mode: "insensitive" };
 
-    if (categoryName)
+    if (category)
       where.PropertyCategory = {
-        is: { name: { contains: categoryName, mode: "insensitive" } },
+        is: { name: { contains: category, mode: "insensitive" } },
       };
 
     if (typeof guest === "number") where.maxGuests = { gte: guest };
@@ -105,15 +105,64 @@ export class PropertyService {
       }
     }
 
-    let orderBy: any = { createdAt: "desc" };
-    if (sortBy === "name") {
-      orderBy = { name: sortOrder || "asc" };
-    } else if (sortBy === "price") {
-      orderBy = { Rooms: { _min: { basePrice: sortOrder || "asc" } } };
+    const total = await prisma.property.count({ where });
+
+    if (sortBy === "price") {
+      const matchingProperties = await prisma.property.findMany({
+        where,
+        select: { id: true },
+      });
+
+      const propertyIds = matchingProperties.map((p) => p.id);
+
+      if (propertyIds.length === 0) return { properties: [], total };
+
+      const grouped = await prisma.room.groupBy({
+        by: ["propertyId"],
+        where: { propertyId: { in: propertyIds } },
+        _min: { basePrice: true },
+      });
+
+      const minPriceMap = new Map<string, number>();
+      for (const g of grouped) {
+        const val = g._min?.basePrice;
+        minPriceMap.set(
+          g.propertyId,
+          val === null || val === undefined
+            ? Number.POSITIVE_INFINITY
+            : Number(val)
+        );
+      }
+
+      const propsWithMin = propertyIds.map((id) => ({
+        id,
+        minPrice: minPriceMap.get(id) ?? Number.POSITIVE_INFINITY,
+      }));
+
+      propsWithMin.sort((a, b) => {
+        if (a.minPrice === b.minPrice) return 0;
+        if ((sortOrder || "asc") === "asc") return a.minPrice - b.minPrice;
+        return b.minPrice - a.minPrice;
+      });
+
+      const pagedIds = propsWithMin.slice(skip, skip + take).map((p) => p.id);
+
+      const properties = await prisma.property.findMany({
+        where: { id: { in: pagedIds } },
+        include: { PropertyCategory: true, Rooms: true, Pictures: true },
+      });
+
+      // Preserve the order of pagedIds
+      const propsById = new Map(properties.map((p) => [p.id, p]));
+      const ordered = pagedIds
+        .map((id) => propsById.get(id))
+        .filter(Boolean) as any[];
+
+      return { properties: ordered, total };
     }
 
-    // Get total count for pagination
-    const total = await prisma.property.count({ where });
+    const orderBy: any =
+      sortBy === "name" ? { name: sortOrder || "asc" } : { createdAt: "desc" };
 
     const properties = await prisma.property.findMany({
       where,

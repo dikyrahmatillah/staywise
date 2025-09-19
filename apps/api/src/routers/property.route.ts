@@ -23,6 +23,8 @@ router.get(
   verifyRoleMiddleware,
   propertyController.getPropertiesByTenant
 );
+
+router.get("/:slug", propertyController.getProperty);
 router.get(
   "/:id",
   verifyTokenMiddleware,
@@ -42,6 +44,5 @@ router.delete(
   verifyRoleMiddleware,
   propertyController.deleteProperty
 );
-router.get("/:slug", propertyController.getProperty);
 
 export default router;
