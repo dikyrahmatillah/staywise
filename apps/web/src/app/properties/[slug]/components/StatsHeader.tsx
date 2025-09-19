@@ -1,6 +1,6 @@
 "use client";
 
-import { Users, Bed, Bath, Star } from "lucide-react";
+import { Users, Bed, Star } from "lucide-react";
 
 export function StatsHeader({
   city,
@@ -10,7 +10,8 @@ export function StatsHeader({
   reviewCount,
   maxGuests,
   bedrooms,
-  bathrooms,
+  totalBeds,
+  bedTypeSummary,
 }: {
   city: string;
   address?: string | null;
@@ -19,7 +20,8 @@ export function StatsHeader({
   reviewCount: number;
   maxGuests?: number | null;
   bedrooms: number;
-  bathrooms: number;
+  totalBeds?: number;
+  bedTypeSummary?: string;
 }) {
   return (
     <div className="mb-6">
@@ -34,16 +36,32 @@ export function StatsHeader({
             <div className="flex gap-6">
               <div className="flex items-center gap-2">
                 <Users className="h-4 w-4" />
-                <span className="font-medium">{maxGuests} Guests</span>
+                {/* Show guest range similar to PropertyCard: 1-N or N Guests when equal */}
+                <span className="font-medium">
+                  {(() => {
+                    const minGuests = 1;
+                    const max = maxGuests ?? 1;
+                    return minGuests === max
+                      ? `${max} Guests`
+                      : `${minGuests}-${max} Guests`;
+                  })()}
+                </span>
               </div>
               <div className="flex items-center gap-2">
                 <Bed className="h-4 w-4" />
                 <span className="font-medium">{bedrooms} Bedrooms</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Bath className="h-4 w-4" />
-                <span className="font-medium">{bathrooms} Bathrooms</span>
-              </div>
+              {totalBeds && (
+                <div className="flex items-center gap-2">
+                  <Bed className="h-4 w-4" />
+                  <span className="font-medium">{totalBeds} Beds</span>
+                </div>
+              )}
+              {bedTypeSummary && (
+                <div className="flex items-center gap-2">
+                  <span className="font-medium text-xs">{bedTypeSummary}</span>
+                </div>
+              )}
             </div>
           </div>
 

@@ -79,61 +79,62 @@ export default function FeaturedProperties() {
                 style={{ flex: `0 0 ${100 / slidesPerView}%` }}
                 className="px-2"
               >
-                <Card className="overflow-hidden transition-shadow border bg-white shadow-sm">
-                  <div className="aspect-[4/3] bg-slate-200 relative overflow-hidden">
-                    <Image
-                      src={
-                        property.imageUrl ||
-                        `https://picsum.photos/400/300?random=${property.id}`
-                      }
-                      alt={property.name}
-                      width={400}
-                      height={300}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <CardContent className="px-3 pb-3">
-                    <CardTitle className="text-lg mb-1 line-clamp-1">
-                      <Link
-                        href={`/properties/${property.slug}`}
-                        className="hover:text-blue-600"
-                      >
+                <Link
+                  href={`/properties/${property.slug}`}
+                  aria-label={`View details for ${property.name}`}
+                  className="block"
+                >
+                  <Card className="overflow-hidden transition-shadow border bg-white shadow-sm">
+                    <div className="aspect-[4/3] bg-slate-200 relative overflow-hidden">
+                      <Image
+                        src={
+                          property.imageUrl ||
+                          `https://picsum.photos/400/300?random=${property.id}`
+                        }
+                        alt={property.name}
+                        width={400}
+                        height={300}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <CardContent className="px-3 pb-3">
+                      <CardTitle className="text-lg mb-1 line-clamp-1">
                         {property.name}
-                      </Link>
-                    </CardTitle>
-                    <div className="flex items-center gap-2 text-sm text-slate-500 mb-1">
-                      <MapPin className="w-4 h-4 text-slate-400" />
-                      <span>{property.city}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-slate-600 mb-1">
-                      <div className="flex items-center gap-1">
-                        <Users className="w-4 h-4" />
-                        <span>{property.maxGuests} Guests</span>
+                      </CardTitle>
+                      <div className="flex items-center gap-2 text-sm text-slate-500 mb-1">
+                        <MapPin className="w-4 h-4 text-slate-400" />
+                        <span>{property.city}</span>
                       </div>
-                      <div className="flex items-center gap-1">
-                        <span>{property.Rooms.length || 0} Rooms</span>
+                      <div className="flex items-center gap-2 text-sm text-slate-600 mb-1">
+                        <div className="flex items-center gap-1">
+                          <Users className="w-4 h-4" />
+                          <span>{property.maxGuests} Guests</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span>{property.Rooms.length || 0} Rooms</span>
+                        </div>
                       </div>
-                    </div>
-                    <p className="text-sm text-slate-600 mb-4 line-clamp-2">
-                      {property.description}
-                    </p>
+                      <p className="text-sm text-slate-600 mb-4 line-clamp-2">
+                        {property.description}
+                      </p>
 
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-lg font-bold">
-                          {formatCurrency(property.Rooms[0]?.basePrice || 0)}
-                          <span className="text-sm font-normal text-slate-600">
-                            /night
-                          </span>
-                        </p>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-lg font-bold">
+                            {formatCurrency(property.Rooms[0]?.basePrice || 0)}
+                            <span className="text-sm font-normal text-slate-600">
+                              /night
+                            </span>
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                          <span className="text-sm font-medium">4.8</span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-1">
-                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                        <span className="text-sm font-medium">4.8</span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
+                </Link>
               </div>
             ))}
           </div>
