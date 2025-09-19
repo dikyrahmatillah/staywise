@@ -10,56 +10,56 @@ const categories = [
     name: "Hotels",
     image:
       "https://images.unsplash.com/photo-1468824357306-a439d58ccb1c?auto=format&fit=crop&w=1200&q=80",
-    href: "/properties?categoryName=hotels",
+    href: "/properties?category=hotels",
   },
   {
     id: 2,
     name: "Apartments",
     image:
       "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1200&q=80",
-    href: "/properties?categoryName=apartments",
+    href: "/properties?category=apartments",
   },
   {
     id: 3,
     name: "Villas",
     image:
       "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=1200&q=80",
-    href: "/properties?categoryName=villas",
+    href: "/properties?category=villas",
   },
   {
     id: 4,
     name: "Resorts",
     image:
       "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=1200&q=80",
-    href: "/properties?categoryName=resorts",
+    href: "/properties?category=resorts",
   },
   {
     id: 5,
     name: "Cabins",
     image:
       "https://images.unsplash.com/photo-1510798831971-661eb04b3739?auto=format&fit=crop&w=1200&q=80",
-    href: "/properties?categoryName=cabins",
+    href: "/properties?category=cabins",
   },
   {
     id: 6,
     name: "Cottages",
     image:
       "https://images.unsplash.com/photo-1478689373814-b2f9a1150a4c?auto=format&fit=crop&w=1200&q=80",
-    href: "/properties?categoryName=cottages",
+    href: "/properties?category=cottages",
   },
   {
     id: 8,
     name: "Hostels",
     image:
       "https://images.unsplash.com/photo-1709805619372-40de3f158e83?auto=format&fit=crop&w=1200&q=80",
-    href: "/properties?categoryName=hostels",
+    href: "/properties?category=hostels",
   },
   {
     id: 9,
     name: "House",
     image:
       "https://images.unsplash.com/photo-1572120360610-d971b9d7767c?auto=format&fit=crop&w=1200&q=80",
-    href: "/properties?categoryName=house",
+    href: "/properties?category=house",
   },
 ];
 
@@ -73,7 +73,9 @@ export default function PropertyCategories() {
               <h2 className="text-3xl font-bold sm:text-4xl text-slate-900">
                 Property Categories
               </h2>
-              <p className="text-slate-600">Browse properties by popular categories</p>
+              <p className="text-slate-600">
+                Browse properties by popular categories
+              </p>
             </div>
           </div>
         </div>

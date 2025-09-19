@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { useState, useMemo } from "react";
-import type { BookingTransaction } from "@/types/booking";
+import type { BookingTransaction } from "@repo/types";
 import { BookingTransactionsTable } from "@/components/guest/my-bookings/booking-transactions-table";
 import { useBookings } from "@/hooks/useBookings";
 import { RefreshCw } from "lucide-react";

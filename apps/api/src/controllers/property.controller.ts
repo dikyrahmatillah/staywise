@@ -146,7 +146,7 @@ export class PropertyController {
         guest: adults + children,
         pets: parsed.pets,
         name: parsed.name,
-        categoryName: parsed.categoryName,
+        category: parsed.category,
         sortBy: parsed.sortBy,
         sortOrder: parsed.sortOrder,
       };
