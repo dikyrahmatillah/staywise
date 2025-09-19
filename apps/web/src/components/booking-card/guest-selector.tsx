@@ -45,7 +45,9 @@ export function GuestSelector({
           <div className="flex items-center justify-between">
             <div>
               <div className="font-medium">Adults</div>
-              <div className="text-sm text-muted-foreground">Ages 13 or above</div>
+              <div className="text-sm text-muted-foreground">
+                Ages 13 or above
+              </div>
             </div>
             <div className="flex items-center gap-3">
               <Button
@@ -101,7 +103,9 @@ export function GuestSelector({
           <div className="flex items-center justify-between">
             <div>
               <div className="font-medium">Pets</div>
-              <div className="text-sm text-muted-foreground">Bringing a service animal?</div>
+              <div className="text-sm text-muted-foreground">
+                Bringing a service animal?
+              </div>
             </div>
             <div className="flex items-center gap-3">
               <Button

@@ -1,6 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { format, parseISO } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Star } from "lucide-react";
 import type { ReviewItem } from "./types";
@@ -12,11 +14,15 @@ export function Reviews({
   reviews: ReviewItem[];
   total: number;
 }) {
+  const [showAll, setShowAll] = useState(false);
+
+  const visibleReviews = showAll ? reviews : reviews.slice(0, 3);
+
   return (
     <section id="reviews">
       <h3 className="text-xl font-semibold mb-4">Reviews</h3>
       <div className="space-y-6">
-        {reviews.map((review) => (
+        {visibleReviews.map((review) => (
           <div key={review.id} className="border-b pb-6 last:border-b-0">
             <div className="flex items-start gap-3">
               <Avatar>
@@ -35,7 +41,10 @@ export function Reviews({
                     ))}
                   </div>
                   <span className="text-sm text-muted-foreground">
-                    {review.date}
+                    {(() => {
+                      const d = parseISO(review.date);
+                      return format(d, "yyyy-MM-dd");
+                    })()}
                   </span>
                 </div>
                 <p className="text-muted-foreground">{review.comment}</p>
@@ -43,9 +52,16 @@ export function Reviews({
             </div>
           </div>
         ))}
-        <Button variant="outline" className="w-full">
-          Show all {total} reviews
-        </Button>
+
+        {reviews.length > 3 && (
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={() => setShowAll((s) => !s)}
+          >
+            {showAll ? "Show less" : `Show all ${total} reviews`}
+          </Button>
+        )}
       </div>
     </section>
   );

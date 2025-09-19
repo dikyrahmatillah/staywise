@@ -36,7 +36,16 @@ export function StatsHeader({
             <div className="flex gap-6">
               <div className="flex items-center gap-2">
                 <Users className="h-4 w-4" />
-                <span className="font-medium">{maxGuests} Guests</span>
+                {/* Show guest range similar to PropertyCard: 1-N or N Guests when equal */}
+                <span className="font-medium">
+                  {(() => {
+                    const minGuests = 1;
+                    const max = maxGuests ?? 1;
+                    return minGuests === max
+                      ? `${max} Guests`
+                      : `${minGuests}-${max} Guests`;
+                  })()}
+                </span>
               </div>
               <div className="flex items-center gap-2">
                 <Bed className="h-4 w-4" />
