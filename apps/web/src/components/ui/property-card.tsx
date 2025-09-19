@@ -16,6 +16,7 @@ import {
   MapPin,
   Users,
   Bed,
+  Star,
   Eye,
   Edit,
   Trash2,
@@ -33,6 +34,7 @@ import {
   formatGuestDisplay,
   getTotalRooms,
 } from "@/components/tenant/property-utils";
+import usePropertyDetails from "@/hooks/usePropertyDetails";
 
 interface PropertyCardProps {
   property: PropertyResponse;
@@ -46,6 +48,9 @@ export default function PropertyCard({
   const totalRooms = getTotalRooms(property);
   const priceDisplay = formatPriceDisplay(property);
   const guestDisplay = formatGuestDisplay(property);
+  const { data } = usePropertyDetails(property.slug);
+  const averageRating = data?.averageRating ?? undefined;
+  const reviewCount = Number(data?.reviewCount ?? 0);
 
   return (
     <Card
@@ -107,6 +112,17 @@ export default function PropertyCard({
                     <DollarSign className="h-4 w-4" />
                     <span>{priceDisplay}/night</span>
                   </div>
+                  {averageRating !== undefined ? (
+                    <div className="flex items-center gap-1">
+                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                      <span className="font-medium">
+                        {averageRating.toFixed(1)}
+                      </span>
+                      <span className="text-muted-foreground">
+                        ({reviewCount})
+                      </span>
+                    </div>
+                  ) : null}
                 </div>
               </div>
 

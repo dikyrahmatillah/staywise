@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Filter, Search } from "lucide-react";
+import { IoClose } from "react-icons/io5";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,20 +22,18 @@ export interface FiltersBarProps {
 
 export function FiltersBar({ params, onChange }: FiltersBarProps) {
   const [nameFilter, setNameFilter] = useState(params.name || "");
-  const [categoryFilter, setCategoryFilter] = useState(
-    params.categoryName || ""
-  );
+  const [categoryFilter, setCategoryFilter] = useState(params.category || "");
 
   useEffect(() => {
     setNameFilter(params.name || "");
-    setCategoryFilter(params.categoryName || "");
-  }, [params.name, params.categoryName]);
+    setCategoryFilter(params.category || "");
+  }, [params.name, params.category]);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     onChange({
       name: nameFilter,
-      categoryName: categoryFilter,
+      category: categoryFilter,
     });
   };
 
@@ -43,7 +42,7 @@ export function FiltersBar({ params, onChange }: FiltersBarProps) {
     setCategoryFilter("");
     onChange({
       name: "",
-      categoryName: "",
+      category: "",
       sortBy: "",
       sortOrder: "",
       page: 1,
@@ -69,20 +68,49 @@ export function FiltersBar({ params, onChange }: FiltersBarProps) {
                 placeholder="Search by property name..."
                 value={nameFilter}
                 onChange={(e) => setNameFilter(e.target.value)}
-                className="pl-10"
+                className="pl-10 pr-8"
               />
+              {nameFilter && (
+                <button
+                  type="button"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 flex items-center justify-center text-muted-foreground cursor-pointer"
+                  onClick={() => {
+                    setNameFilter("");
+                    onChange({ name: "" });
+                  }}
+                  aria-label="Clear name"
+                >
+                  <IoClose className="h-3 w-3" />
+                </button>
+              )}
             </div>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="category">Category</Label>
-            <Input
-              id="category"
-              type="text"
-              placeholder="Search by category..."
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-            />
+            <div className="relative">
+              <Input
+                id="category"
+                type="text"
+                placeholder="Search by category..."
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                className="pr-8"
+              />
+              {categoryFilter && (
+                <button
+                  type="button"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 flex items-center justify-center text-muted-foreground cursor-pointer"
+                  onClick={() => {
+                    setCategoryFilter("");
+                    onChange({ category: "" });
+                  }}
+                  aria-label="Clear category"
+                >
+                  <IoClose className="h-3 w-3" />
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="space-y-2">
@@ -94,6 +122,10 @@ export function FiltersBar({ params, onChange }: FiltersBarProps) {
                   : ""
               }
               onValueChange={(value) => {
+                if (!value || value === "none") {
+                  onChange({ sortBy: "", sortOrder: "" });
+                  return;
+                }
                 const [sortBy, sortOrder] = value.split("-") as [
                   "name" | "price",
                   "asc" | "desc"
@@ -105,6 +137,7 @@ export function FiltersBar({ params, onChange }: FiltersBarProps) {
                 <SelectValue placeholder="Sort by..." />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="none">Default</SelectItem>
                 <SelectItem value="name-asc">Name (A-Z)</SelectItem>
                 <SelectItem value="name-desc">Name (Z-A)</SelectItem>
                 <SelectItem value="price-asc">Price (Low to High)</SelectItem>

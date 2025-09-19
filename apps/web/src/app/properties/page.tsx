@@ -40,7 +40,7 @@ function PropertiesPageInner() {
   const clearFilters = () => {
     updateSearchParams({
       name: undefined,
-      categoryName: undefined,
+      category: undefined,
       sortBy: undefined,
       sortOrder: undefined,
       page: 1,

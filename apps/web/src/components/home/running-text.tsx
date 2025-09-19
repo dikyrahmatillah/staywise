@@ -2,7 +2,7 @@
 
 export default function RunningText() {
   const messages = [
-    "Limited time: Save up to 30% on select stays",
+    "Limited time: Save up to 100% on select stays",
     "24/7 support for guests",
     "Book early for exclusive perks",
   ];
@@ -25,6 +25,8 @@ export default function RunningText() {
       </div>
 
       <style>{`
+<<<<<<< Updated upstream
+=======
         /* Seamless marquee: use translate3d, flex layout and prevent flex items from shrinking */
         :root { --marquee-duration: 22s; --marquee-gap: 4rem; }
 
@@ -40,6 +42,12 @@ export default function RunningText() {
           will-change: transform;
         }
 
+        /* Pause animation when the user hovers or focuses the marquee */
+        .marquee:hover .marquee__inner,
+        .marquee:focus-within .marquee__inner {
+          animation-play-state: paused;
+        }
+
         .marquee__item {
           display: inline-flex;
           flex: 0 0 50%; /* each item takes half of the inner width */
@@ -53,9 +61,18 @@ export default function RunningText() {
           padding-right: var(--marquee-gap);
         }
 
+>>>>>>> Stashed changes
         @keyframes marquee {
           0% { transform: translate3d(0, 0, 0); }
           100% { transform: translate3d(-50%, 0, 0); }
+        }
+
+        /* Respect user's reduced motion preference */
+        @media (prefers-reduced-motion: reduce) {
+          .marquee__inner {
+            animation: none !important;
+            transform: none !important;
+          }
         }
       `}</style>
     </section>

@@ -27,7 +27,7 @@ export function usePropertySearchParams(): [
       guest: toInt(sp.get("guest")),
       pets: toInt(sp.get("pets")),
       name: sp.get("name") ?? undefined,
-      categoryName: sp.get("categoryName") ?? undefined,
+      category: sp.get("category") ?? undefined,
       sortBy: (sp.get("sortBy") as "name" | "price") ?? undefined,
       sortOrder: (sp.get("sortOrder") as "asc" | "desc") ?? undefined,
     };
