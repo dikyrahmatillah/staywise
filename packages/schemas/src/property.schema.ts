@@ -40,7 +40,7 @@ export const getPropertiesQuerySchema = z.object({
   guest: coerceOptionalInt(0),
   pets: coerceOptionalInt(0),
   name: z.string().optional(),
-  categoryName: z.string().optional(),
+  category: z.string().optional(),
   sortBy: z.union([z.literal("name"), z.literal("price")]).optional(),
   sortOrder: z.union([z.literal("asc"), z.literal("desc")]).optional(),
 });
@@ -77,7 +77,7 @@ export type GetPropertiesParams = {
   guest?: number;
   pets?: number;
   name?: string;
-  categoryName?: string;
+  category?: string;
   sortBy?: "name" | "price";
   sortOrder?: "asc" | "desc";
 };

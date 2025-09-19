@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
-import { Users, Star } from "lucide-react";
+import { Users, Star, MapPin } from "lucide-react";
 import PagerControls from "@/components/ui/pager-controls";
 import { useProperties } from "@/hooks/useProperties";
 import type { Property } from "@/types/property";
@@ -79,8 +79,8 @@ export default function FeaturedProperties() {
                 style={{ flex: `0 0 ${100 / slidesPerView}%` }}
                 className="px-2"
               >
-                <Card className="overflow-hidden transition-shadow border-none shadow-none bg-transparent">
-                  <div className="aspect-[4/3] bg-slate-200 relative rounded-xl overflow-hidden">
+                <Card className="overflow-hidden transition-shadow border bg-white shadow-sm">
+                  <div className="aspect-[4/3] bg-slate-200 relative overflow-hidden">
                     <Image
                       src={
                         property.imageUrl ||
@@ -92,11 +92,8 @@ export default function FeaturedProperties() {
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  <CardContent className="p-1">
-                    <div className="text-sm text-slate-500 mb-0.5">
-                      {property.city}
-                    </div>
-                    <CardTitle className="text-lg mb-0.5 line-clamp-1">
+                  <CardContent className="px-3 pb-3">
+                    <CardTitle className="text-lg mb-1 line-clamp-1">
                       <Link
                         href={`/properties/${property.slug}`}
                         className="hover:text-blue-600"
@@ -104,6 +101,10 @@ export default function FeaturedProperties() {
                         {property.name}
                       </Link>
                     </CardTitle>
+                    <div className="flex items-center gap-2 text-sm text-slate-500 mb-1">
+                      <MapPin className="w-4 h-4 text-slate-400" />
+                      <span>{property.city}</span>
+                    </div>
                     <div className="flex items-center gap-2 text-sm text-slate-600 mb-1">
                       <div className="flex items-center gap-1">
                         <Users className="w-4 h-4" />
@@ -113,7 +114,7 @@ export default function FeaturedProperties() {
                         <span>{property.Rooms.length || 0} Rooms</span>
                       </div>
                     </div>
-                    <p className="text-sm text-slate-600 mb-1 line-clamp-2">
+                    <p className="text-sm text-slate-600 mb-4 line-clamp-2">
                       {property.description}
                     </p>
 

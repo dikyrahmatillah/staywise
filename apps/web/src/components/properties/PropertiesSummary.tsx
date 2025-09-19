@@ -28,11 +28,10 @@ export function PropertiesSummary({
   const summary = (() => {
     if (isLoading) return "Loading...";
     let text = "";
-    if (params.name || params.categoryName || params.location) {
+    if (params.name || params.category || params.location) {
       const filters = [] as string[];
       if (params.name) filters.push(`for "${params.name}"`);
-      if (params.categoryName)
-        filters.push(`in category "${params.categoryName}"`);
+      if (params.category) filters.push(`in category "${params.category}"`);
       if (params.location)
         filters.push(`in ${formatLocation(params.location)}`);
       if (total === 0) text = `No Properties ${filters.join(" ")}`;
@@ -64,7 +63,6 @@ export function PropertiesSummary({
             <SelectItem value="6">6</SelectItem>
             <SelectItem value="12">12</SelectItem>
             <SelectItem value="24">24</SelectItem>
-            <SelectItem value="48">48</SelectItem>
           </SelectContent>
         </Select>
         <span className="text-sm text-muted-foreground">per page</span>
