@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import axios from "axios";
 import { toast } from "sonner";
-import type { BookingTransaction } from "@/types/booking";
+import type { BookingTransaction } from "@repo/types";
 
 interface BookingsApiResponse {
   success: boolean;
