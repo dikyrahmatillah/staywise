@@ -252,7 +252,7 @@ async function seed() {
 
       const roomCount = faker.number.int({ min: 2, max: 4 });
       for (let r = 0; r < roomCount; r++) {
-        const basePrice = faker.number.int({ min: 20, max: 300 });
+        const basePrice = faker.number.int({ min: 800_000, max: 2_000_000 });
         const room = await prisma.room.create({
           data: {
             propertyId: property.id,

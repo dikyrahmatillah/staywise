@@ -8,6 +8,7 @@ import usePropertyDetails from "@/hooks/usePropertyDetails";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import type { Property } from "@/types/property";
+import { formatCurrency } from "@/lib/booking-formatters";
 
 interface PropertyCardProps {
   property: Property;
@@ -71,7 +72,9 @@ export function PropertyCard({ property }: PropertyCardProps) {
 
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-lg font-semibold">${basePrice}</span>
+              <span className="text-lg font-semibold">
+                {formatCurrency(basePrice)}
+              </span>
               <span className="text-muted-foreground text-sm">/night</span>
             </div>
             <div className="flex gap-2">
