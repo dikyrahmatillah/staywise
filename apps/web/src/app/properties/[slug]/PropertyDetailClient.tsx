@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/axios";
 import type { Amenities } from "./components/types";
@@ -13,6 +13,16 @@ import { Reviews } from "./components/Reviews";
 import { BookingSidebar } from "./components/BookingSidebar";
 import { RoomsSection } from "./components/RoomsSection";
 
+type Room = {
+  id: string;
+  name: string;
+  basePrice: string | number;
+  bedCount?: number;
+  bedType?: string | null;
+  maxGuests?: number;
+  imageUrl?: string | null;
+};
+
 type DetailResponse = {
   id: string;
   name: string;
@@ -20,13 +30,7 @@ type DetailResponse = {
   address: string;
   description?: string | null;
   maxGuests?: number;
-  Rooms: {
-    id: string;
-    name: string;
-    basePrice: string | number;
-    bedCount?: number;
-    bedType?: string | null;
-  }[];
+  Rooms: Room[];
   Facilities: { id: string; propertyId: string; facility: Amenities }[];
   Pictures: {
     id: string;
@@ -55,6 +59,8 @@ async function fetchProperty(slug: string): Promise<DetailResponse> {
 }
 
 export function PropertyDetailClient({ slug }: { slug: string }) {
+  const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
+
   const { data, isLoading, error } = useQuery<DetailResponse, Error>({
     queryKey: ["property", slug],
     queryFn: () => fetchProperty(slug),
@@ -85,6 +91,10 @@ export function PropertyDetailClient({ slug }: { slug: string }) {
   const totalBedrooms = property.Rooms?.length || 1;
   const totalBeds =
     property.Rooms?.reduce((sum, room) => sum + (room.bedCount || 0), 0) || 0;
+
+  const handleRoomSelect = (room: Room) => {
+    setSelectedRoom(room);
+  };
 
   return (
     <div>
@@ -117,7 +127,11 @@ export function PropertyDetailClient({ slug }: { slug: string }) {
                 })),
               }}
             />
-            <RoomsSection rooms={property.Rooms || []} />
+            <RoomsSection
+              rooms={property.Rooms || []}
+              selectedRoomId={selectedRoom?.id}
+              onRoomSelect={handleRoomSelect}
+            />
             <Reviews reviews={details.reviews} total={reviewCount} />
           </div>
         </div>
@@ -126,6 +140,8 @@ export function PropertyDetailClient({ slug }: { slug: string }) {
           <BookingSidebar
             pricePerNight={Number(property.Rooms?.[0]?.basePrice ?? 0)}
             maxGuests={property.maxGuests}
+            propertyId={property.id}
+            selectedRoom={selectedRoom}
           />
         </div>
       </div>

@@ -1,9 +1,10 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Bed } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+// ...removed Badge and Bed imports; not needed for the inline layout
 import { formatCurrency } from "@/lib/booking-formatters";
+import Image from "next/image";
 
 type Room = {
   id: string;
@@ -11,53 +12,102 @@ type Room = {
   basePrice: string | number;
   bedCount?: number;
   bedType?: string | null;
+  maxGuests?: number;
+  imageUrl?: string | null;
 };
 
 interface RoomsSectionProps {
   rooms: Room[];
+  selectedRoomId?: string;
+  onRoomSelect?: (room: Room) => void;
 }
 
-export function RoomsSection({ rooms }: RoomsSectionProps) {
+export function RoomsSection({
+  rooms,
+  selectedRoomId,
+  onRoomSelect,
+}: RoomsSectionProps) {
   if (!rooms || rooms.length === 0) {
     return null;
   }
 
+  const handleRoomSelect = (room: Room) => {
+    onRoomSelect?.(room);
+  };
+
   return (
     <div className="space-y-4">
       <h3 className="text-xl font-semibold">Room Details</h3>
-      <div className="grid gap-4 md:grid-cols-2">
-        {rooms.map((room) => (
-          <Card key={room.id} className="border">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg">{room.name}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-2xl font-bold">
-                  {formatCurrency(Number(room.basePrice))}
-                </span>
-                <span className="text-sm text-muted-foreground">/night</span>
-              </div>
+      <div className="grid gap-4 grid-cols-1">
+        {rooms.map((room) => {
+          const isSelected = selectedRoomId === room.id;
 
-              <div className="flex gap-4">
-                {room.bedCount && (
-                  <div className="flex items-center gap-1">
-                    <Bed className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">
-                      {room.bedCount} {room.bedCount === 1 ? "Bed" : "Beds"}
+          return (
+            <Card
+              key={room.id}
+              className={`w-full flex border p-0 hover:shadow-lg transition-shadow rounded-none overflow-hidden ${
+                isSelected ? "border-primary ring-2 ring-primary/20" : ""
+              }`}
+            >
+              <div className="flex-1 min-w-0 p-3 flex items-center justify-between">
+                <div className="flex items-center gap-3 min-w-0">
+                  {room.imageUrl ? (
+                    <div className="relative w-22 h-16 flex-shrink-0 overflow-hidden">
+                      <Image
+                        src={room.imageUrl}
+                        alt={`${room.name} image`}
+                        fill
+                        sizes="(max-width: 320px) 44vw, 120px"
+                        className="object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-44 h-28 bg-muted/40 flex items-center justify-center text-sm text-muted-foreground">
+                      No image
+                    </div>
+                  )}
+                  <div className="truncate">
+                    <h4 className="text-sm font-medium truncate">
+                      {room.name}
+                    </h4>
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground truncate">
+                      {room.bedCount ? (
+                        <span className="truncate">
+                          {room.bedCount} {room.bedCount === 1 ? "Bed" : "Beds"}
+                        </span>
+                      ) : null}
+
+                      {room.bedType ? (
+                        <span className="truncate">
+                          &nbsp;·&nbsp;{room.bedType}
+                        </span>
+                      ) : null}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="text-right">
+                  <div className="text-sm font-semibold">
+                    {formatCurrency(Number(room.basePrice))}{" "}
+                    <span className="text-xs text-muted-foreground">
+                      /night
                     </span>
                   </div>
-                )}
-
-                {room.bedType && (
-                  <Badge variant="secondary" className="text-xs">
-                    {room.bedType}
-                  </Badge>
-                )}
+                  <div className="mt-2">
+                    <Button
+                      size="sm"
+                      variant={isSelected ? "default" : "outline"}
+                      onClick={() => handleRoomSelect(room)}
+                      className="text-xs px-3 py-1"
+                    >
+                      {isSelected ? "Selected" : "Select"}
+                    </Button>
+                  </div>
+                </div>
               </div>
-            </CardContent>
-          </Card>
-        ))}
+            </Card>
+          );
+        })}
       </div>
     </div>
   );
