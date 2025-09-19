@@ -22,11 +22,22 @@ import {
 } from "@repo/schemas";
 import { formatCurrency } from "@/lib/booking-formatters";
 
+type Room = {
+  id: string;
+  name: string;
+  basePrice: string | number;
+  bedCount?: number;
+  bedType?: string | null;
+  capacity?: number;
+  imageUrl?: string | null;
+};
+
 interface BookingSidebarProps {
   pricePerNight: number;
   maxGuests?: number;
   propertyId?: string;
   unavailableDates?: Date[];
+  selectedRoom?: Room | null;
 }
 
 export function BookingSidebar({
@@ -34,6 +45,7 @@ export function BookingSidebar({
   maxGuests = 10,
   propertyId,
   unavailableDates = [],
+  selectedRoom,
 }: BookingSidebarProps) {
   const router = useRouter();
   const { data: session, status } = useSession();
@@ -42,6 +54,8 @@ export function BookingSidebar({
   const [adults, setAdults] = useState(1);
   const [childrenCount, setChildrenCount] = useState(0);
   const [pets, setPets] = useState(0);
+  // effective max depends on selected room, falling back to property max
+  const effectiveMaxGuests = selectedRoom?.capacity ?? maxGuests;
   const [guestSelectorOpen, setGuestSelectorOpen] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isBooking, setIsBooking] = useState(false);
@@ -52,6 +66,11 @@ export function BookingSidebar({
       return;
     }
 
+    // Use selected room price if available, otherwise fall back to pricePerNight
+    const currentPrice = selectedRoom
+      ? Number(selectedRoom.basePrice)
+      : pricePerNight;
+
     const bookingData: Partial<BookingFormData> = {
       checkInDate,
       checkOutDate,
@@ -59,7 +78,7 @@ export function BookingSidebar({
       children: childrenCount,
       pets,
       propertyId,
-      pricePerNight,
+      pricePerNight: currentPrice,
     };
 
     const result = validateBookingDataSafe(bookingData, maxGuests);
@@ -73,6 +92,7 @@ export function BookingSidebar({
     propertyId,
     pricePerNight,
     maxGuests,
+    selectedRoom,
   ]);
 
   // Real-time validation
@@ -91,6 +111,20 @@ export function BookingSidebar({
     validateCurrentData,
   ]);
 
+  // When selected room changes, clamp guest values to the effective max
+  useEffect(() => {
+    const total = adults + childrenCount;
+    if (total > effectiveMaxGuests) {
+      const overflow = total - effectiveMaxGuests;
+      setChildrenCount((c) => {
+        if (c >= overflow) return c - overflow;
+        return 0;
+      });
+      setAdults((a) => Math.max(1, a - Math.max(0, overflow - childrenCount)));
+      toast.info(`Guest count adjusted to room max: ${effectiveMaxGuests}`);
+    }
+  }, [selectedRoom, adults, childrenCount, effectiveMaxGuests]);
+
   const calculateNights = () => {
     if (!checkInDate || !checkOutDate) return 0;
     return (
@@ -100,10 +134,14 @@ export function BookingSidebar({
   };
 
   const nights = calculateNights();
+  // Use selected room price if available, otherwise fall back to pricePerNight
+  const currentPrice = selectedRoom
+    ? Number(selectedRoom.basePrice)
+    : pricePerNight;
   const totalPrice = bookingValidationUtils.calculateTotalPrice(
     checkInDate || new Date(),
     checkOutDate || new Date(),
-    pricePerNight
+    currentPrice
   );
 
   const isDateDisabled = (date: Date) => {
@@ -169,20 +207,22 @@ export function BookingSidebar({
     if (status === "unauthenticated" || !session) {
       toast.error("Please log in to continue with your booking");
 
-      // Build return URL for post-login redirect
       const currentUrl = window.location.pathname + window.location.search;
       const returnUrl = encodeURIComponent(currentUrl);
 
-      // Delay redirect slightly to let user see the toast
       setTimeout(() => {
         router.push(`/signin?callbackUrl=${returnUrl}`);
       }, 1500);
       return;
     }
 
-    // Always allow booking attempt, but validate first
     if (!checkInDate || !checkOutDate) {
       toast.error("Please select check-in and check-out dates");
+      return;
+    }
+
+    if (!selectedRoom) {
+      toast.error("Please select a room");
       return;
     }
 
@@ -203,7 +243,6 @@ export function BookingSidebar({
     setIsBooking(true);
 
     try {
-      // Additional availability check (you can integrate with your backend here)
       const isAvailable = bookingValidationUtils.checkDateAvailability(
         checkInDate!,
         checkOutDate!
@@ -217,24 +256,23 @@ export function BookingSidebar({
         return;
       }
 
-      // Show loading toast
       const loadingToast = toast.loading("Processing your booking...");
 
       const bookingParams = new URLSearchParams({
         propertyId: propertyId || "1",
+        roomId: selectedRoom?.id || "",
         checkIn: checkInDate!.toISOString(),
         checkOut: checkOutDate!.toISOString(),
         adults: adults.toString(),
         children: childrenCount.toString(),
         pets: pets.toString(),
-        pricePerNight: pricePerNight.toString(),
+        pricePerNight: currentPrice.toString(),
         totalPrice: totalPrice.toString(),
         nights: nights.toString(),
         userId: session.user.id,
         userEmail: session.user.email,
       });
 
-      // Dismiss loading toast
       toast.dismiss(loadingToast);
 
       router.push(`/booking?${bookingParams.toString()}`);
@@ -262,10 +300,15 @@ export function BookingSidebar({
         <CardHeader>
           <div className="flex items-baseline gap-0.5">
             <span className="font-sans text-3xl font-bold">
-              {formatCurrency(pricePerNight)}
+              {formatCurrency(currentPrice)}
             </span>
             <span className="font-sans text-muted-foreground">/night</span>
           </div>
+          {selectedRoom && (
+            <div className="text-sm text-muted-foreground">
+              {selectedRoom.name}
+            </div>
+          )}
           {nights > 0 && (
             <div className="mt-2 text-sm text-muted-foreground">
               {formatCurrency(pricePerNight)} x {nights} night
@@ -351,7 +394,7 @@ export function BookingSidebar({
             <div className="flex flex-row justify-between">
               <Label>Guests</Label>
               <Label className="text-sm text-muted-foreground">
-                Max: {maxGuests} guests
+                Max: {effectiveMaxGuests} guests
               </Label>
             </div>
             <div
@@ -368,7 +411,7 @@ export function BookingSidebar({
                 onPetsChange={setPets}
                 isOpen={guestSelectorOpen}
                 onOpenChange={setGuestSelectorOpen}
-                maxGuests={maxGuests}
+                maxGuests={effectiveMaxGuests}
               />
             </div>
             {getFieldError("adults") && (
