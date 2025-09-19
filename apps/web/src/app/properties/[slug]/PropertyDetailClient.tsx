@@ -12,6 +12,7 @@ import { AmenitiesSection } from "./components/AmenitiesSection";
 import { LocationSection } from "./components/LocationSection";
 import { Reviews } from "./components/Reviews";
 import { BookingSidebar } from "./components/BookingSidebar";
+import { RoomsSection } from "./components/RoomsSection";
 
 type DetailResponse = {
   id: string;
@@ -84,7 +85,15 @@ export function PropertyDetailClient({ slug }: { slug: string }) {
 
   const details = { reviews: reviewsToShow };
   const totalBedrooms = property.Rooms?.length || 1;
-  const totalBathrooms = property.Rooms?.length || 1;
+
+  // Compute aggregated room data
+  const totalBeds =
+    property.Rooms?.reduce((sum, room) => sum + (room.bedCount || 0), 0) || 0;
+  const bedTypes = property.Rooms?.map((room) => room.bedType).filter(Boolean);
+  const bedTypeSummary =
+    bedTypes && bedTypes.length > 0
+      ? Array.from(new Set(bedTypes)).join(", ")
+      : undefined;
 
   return (
     <div>
@@ -101,7 +110,8 @@ export function PropertyDetailClient({ slug }: { slug: string }) {
             reviewCount={reviewCount}
             maxGuests={property.maxGuests}
             bedrooms={totalBedrooms}
-            bathrooms={totalBathrooms}
+            totalBeds={totalBeds}
+            bedTypeSummary={bedTypeSummary}
           />
           <div className="space-y-8">
             <AmenitiesSection
@@ -117,6 +127,7 @@ export function PropertyDetailClient({ slug }: { slug: string }) {
                 })),
               }}
             />
+            <RoomsSection rooms={property.Rooms || []} />
             <LocationSection address={property.address} city={property.city} />
             <Reviews reviews={details.reviews} total={reviewCount} />
           </div>
