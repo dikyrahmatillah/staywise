@@ -1,10 +1,10 @@
 // packages/types/src/booking.ts
 
-import type { 
-  PaymentProof, 
-  GatewayPayment, 
+import type {
+  PaymentProof,
+  GatewayPayment,
   BookingPaymentMethod,
-  OrderStatus 
+  OrderStatus,
 } from "./prisma";
 
 // Main booking transaction interface for frontend
@@ -52,4 +52,92 @@ export interface Property {
 export interface Room {
   name: string;
   type?: string;
+}
+
+export interface CreateBookingInput {
+  userId: string;
+  propertyId: string;
+  roomId: string;
+  checkIn: string | Date;
+  checkOut: string | Date;
+  adults?: number;
+  children?: number;
+  pets?: number;
+  pricePerNight: number;
+  totalAmount: number;
+  paymentMethod?: BookingPaymentMethod;
+}
+
+// Room availability result (shared between API and frontend)
+export interface RoomAvailabilityResult {
+  available: boolean;
+  message: string;
+  unavailableDates?: Date[];
+  pricing?: {
+    basePrice?: number;
+    hasAdjustments: boolean;
+  } | null;
+  conflictingDates?: Array<{
+    checkIn: Date;
+    checkOut: Date;
+    orderCode: string;
+  }>;
+}
+
+// Booking filters for queries (shared between frontend and API)
+export interface BookingFilters {
+  userId?: string;
+  tenantId?: string;
+  propertyId?: string;
+  status?: string[];
+  includeExpired?: boolean;
+}
+
+// Availability check parameters (used by frontend booking forms)
+export interface AvailabilityCheckParams {
+  propertyId: string;
+  roomId: string;
+  checkInDate: Date;
+  checkOutDate: Date;
+  adults?: number;
+  children?: number;
+  pets?: number;
+  pricePerNight: number;
+}
+
+// Booking calculation results (useful for frontend price display)
+export interface BookingTotals {
+  nights: number;
+  totalPrice: number;
+  isValidPeriod: boolean;
+}
+
+// Booking validation data (shared validation structure)
+export interface BookingValidationData {
+  checkInDate: Date;
+  checkOutDate: Date;
+  adults: number;
+  children: number;
+  pets: number;
+  propertyId: string;
+  pricePerNight: number;
+}
+
+// Booking validation data (shared validation structure)
+export interface BookingValidationData {
+  checkInDate: Date;
+  checkOutDate: Date;
+  adults: number;
+  children: number;
+  pets: number;
+  propertyId: string;
+  pricePerNight: number;
+}
+
+// Enhanced availability result with validation
+export interface AvailabilityWithValidationResult extends RoomAvailabilityResult {
+  nights?: number;
+  totalPrice?: number;
+  validationPassed?: boolean;
+  validationErrors?: any;
 }
