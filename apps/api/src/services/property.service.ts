@@ -1,6 +1,10 @@
 import { prisma } from "@repo/database";
 import { AppError } from "@/errors/app.error.js";
-import { GetPropertiesParams, CreatePropertyInput } from "@repo/schemas";
+import {
+  GetPropertiesParams,
+  CreatePropertyInput,
+  UpdatePropertyInput,
+} from "@repo/schemas";
 import { nanoid } from "nanoid";
 import { resolveCategoryId } from "./category.service.js";
 import { mapFacilities, mapPictures, mapRooms } from "../utils/mappers.js";
@@ -157,6 +161,42 @@ export class PropertyService {
     };
   }
 
+  async getPropertyById(propertyId: string, tenantId?: string) {
+    if (!propertyId) throw new AppError("Missing property ID", 400);
+
+    const where: any = { id: propertyId };
+    if (tenantId) {
+      where.tenantId = tenantId;
+    }
+
+    const property = await prisma.property.findUnique({
+      where,
+      include: {
+        PropertyCategory: true,
+        CustomCategory: true,
+        Pictures: true,
+        Rooms: {
+          include: {
+            RoomAvailabilities: true,
+            PriceAdjustments: { include: { Dates: true } },
+          },
+        },
+        Facilities: true,
+      },
+    });
+
+    if (!property) {
+      throw new AppError(
+        tenantId
+          ? "Property not found or you don't have permission to access it"
+          : "Property not found",
+        404
+      );
+    }
+
+    return property;
+  }
+
   async getPropertiesByTenant(tenantId: string) {
     const properties = await prisma.property.findMany({
       where: { tenantId },
@@ -218,5 +258,107 @@ export class PropertyService {
     });
 
     return { message: "Property deleted successfully" };
+  }
+
+  async updateProperty(
+    propertyId: string,
+    tenantId: string,
+    data: UpdatePropertyInput
+  ) {
+    // First check if the property belongs to the tenant
+    const existingProperty = await prisma.property.findFirst({
+      where: { id: propertyId, tenantId },
+    });
+
+    if (!existingProperty) {
+      throw new AppError(
+        "Property not found or you don't have permission to update it",
+        404
+      );
+    }
+
+    const property = await prisma.$transaction(async (tx) => {
+      const updateData: any = {};
+
+      // Only update fields that are provided
+      if (data.name !== undefined) updateData.name = data.name;
+      if (data.description !== undefined)
+        updateData.description = data.description;
+      if (data.country !== undefined) updateData.country = data.country;
+      if (data.city !== undefined) updateData.city = data.city;
+      if (data.address !== undefined) updateData.address = data.address;
+      if (data.latitude !== undefined) updateData.latitude = data.latitude;
+      if (data.longitude !== undefined) updateData.longitude = data.longitude;
+      if (data.maxGuests !== undefined) updateData.maxGuests = data.maxGuests;
+
+      // Handle category updates
+      if (
+        "propertyCategoryId" in data ||
+        "customCategoryId" in data ||
+        "customCategory" in data
+      ) {
+        const propertyCategoryId = await resolveCategoryId(tx, data as any);
+        updateData.propertyCategoryId = propertyCategoryId;
+        if ("customCategoryId" in data && data.customCategoryId) {
+          updateData.customCategoryId = data.customCategoryId;
+        }
+      }
+
+      // Update basic property data
+      const updated = await tx.property.update({
+        where: { id: propertyId },
+        data: updateData,
+        include: {
+          PropertyCategory: true,
+          CustomCategory: true,
+          Pictures: true,
+          Rooms: {
+            include: {
+              RoomAvailabilities: true,
+              PriceAdjustments: { include: { Dates: true } },
+            },
+          },
+          Facilities: true,
+        },
+      });
+
+      // Handle facilities update
+      if ("facilities" in data && data.facilities !== undefined) {
+        await tx.propertyFacility.deleteMany({
+          where: { propertyId },
+        });
+
+        if (data.facilities.length > 0) {
+          await tx.propertyFacility.createMany({
+            data: data.facilities.map((facility: any) => ({
+              propertyId,
+              facility: facility.facility,
+              note: facility.note,
+            })),
+          });
+        }
+      }
+
+      // Handle pictures update
+      if ("pictures" in data && data.pictures !== undefined) {
+        await tx.propertyPicture.deleteMany({
+          where: { propertyId },
+        });
+
+        if (data.pictures.length > 0) {
+          await tx.propertyPicture.createMany({
+            data: data.pictures.map((picture: any) => ({
+              propertyId,
+              imageUrl: picture.imageUrl,
+              note: picture.note,
+            })),
+          });
+        }
+      }
+
+      return updated;
+    });
+
+    return property;
   }
 }

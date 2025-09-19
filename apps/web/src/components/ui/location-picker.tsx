@@ -42,6 +42,22 @@ export function LocationPicker({
     onMapLoad,
   } = useLocationPicker({ onLocationSelect, initialLocation });
 
+  interface GoogleWindow {
+    google?: {
+      maps?: {
+        Animation?: {
+          DROP?: number;
+        };
+      };
+    };
+  }
+
+  const getMarkerAnimation = (): number | undefined => {
+    if (typeof window === "undefined") return undefined;
+    const gw = window as unknown as GoogleWindow;
+    return gw.google?.maps?.Animation?.DROP as number | undefined;
+  };
+
   return (
     <div className={`space-y-4 ${className}`}>
       <LoadScript googleMapsApiKey={apiKey} libraries={["places"]}>
@@ -68,13 +84,6 @@ export function LocationPicker({
             </div>
           </div>
 
-          <div>
-            <p className="text-sm text-gray-600">
-              Search for a location or click anywhere on the map to set the
-              location for your property.
-            </p>
-          </div>
-
           <div className="border rounded-lg overflow-hidden">
             <GoogleMap
               mapContainerStyle={{
@@ -99,7 +108,7 @@ export function LocationPicker({
               {selectedLocation && (
                 <Marker
                   position={selectedLocation}
-                  animation={google.maps.Animation.DROP}
+                  animation={getMarkerAnimation()}
                 />
               )}
             </GoogleMap>

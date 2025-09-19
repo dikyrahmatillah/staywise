@@ -123,7 +123,29 @@ export const createPropertyInputSchema = z
   })
   .and(createPropertyCategoryInput);
 
+export const updatePropertyInputSchema = z.object({
+  name: z.string().max(100).optional(),
+  description: z.string().optional(),
+  country: z.string().max(60).optional(),
+  city: z.string().max(100).optional(),
+  address: z.string().optional(),
+  latitude: z.number().min(-90).max(90).optional().nullable(),
+  longitude: z.number().min(-180).max(180).optional().nullable(),
+  maxGuests: z.number().int().min(1).optional(),
+  pictures: z.array(createPropertyPictureSchema).optional(),
+  facilities: z.array(createFacilitySchema).optional(),
+  propertyCategoryId: z.uuid().optional(),
+  customCategoryId: z.uuid().optional(),
+  customCategory: z
+    .object({
+      name: z.string().min(1),
+      description: z.string().optional(),
+    })
+    .optional(),
+});
+
 export type CreatePropertyInput = z.infer<typeof createPropertyInputSchema>;
+export type UpdatePropertyInput = z.infer<typeof updatePropertyInputSchema>;
 export type CreatePropertyPictureInput = z.infer<
   typeof createPropertyPictureSchema
 >;
