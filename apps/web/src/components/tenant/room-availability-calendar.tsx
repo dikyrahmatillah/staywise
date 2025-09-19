@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,15 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Calendar,
-  CalendarDays,
-  Check,
-  X,
-  RefreshCw,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import { useRoomAvailability } from "@/hooks/useRoomAvailability";
 import { cn } from "@/lib/utils";
 
@@ -36,8 +28,6 @@ export function RoomAvailabilityCalendar({
   onOpenChange,
 }: RoomAvailabilityCalendarProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [selectedDates, setSelectedDates] = useState<Set<string>>(new Set());
-  const [bulkMode, setBulkMode] = useState(false);
 
   const {
     loading,
@@ -48,7 +38,6 @@ export function RoomAvailabilityCalendar({
     isDateBlocked,
   } = useRoomAvailability(roomId);
 
-  // Generate calendar dates for current month
   const generateCalendarDates = () => {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
@@ -57,9 +46,7 @@ export function RoomAvailabilityCalendar({
     const startDate = new Date(firstDay);
     const endDate = new Date(lastDay);
 
-    // Start from the beginning of the week
     startDate.setDate(startDate.getDate() - startDate.getDay());
-    // End at the end of the week
     endDate.setDate(endDate.getDate() + (6 - endDate.getDay()));
 
     const dates: Date[] = [];
@@ -91,45 +78,11 @@ export function RoomAvailabilityCalendar({
     if (isPastDate(date)) return;
 
     const dateKey = formatDateKey(date);
-    console.log("Clicking date:", dateKey);
-    console.log("Is date blocked?", isDateBlocked(dateKey));
-
-    if (bulkMode) {
-      setSelectedDates((prev) => {
-        const newSelected = new Set(prev);
-        if (newSelected.has(dateKey)) {
-          newSelected.delete(dateKey);
-        } else {
-          newSelected.add(dateKey);
-        }
-        return newSelected;
-      });
+    if (isDateBlocked(dateKey)) {
+      await unblockDates([dateKey]);
     } else {
-      // Toggle: if blocked, unblock it; if available, block it
-      if (isDateBlocked(dateKey)) {
-        console.log("Unblocking date:", dateKey);
-        await unblockDates([dateKey]);
-      } else {
-        console.log("Blocking date:", dateKey);
-        await blockDates([dateKey]);
-      }
+      await blockDates([dateKey]);
     }
-  };
-
-  const handleBulkBlock = async () => {
-    if (selectedDates.size === 0) return;
-    const dates = Array.from(selectedDates);
-    await blockDates(dates);
-    setSelectedDates(new Set());
-    setBulkMode(false);
-  };
-
-  const handleBulkUnblock = async () => {
-    if (selectedDates.size === 0) return;
-    const dates = Array.from(selectedDates);
-    await unblockDates(dates);
-    setSelectedDates(new Set());
-    setBulkMode(false);
   };
 
   const navigateMonth = (direction: "prev" | "next") => {
@@ -144,26 +97,16 @@ export function RoomAvailabilityCalendar({
     });
   };
 
-  const refreshAvailability = useCallback(() => {
-    const year = currentDate.getFullYear();
-    const month = currentDate.getMonth();
-    const startDate = new Date(year, month, 1);
-    const endDate = new Date(year, month + 1, 0);
-
-    fetchBlockedDates(formatDateKey(startDate), formatDateKey(endDate));
-  }, [currentDate, fetchBlockedDates]);
-
   useEffect(() => {
     if (open && roomId) {
-      refreshAvailability();
-    }
-  }, [open, roomId, currentDate, refreshAvailability]);
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth();
+      const startDate = new Date(year, month, 1);
+      const endDate = new Date(year, month + 1, 0);
 
-  useEffect(() => {
-    if (!bulkMode) {
-      setSelectedDates(new Set());
+      fetchBlockedDates(formatDateKey(startDate), formatDateKey(endDate));
     }
-  }, [bulkMode]);
+  }, [open, roomId, currentDate, fetchBlockedDates]);
 
   const calendarDates = generateCalendarDates();
   const monthYear = currentDate.toLocaleString("default", {
@@ -192,8 +135,7 @@ export function RoomAvailabilityCalendar({
             </div>
           )}
 
-          {/* Controls */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+          <div className="grid place-content-center">
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"
@@ -215,69 +157,10 @@ export function RoomAvailabilityCalendar({
             </div>
 
             <div className="flex gap-2 flex-wrap">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={refreshAvailability}
-                disabled={loading}
-              >
-                <RefreshCw
-                  className={cn("h-4 w-4 mr-2", loading && "animate-spin")}
-                />
-                Refresh
-              </Button>
-              <Button
-                variant={bulkMode ? "default" : "outline"}
-                size="sm"
-                onClick={() => setBulkMode(!bulkMode)}
-              >
-                <CalendarDays className="h-4 w-4 mr-2" />
-                Bulk Mode
-              </Button>
+              {/* controls space reserved for future actions */}
             </div>
           </div>
 
-          {/* Bulk actions */}
-          {bulkMode && selectedDates.size > 0 && (
-            <div className="flex gap-2 p-3 bg-blue-50 border border-blue-200 rounded-md">
-              <span className="text-sm text-blue-700 flex-1">
-                {selectedDates.size} date{selectedDates.size > 1 ? "s" : ""}{" "}
-                selected
-              </span>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={handleBulkBlock}
-                className="text-red-600 hover:text-red-700"
-              >
-                <X className="h-4 w-4 mr-1" />
-                Block Selected
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={handleBulkUnblock}
-                className="text-green-600 hover:text-green-700"
-              >
-                <Check className="h-4 w-4 mr-1" />
-                Unblock Selected
-              </Button>
-            </div>
-          )}
-
-          {/* Legend */}
-          <div className="flex gap-4 text-sm">
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-green-100 border border-green-300 rounded"></div>
-              <span>Available (Default)</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-red-100 border border-red-300 rounded"></div>
-              <span>Blocked</span>
-            </div>
-          </div>
-
-          {/* Calendar */}
           <Card>
             <CardContent className="p-4">
               <div className="grid grid-cols-7 gap-1 mb-2">
@@ -299,7 +182,6 @@ export function RoomAvailabilityCalendar({
                   const isBlocked = isDateBlocked(dateKey);
                   const isCurrentMonthDate = isCurrentMonth(date);
                   const isPast = isPastDate(date);
-                  const isSelected = selectedDates.has(dateKey);
 
                   return (
                     <button
@@ -311,7 +193,6 @@ export function RoomAvailabilityCalendar({
                         "hover:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500",
                         !isCurrentMonthDate && "text-muted-foreground",
                         isPast && "opacity-50 cursor-not-allowed",
-                        isSelected && bulkMode && "ring-2 ring-blue-500",
                         isBlocked
                           ? "bg-red-100 border-red-300 text-red-800"
                           : "bg-green-100 border-green-300 text-green-800",
@@ -319,21 +200,26 @@ export function RoomAvailabilityCalendar({
                       )}
                     >
                       {date.getDate()}
-                      {isSelected && bulkMode && (
-                        <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full"></div>
-                      )}
                     </button>
                   );
                 })}
               </div>
             </CardContent>
           </Card>
+          <div className="flex gap-4 text-sm">
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-green-100 border border-green-300 rounded"></div>
+              <span>Available (Default)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-red-100 border border-red-300 rounded"></div>
+              <span>Blocked</span>
+            </div>
+          </div>
 
-          {/* Summary */}
           <div className="text-sm text-muted-foreground">
-            {bulkMode
-              ? "Select dates and use bulk actions to block or unblock them."
-              : "Click on any date to toggle between available (green) and blocked (red). Rooms are available by default unless blocked."}
+            Click on any date to toggle between available (green) and blocked
+            (red).
           </div>
         </div>
       </DialogContent>
