@@ -296,49 +296,43 @@ export function BookingSidebar({
 
   return (
     <div className="sticky top-20">
-      <Card className="mb-6">
-        <CardHeader>
-          <div className="flex items-baseline gap-0.5">
+      <Card className="border-slate-200 shadow-lg rounded-xl overflow-hidden">
+        <CardHeader className="bg-white border-b border-slate-100">
+          <div className="flex items-baseline gap-1">
             <span className="font-sans text-3xl font-bold">
               {formatCurrency(currentPrice)}
             </span>
-            <span className="font-sans text-muted-foreground">/night</span>
+            <span className="font-sans text-muted-foreground text-sm">
+              /night
+            </span>
           </div>
           {selectedRoom && (
-            <div className="text-sm text-muted-foreground">
+            <div className="text-sm font-medium text-slate-600">
               {selectedRoom.name}
             </div>
           )}
-          {nights > 0 && (
-            <div className="mt-2 text-sm text-muted-foreground">
-              {formatCurrency(pricePerNight)} x {nights} night
-              {nights > 1 ? "s" : ""} ={" "}
-              <span className="font-semibold text-foreground">
-                {formatCurrency(totalPrice)}
-              </span>
-            </div>
-          )}
         </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Date Selection */}
-          <div className="grid grid-cols-2 gap-4">
+        <CardContent className="space-y-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="checkIn">Check-in</Label>
+              <Label htmlFor="checkIn" className="text-sm font-medium">
+                Check-in
+              </Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
-                    className={`w-full justify-start text-left font-normal bg-transparent ${
+                    className={`w-full justify-start text-left font-normal mt-1.5 bg-white border-slate-200 hover:bg-slate-50 px-3 py-3 sm:py-2 min-h-[44px] ${
                       getFieldError("checkInDate")
                         ? "border-red-500 focus:border-red-500"
                         : ""
                     }`}
                   >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    <CalendarIcon className="mr-2 h-5 w-5 text-slate-500" />
                     {formatDateDisplay(checkInDate)}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
+                <PopoverContent className="w-full sm:w-auto max-w-[420px] p-0 border-slate-200 left-0 right-0 mx-0 sm:mx-0">
                   <CalendarComponent
                     mode="single"
                     selected={checkInDate}
@@ -356,22 +350,24 @@ export function BookingSidebar({
             </div>
 
             <div>
-              <Label htmlFor="checkOut">Check-out</Label>
+              <Label htmlFor="checkOut" className="text-sm font-medium">
+                Check-out
+              </Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
-                    className={`w-full justify-start text-left font-normal bg-transparent ${
+                    className={`w-full justify-start text-left font-normal mt-1.5 bg-white border-slate-200 hover:bg-slate-50 px-3 py-3 sm:py-2 min-h-[44px] ${
                       getFieldError("checkOutDate")
                         ? "border-red-500 focus:border-red-500"
                         : ""
                     }`}
                   >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    <CalendarIcon className="mr-2 h-5 w-5 text-slate-500" />
                     {formatDateDisplay(checkOutDate)}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
+                <PopoverContent className="w-full sm:w-auto max-w-[420px] p-0 border-slate-200 left-0 right-0 mx-0 sm:mx-0">
                   <CalendarComponent
                     mode="single"
                     selected={checkOutDate}
@@ -390,15 +386,15 @@ export function BookingSidebar({
           </div>
 
           {/* Guest Selection */}
-          <div>
-            <div className="flex flex-row justify-between">
-              <Label>Guests</Label>
-              <Label className="text-sm text-muted-foreground">
+          <div className="pb-2">
+            <div className="flex flex-row justify-between mb-1.5">
+              <Label className="text-sm font-medium">Guests</Label>
+              <span className="text-xs text-slate-500 font-normal">
                 Max: {effectiveMaxGuests} guests
-              </Label>
+              </span>
             </div>
             <div
-              className={`border rounded-md ${
+              className={`border rounded-md bg-white border-slate-200 ${
                 getFieldError("adults") ? "border-red-500" : ""
               }`}
             >
@@ -421,28 +417,48 @@ export function BookingSidebar({
             )}
           </div>
 
-          {/* Success Indicator - simplified logic */}
           {checkInDate && checkOutDate && adults > 0 && !hasErrors() && (
             <div className="flex items-center gap-2 text-green-600 bg-green-50 p-3 rounded-lg border border-green-200">
-              <CheckCircle className="h-4 w-4" />
+              <CheckCircle className="h-5 w-5" />
               <span className="text-sm font-medium">Ready to book!</span>
             </div>
           )}
 
+          {nights > 0 && (
+            <>
+              {/* Desktop / tablet layout */}
+              <div className="mt-4 p-3 bg-slate-50 rounded-lg ">
+                <div className="flex items-center justify-between">
+                  <div className="text-sm text-slate-600">
+                    × {nights} night{nights > 1 ? "s" : ""}
+                  </div>
+                  <div className="text-xs text-muted-foreground font-medium">
+                    Total
+                  </div>
+                </div>
+                <div className="mt-2 flex justify-end">
+                  <div className="font-bold text-lg">
+                    {formatCurrency(totalPrice)}
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+
           {/* Book Now Button */}
           <Button
-            className="w-full text-[16px] rounded-full py-6"
+            className="w-full text-base font-semibold rounded-lg py-6  shadow-md hover:shadow-lg transition-all duration-300"
             onClick={handleBookNow}
-            disabled={status === "loading"}
+            disabled={status === "loading" || isBooking}
           >
             {isBooking ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                 Processing...
               </>
             ) : status === "loading" ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                 Loading...
               </>
             ) : !session ? (
@@ -451,6 +467,12 @@ export function BookingSidebar({
               "Book Now"
             )}
           </Button>
+
+          {!session && (
+            <p className="text-xs text-center text-slate-500 mt-2">
+              You&apos;ll need to log in before completing your booking
+            </p>
+          )}
         </CardContent>
       </Card>
     </div>

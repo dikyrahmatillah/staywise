@@ -2,9 +2,9 @@
 
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-// ...removed Badge and Bed imports; not needed for the inline layout
 import { formatCurrency } from "@/lib/booking-formatters";
 import Image from "next/image";
+import { Bed, Users } from "lucide-react";
 
 type Room = {
   id: string;
@@ -12,7 +12,8 @@ type Room = {
   basePrice: string | number;
   bedCount?: number;
   bedType?: string | null;
-  maxGuests?: number;
+  capacity?: number;
+  description?: string | null;
   imageUrl?: string | null;
 };
 
@@ -37,15 +38,43 @@ export function RoomsSection({
 
   return (
     <div className="space-y-4">
-      <h3 className="text-xl font-semibold">Room Details</h3>
+      <h3 className="text-xl font-semibold">Room options</h3>
       <div className="grid gap-4 grid-cols-1">
         {rooms.map((room) => {
           const isSelected = selectedRoomId === room.id;
+          const normalizedBedType = room.bedType
+            ? room.bedType.trim().toLowerCase()
+            : null;
+
+          const bedText =
+            room.bedCount && normalizedBedType
+              ? `${room.bedCount} ${normalizedBedType} ${
+                  room.bedCount === 1 ? "bed" : "beds"
+                }`
+              : room.bedCount
+              ? `${room.bedCount} ${room.bedCount === 1 ? "bed" : "beds"}`
+              : normalizedBedType
+              ? `${
+                  /bed$/i.test(normalizedBedType)
+                    ? normalizedBedType
+                    : `${normalizedBedType} bed`
+                }`
+              : "";
 
           return (
             <Card
               key={room.id}
-              className={`w-full flex border p-0 hover:shadow-lg transition-shadow rounded-none overflow-hidden ${
+              role="button"
+              tabIndex={0}
+              aria-pressed={isSelected}
+              onClick={() => handleRoomSelect(room)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  handleRoomSelect(room);
+                }
+              }}
+              className={`w-full flex border p-0 hover:shadow-lg transition-shadow rounded-md overflow-hidden cursor-pointer ${
                 isSelected ? "border-primary ring-2 ring-primary/20" : ""
               }`}
             >
@@ -58,7 +87,7 @@ export function RoomsSection({
                         alt={`${room.name} image`}
                         fill
                         sizes="(max-width: 320px) 44vw, 120px"
-                        className="object-cover"
+                        className="object-cover rounded-md"
                       />
                     </div>
                   ) : (
@@ -67,19 +96,33 @@ export function RoomsSection({
                     </div>
                   )}
                   <div className="truncate">
-                    <h4 className="text-sm font-medium truncate">
+                    <h4 className="text-md font-medium truncate">
                       {room.name}
                     </h4>
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground truncate">
-                      {room.bedCount ? (
-                        <span className="truncate">
-                          {room.bedCount} {room.bedCount === 1 ? "Bed" : "Beds"}
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground truncate">
+                      {bedText ? (
+                        <span className="inline-flex items-center gap-1 truncate">
+                          <Bed
+                            className="w-4 h-4 text-muted-foreground flex-shrink-0"
+                            aria-hidden
+                          />
+                          <span className="truncate">{bedText}</span>
                         </span>
                       ) : null}
 
-                      {room.bedType ? (
-                        <span className="truncate">
-                          &nbsp;·&nbsp;{room.bedType}
+                      {room.capacity ? (
+                        <span className="inline-flex items-center gap-1 truncate">
+                          <span className="text-muted-foreground">
+                            &middot;
+                          </span>
+                          <Users
+                            className="w-4 h-4 text-muted-foreground flex-shrink-0"
+                            aria-hidden
+                          />
+                          <span className="truncate">
+                            {room.capacity}{" "}
+                            {room.capacity === 1 ? "guest" : "guests"}
+                          </span>
                         </span>
                       ) : null}
                     </div>
@@ -97,8 +140,11 @@ export function RoomsSection({
                     <Button
                       size="sm"
                       variant={isSelected ? "default" : "outline"}
-                      onClick={() => handleRoomSelect(room)}
-                      className="text-xs px-3 py-1"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRoomSelect(room);
+                      }}
+                      className="text-xs px-3 py-1 cursor-pointer"
                     >
                       {isSelected ? "Selected" : "Select"}
                     </Button>

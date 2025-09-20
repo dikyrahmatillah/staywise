@@ -1,6 +1,7 @@
 "use client";
 
-import { Users, Bed, Star } from "lucide-react";
+import { Users, Bed, Star, MapPin, Home } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 
 export function StatsHeader({
   city,
@@ -24,62 +25,89 @@ export function StatsHeader({
   bedTypeSummary?: string;
 }) {
   return (
-    <div className="mb-6">
-      <div className="flex items-start gap-4">
+    <div className="mb-10">
+      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
         <div className="flex-1">
-          <h2 className="text-3xl font-serif mb-2">{city}</h2>
-          <p className="text-lg text-muted-foreground mb-4">
-            {address}, {city}
-          </p>
-
-          <div className="mt-2 rounded-lg border px-4 py-3 text-sm text-muted-foreground inline-block">
-            <div className="flex gap-6">
-              <div className="flex items-center gap-2">
-                <Users className="h-4 w-4" />
-                {/* Show guest range similar to PropertyCard: 1-N or N Guests when equal */}
-                <span className="font-medium">
-                  {(() => {
-                    const minGuests = 1;
-                    const max = maxGuests ?? 1;
-                    return minGuests === max
-                      ? `${max} Guests`
-                      : `${minGuests}-${max} Guests`;
-                  })()}
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Bed className="h-4 w-4" />
-                <span className="font-medium">{bedrooms} Bedrooms</span>
-              </div>
-              {totalBeds && (
-                <div className="flex items-center gap-2">
-                  <Bed className="h-4 w-4" />
-                  <span className="font-medium">{totalBeds} Beds</span>
-                </div>
-              )}
-              {bedTypeSummary && (
-                <div className="flex items-center gap-2">
-                  <span className="font-medium text-xs">{bedTypeSummary}</span>
-                </div>
-              )}
-            </div>
+          <div className="flex items-center gap-2 text-muted-foreground mb-1">
+            <MapPin className="h-4 w-4" />
+            <p className="text-sm">
+              {address}, {city}
+            </p>
           </div>
-
-          {description ? (
-            <p className="mt-6 text-muted-foreground">{description}</p>
-          ) : null}
+          <h2 className="text-3xl font-serif mb-2">{city}</h2>
         </div>
 
         <div className="flex-shrink-0">
-          <div className="rounded-full border px-4 py-2 inline-flex items-center gap-3">
-            <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-            <span className="font-medium">{Math.round(rating)}</span>
-            <span className="text-sm text-muted-foreground">
-              {reviewCount} reviews
+          <div className="rounded-full bg-white shadow-sm border border-slate-100 px-4 py-2 inline-flex items-center gap-3 hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-1">
+              <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+              <span className="font-semibold">{rating.toFixed(1)}</span>
+            </div>
+            <Separator orientation="vertical" className="h-4" />
+            <span className="text-sm font-medium">
+              {reviewCount} review{reviewCount !== 1 ? "s" : ""}
             </span>
           </div>
         </div>
       </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-lg">
+          <div className="bg-white p-2 rounded-full">
+            <Users className="h-5 w-5 text-slate-700" />
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground">Guests</p>
+            <p className="font-medium">
+              {(() => {
+                const minGuests = 1;
+                const max = maxGuests ?? 1;
+                return minGuests === max
+                  ? `${max} Guest${max !== 1 ? "s" : ""}`
+                  : `${minGuests}-${max} Guests`;
+              })()}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-lg">
+          <div className="bg-white p-2 rounded-full">
+            <Home className="h-5 w-5 text-slate-700" />
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground">Room</p>
+            <p className="font-medium">
+              {bedrooms} Room{bedrooms !== 1 ? "s" : ""}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-lg">
+          <div className="bg-white p-2 rounded-full">
+            <Bed className="h-5 w-5 text-slate-700" />
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground">Beds</p>
+            <div>
+              <p className="font-medium">
+                {totalBeds || 0} Bed{totalBeds !== 1 ? "s" : ""}
+              </p>
+              {bedTypeSummary && (
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {bedTypeSummary}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {description ? (
+        <div className="bg-white p-6 rounded-lg border border-slate-100 shadow-sm">
+          <h3 className="text-lg font-medium mb-3">About this place</h3>
+          <p className="text-muted-foreground leading-relaxed">{description}</p>
+        </div>
+      ) : null}
     </div>
   );
 }
