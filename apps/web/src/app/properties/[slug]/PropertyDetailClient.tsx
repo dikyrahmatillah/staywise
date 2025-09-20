@@ -12,6 +12,7 @@ import { AmenitiesSection } from "./components/AmenitiesSection";
 import { Reviews } from "./components/Reviews";
 import { BookingSidebar } from "./components/BookingSidebar";
 import { RoomsSection } from "./components/RoomsSection";
+import { LocationSection } from "./components/LocationSection";
 
 type Room = {
   id: string;
@@ -51,6 +52,8 @@ type DetailResponse = {
   }[];
   reviewCount?: number;
   averageRating?: number | null;
+  latitude?: number | string | null;
+  longitude?: number | string | null;
 };
 
 async function fetchProperty(slug: string): Promise<DetailResponse> {
@@ -97,11 +100,11 @@ export function PropertyDetailClient({ slug }: { slug: string }) {
   };
 
   return (
-    <div>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
       <HeaderBlock name={property.name} />
       <ImageGallery name={property.name} images={images} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-10">
         <div className="lg:col-span-2">
           <StatsHeader
             city={property.city}
@@ -113,7 +116,7 @@ export function PropertyDetailClient({ slug }: { slug: string }) {
             bedrooms={totalBedrooms}
             totalBeds={totalBeds}
           />
-          <div className="space-y-8">
+          <div className="space-y-12">
             <AmenitiesSection
               property={{
                 id: property.id,
@@ -127,22 +130,45 @@ export function PropertyDetailClient({ slug }: { slug: string }) {
                 })),
               }}
             />
-            <RoomsSection
-              rooms={property.Rooms || []}
-              selectedRoomId={selectedRoom?.id}
-              onRoomSelect={handleRoomSelect}
-            />
-            <Reviews reviews={details.reviews} total={reviewCount} />
+            <div className="border-t border-gray-100 pt-8">
+              <RoomsSection
+                rooms={property.Rooms || []}
+                selectedRoomId={selectedRoom?.id}
+                onRoomSelect={handleRoomSelect}
+              />
+            </div>
+            <div className="border-t border-gray-100 pt-8">
+              <LocationSection
+                address={property.address}
+                city={property.city}
+                latitude={
+                  property.latitude === undefined || property.latitude === null
+                    ? undefined
+                    : Number(property.latitude as unknown)
+                }
+                longitude={
+                  property.longitude === undefined ||
+                  property.longitude === null
+                    ? undefined
+                    : Number(property.longitude as unknown)
+                }
+              />
+            </div>
+            <div className="border-t border-gray-100 pt-8">
+              <Reviews reviews={details.reviews} total={reviewCount} />
+            </div>
           </div>
         </div>
 
         <div className="lg:col-span-1">
-          <BookingSidebar
-            pricePerNight={Number(property.Rooms?.[0]?.basePrice ?? 0)}
-            maxGuests={property.maxGuests}
-            propertyId={property.id}
-            selectedRoom={selectedRoom}
-          />
+          <div className="sticky top-24">
+            <BookingSidebar
+              pricePerNight={Number(property.Rooms?.[0]?.basePrice ?? 0)}
+              maxGuests={property.maxGuests}
+              propertyId={property.id}
+              selectedRoom={selectedRoom}
+            />
+          </div>
         </div>
       </div>
     </div>
