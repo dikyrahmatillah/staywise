@@ -311,9 +311,10 @@ export function BookingSidebar({
           )}
           {nights > 0 && (
             <div className="mt-2 text-sm text-muted-foreground">
-              ${currentPrice} x {nights} night{nights > 1 ? "s" : ""} ={" "}
+              {formatCurrency(pricePerNight)} x {nights} night
+              {nights > 1 ? "s" : ""} ={" "}
               <span className="font-semibold text-foreground">
-                ${totalPrice}
+                {formatCurrency(totalPrice)}
               </span>
             </div>
           )}

@@ -275,6 +275,9 @@ model Booking {
     orderCode     String               @unique @db.VarChar(30)
     status        OrderStatus          @default(WAITING_PAYMENT)
     paymentMethod BookingPaymentMethod @default(MANUAL_TRANSFER)
+    snapToken     String?
+    orderId       String?
+    paidAt        DateTime?
     checkInDate   DateTime
     checkOutDate  DateTime
     nights        Int

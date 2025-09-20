@@ -4,9 +4,17 @@ import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { ArrowLeft, CreditCard, Building2, Loader2 } from "lucide-react";
 import { FileDropzone } from "@/components/guest/file-dropzone";
 import { ImagePreview } from "@/components/guest/image-preview";
+import { formatCurrency } from "@/lib/booking-formatters";
 
 function BookingContent() {
   const router = useRouter();
@@ -21,6 +29,7 @@ function BookingContent() {
   >(null);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
 
   const getBookingDetails = () => {
     const checkInParam = searchParams.get("checkIn");
@@ -36,7 +45,7 @@ function BookingContent() {
       children: Number.parseInt(searchParams.get("children") || "0"),
       pets: Number.parseInt(searchParams.get("pets") || "0"),
       pricePerNight: Number.parseInt(
-        searchParams.get("pricePerNight") || "250"
+        searchParams.get("pricePerNight") || "1_000_000"
       ),
     };
   };
@@ -58,6 +67,8 @@ function BookingContent() {
     setSelectedPaymentMethod(method);
     if (method === "midtrans") {
       setCurrentStep(3);
+    } else if (method === "bank") {
+      setIsUploadModalOpen(true);
     }
   };
 
@@ -67,10 +78,10 @@ function BookingContent() {
 
   const handleProcessPayment = async () => {
     setIsProcessing(true);
-    // Simulate payment processing
     setTimeout(() => {
       setIsProcessing(false);
       setCurrentStep(3);
+      setIsUploadModalOpen(false);
     }, 2000);
   };
 
@@ -109,41 +120,31 @@ function BookingContent() {
                   <h3 className="text-lg font-semibold mb-2">
                     Choose how to pay
                   </h3>
-                  <p className="text-muted-foreground mb-4">
-                    Pay ${totalPrice.toLocaleString()} now
-                  </p>
 
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={`w-4 h-4 border-2 rounded-full cursor-pointer ${
-                          selectedPaymentType === "full"
-                            ? "border-foreground bg-foreground"
-                            : "border-muted-foreground"
-                        }`}
-                        onClick={() => setSelectedPaymentType("full")}
-                      ></div>
-                      <span>Pay ${totalPrice.toLocaleString()} now</span>
+                  <RadioGroup
+                    value={selectedPaymentType}
+                    onValueChange={(value) =>
+                      setSelectedPaymentType(value as "full" | "partial")
+                    }
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="full" id="full" />
+                      <label htmlFor="full" className="cursor-pointer">
+                        Pay {formatCurrency(totalPrice)} now
+                      </label>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={`w-4 h-4 border-2 rounded-full cursor-pointer ${
-                          selectedPaymentType === "partial"
-                            ? "border-foreground bg-foreground"
-                            : "border-muted-foreground"
-                        }`}
-                        onClick={() => setSelectedPaymentType("partial")}
-                      ></div>
-                      <div>
+                    <div className="flex items-center space-x-2 opacity-50">
+                      <RadioGroupItem value="partial" id="partial" disabled />
+                      <label htmlFor="partial" className="cursor-not-allowed">
                         <div>Pay part now, part later</div>
                         <div className="text-sm text-muted-foreground">
-                          ${Math.round(totalPrice * 0.5).toLocaleString()} now,
-                          ${Math.round(totalPrice * 0.5).toLocaleString()} on
-                          Oct 2. No extra fees.
+                          {formatCurrency(totalPrice * 0.5)} now, {""}
+                          {formatCurrency(totalPrice * 0.5)} on arrival No extra
+                          fees.
                         </div>
-                      </div>
+                      </label>
                     </div>
-                  </div>
+                  </RadioGroup>
 
                   <Button
                     className="w-full mt-4 bg-foreground text-background hover:bg-foreground/90"
@@ -179,7 +180,6 @@ function BookingContent() {
 
                   {currentStep >= 2 && (
                     <div className="space-y-4 mt-4">
-                      {/* Manual Bank Transfer Option */}
                       <div
                         className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${
                           selectedPaymentMethod === "bank"
@@ -201,7 +201,6 @@ function BookingContent() {
                         </div>
                       </div>
 
-                      {/* Payment Gateway Option */}
                       <div
                         className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${
                           selectedPaymentMethod === "midtrans"
@@ -222,55 +221,6 @@ function BookingContent() {
                           </div>
                         </div>
                       </div>
-
-                      {selectedPaymentMethod === "bank" && (
-                        <div className="mt-6 space-y-4">
-                          <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                            <p className="text-sm text-blue-800 font-medium mb-2">
-                              Bank Transfer Details:
-                            </p>
-                            <div className="text-sm text-blue-700 space-y-1">
-                              <p>Bank: BCA</p>
-                              <p>Account: 1234567890</p>
-                              <p>Name: Villa Booking Indonesia</p>
-                              <p>
-                                Amount: $
-                                {selectedPaymentType === "full"
-                                  ? totalPrice.toLocaleString()
-                                  : Math.round(
-                                      totalPrice * 0.5
-                                    ).toLocaleString()}
-                              </p>
-                            </div>
-                          </div>
-
-                          {!uploadedFile ? (
-                            <FileDropzone onFileSelect={handleFileSelect} />
-                          ) : (
-                            <div className="space-y-4">
-                              <ImagePreview
-                                file={uploadedFile}
-                                onRemove={() => setUploadedFile(null)}
-                                title="Payment Proof"
-                              />
-                              <Button
-                                className="w-full"
-                                onClick={handleProcessPayment}
-                                disabled={isProcessing}
-                              >
-                                {isProcessing ? (
-                                  <>
-                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                    Processing...
-                                  </>
-                                ) : (
-                                  "Submit Payment Proof"
-                                )}
-                              </Button>
-                            </div>
-                          )}
-                        </div>
-                      )}
                     </div>
                   )}
                 </div>
@@ -391,16 +341,16 @@ function BookingContent() {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span>
-                      {nights} night{nights > 1 ? "s" : ""} x $
+                      {nights} night{nights > 1 ? "s" : ""} x Rp
                       {bookingDetails.pricePerNight.toLocaleString()}
                     </span>
-                    <span>${totalPrice.toLocaleString()}</span>
+                    <span>{formatCurrency(totalPrice)}</span>
                   </div>
                 </div>
                 <div className="border-t pt-4 mt-4">
                   <div className="flex justify-between font-semibold">
-                    <span>Total (USD)</span>
-                    <span>${totalPrice.toLocaleString()}</span>
+                    <span>Total (IDR)</span>
+                    <span>{formatCurrency(totalPrice)}</span>
                   </div>
                 </div>
               </div>
@@ -435,6 +385,59 @@ function BookingContent() {
           </div>
         </div>
       </div>
+
+      {/* Modal for file upload */}
+      <Dialog open={isUploadModalOpen} onOpenChange={setIsUploadModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Upload Payment Proof</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-blue-800 font-medium mb-2">
+                Bank Transfer Details:
+              </p>
+              <div className="text-sm text-blue-700 space-y-1">
+                <p>Bank: BCA</p>
+                <p>Account: 1234567890</p>
+                <p>Name: Tenant Name</p>
+                <p>
+                  Amount:{" "}
+                  {selectedPaymentType === "full"
+                    ? formatCurrency(totalPrice)
+                    : formatCurrency(totalPrice * 0.5)}
+                </p>
+              </div>
+            </div>
+
+            {!uploadedFile ? (
+              <FileDropzone onFileSelect={handleFileSelect} />
+            ) : (
+              <div className="space-y-4">
+                <ImagePreview
+                  file={uploadedFile}
+                  onRemove={() => setUploadedFile(null)}
+                  title="Payment Proof"
+                />
+                <Button
+                  className="w-full"
+                  onClick={handleProcessPayment}
+                  disabled={isProcessing}
+                >
+                  {isProcessing ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    "Submit Payment Proof"
+                  )}
+                </Button>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
