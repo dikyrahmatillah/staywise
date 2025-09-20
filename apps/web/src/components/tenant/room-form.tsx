@@ -61,7 +61,7 @@ export function RoomForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
-    price: 0, // UI uses `price` but schema expects `basePrice`
+    price: 0,
     capacity: 1,
     bedType: "" as BedType | "",
     bedCount: 1,
@@ -71,8 +71,14 @@ export function RoomForm({
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  // imageCaption removed - no caption input in this form
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
+  const ALLOWED_IMAGE_TYPES = [
+    "image/jpeg",
+    "image/png",
+    "image/gif",
+    "image/webp",
+  ];
 
   useEffect(() => {
     if (room) {
@@ -145,13 +151,46 @@ export function RoomForm({
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files && e.target.files[0];
     if (file) {
+      // validate type
+      if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+        setErrors((prev) => ({
+          ...prev,
+          imageUrl: "Unsupported file type. Allowed: JPG, PNG, GIF, WEBP.",
+        }));
+        setImageFile(null);
+        return;
+      }
+
+      // validate size
+      if (file.size > MAX_IMAGE_SIZE) {
+        setErrors((prev) => ({
+          ...prev,
+          imageUrl: "File is too large. Maximum size is 5 MB.",
+        }));
+        setImageFile(null);
+        return;
+      }
+
       setImageFile(file);
       if (errors.imageUrl) setErrors((prev) => ({ ...prev, imageUrl: "" }));
     }
   };
 
+  const handleChooseFileClick = () => {
+    fileInputRef.current?.click();
+  };
+
   const handlePickImage = () => {
     fileInputRef.current?.click();
+  };
+
+  const truncateFileName = (name: string, max = 30) => {
+    if (name.length <= max) return name;
+    const extIndex = name.lastIndexOf(".");
+    const ext = extIndex > -1 ? name.slice(extIndex) : "";
+    const base = extIndex > -1 ? name.slice(0, extIndex) : name;
+    const keep = Math.max(6, Math.floor((max - ext.length) / 2));
+    return `${base.slice(0, keep)}...${base.slice(-keep)}${ext}`;
   };
 
   const validateForm = () => {
@@ -183,6 +222,26 @@ export function RoomForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // re-check image validity before submit
+    if (imageFile) {
+      if (!ALLOWED_IMAGE_TYPES.includes(imageFile.type)) {
+        setErrors((prev) => ({
+          ...prev,
+          imageUrl: "Unsupported file type. Allowed: JPG, PNG, GIF, WEBP.",
+        }));
+        toast.error("Please fix the form errors");
+        return;
+      }
+      if (imageFile.size > MAX_IMAGE_SIZE) {
+        setErrors((prev) => ({
+          ...prev,
+          imageUrl: "File is too large. Maximum size is 5 MB.",
+        }));
+        toast.error("Please fix the form errors");
+        return;
+      }
+    }
+
     const validatedData = validateForm();
 
     if (!validatedData) {
@@ -241,8 +300,12 @@ export function RoomForm({
         <form onSubmit={handleSubmit} className="space-y-4">
           <Tabs defaultValue="room">
             <TabsList className="w-full">
-              <TabsTrigger value="room">Room</TabsTrigger>
-              <TabsTrigger value="image">Image</TabsTrigger>
+              <TabsTrigger value="room" className="cursor-pointer">
+                Room
+              </TabsTrigger>
+              <TabsTrigger value="image" className="cursor-pointer">
+                Image
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="room">
@@ -336,12 +399,16 @@ export function RoomForm({
                   value={formData.bedType}
                   disabled={isSubmitting}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="cursor-pointer">
                     <SelectValue placeholder="Select bed type" />
                   </SelectTrigger>
                   <SelectContent>
                     {bedTypeOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
+                      <SelectItem
+                        key={option.value}
+                        value={option.value}
+                        className="cursor-pointer"
+                      >
                         {option.label}
                       </SelectItem>
                     ))}
@@ -355,7 +422,6 @@ export function RoomForm({
 
             <TabsContent value="image">
               <div className="space-y-2">
-                <Label htmlFor="imageFile">Image</Label>
                 <input
                   ref={fileInputRef}
                   id="imageFile"
@@ -364,10 +430,37 @@ export function RoomForm({
                   accept="image/*"
                   onChange={handleFileChange}
                   disabled={isSubmitting}
-                  className="w-full"
+                  className="hidden"
                 />
 
-                {/* clickable preview area */}
+                <div className="mt-2 flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleChooseFileClick}
+                    disabled={isSubmitting}
+                  >
+                    Choose File
+                  </Button>
+
+                  <div
+                    className="text-sm text-muted-foreground"
+                    title={
+                      imageFile
+                        ? imageFile.name
+                        : previewUrl
+                        ? "Current image"
+                        : "No file chosen"
+                    }
+                  >
+                    {imageFile
+                      ? truncateFileName(imageFile.name)
+                      : previewUrl
+                      ? "Current image"
+                      : "No file chosen"}
+                  </div>
+                </div>
+
                 <div
                   role="button"
                   tabIndex={0}
