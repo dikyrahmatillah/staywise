@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export function ImageGallery({
   name,
@@ -25,80 +26,65 @@ export function ImageGallery({
     setOpen(true);
   };
 
-  const prev = useCallback(() => {
-    setIndex((i) =>
-      images.length ? (i - 1 + images.length) % images.length : 0
-    );
-  }, [images.length]);
+  const nextImage = () => {
+    setIndex((prev) => (prev + 1) % images.length);
+  };
 
-  const next = useCallback(() => {
-    setIndex((i) => (images.length ? (i + 1) % images.length : 0));
-  }, [images.length]);
-
-  useEffect(() => {
-    if (!open) return;
-
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "ArrowLeft") {
-        e.preventDefault();
-        prev();
-      } else if (e.key === "ArrowRight") {
-        e.preventDefault();
-        next();
-      } else if (e.key === "Escape") {
-        setOpen(false);
-      }
-    };
-
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open, prev, next]);
-
-  const currentSrc = images?.[index] ?? "";
+  const prevImage = () => {
+    setIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
 
   return (
     <div className="mb-8">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="md:col-span-2">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-2 h-[450px]">
+        <div className="md:col-span-8 h-full">
           <button
             type="button"
             onClick={() => openAt(0)}
-            className="relative w-full aspect-[16/9] overflow-hidden rounded-lg cursor-pointer focus:outline-none"
+            className="relative w-full h-full overflow-hidden rounded-l-xl cursor-pointer focus:outline-none group"
             aria-label={`Open photo 1 of ${images.length} for ${name}`}
           >
             {primary ? (
-              <Image
-                src={primary}
-                alt={`${name} - photo 1`}
-                fill
-                className="object-cover"
-              />
+              <>
+                <Image
+                  src={primary}
+                  alt={`${name} - photo 1`}
+                  fill
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              </>
             ) : (
               <div className="w-full h-full bg-muted/50 flex items-center justify-center">
                 No image
               </div>
             )}
 
-            <div className="absolute left-3 bottom-3">
-              <Badge variant="secondary">{images.length} Photos</Badge>
+            <div className="absolute left-5 bottom-5 z-10">
+              <Badge className="px-3 py-1.5 text-sm bg-white/90 text-black hover:bg-white/95 transition-colors">
+                {images.length} Photos
+              </Badge>
             </div>
           </button>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className="md:col-span-4 flex flex-col gap-2 h-full">
           <button
             type="button"
             onClick={() => openAt(1)}
-            className="relative w-full aspect-[9/5] overflow-hidden rounded-lg cursor-pointer focus:outline-none"
+            className="relative w-full h-1/2 overflow-hidden rounded-tr-xl cursor-pointer focus:outline-none group"
             aria-label={`Open photo 2 of ${images.length} for ${name}`}
           >
             {rightTop ? (
-              <Image
-                src={rightTop}
-                alt={`${name} - photo 2`}
-                fill
-                className="object-cover"
-              />
+              <>
+                <Image
+                  src={rightTop}
+                  alt={`${name} - photo 2`}
+                  fill
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              </>
             ) : (
               <div className="w-full h-full bg-muted/50 flex items-center justify-center">
                 No image
@@ -109,7 +95,7 @@ export function ImageGallery({
           <button
             type="button"
             onClick={() => openAt(2)}
-            className="relative w-full aspect-[9/5] overflow-hidden rounded-lg cursor-pointer focus:outline-none"
+            className="relative w-full h-1/2 overflow-hidden rounded-br-xl cursor-pointer focus:outline-none group"
             aria-label={`Open photo 3 of ${images.length} for ${name}`}
           >
             {rightBottom ? (
@@ -118,15 +104,16 @@ export function ImageGallery({
                   src={rightBottom}
                   alt={`${name} - photo 3`}
                   fill
-                  className="object-cover"
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
                 />
                 {images.length > 3 && (
-                  <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                    <span className="text-white font-semibold">
+                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center group-hover:bg-black/60 transition-colors">
+                    <span className="text-white text-lg font-semibold">
                       +{images.length - 3} more photos
                     </span>
                   </div>
                 )}
+                <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </>
             ) : (
               <div className="w-full h-full bg-muted/50 flex items-center justify-center">
@@ -138,52 +125,56 @@ export function ImageGallery({
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="p-0 bg-transparent w-screen h-screen max-w-none max-h-none rounded-none border-0 shadow-none">
-          <DialogTitle className="sr-only">{name} photos</DialogTitle>
-          <div className="relative w-full h-full">
-            {/* Prev button */}
-            {images.length > 1 && (
-              <button
-                className="absolute left-4 top-1/2 -translate-y-1/2 z-50 rounded-full bg-black/20 p-2 text-white hover:bg-black/30"
-                onClick={prev}
-                aria-label="Previous photo"
-              >
-                <ChevronLeft className="h-6 w-6" />
-              </button>
-            )}
+        <DialogContent className="max-w-6xl w-full p-0 bg-transparent border-none">
+          <div className="relative bg-black h-[80vh] flex items-center justify-center">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute top-4 right-4 text-white bg-black/50 hover:bg-black/70 z-10"
+              onClick={() => setOpen(false)}
+            >
+              <X className="h-6 w-6" />
+            </Button>
 
-            {/* Next button */}
-            {images.length > 1 && (
-              <button
-                className="absolute right-4 top-1/2 -translate-y-1/2 z-50 rounded-full bg-black/20 p-2 text-white hover:bg-black/30"
-                onClick={next}
-                aria-label="Next photo"
-              >
-                <ChevronRight className="h-6 w-6" />
-              </button>
-            )}
-
-            <div className="absolute inset-0 flex items-center justify-center px-2">
-              {currentSrc ? (
-                <div className="max-w-[98vw] max-h-[98vh] w-full h-full">
-                  <Image
-                    src={currentSrc}
-                    alt={`${name} - photo ${index + 1}`}
-                    fill
-                    sizes="98vw"
-                    className="object-contain"
-                  />
-                </div>
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-white">
-                  No image
-                </div>
+            <div className="w-full h-full relative flex items-center justify-center">
+              <DialogTitle>
+                <span className="sr-only">{name} photos</span>
+              </DialogTitle>
+              {images[index] && (
+                <Image
+                  src={images[index]}
+                  alt={`${name} - photo ${index + 1}`}
+                  fill
+                  className="object-contain"
+                />
               )}
             </div>
 
-            {/* counter */}
-            <div className="absolute left-1/2 -translate-x-1/2 bottom-6 z-50 text-white bg-black/20 px-3 py-1 rounded">
-              {index + 1} / {images.length}
+            {images.length > 1 && (
+              <>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white bg-black/50 hover:bg-white/50 z-10"
+                  onClick={prevImage}
+                >
+                  <ChevronLeft className="h-6 w-6" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white bg-black/50 hover:bg-white/50 z-10"
+                  onClick={nextImage}
+                >
+                  <ChevronRight className="h-6 w-6" />
+                </Button>
+              </>
+            )}
+
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white">
+              <span>
+                {index + 1} of {images.length}
+              </span>
             </div>
           </div>
         </DialogContent>
