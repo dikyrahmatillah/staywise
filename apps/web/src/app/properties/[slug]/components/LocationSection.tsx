@@ -1,7 +1,5 @@
 "use client";
 
-// MapPin removed - using embedded Google Maps instead
-
 export function LocationSection({
   address,
   city,
