@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { z } from "zod";
 import {
@@ -11,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -28,6 +29,7 @@ import {
   CreateRoomInput,
   createRoomSchema,
   UpdateRoomInput,
+  updateRoomSchema,
 } from "@repo/schemas";
 
 interface RoomFormProps {
@@ -59,7 +61,7 @@ export function RoomForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
-    basePrice: 0,
+    price: 0,
     capacity: 1,
     bedType: "" as BedType | "",
     bedCount: 1,
@@ -68,13 +70,21 @@ export function RoomForm({
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>("");
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
+  const ALLOWED_IMAGE_TYPES = [
+    "image/jpeg",
+    "image/png",
+    "image/gif",
+    "image/webp",
+  ];
 
   useEffect(() => {
     if (room) {
       setFormData({
         name: room.name,
-        basePrice: room.basePrice,
+        price: room.basePrice,
         capacity: room.capacity,
         bedType: room.bedType || "",
         bedCount: room.bedCount,
@@ -86,7 +96,7 @@ export function RoomForm({
     } else {
       setFormData({
         name: "",
-        basePrice: 0,
+        price: 0,
         capacity: 1,
         bedType: "",
         bedCount: 1,
@@ -113,13 +123,22 @@ export function RoomForm({
   ) => {
     const target = e.target as HTMLInputElement | HTMLTextAreaElement;
     const { name, value } = target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]:
-        name === "basePrice" || name === "capacity" || name === "bedCount"
+    setFormData((prev) => {
+      const raw =
+        name === "price" || name === "capacity" || name === "bedCount"
           ? Number(value)
-          : value,
-    }));
+          : value;
+      const clamped =
+        typeof raw === "number" &&
+        raw < 0 &&
+        (name === "price" || name === "capacity" || name === "bedCount")
+          ? 0
+          : raw;
+      return {
+        ...prev,
+        [name]: clamped,
+      };
+    });
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }
@@ -132,19 +151,59 @@ export function RoomForm({
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files && e.target.files[0];
     if (file) {
+      // validate type
+      if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+        setErrors((prev) => ({
+          ...prev,
+          imageUrl: "Unsupported file type. Allowed: JPG, PNG, GIF, WEBP.",
+        }));
+        setImageFile(null);
+        return;
+      }
+
+      // validate size
+      if (file.size > MAX_IMAGE_SIZE) {
+        setErrors((prev) => ({
+          ...prev,
+          imageUrl: "File is too large. Maximum size is 5 MB.",
+        }));
+        setImageFile(null);
+        return;
+      }
+
       setImageFile(file);
       if (errors.imageUrl) setErrors((prev) => ({ ...prev, imageUrl: "" }));
     }
   };
 
+  const handleChooseFileClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handlePickImage = () => {
+    fileInputRef.current?.click();
+  };
+
+  const truncateFileName = (name: string, max = 30) => {
+    if (name.length <= max) return name;
+    const extIndex = name.lastIndexOf(".");
+    const ext = extIndex > -1 ? name.slice(extIndex) : "";
+    const base = extIndex > -1 ? name.slice(0, extIndex) : name;
+    const keep = Math.max(6, Math.floor((max - ext.length) / 2));
+    return `${base.slice(0, keep)}...${base.slice(-keep)}${ext}`;
+  };
+
   const validateForm = () => {
     try {
-      const validatedData = createRoomSchema.parse({
+      const payload = {
         ...formData,
+        basePrice: formData.price,
         bedType: formData.bedType || undefined,
         imageUrl: formData.imageUrl || undefined,
         description: formData.description || undefined,
-      });
+      };
+
+      const validatedData = updateRoomSchema.parse(payload) as UpdateRoomInput;
       setErrors({});
       return validatedData;
     } catch (error) {
@@ -163,6 +222,26 @@ export function RoomForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // re-check image validity before submit
+    if (imageFile) {
+      if (!ALLOWED_IMAGE_TYPES.includes(imageFile.type)) {
+        setErrors((prev) => ({
+          ...prev,
+          imageUrl: "Unsupported file type. Allowed: JPG, PNG, GIF, WEBP.",
+        }));
+        toast.error("Please fix the form errors");
+        return;
+      }
+      if (imageFile.size > MAX_IMAGE_SIZE) {
+        setErrors((prev) => ({
+          ...prev,
+          imageUrl: "File is too large. Maximum size is 5 MB.",
+        }));
+        toast.error("Please fix the form errors");
+        return;
+      }
+    }
+
     const validatedData = validateForm();
 
     if (!validatedData) {
@@ -175,7 +254,11 @@ export function RoomForm({
       if (imageFile) {
         const form = new FormData();
         form.append("name", String(validatedData.name));
-        form.append("basePrice", String(validatedData.basePrice));
+        // backend expects `basePrice` key
+        const basePrice =
+          (validatedData as CreateRoomInput | UpdateRoomInput).basePrice ??
+          formData.price;
+        form.append("basePrice", String(basePrice));
         form.append("capacity", String(validatedData.capacity));
         if (validatedData.bedType)
           form.append("bedType", String(validatedData.bedType));
@@ -190,7 +273,7 @@ export function RoomForm({
       }
       setFormData({
         name: "",
-        basePrice: 0,
+        price: 0,
         capacity: 1,
         bedType: "",
         bedCount: 1,
@@ -215,136 +298,202 @@ export function RoomForm({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Room Name</Label>
-            <Input
-              id="name"
-              name="name"
-              placeholder="Enter room name"
-              value={formData.name}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-            />
-            {errors.name && (
-              <p className="text-sm text-red-500">{errors.name}</p>
-            )}
-          </div>
+          <Tabs defaultValue="room">
+            <TabsList className="w-full">
+              <TabsTrigger value="room" className="cursor-pointer">
+                Room
+              </TabsTrigger>
+              <TabsTrigger value="image" className="cursor-pointer">
+                Image
+              </TabsTrigger>
+            </TabsList>
 
-          <div className="space-y-2">
-            <Label htmlFor="description">Description (optional)</Label>
-            <textarea
-              id="description"
-              name="description"
-              placeholder="A short description of the room"
-              className="w-full rounded-md border bg-transparent px-3 py-2 text-sm shadow-sm focus:outline-none"
-              value={formData.description}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-            />
-            {errors.description && (
-              <p className="text-sm text-red-500">{errors.description}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="basePrice">Base Price (per night)</Label>
-            <Input
-              id="basePrice"
-              name="basePrice"
-              type="number"
-              placeholder="0"
-              value={formData.basePrice}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-            />
-            {errors.basePrice && (
-              <p className="text-sm text-red-500">{errors.basePrice}</p>
-            )}
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="capacity">Capacity</Label>
-              <Input
-                id="capacity"
-                name="capacity"
-                type="number"
-                placeholder="1"
-                value={formData.capacity}
-                onChange={handleInputChange}
-                disabled={isSubmitting}
-              />
-              {errors.capacity && (
-                <p className="text-sm text-red-500">{errors.capacity}</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="bedCount">Bed Count</Label>
-              <Input
-                id="bedCount"
-                name="bedCount"
-                type="number"
-                placeholder="1"
-                value={formData.bedCount}
-                onChange={handleInputChange}
-                disabled={isSubmitting}
-              />
-              {errors.bedCount && (
-                <p className="text-sm text-red-500">{errors.bedCount}</p>
-              )}
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="bedType">Bed Type (Optional)</Label>
-            <Select
-              onValueChange={handleSelectChange}
-              value={formData.bedType}
-              disabled={isSubmitting}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select bed type" />
-              </SelectTrigger>
-              <SelectContent>
-                {bedTypeOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.bedType && (
-              <p className="text-sm text-red-500">{errors.bedType}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="imageFile">Image (Optional)</Label>
-            <input
-              id="imageFile"
-              name="imageFile"
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              disabled={isSubmitting}
-              className="block w-full text-sm text-slate-600"
-            />
-            {previewUrl && (
-              <div className="mt-2 relative h-40 w-full">
-                <Image
-                  src={previewUrl}
-                  alt="Selected preview"
-                  fill
-                  sizes="(max-width: 640px) 100vw, 40rem"
-                  className="rounded-md object-cover"
+            <TabsContent value="room">
+              <div className="space-y-2">
+                <Label htmlFor="name">Room Name</Label>
+                <Input
+                  id="name"
+                  name="name"
+                  placeholder="Enter room name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  disabled={isSubmitting}
                 />
+                {errors.name && (
+                  <p className="text-sm text-red-500">{errors.name}</p>
+                )}
               </div>
-            )}
-            {errors.imageUrl && (
-              <p className="text-sm text-red-500">{errors.imageUrl}</p>
-            )}
-          </div>
+
+              <div className="space-y-2 mt-4">
+                <Label htmlFor="description">Description (optional)</Label>
+                <textarea
+                  id="description"
+                  name="description"
+                  placeholder="A short description of the room"
+                  className="w-full rounded-md border bg-transparent px-3 py-2 text-sm shadow-sm focus:outline-none"
+                  value={formData.description}
+                  onChange={handleInputChange}
+                  disabled={isSubmitting}
+                />
+                {errors.description && (
+                  <p className="text-sm text-red-500">{errors.description}</p>
+                )}
+              </div>
+
+              <div className="space-y-2 mt-4">
+                <Label htmlFor="price">Price (per night)</Label>
+                <Input
+                  id="price"
+                  name="price"
+                  type="number"
+                  placeholder="0"
+                  min={0}
+                  value={formData.price}
+                  onChange={handleInputChange}
+                  disabled={isSubmitting}
+                />
+                {errors.price && (
+                  <p className="text-sm text-red-500">{errors.price}</p>
+                )}
+              </div>
+
+              <div className="grid grid-cols-3 gap-4 mt-4">
+                <div className="space-y-2">
+                  <Label htmlFor="capacity">Capacity</Label>
+                  <Input
+                    id="capacity"
+                    name="capacity"
+                    type="number"
+                    placeholder="1"
+                    min={0}
+                    value={formData.capacity}
+                    onChange={handleInputChange}
+                    disabled={isSubmitting}
+                  />
+                  {errors.capacity && (
+                    <p className="text-sm text-red-500">{errors.capacity}</p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="bedCount">Bed Count</Label>
+                  <Input
+                    id="bedCount"
+                    name="bedCount"
+                    type="number"
+                    placeholder="1"
+                    min={0}
+                    value={formData.bedCount}
+                    onChange={handleInputChange}
+                    disabled={isSubmitting}
+                  />
+                  {errors.bedCount && (
+                    <p className="text-sm text-red-500">{errors.bedCount}</p>
+                  )}
+                </div>
+              </div>
+              <div className="space-y-2 mt-4">
+                <Label htmlFor="bedType">Bed Type</Label>
+                <Select
+                  onValueChange={handleSelectChange}
+                  value={formData.bedType}
+                  disabled={isSubmitting}
+                >
+                  <SelectTrigger className="cursor-pointer">
+                    <SelectValue placeholder="Select bed type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {bedTypeOptions.map((option) => (
+                      <SelectItem
+                        key={option.value}
+                        value={option.value}
+                        className="cursor-pointer"
+                      >
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.bedType && (
+                  <p className="text-sm text-red-500">{errors.bedType}</p>
+                )}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="image">
+              <div className="space-y-2">
+                <input
+                  ref={fileInputRef}
+                  id="imageFile"
+                  name="imageFile"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  disabled={isSubmitting}
+                  className="hidden"
+                />
+
+                <div className="mt-2 flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleChooseFileClick}
+                    disabled={isSubmitting}
+                  >
+                    Choose File
+                  </Button>
+
+                  <div
+                    className="text-sm text-muted-foreground"
+                    title={
+                      imageFile
+                        ? imageFile.name
+                        : previewUrl
+                        ? "Current image"
+                        : "No file chosen"
+                    }
+                  >
+                    {imageFile
+                      ? truncateFileName(imageFile.name)
+                      : previewUrl
+                      ? "Current image"
+                      : "No file chosen"}
+                  </div>
+                </div>
+
+                <div
+                  role="button"
+                  tabIndex={0}
+                  onClick={handlePickImage}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") handlePickImage();
+                  }}
+                  className={`mt-2 relative h-40 w-full rounded-md overflow-hidden border-2 border-dashed flex items-center justify-center cursor-pointer bg-muted/5`}
+                >
+                  {previewUrl ? (
+                    <Image
+                      src={previewUrl}
+                      alt="Selected preview"
+                      fill
+                      sizes="(max-width: 640px) 100vw, 40rem"
+                      className="object-cover"
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center gap-1 text-sm text-muted-foreground">
+                      <div>Click an image here to upload</div>
+                      <div className="text-xs text-muted-foreground">
+                        PNG, JPG, GIF
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {errors.imageUrl && (
+                  <p className="text-sm text-red-500">{errors.imageUrl}</p>
+                )}
+              </div>
+            </TabsContent>
+          </Tabs>
 
           <DialogFooter>
             <Button

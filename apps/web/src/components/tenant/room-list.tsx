@@ -5,13 +5,7 @@ import Image from "next/image";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
+// Dropdown menu removed; using explicit buttons instead
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,7 +22,6 @@ import {
   DollarSign,
   Edit,
   Trash2,
-  MoreHorizontal,
   ImageIcon,
   Calendar,
   CalendarDays,
@@ -246,36 +239,15 @@ export function RoomList({ rooms, loading, onEdit, onDelete }: RoomListProps) {
                         Price Rules
                       </Button>
 
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button size="sm" variant="outline">
-                            <MoreHorizontal className="h-4 w-4 mr-1" />
-                            More
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48">
-                          <DropdownMenuItem
-                            onClick={() => handleManageAvailability(room)}
-                          >
-                            <CalendarDays className="h-4 w-4 mr-2" />
-                            Block Dates
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => handleManagePriceAdjustment(room)}
-                          >
-                            <TrendingUp className="h-4 w-4 mr-2" />
-                            Price Rules
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            onClick={() => setDeleteRoomId(room.id)}
-                            className="text-red-600 focus:text-red-600 cursor-pointer"
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Delete Room
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setDeleteRoomId(room.id)}
+                        className="text-red-600 border-red-300 hover:bg-red-50"
+                      >
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        Delete Room
+                      </Button>
                     </div>
                   </div>
 

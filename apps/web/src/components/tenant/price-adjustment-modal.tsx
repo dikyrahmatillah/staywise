@@ -300,7 +300,9 @@ export function PriceAdjustmentModal({
                 <CardContent>
                   <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                      <Label htmlFor="title">Title (Optional)</Label>
+                      <Label htmlFor="title" className="mb-1">
+                        Title (Optional)
+                      </Label>
                       <Input
                         id="title"
                         value={formData.title}
@@ -316,7 +318,7 @@ export function PriceAdjustmentModal({
 
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <Label>Adjustment Type</Label>
+                        <Label className="mb-1">Adjustment Type</Label>
                         <Select
                           value={formData.adjustType}
                           onValueChange={(value: PriceAdjustType) =>
@@ -347,7 +349,7 @@ export function PriceAdjustmentModal({
                       </div>
 
                       <div>
-                        <Label>
+                        <Label className="mb-1">
                           Adjustment Value
                           {formData.adjustType === "PERCENTAGE"
                             ? " (%)"
@@ -385,7 +387,7 @@ export function PriceAdjustmentModal({
 
                     <div className="space-y-4">
                       <div>
-                        <Label>Date Selection Mode</Label>
+                        <Label className="mb-1">Date Selection Mode</Label>
                         <div className="flex gap-4 mt-2">
                           <div className="flex items-center space-x-2">
                             <input
@@ -431,7 +433,7 @@ export function PriceAdjustmentModal({
                       {formData.dateMode === "range" && (
                         <div className="grid grid-cols-2 gap-4">
                           <div>
-                            <Label>Start Date</Label>
+                            <Label className="mb-1">Start Date</Label>
                             <Popover>
                               <PopoverTrigger asChild>
                                 <Button
@@ -461,7 +463,7 @@ export function PriceAdjustmentModal({
                           </div>
 
                           <div>
-                            <Label>End Date</Label>
+                            <Label className="mb-1">End Date</Label>
                             <Popover>
                               <PopoverTrigger asChild>
                                 <Button
