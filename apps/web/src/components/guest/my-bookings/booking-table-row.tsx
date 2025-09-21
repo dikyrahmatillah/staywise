@@ -50,7 +50,7 @@ export const BookingTableRow = ({
     // Show different actions based on payment method
     if (booking.paymentMethod === "MANUAL_TRANSFER") {
       return (
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2">
           <Dialog
             open={paymentProofDialogOpen}
             onOpenChange={setPaymentProofDialogOpen}
