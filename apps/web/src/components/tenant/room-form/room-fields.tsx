@@ -1,42 +1,46 @@
 "use client";
 
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/components/ui/select";
-import { TabsContent } from "@/components/ui/tabs";
-import { Loader2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { bedTypeOptions } from "./constants";
 import type { BedType } from "@/types/room";
+import type { RoomFormErrors, RoomFormState } from "./types";
 
-interface Props {
-  formData: any;
-  errors: Record<string, string>;
-  isSubmitting: boolean;
-  handleInputChange: (e: React.ChangeEvent<any>) => void;
-  handleSelectChange: (value: BedType) => void;
-  bedTypeOptions: { value: BedType; label: string }[];
-  room?: any;
-}
+type Props = {
+  values: RoomFormState;
+  errors: RoomFormErrors;
+  disabled?: boolean;
+  onChange: (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => void;
+  onSelectChange: (value: BedType) => void;
+};
 
-export default function RoomDetails({
-  formData,
+export function RoomFields({
+  values,
   errors,
-  isSubmitting,
-  handleInputChange,
-  handleSelectChange,
-  bedTypeOptions,
-  room,
+  disabled,
+  onChange,
+  onSelectChange,
 }: Props) {
   return (
-    <TabsContent value="room">
+    <div>
       <div className="space-y-2">
         <Label htmlFor="name">Room Name</Label>
         <Input
           id="name"
           name="name"
           placeholder="Enter room name"
-          value={formData.name}
-          onChange={handleInputChange}
-          disabled={isSubmitting}
+          value={values.name}
+          onChange={onChange}
+          disabled={disabled}
         />
         {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
       </div>
@@ -48,9 +52,9 @@ export default function RoomDetails({
           name="description"
           placeholder="A short description of the room"
           className="w-full rounded-md border bg-transparent px-3 py-2 text-sm shadow-sm focus:outline-none"
-          value={formData.description}
-          onChange={handleInputChange}
-          disabled={isSubmitting}
+          value={values.description}
+          onChange={onChange}
+          disabled={disabled}
         />
         {errors.description && (
           <p className="text-sm text-red-500">{errors.description}</p>
@@ -63,11 +67,11 @@ export default function RoomDetails({
           id="price"
           name="price"
           type="number"
-          placeholder="0"
-          min={0}
-          value={formData.price}
-          onChange={handleInputChange}
-          disabled={isSubmitting}
+          placeholder="1"
+          min={1}
+          value={values.price}
+          onChange={onChange}
+          disabled={disabled}
         />
         {errors.price && <p className="text-sm text-red-500">{errors.price}</p>}
       </div>
@@ -80,10 +84,10 @@ export default function RoomDetails({
             name="capacity"
             type="number"
             placeholder="1"
-            min={0}
-            value={formData.capacity}
-            onChange={handleInputChange}
-            disabled={isSubmitting}
+            min={1}
+            value={values.capacity}
+            onChange={onChange}
+            disabled={disabled}
           />
           {errors.capacity && (
             <p className="text-sm text-red-500">{errors.capacity}</p>
@@ -97,37 +101,42 @@ export default function RoomDetails({
             name="bedCount"
             type="number"
             placeholder="1"
-            min={0}
-            value={formData.bedCount}
-            onChange={handleInputChange}
-            disabled={isSubmitting}
+            min={1}
+            value={values.bedCount}
+            onChange={onChange}
+            disabled={disabled}
           />
           {errors.bedCount && (
             <p className="text-sm text-red-500">{errors.bedCount}</p>
           )}
         </div>
       </div>
-
       <div className="space-y-2 mt-4">
         <Label htmlFor="bedType">Bed Type</Label>
         <Select
-          onValueChange={handleSelectChange}
-          value={formData.bedType}
-          disabled={isSubmitting}
+          onValueChange={onSelectChange}
+          value={values.bedType}
+          disabled={disabled}
         >
           <SelectTrigger className="cursor-pointer">
             <SelectValue placeholder="Select bed type" />
           </SelectTrigger>
           <SelectContent>
             {bedTypeOptions.map((option) => (
-              <SelectItem key={option.value} value={option.value} className="cursor-pointer">
+              <SelectItem
+                key={option.value}
+                value={option.value}
+                className="cursor-pointer"
+              >
                 {option.label}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
-        {errors.bedType && <p className="text-sm text-red-500">{errors.bedType}</p>}
+        {errors.bedType && (
+          <p className="text-sm text-red-500">{errors.bedType}</p>
+        )}
       </div>
-    </TabsContent>
+    </div>
   );
 }
