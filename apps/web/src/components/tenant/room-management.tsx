@@ -26,6 +26,7 @@ export function RoomManagement() {
     createRoom,
     updateRoom,
     deleteRoom,
+    isEmpty,
   } = useRooms(propertyId);
 
   const handleSubmit = async (data: CreateRoomInput | UpdateRoomInput) => {
@@ -93,13 +94,14 @@ export function RoomManagement() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Bed className="h-5 w-5" />
-            Rooms ({rooms.length})
+            Rooms {loading ? "(…)" : `(${rooms.length})`}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <RoomList
             rooms={rooms}
             loading={loading}
+            isEmpty={isEmpty}
             onEdit={handleEditRoom}
             onDelete={handleDeleteRoom}
           />
