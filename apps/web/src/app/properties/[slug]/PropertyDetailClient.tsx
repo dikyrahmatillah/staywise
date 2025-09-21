@@ -8,6 +8,7 @@ import type { ApiResponse } from "@/types/api";
 import { HeaderBlock } from "./components/HeaderBlock";
 import { ImageGallery } from "./components/ImageGallery";
 import { StatsHeader } from "./components/StatsHeader";
+import { getGuestRange } from "@/components/tenant/property-utils";
 import { AmenitiesSection } from "./components/AmenitiesSection";
 import { Reviews } from "./components/Reviews";
 import { BookingSidebar } from "./components/BookingSidebar";
@@ -21,6 +22,7 @@ type Room = {
   bedCount?: number;
   bedType?: string | null;
   maxGuests?: number;
+  capacity?: number;
   imageUrl?: string | null;
 };
 
@@ -94,6 +96,9 @@ export function PropertyDetailClient({ slug }: { slug: string }) {
   const totalBedrooms = property.Rooms?.length || 1;
   const totalBeds =
     property.Rooms?.reduce((sum, room) => sum + (room.bedCount || 0), 0) || 0;
+  // derive guest capacity range using shared helper
+  type PropLike = { Rooms?: unknown[]; maxGuests?: number };
+  const guestRange = getGuestRange(property as PropLike);
 
   const handleRoomSelect = (room: Room) => {
     setSelectedRoom(room);
@@ -112,7 +117,8 @@ export function PropertyDetailClient({ slug }: { slug: string }) {
             description={property.description}
             rating={rating}
             reviewCount={reviewCount}
-            maxGuests={property.maxGuests}
+            minGuests={guestRange.min}
+            maxGuests={guestRange.max}
             bedrooms={totalBedrooms}
             totalBeds={totalBeds}
           />
@@ -164,7 +170,7 @@ export function PropertyDetailClient({ slug }: { slug: string }) {
           <div className="sticky top-24">
             <BookingSidebar
               pricePerNight={Number(property.Rooms?.[0]?.basePrice ?? 0)}
-              maxGuests={property.maxGuests}
+              maxGuests={guestRange.max}
               propertyId={property.id}
               selectedRoom={selectedRoom}
             />

@@ -10,6 +10,7 @@ export function StatsHeader({
   rating,
   reviewCount,
   maxGuests,
+  minGuests,
   bedrooms,
   totalBeds,
   bedTypeSummary,
@@ -20,6 +21,7 @@ export function StatsHeader({
   rating: number;
   reviewCount: number;
   maxGuests?: number | null;
+  minGuests?: number | null;
   bedrooms: number;
   totalBeds?: number;
   bedTypeSummary?: string;
@@ -60,11 +62,11 @@ export function StatsHeader({
             <p className="text-sm text-muted-foreground">Guests</p>
             <p className="font-medium">
               {(() => {
-                const minGuests = 1;
-                const max = maxGuests ?? 1;
-                return minGuests === max
-                  ? `${max} Guest${max !== 1 ? "s" : ""}`
-                  : `${minGuests}-${max} Guests`;
+                const effectiveMin = minGuests ?? 1;
+                const effectiveMax = maxGuests ?? effectiveMin;
+                return effectiveMin === effectiveMax
+                  ? `${effectiveMax} Guest${effectiveMax !== 1 ? "s" : ""}`
+                  : `${effectiveMin}-${effectiveMax} Guests`;
               })()}
             </p>
           </div>
