@@ -7,157 +7,124 @@ import { api } from "@/lib/axios";
 import { toast } from "sonner";
 import type { Room, RoomsApiResponse, RoomApiResponse } from "@/types/room";
 import { CreateRoomInput, UpdateRoomInput } from "@repo/schemas";
+import { setAuthToken } from "@/lib/axios";
+
+function getErrorMessage(err: unknown, fallback: string) {
+  if (axios.isAxiosError(err) && err.response?.data?.message) {
+    return err.response.data.message as string;
+  }
+  return fallback;
+}
 
 export function useRooms(propertyId: string) {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [rooms, setRooms] = useState<Room[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const authToken = session?.user?.accessToken ?? null;
+
   const fetchRooms = useCallback(async () => {
-    if (!session?.user?.accessToken) return;
+    if (!authToken) return;
 
     setLoading(true);
     setError(null);
 
     try {
-      api.defaults.headers.common.Authorization = `Bearer ${session.user.accessToken}`;
-      const response = await api.get<RoomsApiResponse>(
+      const res = await api.get<RoomsApiResponse>(
         `/rooms/property/${propertyId}`
       );
-      setRooms(response.data.data);
+      setRooms(res.data.data);
     } catch (err) {
-      console.error("Error fetching rooms:", err);
-      const errorMessage =
-        axios.isAxiosError(err) && err.response?.data?.message
-          ? err.response.data.message
-          : "Failed to fetch rooms";
-      setError(errorMessage);
-      toast.error(errorMessage);
+      const msg = getErrorMessage(err, "Failed to fetch rooms");
+      console.error("fetchRooms:", err);
+      setError(msg);
+      toast.error(msg);
     } finally {
-      delete api.defaults.headers.common.Authorization;
       setLoading(false);
     }
-  }, [propertyId, session?.user?.accessToken]);
+  }, [authToken, propertyId]);
 
   const createRoom = useCallback(
     async (roomData: CreateRoomInput | FormData) => {
-      if (!session?.user?.accessToken) {
-        toast.error("Authentication required");
-        return;
-      }
+      if (!authToken) return toast.error("Authentication required");
 
       try {
-        api.defaults.headers.common.Authorization = `Bearer ${session.user.accessToken}`;
-        let response;
-        if (roomData instanceof FormData) {
-          response = await api.post<RoomApiResponse>(
-            `/rooms/property/${propertyId}`,
-            roomData
-          );
-        } else {
-          response = await api.post<RoomApiResponse>(
-            `/rooms/property/${propertyId}`,
-            roomData
-          );
-        }
-        setRooms((prevRooms) => [...prevRooms, response.data.data]);
+        const res = await api.post<RoomApiResponse>(
+          `/rooms/property/${propertyId}`,
+          roomData
+        );
+        setRooms((p) => [...p, res.data.data]);
         toast.success("Room created successfully");
-        return response.data.data;
+        return res.data.data;
       } catch (err) {
-        console.error("Error creating room:", err);
-        const errorMessage =
-          axios.isAxiosError(err) && err.response?.data?.message
-            ? err.response.data.message
-            : "Failed to create room";
-        toast.error(errorMessage);
+        const msg = getErrorMessage(err, "Failed to create room");
+        console.error("createRoom:", err);
+        toast.error(msg);
         throw err;
-      } finally {
-        delete api.defaults.headers.common.Authorization;
       }
     },
-    [propertyId, session?.user?.accessToken]
+    [authToken, propertyId]
   );
 
   const updateRoom = useCallback(
     async (roomId: string, roomData: UpdateRoomInput | FormData) => {
-      if (!session?.user?.accessToken) {
-        toast.error("Authentication required");
-        return;
-      }
+      if (!authToken) return toast.error("Authentication required");
 
       try {
-        api.defaults.headers.common.Authorization = `Bearer ${session.user.accessToken}`;
-        let response;
-        if (roomData instanceof FormData) {
-          response = await api.put<RoomApiResponse>(
-            `/rooms/${roomId}`,
-            roomData
-          );
-        } else {
-          response = await api.put<RoomApiResponse>(
-            `/rooms/${roomId}`,
-            roomData
-          );
-        }
-        setRooms((prevRooms) =>
-          prevRooms.map((room) =>
-            room.id === roomId ? response.data.data : room
-          )
+        const res = await api.put<RoomApiResponse>(
+          `/rooms/${roomId}`,
+          roomData
+        );
+        setRooms((prev) =>
+          prev.map((r) => (r.id === roomId ? res.data.data : r))
         );
         toast.success("Room updated successfully");
-        return response.data.data;
+        return res.data.data;
       } catch (err) {
-        console.error("Error updating room:", err);
-        const errorMessage =
-          axios.isAxiosError(err) && err.response?.data?.message
-            ? err.response.data.message
-            : "Failed to update room";
-        toast.error(errorMessage);
+        const msg = getErrorMessage(err, "Failed to update room");
+        console.error("updateRoom:", err);
+        toast.error(msg);
         throw err;
-      } finally {
-        delete api.defaults.headers.common.Authorization;
       }
     },
-    [session?.user?.accessToken]
+    [authToken]
   );
 
   const deleteRoom = useCallback(
     async (roomId: string) => {
-      if (!session?.user?.accessToken) {
-        toast.error("Authentication required");
-        return;
-      }
+      if (!authToken) return toast.error("Authentication required");
 
       try {
-        api.defaults.headers.common.Authorization = `Bearer ${session.user.accessToken}`;
         await api.delete(`/rooms/${roomId}`);
-        setRooms((prevRooms) => prevRooms.filter((room) => room.id !== roomId));
+        setRooms((p) => p.filter((r) => r.id !== roomId));
         toast.success("Room deleted successfully");
       } catch (err) {
-        console.error("Error deleting room:", err);
-        const errorMessage =
-          axios.isAxiosError(err) && err.response?.data?.message
-            ? err.response.data.message
-            : "Failed to delete room";
-        toast.error(errorMessage);
+        const msg = getErrorMessage(err, "Failed to delete room");
+        console.error("deleteRoom:", err);
+        toast.error(msg);
         throw err;
-      } finally {
-        delete api.defaults.headers.common.Authorization;
       }
     },
-    [session?.user?.accessToken]
+    [authToken]
   );
 
   useEffect(() => {
-    if (session?.user?.accessToken && propertyId) {
+    if (status === "loading") return;
+
+    setAuthToken(authToken);
+
+    if (status === "authenticated" && authToken && propertyId) {
       fetchRooms();
+    } else {
+      setLoading(false);
     }
-  }, [fetchRooms, session?.user?.accessToken, propertyId]);
+  }, [status, authToken, propertyId, fetchRooms]);
 
   return {
     rooms,
     loading,
+    isEmpty: !loading && rooms.length === 0,
     error,
     fetchRooms,
     createRoom,
