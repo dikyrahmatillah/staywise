@@ -1,31 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, AlertTriangle, Edit, Trash2, Plus } from "lucide-react";
-import type {
-  CustomCategoryResponse,
-  CreateCustomCategoryInput,
-} from "@repo/schemas";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { CategoryForm } from "./category-form";
-
+import { Loader2, AlertTriangle, Edit, Trash2 } from "lucide-react";
+import type { CustomCategoryResponse } from "@repo/schemas";
 interface CustomCategoriesSectionProps {
   categories: CustomCategoryResponse[];
   loading: boolean;
   error: string | null;
   onEdit: (c: CustomCategoryResponse) => void;
   onDelete: (c: CustomCategoryResponse) => void;
-  onCreate: (data: CreateCustomCategoryInput) => Promise<void>;
-  createLoading: boolean;
 }
 
 export function CustomCategoriesSection({
@@ -34,10 +18,7 @@ export function CustomCategoriesSection({
   error,
   onEdit,
   onDelete,
-  onCreate,
-  createLoading,
 }: CustomCategoriesSectionProps) {
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
   return (
     <Card>
       <CardHeader className="flex items-center justify-between">
@@ -45,29 +26,6 @@ export function CustomCategoriesSection({
           <Edit className="h-5 w-5" />
           Custom Categories
         </CardTitle>
-        <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Custom Category
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Create Custom Category</DialogTitle>
-              <DialogDescription>
-                Add a new custom category for your properties.
-              </DialogDescription>
-            </DialogHeader>
-            <CategoryForm
-              onSubmit={async (data) => {
-                await onCreate(data);
-              }}
-              onCancel={() => setIsCreateOpen(false)}
-              isLoading={createLoading}
-            />
-          </DialogContent>
-        </Dialog>
       </CardHeader>
       <CardContent>
         {loading ? (

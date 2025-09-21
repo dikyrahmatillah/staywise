@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Building2, Bed, Users, Calendar } from "lucide-react";
 import { useTenantProperties } from "@/hooks/useTenantProperties";
+import { getGuestRange } from "@/components/tenant/property-utils";
 
 interface PropertyStatsProps {
   tenantId: string;
@@ -31,7 +32,9 @@ export function PropertyStats({ tenantId }: PropertyStatsProps) {
         (acc: PropertyStats, property) => {
           acc.totalProperties += 1;
           acc.totalRooms += property.Rooms?.length || 0;
-          acc.totalCapacity += property.maxGuests || 0;
+          type PropLike = { Rooms?: unknown[]; maxGuests?: number };
+          const { max } = getGuestRange(property as PropLike);
+          acc.totalCapacity += max || 0;
 
           const bookings = property._count?.Bookings ?? 0;
           acc.totalBookings += bookings;
