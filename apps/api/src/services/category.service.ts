@@ -12,46 +12,50 @@ export async function resolveCategoryId(
   tx: Prisma.TransactionClient,
   data: CreatePropertyInput
 ) {
-  if ("propertyCategoryId" in data) return (data as any).propertyCategoryId;
+  const maybeId = (data as any).propertyCategoryId;
+  if (maybeId) return maybeId;
 
-  if ("category" in data) {
-    const category: any = (data as any).category;
-    if (category && typeof category === "object") {
-      const { name, description } = category as {
-        name: string;
-        description?: string;
-      };
-      const { id } = await tx.propertyCategory.create({
-        data: {
-          name,
-        },
-        select: { id: true },
-      });
-      return id;
-    }
+  const incoming = (data as any).category;
+  if (incoming && typeof incoming === "object" && incoming.name) {
+    const name = String(incoming.name).trim();
+    const description = incoming.description
+      ? String(incoming.description).trim()
+      : undefined;
+
+    const { id } = await tx.propertyCategory.create({
+      data: {
+        name,
+        ...(description ? { description } : {}),
+      },
+      select: { id: true },
+    });
+
+    return id;
   }
 
   throw new AppError("Category is required", 400);
 }
 
+function paginate(query: GetCategoriesQuery) {
+  const { page = 1, limit = 10, search } = query;
+  const skip = (page - 1) * limit;
+  return { page, limit, skip, search };
+}
+
 export class CategoryService {
   async getCustomCategories(tenantId: string, query: GetCategoriesQuery) {
-    const { page = 1, limit = 10, search } = query;
-    const skip = (page - 1) * limit;
+    const { page, limit, skip, search } = paginate(query);
 
-    const whereClause: Prisma.CustomCategoryWhereInput = {
+    const where: Prisma.CustomCategoryWhereInput = {
       tenantId,
       ...(search && {
-        name: {
-          contains: search,
-          mode: "insensitive" as const,
-        },
+        name: { contains: search, mode: "insensitive" as const },
       }),
     };
 
     const [categories, total] = await Promise.all([
       prisma.customCategory.findMany({
-        where: whereClause,
+        where,
         skip,
         take: limit,
         orderBy: { createdAt: "desc" },
@@ -63,57 +67,44 @@ export class CategoryService {
           updatedAt: true,
         },
       }),
-      prisma.customCategory.count({ where: whereClause }),
+      prisma.customCategory.count({ where }),
     ]);
-
-    const totalPages = Math.ceil(total / limit);
 
     return {
       categories,
       total,
       page,
       limit,
-      totalPages,
+      totalPages: Math.ceil(total / limit),
     };
   }
 
   async getDefaultCategories(query: GetCategoriesQuery) {
-    const { page = 1, limit = 10, search } = query;
-    const skip = (page - 1) * limit;
+    const { page, limit, skip, search } = paginate(query);
 
-    const whereClause: Prisma.PropertyCategoryWhereInput = {
+    const where: Prisma.PropertyCategoryWhereInput = {
       ...(search && {
-        name: {
-          contains: search,
-          mode: "insensitive" as const,
-        },
+        name: { contains: search, mode: "insensitive" as const },
       }),
     };
 
     const [categories, total] = await Promise.all([
       prisma.propertyCategory.findMany({
-        where: whereClause,
+        where,
         skip,
         take: limit,
         orderBy: { name: "asc" },
-        select: {
-          id: true,
-          name: true,
-          createdAt: true,
-          updatedAt: true,
-        },
+        select: { id: true, name: true, createdAt: true, updatedAt: true },
       }),
-      prisma.propertyCategory.count({ where: whereClause }),
+      prisma.propertyCategory.count({ where }),
     ]);
-
-    const totalPages = Math.ceil(total / limit);
 
     return {
       categories,
       total,
       page,
       limit,
-      totalPages,
+      totalPages: Math.ceil(total / limit),
     };
   }
 
@@ -121,25 +112,24 @@ export class CategoryService {
     tenantId: string,
     data: CreateCustomCategoryInput
   ) {
-    const existingCategory = await prisma.customCategory.findFirst({
-      where: {
-        tenantId,
-        name: {
-          equals: data.name,
-          mode: "insensitive",
-        },
-      },
-    });
+    const name = data.name.trim();
 
-    if (existingCategory) {
-      throw new AppError("Category with this name already exists", 409);
+    const currentCount = await prisma.customCategory.count({
+      where: { tenantId },
+    });
+    if (currentCount >= 10) {
+      throw new AppError("Maximum of 10 custom categories reached", 409);
     }
 
-    const category = await prisma.customCategory.create({
-      data: {
-        tenantId,
-        name: data.name.trim(),
-      },
+    const existingCategory = await prisma.customCategory.findFirst({
+      where: { tenantId, name: { equals: name, mode: "insensitive" } },
+    });
+
+    if (existingCategory)
+      throw new AppError("Category with this name already exists", 409);
+
+    return prisma.customCategory.create({
+      data: { tenantId, name },
       select: {
         id: true,
         tenantId: true,
@@ -148,8 +138,6 @@ export class CategoryService {
         updatedAt: true,
       },
     });
-
-    return category;
   }
 
   async updateCustomCategory(
@@ -158,41 +146,25 @@ export class CategoryService {
     data: UpdateCustomCategoryInput
   ) {
     const existingCategory = await prisma.customCategory.findFirst({
-      where: {
-        id: categoryId,
-        tenantId,
-      },
+      where: { id: categoryId, tenantId },
     });
+    if (!existingCategory) throw new AppError("Category not found", 404);
 
-    if (!existingCategory) {
-      throw new AppError("Category not found", 404);
-    }
-
+    const name = data.name.trim();
     const nameConflict = await prisma.customCategory.findFirst({
       where: {
         tenantId,
-        name: {
-          equals: data.name,
-          mode: "insensitive",
-        },
-        NOT: {
-          id: categoryId,
-        },
+        name: { equals: name, mode: "insensitive" },
+        NOT: { id: categoryId },
       },
     });
 
-    if (nameConflict) {
+    if (nameConflict)
       throw new AppError("Category with this name already exists", 409);
-    }
 
-    const category = await prisma.customCategory.update({
-      where: {
-        id: categoryId,
-        tenantId,
-      },
-      data: {
-        name: data.name.trim(),
-      },
+    return prisma.customCategory.update({
+      where: { id: categoryId, tenantId },
+      data: { name },
       select: {
         id: true,
         tenantId: true,
@@ -201,40 +173,24 @@ export class CategoryService {
         updatedAt: true,
       },
     });
-
-    return category;
   }
 
   async deleteCustomCategory(tenantId: string, categoryId: string) {
     const existingCategory = await prisma.customCategory.findFirst({
-      where: {
-        id: categoryId,
-        tenantId,
-      },
+      where: { id: categoryId, tenantId },
     });
-
-    if (!existingCategory) {
-      throw new AppError("Category not found", 404);
-    }
+    if (!existingCategory) throw new AppError("Category not found", 404);
 
     const propertiesUsingCategory = await prisma.property.count({
-      where: {
-        customCategoryId: categoryId,
-      },
+      where: { customCategoryId: categoryId },
     });
 
-    if (propertiesUsingCategory > 0) {
+    if (propertiesUsingCategory > 0)
       throw new AppError(
         "Cannot delete category that is being used by properties",
         409
       );
-    }
 
-    await prisma.customCategory.delete({
-      where: {
-        id: categoryId,
-        tenantId,
-      },
-    });
+    await prisma.customCategory.delete({ where: { id: categoryId, tenantId } });
   }
 }
