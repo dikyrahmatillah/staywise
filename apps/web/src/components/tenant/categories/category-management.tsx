@@ -1,13 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
+import { Plus } from "lucide-react";
 import {
   useCustomCategories,
   useDefaultCategories,
@@ -24,6 +27,7 @@ import { CategoryForm } from "./category-form";
 import { DeleteCategoryDialog } from "./delete-category-dialog";
 
 export function CategoryManagement() {
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] =
@@ -50,6 +54,7 @@ export function CategoryManagement() {
     try {
       await createCategory(data);
       toast.success("Category created successfully");
+      setCreateDialogOpen(false);
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Failed to create category"
@@ -62,7 +67,6 @@ export function CategoryManagement() {
 
   const handleUpdateCategory = async (data: UpdateCustomCategoryInput) => {
     if (!selectedCategory) return;
-
     setActionLoading(true);
     try {
       await updateCategory(selectedCategory.id, data);
@@ -81,7 +85,6 @@ export function CategoryManagement() {
 
   const handleDeleteCategory = async () => {
     if (!selectedCategory) return;
-
     setActionLoading(true);
     try {
       await deleteCategory(selectedCategory.id);
@@ -109,6 +112,39 @@ export function CategoryManagement() {
 
   return (
     <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="space-y-1">
+          <h1 className="text-3xl font-bold tracking-tight">
+            Category Management
+          </h1>
+          <p className="text-muted-foreground">
+            Manage property categories and classifications
+          </p>
+        </div>
+
+        <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Custom Category
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create Custom Category</DialogTitle>
+              <DialogDescription>
+                Add a new custom category for your properties.
+              </DialogDescription>
+            </DialogHeader>
+            <CategoryForm
+              onSubmit={handleCreateCategory}
+              onCancel={() => setCreateDialogOpen(false)}
+              isLoading={actionLoading}
+            />
+          </DialogContent>
+        </Dialog>
+      </div>
+
       <div className="grid gap-6 md:grid-cols-2">
         <DefaultCategoriesSection
           categories={defaultCategories}
@@ -121,8 +157,6 @@ export function CategoryManagement() {
           error={customError}
           onEdit={openEditDialog}
           onDelete={openDeleteDialog}
-          onCreate={handleCreateCategory}
-          createLoading={actionLoading}
         />
       </div>
 
