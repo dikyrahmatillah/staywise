@@ -60,9 +60,8 @@ export class CategoryController {
   ) => {
     try {
       const tenantId = request.user?.id;
-      if (!tenantId) {
+      if (!tenantId)
         return response.status(401).json({ message: "Unauthorized" });
-      }
 
       const data = createCustomCategoryInputSchema.parse(request.body);
       const category = await this.categoryService.createCustomCategory(

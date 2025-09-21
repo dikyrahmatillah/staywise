@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import api from "@/lib/axios";
+import type { AxiosError } from "axios";
 import { useSession } from "next-auth/react";
 import {
   CustomCategoryResponse,
@@ -17,6 +18,21 @@ export function useCustomCategories() {
   const [categories, setCategories] = useState<CustomCategoryResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const getApiErrorMessage = (err: unknown) => {
+    if ((err as AxiosError)?.isAxiosError) {
+      const aErr = err as AxiosError<Record<string, unknown>>;
+      const respData = aErr.response?.data as
+        | Record<string, unknown>
+        | undefined;
+      const msg =
+        respData && typeof respData.message === "string"
+          ? respData.message
+          : undefined;
+      return msg ? msg : aErr.message;
+    }
+    return err instanceof Error ? err.message : "Unknown error occurred";
+  };
 
   const fetchCategories = useCallback(async () => {
     try {
@@ -37,7 +53,7 @@ export function useCustomCategories() {
 
       setCategories(resp.data.data.categories);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Unknown error occurred");
+      setError(getApiErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -56,7 +72,7 @@ export function useCustomCategories() {
       setCategories((prev) => [...prev, resp.data.data]);
       return resp.data.data;
     } catch (err) {
-      throw err;
+      throw new Error(getApiErrorMessage(err));
     }
   };
 
@@ -78,7 +94,7 @@ export function useCustomCategories() {
       );
       return resp.data.data;
     } catch (err) {
-      throw err;
+      throw new Error(getApiErrorMessage(err));
     }
   };
 
@@ -91,7 +107,7 @@ export function useCustomCategories() {
       });
       setCategories((prev) => prev.filter((cat) => cat.id !== id));
     } catch (err) {
-      throw err;
+      throw new Error(getApiErrorMessage(err));
     }
   };
 
