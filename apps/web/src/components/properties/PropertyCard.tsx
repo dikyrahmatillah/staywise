@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { MapPin, Users, Building2, Star } from "lucide-react";
 import usePropertyDetails from "@/hooks/usePropertyDetails";
+import { getGuestRange } from "@/components/tenant/property-utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import type { Property } from "@/types/property";
@@ -18,8 +19,10 @@ export function PropertyCard({ property }: PropertyCardProps) {
   const { data } = usePropertyDetails(property.slug);
 
   const totalRooms = property.Rooms?.length || 1;
-  const minGuests = 1;
-  const maxGuests = property.maxGuests || 1;
+  type PropLike = { Rooms?: unknown[]; maxGuests?: number };
+  const guestRange = getGuestRange(property as PropLike);
+  const minGuests = guestRange.min;
+  const maxGuests = guestRange.max;
   const averageRating = data?.averageRating || 0.0;
   const basePrice = property.Rooms?.[0]?.basePrice;
 
@@ -58,7 +61,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
               <Users className="h-4 w-4" />
               <span>
                 {minGuests === maxGuests
-                  ? `${totalRooms} Guests`
+                  ? `${minGuests} Guest${minGuests !== 1 ? "s" : ""}`
                   : `${minGuests}-${maxGuests} Guests`}
               </span>
             </div>

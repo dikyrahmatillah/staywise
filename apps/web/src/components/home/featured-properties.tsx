@@ -9,6 +9,7 @@ import { useProperties } from "@/hooks/useProperties";
 import type { Property } from "@/types/property";
 import { useEffect, useState } from "react";
 import { formatCurrency } from "@/lib/booking-formatters";
+import { getGuestRange } from "@/components/tenant/property-utils";
 
 export default function FeaturedProperties() {
   const { data, isLoading, isError } = useProperties({ limit: 8 });
@@ -105,7 +106,20 @@ export default function FeaturedProperties() {
                       <div className="flex items-center gap-2 text-sm text-slate-600 mb-1">
                         <div className="flex items-center gap-1">
                           <Users className="w-4 h-4" />
-                          <span>{property.maxGuests} Guests</span>
+                          <span>
+                            {(() => {
+                              type PropLike = {
+                                Rooms?: unknown[];
+                                maxGuests?: number;
+                              };
+                              const { min, max } = getGuestRange(
+                                property as PropLike
+                              );
+                              return min === max
+                                ? `${min} Guests`
+                                : `${min}-${max} Guests`;
+                            })()}
+                          </span>
                         </div>
                         <div className="flex items-center gap-1">
                           <span>{property.Rooms.length || 0} Rooms</span>
