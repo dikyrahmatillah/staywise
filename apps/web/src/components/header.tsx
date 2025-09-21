@@ -35,7 +35,10 @@ export function Header() {
 
       if (isAtTop !== nearTop) setIsAtTop(nearTop);
 
-      const shouldAutoOpen = pathname === "/" || pathname === "/properties";
+      const isDesktop =
+        typeof window !== "undefined" && window.innerWidth >= 640;
+      const shouldAutoOpen =
+        (pathname === "/" || pathname === "/properties") && isDesktop;
 
       if (scrollTop >= closeThreshold) {
         if (isSearchOpen && !userClosedSearch && shouldAutoOpen)

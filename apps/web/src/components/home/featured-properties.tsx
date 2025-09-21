@@ -41,7 +41,7 @@ export default function FeaturedProperties() {
   const next = () => setCurrent((c: number) => Math.min(maxIndex, c + 1));
 
   return (
-    <section className="w-full py-6 md:py-12">
+    <section className="w-full py-8 md:py-12">
       <div className="container mx-auto max-w-7xl px-4 md:px-6">
         <div className="relative">
           <div className="flex items-center justify-between mb-4">
@@ -84,13 +84,10 @@ export default function FeaturedProperties() {
                   aria-label={`View details for ${property.name}`}
                   className="block"
                 >
-                  <Card className="overflow-hidden transition-shadow border bg-white shadow-sm">
+                  <Card className="overflow-hidden py-0 transition-shadow border bg-white shadow-sm">
                     <div className="aspect-[4/3] bg-slate-200 relative overflow-hidden">
                       <Image
-                        src={
-                          property.imageUrl ||
-                          `https://picsum.photos/400/300?random=${property.id}`
-                        }
+                        src={property.Pictures[0]?.imageUrl}
                         alt={property.name}
                         width={400}
                         height={300}

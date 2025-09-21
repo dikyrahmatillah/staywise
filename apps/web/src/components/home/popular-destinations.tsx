@@ -74,7 +74,7 @@ export default function PopularDestinations() {
   }, [slidesPerView]);
 
   return (
-    <section className="w-full py-16 md:py-8 bg-white">
+    <section className="w-full py-8 bg-white">
       <div className="container mx-auto max-w-7xl px-4 md:px-6">
         <div className="relative">
           <div className="flex items-center justify-between mb-4">
@@ -83,13 +83,13 @@ export default function PopularDestinations() {
                 Popular Destinations
               </h2>
               <p className="text-slate-600">
-                Discover the most sought-after destinations across Indonesia
+                Explore top locations for your next staycation
               </p>
             </div>
           </div>
 
           {slidesPerView === 2 ? (
-            <div className="grid grid-cols-2 gap-4 md:gap-0">
+            <div className="grid grid-cols-2 gap-4 md:gap-4">
               {destinations.map((destination) => (
                 <div key={destination.id}>
                   <Card className="overflow-hidden transition-all duration-300 group cursor-pointer shadow-none border-0 bg-transparent my-0 !p-0">
@@ -159,7 +159,6 @@ export default function PopularDestinations() {
               </div>
             </div>
           )}
-          {/* Mobile controls + progress bar (matches FeaturedProperties) */}
           {slidesPerView === 1 && (
             <PagerControls
               current={current}

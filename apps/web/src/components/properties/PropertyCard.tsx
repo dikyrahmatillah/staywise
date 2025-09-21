@@ -27,9 +27,9 @@ export function PropertyCard({ property }: PropertyCardProps) {
     <Link href={`/properties/${property.slug}`} className="block" passHref>
       <Card
         key={property.id}
-        className="overflow-hidden hover:shadow-lg transition-shadow"
+        className="overflow-hidden hover:shadow-lg transition-shadow py-0"
       >
-        <div className="relative aspect-[16/9]">
+        <div className="relative aspect-[4/3]">
           <Image
             src={property.Pictures[0]?.imageUrl}
             alt={property.name}
@@ -44,7 +44,9 @@ export function PropertyCard({ property }: PropertyCardProps) {
         </div>
         <CardContent className="p-4">
           <CardHeader className="p-0 mb-3">
-            <CardTitle className="text-lg">{property.name}</CardTitle>
+            <CardTitle className="text-lg truncate min-w-0">
+              {property.name}
+            </CardTitle>
             <div className="flex items-center gap-1 text-muted-foreground text-sm">
               <MapPin className="h-4 w-4" />
               <span>{property.city}</span>
