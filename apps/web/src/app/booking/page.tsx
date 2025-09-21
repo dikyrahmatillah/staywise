@@ -2,6 +2,7 @@
 
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -15,10 +16,61 @@ import { ArrowLeft, CreditCard, Building2, Loader2 } from "lucide-react";
 import { FileDropzone } from "@/components/guest/file-dropzone";
 import { ImagePreview } from "@/components/guest/image-preview";
 import { formatCurrency } from "@/lib/booking-formatters";
+import { toast } from "sonner";
+import axios from "axios";
+import type { BookingPaymentMethod, OrderStatus } from "@repo/types";
+
+// API response type for booking creation
+interface CreateBookingResponse {
+  id: string;
+  orderCode: string;
+  snapToken?: string;
+  status: OrderStatus;
+  totalAmount: number;
+}
+
+// API request type for booking creation
+interface CreateBookingRequest {
+  userId: string;
+  propertyId: string;
+  roomId: string;
+  checkInDate: string;
+  checkOutDate: string;
+  paymentMethod: BookingPaymentMethod;
+}
+
+// Midtrans Snap types
+interface MidtransResult {
+  order_id: string;
+  status_code: string;
+  gross_amount: string;
+  payment_type: string;
+  transaction_time: string;
+  transaction_status: string;
+}
+
+interface MidtransSnap {
+  pay: (
+    token: string,
+    options: {
+      onSuccess: (result: MidtransResult) => void;
+      onPending: (result: MidtransResult) => void;
+      onError: (result: MidtransResult) => void;
+      onClose: () => void;
+    }
+  ) => void;
+}
+
+declare global {
+  interface Window {
+    snap: MidtransSnap;
+  }
+}
 
 function BookingContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { data: session } = useSession();
 
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedPaymentType, setSelectedPaymentType] = useState<
@@ -30,6 +82,8 @@ function BookingContent() {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [createdBooking, setCreatedBooking] =
+    useState<CreateBookingResponse | null>(null);
 
   const getBookingDetails = () => {
     const checkInParam = searchParams.get("checkIn");
@@ -37,6 +91,7 @@ function BookingContent() {
 
     return {
       propertyId: searchParams.get("propertyId") || "1",
+      roomId: searchParams.get("roomId") || "1", // Add roomId to your URL params
       checkIn: checkInParam ? new Date(checkInParam) : new Date("2024-10-11"),
       checkOut: checkOutParam
         ? new Date(checkOutParam)
@@ -59,16 +114,135 @@ function BookingContent() {
   const totalPrice = bookingDetails.pricePerNight * nights;
   const totalGuests = bookingDetails.adults + bookingDetails.children;
 
+  // Create API instance with auth token
+  const createApiInstance = () => {
+    const api = axios.create({
+      baseURL:
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1",
+    });
+
+    if (session?.user?.accessToken) {
+      api.defaults.headers.common.Authorization = `Bearer ${session.user.accessToken}`;
+    }
+
+    return api;
+  };
+
+  const createBooking = async (): Promise<CreateBookingResponse> => {
+    if (!session?.user?.id) {
+      throw new Error("User not authenticated");
+    }
+
+    const api = createApiInstance();
+
+    // Match your booking.service.ts interface exactly
+    const bookingData = {
+      userId: session.user.id,
+      propertyId: bookingDetails.propertyId,
+      roomId: bookingDetails.roomId,
+      checkInDate: bookingDetails.checkIn.toISOString().split("T")[0], // Send as YYYY-MM-DD
+      checkOutDate: bookingDetails.checkOut.toISOString().split("T")[0], // Send as YYYY-MM-DD
+      paymentMethod:
+        selectedPaymentMethod === "midtrans"
+          ? ("PAYMENT_GATEWAY" as const)
+          : ("MANUAL_TRANSFER" as const),
+    };
+
+    console.log("Creating booking with data:", bookingData);
+    console.log("Date values:", {
+      originalCheckIn: bookingDetails.checkIn,
+      originalCheckOut: bookingDetails.checkOut,
+      sentCheckInDate: bookingData.checkInDate,
+      sentCheckOutDate: bookingData.checkOutDate,
+    });
+    console.log("Total price calculated:", totalPrice);
+    console.log("Nights:", nights);
+
+    const response = await api.post<CreateBookingResponse>(
+      "/bookings",
+      bookingData
+    );
+    console.log("Booking created successfully:", response.data);
+    return response.data;
+  };
+
   const handleStep1Continue = () => {
     setCurrentStep(2);
   };
 
   const handlePaymentMethodSelect = (method: "bank" | "midtrans") => {
     setSelectedPaymentMethod(method);
-    if (method === "midtrans") {
-      setCurrentStep(3);
-    } else if (method === "bank") {
-      setIsUploadModalOpen(true);
+  };
+
+  const handlePayNow = async () => {
+    if (!selectedPaymentMethod) {
+      toast.error("Please select a payment method");
+      return;
+    }
+
+    setIsProcessing(true);
+
+    try {
+      const booking = await createBooking();
+      setCreatedBooking(booking);
+
+      if (selectedPaymentMethod === "midtrans" && booking.snapToken) {
+        // Redirect to Midtrans payment page
+        // @ts-expect-error - Midtrans snap global object may not be available
+        window.snap.pay(booking.snapToken, {
+          onSuccess: function (result: MidtransResult) {
+            console.log("Payment success:", result);
+            toast.success("Payment completed successfully!");
+            setCurrentStep(3);
+            // Optionally redirect to bookings dashboard
+            setTimeout(() => {
+              router.push("dashboard/guest/bookings");
+            }, 2000);
+          },
+          onPending: function (result: MidtransResult) {
+            console.log("Payment pending:", result);
+            toast.info("Payment is being processed");
+            setCurrentStep(3);
+          },
+          onError: function (result: MidtransResult) {
+            console.log("Payment error:", result);
+            toast.error("Payment failed. Please try again.");
+          },
+          onClose: function () {
+            console.log("Payment popup closed");
+            toast.info("Payment popup was closed");
+          },
+        });
+      } else if (selectedPaymentMethod === "bank") {
+        // For manual transfer, check if we can upload payment proof
+        if (booking.status === "COMPLETED") {
+          // Backend bug: Manual transfer was marked as completed instead of waiting for payment
+          toast.warning(
+            "Booking created, but payment proof upload is not available due to a system configuration. Please contact support to upload your payment proof."
+          );
+          setCurrentStep(3);
+
+          // Still show success and redirect
+          setTimeout(() => {
+            router.push("dashboard/guest/bookings");
+          }, 3000);
+        } else {
+          // Normal flow: booking is waiting for payment
+          setIsUploadModalOpen(true);
+          toast.success("Booking created! Please upload payment proof.");
+        }
+      }
+    } catch (error) {
+      console.error("Error creating booking:", error);
+      if (axios.isAxiosError(error)) {
+        const errorMessage =
+          error.response?.data?.message || "Failed to create booking";
+        toast.error(errorMessage);
+      } else {
+        toast.error("An unexpected error occurred");
+      }
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -77,13 +251,111 @@ function BookingContent() {
   };
 
   const handleProcessPayment = async () => {
+    if (!uploadedFile || !createdBooking) {
+      toast.error("Please select a file and ensure booking is created");
+      return;
+    }
+
+    // Validate file on frontend before upload
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
+    const maxSize = 5 * 1024 * 1024; // 5MB
+
+    if (!allowedTypes.includes(uploadedFile.type)) {
+      toast.error("Invalid file type. Only JPEG and PNG files are allowed.");
+      return;
+    }
+
+    if (uploadedFile.size > maxSize) {
+      toast.error("File too large. Maximum size is 5MB.");
+      return;
+    }
+
     setIsProcessing(true);
-    setTimeout(() => {
-      setIsProcessing(false);
+
+    try {
+      const api = createApiInstance();
+      const formData = new FormData();
+      formData.append("paymentProof", uploadedFile);
+
+      console.log("Uploading payment proof for booking:", createdBooking);
+      console.log("Using booking ID as orderId:", createdBooking.id);
+      console.log("File details:", {
+        name: uploadedFile.name,
+        type: uploadedFile.type,
+        size: uploadedFile.size,
+        sizeFormatted: `${(uploadedFile.size / 1024 / 1024).toFixed(2)}MB`,
+      });
+
+      // Use booking.id for the orderId parameter (PaymentProofParamsSchema likely expects booking ID)
+      const response = await api.post(
+        `/bookings/${createdBooking.id}/payment-proof`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      console.log("Payment proof uploaded successfully:", response.data);
+      toast.success("Payment proof uploaded successfully!");
       setCurrentStep(3);
       setIsUploadModalOpen(false);
-    }, 2000);
+
+      // Redirect to bookings dashboard after 2 seconds
+      setTimeout(() => {
+        router.push("dashboard/guest/bookings");
+      }, 2000);
+    } catch (error) {
+      console.error("Error uploading payment proof:", error);
+      if (axios.isAxiosError(error)) {
+        console.error("Full error details:", {
+          status: error.response?.status,
+          statusText: error.response?.statusText,
+          data: error.response?.data,
+          headers: error.response?.headers,
+          url: error.config?.url,
+          method: error.config?.method,
+        });
+
+        // Handle specific error cases
+        let errorMessage = "Failed to upload payment proof";
+
+        if (error.response?.status === 400) {
+          const responseData = error.response.data;
+          if (responseData?.message) {
+            errorMessage = responseData.message;
+          } else if (responseData?.error) {
+            errorMessage = responseData.error;
+          } else if (typeof responseData === "string") {
+            errorMessage = responseData;
+          } else {
+            errorMessage =
+              "Invalid request. Please check your file and try again.";
+          }
+        } else if (error.response?.status === 401) {
+          errorMessage = "Authentication failed. Please log in again.";
+        } else if (error.response?.status === 404) {
+          errorMessage =
+            "Booking not found. Please try creating a new booking.";
+        } else if (error.response?.status === 413) {
+          errorMessage = "File too large. Maximum size is 5MB.";
+        }
+
+        toast.error(errorMessage);
+      } else {
+        toast.error("An unexpected error occurred");
+      }
+    } finally {
+      setIsProcessing(false);
+    }
   };
+
+  // Redirect to login if not authenticated
+  if (!session) {
+    router.push("/auth/login");
+    return <div>Redirecting to login...</div>;
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -250,11 +522,20 @@ function BookingContent() {
                   {currentStep >= 3 && (
                     <div className="mt-4">
                       <p className="text-green-600 font-medium">
-                        Payment submitted successfully!
+                        {selectedPaymentMethod === "midtrans"
+                          ? "Payment completed successfully!"
+                          : "Booking created successfully!"}
                       </p>
                       <p className="text-sm text-muted-foreground mt-1">
-                        Your booking request has been sent to the host for
-                        approval.
+                        {createdBooking && (
+                          <>
+                            Booking ID: {createdBooking.orderCode}
+                            <br />
+                            {selectedPaymentMethod === "bank"
+                              ? "Please upload payment proof to complete your booking."
+                              : "Your booking has been confirmed."}
+                          </>
+                        )}
                       </p>
                     </div>
                   )}
@@ -267,11 +548,6 @@ function BookingContent() {
           <div className="space-y-6">
             <Card className="p-6">
               <div className="flex gap-4 mb-6">
-                <img
-                  src="/luxury-villa-pool.jpg"
-                  alt="Villa Bali"
-                  className="w-24 h-24 rounded-lg object-cover"
-                />
                 <div className="flex-1">
                   <h3 className="font-semibold text-lg">
                     Luxury Villa in Bali
@@ -299,6 +575,7 @@ function BookingContent() {
                     variant="ghost"
                     size="sm"
                     className="text-sm underline p-0 h-auto"
+                    disabled={currentStep >= 3}
                   >
                     Edit
                   </Button>
@@ -323,6 +600,7 @@ function BookingContent() {
                     variant="ghost"
                     size="sm"
                     className="text-sm underline p-0 h-auto"
+                    disabled={currentStep >= 3}
                   >
                     Edit
                   </Button>
@@ -353,32 +631,61 @@ function BookingContent() {
                     <span>{formatCurrency(totalPrice)}</span>
                   </div>
                 </div>
+
+                {currentStep >= 2 &&
+                  selectedPaymentMethod &&
+                  currentStep < 3 && (
+                    <div className="mt-4">
+                      <Button
+                        className="w-full bg-foreground text-background hover:bg-foreground/90"
+                        onClick={handlePayNow}
+                        disabled={isProcessing}
+                      >
+                        {isProcessing ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Creating Booking...
+                          </>
+                        ) : (
+                          "Pay Now"
+                        )}
+                      </Button>
+                    </div>
+                  )}
+
+                {currentStep >= 3 && (
+                  <div className="mt-4">
+                    <Button
+                      className="w-full"
+                      onClick={() => router.push("dashboard/guest/bookings")}
+                    >
+                      View My Bookings
+                    </Button>
+                  </div>
+                )}
               </div>
 
-              {(isProcessing || currentStep >= 3) && (
+              {currentStep >= 3 && createdBooking && (
                 <div className="border-t pt-4 mt-6">
-                  <h4 className="font-medium mb-4">Transaction Status</h4>
-                  {isProcessing ? (
-                    <div className="flex items-center gap-2 text-blue-600">
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      <span className="text-sm">
-                        Processing payment proof...
+                  <h4 className="font-medium mb-4">Booking Details</h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span>Booking ID:</span>
+                      <span className="font-mono">
+                        {createdBooking.orderCode}
                       </span>
                     </div>
-                  ) : currentStep >= 3 ? (
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-green-600">
-                        <div className="w-2 h-2 bg-green-600 rounded-full"></div>
-                        <span className="text-sm font-medium">
-                          Payment submitted
-                        </span>
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        Awaiting host confirmation. You&apos;ll receive an email
-                        once approved.
-                      </p>
+                    <div className="flex justify-between">
+                      <span>Status:</span>
+                      <span className="capitalize">
+                        {createdBooking.status}
+                      </span>
                     </div>
-                  ) : null}
+                    <div className="flex justify-between">
+                      <span>Total Amount:</span>
+                      <span>{formatCurrency(createdBooking.totalAmount)}</span>
+                    </div>
+                  </div>
                 </div>
               )}
             </Card>
@@ -407,6 +714,7 @@ function BookingContent() {
                     ? formatCurrency(totalPrice)
                     : formatCurrency(totalPrice * 0.5)}
                 </p>
+                {createdBooking && <p>Reference: {createdBooking.orderCode}</p>}
               </div>
             </div>
 
@@ -427,7 +735,7 @@ function BookingContent() {
                   {isProcessing ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Processing...
+                      Uploading...
                     </>
                   ) : (
                     "Submit Payment Proof"
