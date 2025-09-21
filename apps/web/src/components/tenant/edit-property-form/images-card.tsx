@@ -2,7 +2,9 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Camera } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { Camera, X } from "lucide-react";
 import Image from "next/image";
 import React from "react";
 
@@ -40,7 +42,7 @@ export function ImagesCard({
           {existingPictures && existingPictures.length > 0 && (
             <div>
               <h4 className="text-sm font-medium mb-2">Current Images</h4>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-h-64 overflow-y-auto py-1">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 py-1">
                 {existingPictures.map((picture) => (
                   <div
                     key={picture.id}
@@ -57,10 +59,10 @@ export function ImagesCard({
                     <button
                       type="button"
                       onClick={() => onRemoveExisting(picture.id)}
-                      className="absolute top-2 right-2 z-10 inline-flex h-6 w-6 items-center justify-center rounded-full bg-white/80 text-sm text-red-600 hover:bg-white"
+                      className="absolute top-2 right-2 z-10 inline-flex h-6 w-6 items-center justify-center rounded-full bg-white/80 text-sm text-red-600 hover:bg-white cursor-pointer"
                       aria-label="Remove image"
                     >
-                      ×
+                      <X className="h-3 w-3" />
                     </button>
 
                     {picture.note && (
@@ -74,7 +76,11 @@ export function ImagesCard({
             </div>
           )}
 
-          <div>
+          <div className="my-4">
+            <Separator />
+          </div>
+
+          <div className="space-y-4">
             <Label htmlFor="images">Add New Images</Label>
             <input
               id="images-hidden"
@@ -89,29 +95,33 @@ export function ImagesCard({
               className="hidden"
             />
 
-            <button
-              type="button"
-              onClick={() => hiddenFileInput.current?.click()}
-              className="mt-1 w-full rounded-md border border-input px-3 py-2 text-left text-sm hover:bg-muted/50"
-            >
-              {selectedImages.length === 0 ? (
-                <span className="text-muted-foreground">
-                  Click to select images
-                </span>
-              ) : (
-                <span>
-                  {selectedImages
-                    .slice(0, 3)
-                    .map((f) => f.name)
-                    .join(", ")}
-                  {selectedImages.length > 3 && (
-                    <span className="ml-2 text-muted-foreground">
-                      +{selectedImages.length - 3} more
-                    </span>
-                  )}
-                </span>
-              )}
-            </button>
+            <div className="mt-1 flex items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => hiddenFileInput.current?.click()}
+              >
+                Choose Files
+              </Button>
+
+              <div className="text-sm text-muted-foreground">
+                {selectedImages.length === 0 ? (
+                  "No files selected"
+                ) : (
+                  <span title={selectedImages.map((f) => f.name).join(", ")}>
+                    {selectedImages
+                      .slice(0, 3)
+                      .map((f) => f.name)
+                      .join(", ")}
+                    {selectedImages.length > 3 && (
+                      <span className="ml-2 text-muted-foreground">
+                        +{selectedImages.length - 3} more
+                      </span>
+                    )}
+                  </span>
+                )}
+              </div>
+            </div>
 
             {selectedImages.length > 0 && (
               <div className="mt-2">
@@ -119,11 +129,18 @@ export function ImagesCard({
                   {selectedImages.length} new image(s) selected
                 </p>
 
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-h-64 overflow-y-auto py-1 mt-2">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 py-1 mt-2">
                   {selectedImagePreviews.map((src, idx) => (
                     <div
                       key={idx}
-                      className="relative w-full h-40 overflow-hidden rounded-md"
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => hiddenFileInput.current?.click()}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ")
+                          hiddenFileInput.current?.click();
+                      }}
+                      className="relative w-full h-40 overflow-hidden rounded-md cursor-pointer"
                     >
                       <Image
                         src={src}
@@ -135,11 +152,14 @@ export function ImagesCard({
 
                       <button
                         type="button"
-                        onClick={() => onRemoveSelected(idx)}
-                        className="absolute top-2 right-2 z-10 inline-flex h-6 w-6 items-center justify-center rounded-full bg-white/80 text-sm text-red-600 hover:bg-white"
+                        onClick={(ev) => {
+                          ev.stopPropagation();
+                          onRemoveSelected(idx);
+                        }}
+                        className="absolute top-2 right-2 z-10 inline-flex h-6 w-6 items-center justify-center rounded-full bg-white/80 text-sm text-red-600 hover:bg-white cursor-pointer"
                         aria-label="Remove selected image"
                       >
-                        ×
+                        <X className="h-3 w-3" />
                       </button>
                     </div>
                   ))}
