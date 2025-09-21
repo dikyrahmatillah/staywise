@@ -32,6 +32,9 @@ export function UserMenu() {
   const user = session?.user;
   const role = user?.role?.toLowerCase();
   const isTenant = role === "tenant";
+  const accountHref = isTenant
+    ? "/dashboard/tenant/account"
+    : "/dashboard/guest/account";
 
   if (!user) {
     return (
@@ -129,7 +132,7 @@ export function UserMenu() {
           </DropdownMenuItem>
         )}
         <DropdownMenuItem asChild>
-          <Link href="/account" className="w-full flex items-center gap-2">
+          <Link href={accountHref} className="w-full flex items-center gap-2">
             <HiOutlineCog className="h-4 w-4" /> Account
           </Link>
         </DropdownMenuItem>

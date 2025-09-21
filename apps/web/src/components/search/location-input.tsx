@@ -131,7 +131,7 @@ export function LocationInput({
 
       {showSuggestions && (
         <PopoverContent
-          className="w-full p-0 mt-1"
+          className="w-full sm:w-80 md:w-96 p-0 mt-1"
           align="start"
           side="bottom"
           sideOffset={4}

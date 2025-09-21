@@ -24,9 +24,9 @@ export default function WhyChooseUs() {
   ];
 
   return (
-    <section className="w-full py-12 md:py-16">
+    <section className="w-full py-8 md:py-12">
       <div className="container mx-auto max-w-6xl px-4 md:px-6">
-        <div className="text-center mb-8">
+        <div className=" mb-8">
           <h2 className="text-xl md:text-3xl font-bold mb-2">Why choose us?</h2>
         </div>
 

@@ -65,7 +65,7 @@ const categories = [
 
 export default function PropertyCategories() {
   return (
-    <section className="w-full py-12 md:py-20 bg-white">
+    <section className="w-full py-8 md:py-12">
       <div className="container mx-auto max-w-7xl px-4 md:px-6">
         <div className="relative">
           <div className="flex items-center justify-between mb-4">
