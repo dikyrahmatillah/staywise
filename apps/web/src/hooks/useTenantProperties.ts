@@ -57,7 +57,7 @@ export function useTenantProperties(tenantId: string) {
 
       try {
         const api = createApiInstance(session.user.accessToken);
-        await api.delete(`/properties/${propertyId}`);
+        await api.delete(`/properties/id/${propertyId}`);
         setProperties((props) => props.filter((p) => p.id !== propertyId));
         toast.success("Property deleted successfully");
       } catch (err) {
