@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,6 +13,12 @@ import {
 import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import { useRoomAvailability } from "@/hooks/useRoomAvailability";
 import { cn } from "@/lib/utils";
+import {
+  generateCalendarDates,
+  formatDateKey,
+  isCurrentMonth as isSameMonth,
+  isPastDate,
+} from "@/lib/date-utils";
 
 interface RoomAvailabilityCalendarProps {
   roomId: string;
@@ -38,81 +44,55 @@ export function RoomAvailabilityCalendar({
     isDateBlocked,
   } = useRoomAvailability(roomId);
 
-  const generateCalendarDates = () => {
-    const year = currentDate.getFullYear();
-    const month = currentDate.getMonth();
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    const startDate = new Date(firstDay);
-    const endDate = new Date(lastDay);
+  const getCalendarDates = useCallback(
+    () => generateCalendarDates(currentDate),
+    [currentDate]
+  );
 
-    startDate.setDate(startDate.getDate() - startDate.getDay());
-    endDate.setDate(endDate.getDate() + (6 - endDate.getDay()));
+  const isCurrentMonth = useCallback(
+    (date: Date) => isSameMonth(date, currentDate),
+    [currentDate]
+  );
 
-    const dates: Date[] = [];
-    const current = new Date(startDate);
+  const handleDateClick = useCallback(
+    async (date: Date) => {
+      if (isPastDate(date)) return;
 
-    while (current <= endDate) {
-      dates.push(new Date(current));
-      current.setDate(current.getDate() + 1);
-    }
+      const dateKey = formatDateKey(date);
+      if (isDateBlocked(dateKey)) {
+        await unblockDates([dateKey]);
+      } else {
+        await blockDates([dateKey]);
+      }
+    },
+    [isDateBlocked, unblockDates, blockDates]
+  );
 
-    return dates;
-  };
-
-  const formatDateKey = (date: Date) => {
-    return date.toISOString().split("T")[0];
-  };
-
-  const isCurrentMonth = (date: Date) => {
-    return date.getMonth() === currentDate.getMonth();
-  };
-
-  const isPastDate = (date: Date) => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    return date < today;
-  };
-
-  const handleDateClick = async (date: Date) => {
-    if (isPastDate(date)) return;
-
-    const dateKey = formatDateKey(date);
-    if (isDateBlocked(dateKey)) {
-      await unblockDates([dateKey]);
-    } else {
-      await blockDates([dateKey]);
-    }
-  };
-
-  const navigateMonth = (direction: "prev" | "next") => {
+  const navigateMonth = useCallback((direction: "prev" | "next") => {
     setCurrentDate((prev) => {
       const newDate = new Date(prev);
-      if (direction === "prev") {
-        newDate.setMonth(newDate.getMonth() - 1);
-      } else {
-        newDate.setMonth(newDate.getMonth() + 1);
-      }
+      newDate.setMonth(newDate.getMonth() + (direction === "prev" ? -1 : 1));
       return newDate;
     });
-  };
+  }, []);
 
   useEffect(() => {
-    if (open && roomId) {
-      const year = currentDate.getFullYear();
-      const month = currentDate.getMonth();
-      const startDate = new Date(year, month, 1);
-      const endDate = new Date(year, month + 1, 0);
+    if (!open || !roomId) return;
 
-      fetchBlockedDates(formatDateKey(startDate), formatDateKey(endDate));
-    }
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const startDate = new Date(year, month, 1);
+    const endDate = new Date(year, month + 1, 0);
+
+    fetchBlockedDates(formatDateKey(startDate), formatDateKey(endDate));
   }, [open, roomId, currentDate, fetchBlockedDates]);
 
-  const calendarDates = generateCalendarDates();
-  const monthYear = currentDate.toLocaleString("default", {
-    month: "long",
-    year: "numeric",
-  });
+  const calendarDates = useMemo(() => getCalendarDates(), [getCalendarDates]);
+  const monthYear = useMemo(
+    () =>
+      currentDate.toLocaleString("default", { month: "long", year: "numeric" }),
+    [currentDate]
+  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -154,10 +134,6 @@ export function RoomAvailabilityCalendar({
               >
                 <ChevronRight className="h-4 w-4" />
               </Button>
-            </div>
-
-            <div className="flex gap-2 flex-wrap">
-              {/* controls space reserved for future actions */}
             </div>
           </div>
 
