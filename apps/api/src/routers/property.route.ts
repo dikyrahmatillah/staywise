@@ -24,25 +24,26 @@ router.get(
   propertyController.getPropertiesByTenant
 );
 
-router.get("/:slug", propertyController.getProperty);
 router.get(
-  "/:id",
+  "/id/:id",
   verifyTokenMiddleware,
   verifyRoleMiddleware,
   propertyController.getPropertyById
 );
 router.put(
-  "/:id",
+  "/id/:id",
   verifyTokenMiddleware,
   verifyRoleMiddleware,
   upload.fields([{ name: "propertyImages", maxCount: 10 }]),
   propertyController.updateProperty
 );
 router.delete(
-  "/:propertyId",
+  "/id/:propertyId",
   verifyTokenMiddleware,
   verifyRoleMiddleware,
   propertyController.deleteProperty
 );
+
+router.get("/:slug", propertyController.getProperty);
 
 export default router;
