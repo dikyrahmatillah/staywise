@@ -23,9 +23,11 @@ interface PaymentProof {
 interface PaymentProofUploadProps {
   bookingId: string
   orderCode: string
+  expiresAt?: Date | null // Add expiry time prop
   onUploadComplete?: () => void
+  onExpire?: () => void // Add expiry callback
   className?: string
-  compact?: boolean // For table row integration
+  compact?: boolean
 }
 
 type ProofStatus =
@@ -34,10 +36,95 @@ type ProofStatus =
   | { status: "rejected"; label: string; color: BadgeVariant }
   | null
 
+// Simple Timer Component
+interface SimpleTimerProps {
+  expiresAt: Date
+  onExpire: () => void
+}
+
+function SimpleTimer({ expiresAt, onExpire }: SimpleTimerProps) {
+  const [timeLeft, setTimeLeft] = useState<number>(0);
+  const [isExpired, setIsExpired] = useState(false);
+
+  useEffect(() => {
+    const calculateTimeLeft = () => {
+      const now = new Date().getTime();
+      const expiry = new Date(expiresAt).getTime();
+      const difference = expiry - now;
+      
+      if (difference <= 0) {
+        setIsExpired(true);
+        setTimeLeft(0);
+        onExpire();
+        return 0;
+      }
+      
+      return difference;
+    };
+
+    // Initial calculation
+    const initialTime = calculateTimeLeft();
+    setTimeLeft(initialTime);
+
+    // Set up interval for countdown
+    const timer = setInterval(() => {
+      const remaining = calculateTimeLeft();
+      setTimeLeft(remaining);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [expiresAt, onExpire]);
+
+  const formatTime = (milliseconds: number) => {
+    const totalSeconds = Math.floor(milliseconds / 1000);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    if (hours > 0) {
+      return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
+
+  if (isExpired) {
+    return (
+      <div className="p-3 border border-red-200 bg-red-50 rounded-lg">
+        <div className="flex items-center gap-2 text-red-700">
+          <AlertCircle className="h-4 w-4" />
+          <span className="text-sm font-medium">Time Expired</span>
+        </div>
+        <p className="text-sm text-red-600 mt-1">
+          Payment proof upload time has expired.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-3 border border-blue-200 bg-blue-50 rounded-lg">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Clock className="h-4 w-4 text-blue-700" />
+          <span className="text-sm font-medium text-blue-700">Time Remaining</span>
+        </div>
+        <span className="font-mono text-lg font-semibold text-blue-800">
+          {formatTime(timeLeft)}
+        </span>
+      </div>
+      <p className="text-sm text-blue-600 mt-1">
+        Please upload your payment proof before the timer expires.
+      </p>
+    </div>
+  );
+}
+
 export function PaymentProofUpload({
   bookingId,
   orderCode,
+  expiresAt,
   onUploadComplete,
+  onExpire,
   className,
   compact = false,
 }: PaymentProofUploadProps) {
@@ -94,6 +181,11 @@ export function PaymentProofUpload({
     if (success) {
       setExistingProof(null)
     }
+  }
+
+  const handleTimerExpire = () => {
+    console.log("Timer expired for booking:", bookingId)
+    onExpire?.()
   }
 
   const getProofStatus = (): ProofStatus => {
@@ -159,6 +251,14 @@ export function PaymentProofUpload({
       </CardHeader>
 
       <CardContent className="space-y-6">
+        {/* Timer - Show only when no existing proof and has expiry time */}
+        {!existingProof && expiresAt && (
+          <SimpleTimer 
+            expiresAt={expiresAt} 
+            onExpire={handleTimerExpire}
+          />
+        )}
+
         {isLoading ? (
           <div className="flex items-center justify-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>

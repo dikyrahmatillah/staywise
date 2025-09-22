@@ -1,4 +1,4 @@
-import { faker } from "@faker-js/faker";
+// apps/api/src/services/booking/booking.service.ts
 import { BookingCronService } from "./cron/booking-cron.service.js";
 import { BookingCoreService } from "@/services/booking/core/booking-core.js";
 import { BookingManagementService } from "@/services/booking/core/booking-management.service.js";
@@ -7,9 +7,8 @@ import type {
   BookingFilters,
   AvailabilityCheckParams,
   BookingTotals,
-  CreateBookingInput,
 } from "@repo/types";
-import type { BookingCreationData } from "@/services/booking/types/booking-internal.type.js";
+import { faker } from "@faker-js/faker";
 import type { BookingValidationResult } from "@repo/schemas";
 import type {
   BookingPaymentMethod,
@@ -69,41 +68,40 @@ export class BookingService {
     const orderCode = `ORD-${faker.string
       .alphanumeric({ length: 8 })
       .toUpperCase()}`;
-    // ORD-${Date.now()}-${Math.random()
-    //   .toString(36)
-    //   .substr(2, 5)
-    //   .toUpperCase()};
 
-    // create booking in DB
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
     const booking = await prisma.booking.create({
       data: {
         userId: data.userId,
         propertyId: data.propertyId,
         roomId: data.roomId,
-        tenantId: room.Property.tenantId, // Required field
-        orderCode: orderCode, // Required field
+        tenantId: room.Property.tenantId,
+        orderCode: orderCode,
         checkInDate: checkIn,
         checkOutDate: checkOut,
-        nights: nights, // Required field
-        pricePerNight: pricePerNight, // Required field
-        totalAmount: totalAmount, // Required field
+        nights: nights,
+        pricePerNight: pricePerNight,
+        totalAmount: totalAmount,
         paymentMethod: data.paymentMethod,
+        expiresAt: expiresAt, // ✅ ADDED: Expiration time
         status:
           data.paymentMethod === "PAYMENT_GATEWAY"
-            ? "PROCESSING" // Check your OrderStatus enum for correct value
-            : "WAITING_PAYMENT", // Check your OrderStatus enum for correct value
+            ? "PROCESSING"
+            : "WAITING_PAYMENT", // ✅ FIXED: Manual transfers should wait for payment
       },
     });
 
     // if payment via Midtrans → create Snap transaction
     if (data.paymentMethod === "PAYMENT_GATEWAY") {
-      const orderId = `ORD-${booking.id}-${Date.now()}`;
+      const orderId = `ORD-${faker.string
+        .alphanumeric({ length: 8 })
+        .toUpperCase()}`;
       const transaction = await snap.createTransaction({
         transaction_details: {
           order_id: orderId,
-          gross_amount: totalAmount, // Using calculated total amount
+          gross_amount: totalAmount,
         },
-        // Removed customer_details - check Midtrans docs for correct structure
       });
 
       await prisma.booking.update({
