@@ -15,10 +15,6 @@ export function setAuthToken(token: string | null) {
   authToken = token;
 }
 
-export function getAuthToken() {
-  return authToken;
-}
-
 api.interceptors.request.use((config) => {
   const token = authToken;
   if (token) {
