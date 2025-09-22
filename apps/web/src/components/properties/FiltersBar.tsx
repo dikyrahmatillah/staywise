@@ -133,28 +133,15 @@ export function FiltersBar({ params, onChange }: FiltersBarProps) {
                 onChange({ sortBy, sortOrder });
               }}
             >
-              <SelectTrigger className="cursor-pointer">
-                <SelectValue
-                  className="cursor-pointer"
-                  placeholder="Sort by..."
-                />
+              <SelectTrigger>
+                <SelectValue placeholder="Sort by..." />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none" className="cursor-pointer">
-                  Default
-                </SelectItem>
-                <SelectItem value="name-asc" className="cursor-pointer">
-                  Name (A-Z)
-                </SelectItem>
-                <SelectItem value="name-desc" className="cursor-pointer">
-                  Name (Z-A)
-                </SelectItem>
-                <SelectItem value="price-asc" className="cursor-pointer">
-                  Price (Low to High)
-                </SelectItem>
-                <SelectItem value="price-desc" className="cursor-pointer">
-                  Price (High to Low)
-                </SelectItem>
+                <SelectItem value="none">Default</SelectItem>
+                <SelectItem value="name-asc">Name (A-Z)</SelectItem>
+                <SelectItem value="name-desc">Name (Z-A)</SelectItem>
+                <SelectItem value="price-asc">Price (Low to High)</SelectItem>
+                <SelectItem value="price-desc">Price (High to Low)</SelectItem>
               </SelectContent>
             </Select>
           </div>
