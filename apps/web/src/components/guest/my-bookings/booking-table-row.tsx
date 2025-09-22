@@ -18,7 +18,7 @@ import { PaymentInfo } from "@/components/guest/my-bookings/payment-info";
 import { StatusBadge } from "@/components/guest/my-bookings/status-badge";
 import { PaymentProofUpload } from "@/components/guest/booking-transaction/payment-proof-upload";
 import { BookingCancellationDialog } from "@/components/guest/booking-transaction/cancellation-dialog";
-import { Upload, CreditCard, Eye, X } from "lucide-react";
+import { Upload, CreditCard, Eye, X, FileImage } from "lucide-react";
 import { useBookings } from "@/hooks/useBookings";
 import { toast } from "sonner";
 
@@ -34,6 +34,8 @@ export const BookingTableRow = ({
   onBookingUpdate,
 }: BookingTableRowProps) => {
   const [paymentProofDialogOpen, setPaymentProofDialogOpen] = useState(false);
+  const [paymentProofViewDialogOpen, setPaymentProofViewDialogOpen] =
+    useState(false);
   const [cancellationDialogOpen, setCancellationDialogOpen] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
   const { cancelBooking } = useBookings();
@@ -142,6 +144,43 @@ export const BookingTableRow = ({
       }
     }
 
+    // For WAITING_CONFIRMATION with MANUAL_TRANSFER, show payment proof view
+    if (
+      booking.status === "WAITING_CONFIRMATION" &&
+      booking.paymentMethod === "MANUAL_TRANSFER"
+    ) {
+      return (
+        <Dialog
+          open={paymentProofViewDialogOpen}
+          onOpenChange={setPaymentProofViewDialogOpen}
+        >
+          <DialogTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-full px-4 h-10"
+            >
+              <FileImage className="h-4 w-4 mr-2" />
+              View Proof
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Payment Proof - {booking.orderCode}</DialogTitle>
+            </DialogHeader>
+            <PaymentProofUpload
+              bookingId={booking.id}
+              orderCode={booking.orderCode}
+              onUploadComplete={() => {
+                setPaymentProofViewDialogOpen(false);
+                onBookingUpdate?.();
+              }}
+            />
+          </DialogContent>
+        </Dialog>
+      );
+    }
+
     // For other statuses, show details button
     return (
       <Button
@@ -163,7 +202,7 @@ export const BookingTableRow = ({
         return <StatusBadge status="CANCELED" />;
       }
       if (booking.paymentProof.acceptedAt) {
-        return <StatusBadge status="WAITING_CONFIRMATION" />;
+        return <StatusBadge status="COMPLETED" />;
       }
       return (
         <div className="flex flex-col items-center gap-1">
