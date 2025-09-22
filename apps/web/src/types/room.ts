@@ -58,11 +58,11 @@ export interface RoomAvailabilityApiResponse {
   data: RoomAvailability[];
 }
 
-export interface BlockDatesRequest {
+export interface MarkDatesUnavailableRequest {
   dates: string[];
 }
 
-export interface UnblockDatesRequest {
+export interface UnmarkDatesUnavailableRequest {
   dates: string[];
 }
 

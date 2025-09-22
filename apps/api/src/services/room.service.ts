@@ -171,7 +171,7 @@ export class RoomService {
 
     const whereClause: any = {
       roomId,
-      isAvailable: false, // Only get blocked dates
+      isAvailable: false,
     };
 
     if (params.startDate || params.endDate) {
@@ -184,7 +184,7 @@ export class RoomService {
       }
     }
 
-    const blockedDates = await prisma.roomAvailability.findMany({
+    const unavailableDates = await prisma.roomAvailability.findMany({
       where: whereClause,
       orderBy: { date: "asc" },
       select: {
@@ -196,8 +196,7 @@ export class RoomService {
       },
     });
 
-    // Format dates to YYYY-MM-DD format for frontend consistency
-    const formattedDates = blockedDates.map((item) => ({
+    const formattedDates = unavailableDates.map((item) => ({
       ...item,
       date: item.date.toISOString().split("T")[0],
       createdAt: item.createdAt.toISOString(),
@@ -215,7 +214,7 @@ export class RoomService {
       throw new AppError("Room not found", 404);
     }
 
-    // Create blocked date records
+    // Create unavailable date records
     const results = await Promise.all(
       data.dates.map(async (dateString: string) => {
         return prisma.roomAvailability.upsert({
@@ -244,7 +243,6 @@ export class RoomService {
       })
     );
 
-    // Format dates to YYYY-MM-DD format for frontend consistency
     const formattedResults = results.map((item) => ({
       ...item,
       date: item.date.toISOString().split("T")[0],
@@ -263,7 +261,6 @@ export class RoomService {
       throw new AppError("Room not found", 404);
     }
 
-    // Delete blocked date records (makes them available by default)
     const results = await Promise.all(
       data.dates.map(async (dateString: string) => {
         return prisma.roomAvailability.deleteMany({
