@@ -19,8 +19,32 @@ export function QueryProvider({ children }: { children: React.ReactNode }) {
       })
   );
 
+  const [Devtools, setDevtools] = React.useState<React.ComponentType<{
+    initialIsOpen?: boolean;
+  }> | null>(null);
+
+  React.useEffect(() => {
+    if (process.env.NODE_ENV === "production") return;
+
+    let mounted = true;
+    import("@tanstack/react-query-devtools")
+      .then((mod) => {
+        if (mounted && mod && mod.ReactQueryDevtools) {
+          setDevtools(() => mod.ReactQueryDevtools);
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   return (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    <QueryClientProvider client={queryClient}>
+      {children}
+      {Devtools ? <Devtools initialIsOpen={false} /> : null}
+    </QueryClientProvider>
   );
 }
 
