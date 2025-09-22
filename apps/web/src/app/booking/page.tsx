@@ -237,7 +237,7 @@ function BookingContent() {
 
     // Validate file on frontend before upload
     const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
-    const maxSize = 5 * 1024 * 1024; // 5MB
+    const maxSize = 1 * 1024 * 1024;
 
     if (!allowedTypes.includes(uploadedFile.type)) {
       toast.error("Invalid file type. Only JPEG and PNG files are allowed.");
@@ -245,7 +245,7 @@ function BookingContent() {
     }
 
     if (uploadedFile.size > maxSize) {
-      toast.error("File too large. Maximum size is 5MB.");
+      toast.error("File too large. Maximum size is 1MB.");
       return;
     }
 
@@ -318,7 +318,7 @@ function BookingContent() {
           errorMessage =
             "Booking not found. Please try creating a new booking.";
         } else if (error.response?.status === 413) {
-          errorMessage = "File too large. Maximum size is 5MB.";
+          errorMessage = "File too large. Maximum size is 1MB.";
         }
 
         toast.error(errorMessage);
