@@ -218,7 +218,6 @@ async function seed() {
             min: 95,
             precision: 7,
           }),
-          maxGuests: faker.number.int({ min: 2, max: 12 }),
           Pictures: {
             create: Array.from({ length: 5 }).map(() => ({
               imageUrl: faker.image.urlPicsumPhotos({
@@ -363,6 +362,22 @@ async function seed() {
         if (adjustments.length) {
           roomAdjustments.set(room.id, adjustments);
         }
+      }
+
+      // After creating rooms for this property, ensure property's maxGuests
+      // reflects the highest room capacity created above.
+      const agg = await prisma.room.aggregate({
+        where: { propertyId: property.id },
+        _max: { capacity: true },
+      });
+      const maxCapacity = agg._max.capacity ?? 1;
+      try {
+        await (prisma as any).property.update({
+          where: { id: property.id },
+          data: { maxGuests: maxCapacity },
+        });
+      } catch (e) {
+        // ignore update errors in seed
       }
     }
   }

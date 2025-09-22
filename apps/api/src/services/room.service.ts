@@ -10,6 +10,21 @@ import {
 } from "@repo/schemas";
 
 export class RoomService {
+  private async ensurePropertyMaxGuests(propertyId: string) {
+    const agg = await prisma.room.aggregate({
+      where: { propertyId },
+      _max: { capacity: true },
+    });
+
+    const maxCapacity = agg._max.capacity ?? 1;
+
+    try {
+      await (prisma as any).property.update({
+        where: { id: propertyId },
+        data: { maxGuests: maxCapacity },
+      });
+    } catch (err) {}
+  }
   async createRoom(propertyId: string, data: CreateRoomInput) {
     const property = await prisma.property.findUnique({
       where: { id: propertyId },
@@ -39,6 +54,9 @@ export class RoomService {
         },
       },
     });
+
+    // Ensure property's maxGuests reflects its rooms
+    await this.ensurePropertyMaxGuests(propertyId);
 
     return room;
   }
@@ -130,6 +148,11 @@ export class RoomService {
       },
     });
 
+    // Recalculate property's max guests in case capacity changed
+    if (existingRoom?.Property?.id) {
+      await this.ensurePropertyMaxGuests(existingRoom.Property.id);
+    }
+
     return room;
   }
 
@@ -156,6 +179,11 @@ export class RoomService {
     await prisma.room.delete({
       where: { id: roomId },
     });
+
+    // Recalculate property's max guests after deleting a room
+    if (existingRoom?.propertyId) {
+      await this.ensurePropertyMaxGuests(existingRoom.propertyId);
+    }
 
     return { message: "Room deleted successfully" };
   }
