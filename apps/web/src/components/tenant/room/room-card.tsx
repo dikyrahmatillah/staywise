@@ -110,7 +110,7 @@ export function RoomCard({
                   onClick={() => onManageAvailability(room)}
                 >
                   <CalendarDays className="h-4 w-4 mr-1" />
-                  Block Dates
+                  Availability
                 </Button>
 
                 <Button
