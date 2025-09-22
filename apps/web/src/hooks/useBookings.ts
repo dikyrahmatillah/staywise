@@ -84,8 +84,15 @@ export function useBookings(propertyId?: string) {
       setLoading(false);
     }
   }, [propertyId, session]);
+
   const cancelBooking = useCallback(
     async (bookingId: string) => {
+      console.log("Cancelling booking with ID:", bookingId);
+      console.log(
+        "API URL:",
+        `${process.env.NEXT_PUBLIC_API_URL}/bookings/${bookingId}/cancel`
+      );
+
       if (!session?.user?.accessToken) {
         toast.error("Authentication required");
         return;
@@ -93,7 +100,7 @@ export function useBookings(propertyId?: string) {
 
       try {
         const api = createApiInstance(session.user.accessToken);
-        await api.delete(`/bookings/${bookingId}`);
+        await api.patch(`/bookings/${bookingId}/cancel`);
 
         // Update local state
         setBookings((prevBookings) =>
@@ -106,7 +113,13 @@ export function useBookings(propertyId?: string) {
 
         toast.success("Booking cancelled successfully");
       } catch (err) {
-        console.error("Error cancelling booking:", err);
+        console.error("Cancel booking error details:", {
+        bookingId,
+        url: `${process.env.NEXT_PUBLIC_API_URL}/bookings/${bookingId}/cancel`,
+        error: err
+      });
+      
+        // console.error("Error cancelling booking:", err);
         const errorMessage =
           axios.isAxiosError(err) && err.response?.data?.message
             ? err.response.data.message
