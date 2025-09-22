@@ -118,7 +118,7 @@ export function RoomFields({
           value={values.bedType}
           disabled={disabled}
         >
-          <SelectTrigger className="cursor-pointer">
+          <SelectTrigger>
             <SelectValue placeholder="Select bed type" />
           </SelectTrigger>
           <SelectContent>

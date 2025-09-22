@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import axios from "axios";
+import { api } from "@/lib/axios";
 import { toast } from "sonner";
 import type {
   PriceAdjustment,
@@ -10,79 +11,66 @@ import type {
   PriceAdjustmentApiResponse,
   CreatePriceAdjustmentRequest,
 } from "@/types/room";
+import { setAuthToken } from "@/lib/axios";
 
-const createApiInstance = (accessToken?: string) => {
-  const api = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1",
-  });
-
-  if (accessToken) {
-    api.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
+function getErrorMessage(err: unknown, fallback: string) {
+  if (axios.isAxiosError(err) && err.response?.data?.message) {
+    return err.response.data.message as string;
   }
-
-  return api;
-};
+  return fallback;
+}
 
 export function usePriceAdjustments(roomId: string) {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [priceAdjustments, setPriceAdjustments] = useState<PriceAdjustment[]>(
     []
   );
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const authToken = session?.user?.accessToken ?? null;
+
   const fetchPriceAdjustments = useCallback(async () => {
-    if (!session?.user?.accessToken || !roomId) return;
+    if (!authToken || !roomId) return;
 
     setLoading(true);
     setError(null);
 
     try {
-      const api = createApiInstance(session.user.accessToken);
-      const response = await api.get<PriceAdjustmentsApiResponse>(
+      const res = await api.get<PriceAdjustmentsApiResponse>(
         `/rooms/${roomId}/price-adjustments`
       );
-      setPriceAdjustments(response.data.data);
+      setPriceAdjustments(res.data.data);
     } catch (err) {
-      console.error("Error fetching price adjustments:", err);
-      const errorMessage =
-        axios.isAxiosError(err) && err.response?.data?.message
-          ? err.response.data.message
-          : "Failed to fetch price adjustments";
-      setError(errorMessage);
-      toast.error(errorMessage);
+      const msg = getErrorMessage(err, "Failed to fetch price adjustments");
+      console.error("fetchPriceAdjustments:", err);
+      setError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
-  }, [roomId, session?.user?.accessToken]);
+  }, [authToken, roomId]);
 
   const createPriceAdjustment = useCallback(
     async (adjustmentData: CreatePriceAdjustmentRequest) => {
-      if (!session?.user?.accessToken) {
-        toast.error("Authentication required");
-        return;
-      }
+      if (!authToken) return toast.error("Authentication required");
 
       try {
-        const api = createApiInstance(session.user.accessToken);
-        const response = await api.post<PriceAdjustmentApiResponse>(
+        const res = await api.post<PriceAdjustmentApiResponse>(
           `/rooms/${roomId}/price-adjustments`,
           adjustmentData
         );
-        setPriceAdjustments((prev) => [...prev, response.data.data]);
+        setPriceAdjustments((p) => [...p, res.data.data]);
         toast.success("Price adjustment created successfully");
-        return response.data.data;
+        return res.data.data;
       } catch (err) {
-        console.error("Error creating price adjustment:", err);
-        const errorMessage =
-          axios.isAxiosError(err) && err.response?.data?.message
-            ? err.response.data.message
-            : "Failed to create price adjustment";
-        toast.error(errorMessage);
+        const msg = getErrorMessage(err, "Failed to create price adjustment");
+        console.error("createPriceAdjustment:", err);
+        toast.error(msg);
         throw err;
       }
     },
-    [roomId, session?.user?.accessToken]
+    [authToken, roomId]
   );
 
   const updatePriceAdjustment = useCallback(
@@ -90,67 +78,66 @@ export function usePriceAdjustments(roomId: string) {
       adjustmentId: string,
       adjustmentData: Partial<CreatePriceAdjustmentRequest>
     ) => {
-      if (!session?.user?.accessToken) {
-        toast.error("Authentication required");
-        return;
-      }
+      if (!authToken) return toast.error("Authentication required");
 
       try {
-        const api = createApiInstance(session.user.accessToken);
-        const response = await api.put<PriceAdjustmentApiResponse>(
+        const res = await api.put<PriceAdjustmentApiResponse>(
           `/rooms/price-adjustments/${adjustmentId}`,
           adjustmentData
         );
         setPriceAdjustments((prev) =>
           prev.map((adjustment) =>
-            adjustment.id === adjustmentId ? response.data.data : adjustment
+            adjustment.id === adjustmentId ? res.data.data : adjustment
           )
         );
         toast.success("Price adjustment updated successfully");
-        return response.data.data;
+        return res.data.data;
       } catch (err) {
-        console.error("Error updating price adjustment:", err);
-        const errorMessage =
-          axios.isAxiosError(err) && err.response?.data?.message
-            ? err.response.data.message
-            : "Failed to update price adjustment";
-        toast.error(errorMessage);
+        const msg = getErrorMessage(err, "Failed to update price adjustment");
+        console.error("updatePriceAdjustment:", err);
+        toast.error(msg);
         throw err;
       }
     },
-    [session?.user?.accessToken]
+    [authToken]
   );
 
   const deletePriceAdjustment = useCallback(
     async (adjustmentId: string) => {
-      if (!session?.user?.accessToken) {
-        toast.error("Authentication required");
-        return;
-      }
+      if (!authToken) return toast.error("Authentication required");
 
       try {
-        const api = createApiInstance(session.user.accessToken);
         await api.delete(`/rooms/price-adjustments/${adjustmentId}`);
         setPriceAdjustments((prev) =>
           prev.filter((adjustment) => adjustment.id !== adjustmentId)
         );
         toast.success("Price adjustment deleted successfully");
       } catch (err) {
-        console.error("Error deleting price adjustment:", err);
-        const errorMessage =
-          axios.isAxiosError(err) && err.response?.data?.message
-            ? err.response.data.message
-            : "Failed to delete price adjustment";
-        toast.error(errorMessage);
+        const msg = getErrorMessage(err, "Failed to delete price adjustment");
+        console.error("deletePriceAdjustment:", err);
+        toast.error(msg);
         throw err;
       }
     },
-    [session?.user?.accessToken]
+    [authToken]
   );
+
+  useEffect(() => {
+    if (status === "loading") return;
+
+    setAuthToken(authToken);
+
+    if (status === "authenticated" && authToken && roomId) {
+      fetchPriceAdjustments();
+    } else {
+      setLoading(false);
+    }
+  }, [status, authToken, roomId, fetchPriceAdjustments]);
 
   return {
     priceAdjustments,
     loading,
+    isEmpty: !loading && priceAdjustments.length === 0,
     error,
     fetchPriceAdjustments,
     createPriceAdjustment,

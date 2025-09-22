@@ -38,7 +38,12 @@ export default function DateSelection({ data, onChange }: Props) {
               className="h-4 w-4 text-primary focus:ring-primary"
             />
             <div className="flex flex-col">
-              <Label htmlFor={`dateMode-range-${idRange}`}>Date Range</Label>
+              <Label
+                htmlFor={`dateMode-range-${idRange}`}
+                className="cursor-pointer"
+              >
+                Date Range
+              </Label>
             </div>
           </div>
 
@@ -52,7 +57,10 @@ export default function DateSelection({ data, onChange }: Props) {
               className="h-4 w-4 text-primary focus:ring-primary"
             />
             <div className="flex flex-col">
-              <Label htmlFor={`dateMode-specific-${idRange}`}>
+              <Label
+                htmlFor={`dateMode-specific-${idRange}`}
+                className="cursor-pointer"
+              >
                 Specific Dates
               </Label>
             </div>
