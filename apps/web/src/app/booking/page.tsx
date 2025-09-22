@@ -18,7 +18,7 @@ import { ImagePreview } from "@/components/guest/image-preview";
 import { formatCurrency } from "@/lib/booking-formatters";
 import { toast } from "sonner";
 import axios from "axios";
-import type { BookingPaymentMethod, OrderStatus } from "@repo/types";
+import type { OrderStatus } from "@repo/types";
 
 // API response type for booking creation
 interface CreateBookingResponse {
@@ -27,16 +27,6 @@ interface CreateBookingResponse {
   snapToken?: string;
   status: OrderStatus;
   totalAmount: number;
-}
-
-// API request type for booking creation
-interface CreateBookingRequest {
-  userId: string;
-  propertyId: string;
-  roomId: string;
-  checkInDate: string;
-  checkOutDate: string;
-  paymentMethod: BookingPaymentMethod;
 }
 
 // Midtrans Snap types
