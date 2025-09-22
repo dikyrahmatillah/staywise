@@ -1,125 +1,115 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useEffect } from "react";
 import { useSession } from "next-auth/react";
-import axios from "axios";
-import { api } from "@/lib/axios";
 import { toast } from "sonner";
 import type { Room, RoomsApiResponse, RoomApiResponse } from "@/types/room";
 import { CreateRoomInput, UpdateRoomInput } from "@repo/schemas";
-import { setAuthToken } from "@/lib/axios";
-
-function getErrorMessage(err: unknown, fallback: string) {
-  if (axios.isAxiosError(err) && err.response?.data?.message) {
-    return err.response.data.message as string;
-  }
-  return fallback;
-}
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getErrorMessage } from "@/lib/errors";
+import { api } from "@/lib/axios";
 
 export function useRooms(propertyId: string) {
-  const { data: session, status } = useSession();
-  const [rooms, setRooms] = useState<Room[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { status } = useSession();
+  const queryClient = useQueryClient();
+  const enabled = Boolean(propertyId);
+  const queryKey = ["rooms", propertyId] as const;
 
-  const authToken = session?.user?.accessToken ?? null;
-
-  const fetchRooms = useCallback(async () => {
-    if (!authToken) return;
-
-    setLoading(true);
-    setError(null);
-
-    try {
+  const {
+    data: roomsData,
+    isPending,
+    isFetching,
+    error: roomsError,
+    refetch,
+  } = useQuery<Room[], Error>({
+    queryKey,
+    enabled,
+    queryFn: async () => {
       const res = await api.get<RoomsApiResponse>(
         `/rooms/property/${propertyId}`
       );
-      setRooms(res.data.data);
-    } catch (err) {
-      const msg = getErrorMessage(err, "Failed to fetch rooms");
-      console.error("fetchRooms:", err);
-      setError(msg);
-      toast.error(msg);
-    } finally {
-      setLoading(false);
-    }
-  }, [authToken, propertyId]);
-
-  const createRoom = useCallback(
-    async (roomData: CreateRoomInput | FormData) => {
-      if (!authToken) return toast.error("Authentication required");
-
-      try {
-        const res = await api.post<RoomApiResponse>(
-          `/rooms/property/${propertyId}`,
-          roomData
-        );
-        setRooms((p) => [...p, res.data.data]);
-        toast.success("Room created successfully");
-        return res.data.data;
-      } catch (err) {
-        const msg = getErrorMessage(err, "Failed to create room");
-        console.error("createRoom:", err);
-        toast.error(msg);
-        throw err;
-      }
+      return res.data.data;
     },
-    [authToken, propertyId]
-  );
-
-  const updateRoom = useCallback(
-    async (roomId: string, roomData: UpdateRoomInput | FormData) => {
-      if (!authToken) return toast.error("Authentication required");
-
-      try {
-        const res = await api.put<RoomApiResponse>(
-          `/rooms/${roomId}`,
-          roomData
-        );
-        setRooms((prev) =>
-          prev.map((r) => (r.id === roomId ? res.data.data : r))
-        );
-        toast.success("Room updated successfully");
-        return res.data.data;
-      } catch (err) {
-        const msg = getErrorMessage(err, "Failed to update room");
-        console.error("updateRoom:", err);
-        toast.error(msg);
-        throw err;
-      }
-    },
-    [authToken]
-  );
-
-  const deleteRoom = useCallback(
-    async (roomId: string) => {
-      if (!authToken) return toast.error("Authentication required");
-
-      try {
-        await api.delete(`/rooms/${roomId}`);
-        setRooms((p) => p.filter((r) => r.id !== roomId));
-        toast.success("Room deleted successfully");
-      } catch (err) {
-        const msg = getErrorMessage(err, "Failed to delete room");
-        console.error("deleteRoom:", err);
-        toast.error(msg);
-        throw err;
-      }
-    },
-    [authToken]
-  );
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
+    retry: 1,
+  });
 
   useEffect(() => {
-    if (status === "loading") return;
-
-    setAuthToken(authToken);
-
-    if (status === "authenticated" && authToken && propertyId) {
-      fetchRooms();
-    } else {
-      setLoading(false);
+    if (roomsError) {
+      toast.error(getErrorMessage(roomsError, "Failed to fetch rooms"));
     }
-  }, [status, authToken, propertyId, fetchRooms]);
+  }, [roomsError]);
+
+  const rooms: Room[] = roomsData ?? [];
+  const loading =
+    status === "loading"
+      ? true
+      : isPending || (isFetching && rooms.length === 0);
+  const error = roomsError
+    ? getErrorMessage(roomsError, "Failed to fetch rooms")
+    : null;
+
+  const createRoomMutation = useMutation<
+    Room,
+    unknown,
+    CreateRoomInput | FormData
+  >({
+    mutationFn: async (roomData) => {
+      const res = await api.post<RoomApiResponse>(
+        `/rooms/property/${propertyId}`,
+        roomData
+      );
+      return res.data.data;
+    },
+    onSuccess: () => {
+      toast.success("Room created successfully");
+    },
+    onError: (err: unknown) =>
+      toast.error(getErrorMessage(err, "Failed to create room")),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey });
+    },
+  });
+
+  const updateRoomMutation = useMutation<
+    Room,
+    unknown,
+    { roomId: string; data: UpdateRoomInput | FormData }
+  >({
+    mutationFn: async ({ roomId, data }) => {
+      const res = await api.put<RoomApiResponse>(`/rooms/${roomId}`, data);
+      return res.data.data;
+    },
+    onSuccess: () => toast.success("Room updated successfully"),
+    onError: (err: unknown) =>
+      toast.error(getErrorMessage(err, "Failed to update room")),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey });
+    },
+  });
+
+  const deleteRoomMutation = useMutation<void, unknown, string>({
+    mutationFn: async (roomId) => {
+      await api.delete(`/rooms/${roomId}`);
+    },
+    onSuccess: () => toast.success("Room deleted successfully"),
+    onError: (err: unknown) =>
+      toast.error(getErrorMessage(err, "Failed to delete room")),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey });
+    },
+  });
+
+  const fetchRooms = () => refetch();
+
+  const createRoom = (roomData: CreateRoomInput | FormData) =>
+    createRoomMutation.mutateAsync(roomData);
+
+  const updateRoom = (roomId: string, roomData: UpdateRoomInput | FormData) =>
+    updateRoomMutation.mutateAsync({ roomId, data: roomData });
+
+  const deleteRoom = (roomId: string) => deleteRoomMutation.mutateAsync(roomId);
 
   return {
     rooms,

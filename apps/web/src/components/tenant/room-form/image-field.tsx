@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import type { RoomFormErrors } from "./types";
 import type { RefObject } from "react";
 
@@ -28,6 +29,24 @@ export function ImageField({
   truncateFileName,
   errors,
 }: Props) {
+  const MAX_FILE_SIZE = 1 * 1024 * 1024;
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0] ?? null;
+    if (!file) {
+      onFileChange(e);
+      return;
+    }
+
+    if (file.size > MAX_FILE_SIZE) {
+      toast.error("Image must be 1MB or smaller");
+      if (fileInputRef?.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    onFileChange(e);
+  }
+
   return (
     <div className="space-y-2">
       <input
@@ -35,8 +54,8 @@ export function ImageField({
         id="imageFile"
         name="imageFile"
         type="file"
-        accept="image/*"
-        onChange={onFileChange}
+        accept=".png,.jpg,.jpeg"
+        onChange={handleFileChange}
         disabled={isSubmitting}
         className="hidden"
       />
@@ -89,7 +108,9 @@ export function ImageField({
         ) : (
           <div className="flex flex-col items-center gap-1 text-sm text-muted-foreground">
             <div>Click an image here to upload</div>
-            <div className="text-xs text-muted-foreground">PNG, JPG, GIF</div>
+            <div className="text-xs text-muted-foreground">
+              PNG, JPG — max 1MB
+            </div>
           </div>
         )}
       </div>
