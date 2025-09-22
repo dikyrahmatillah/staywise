@@ -196,7 +196,7 @@ function BookingContent() {
             setCurrentStep(3);
             // Optionally redirect to bookings dashboard
             setTimeout(() => {
-              router.push("dashboard/guest/bookings");
+              router.push("/dashboard/guest");
             }, 2000);
           },
           onPending: function (result: MidtransResult) {
@@ -214,23 +214,12 @@ function BookingContent() {
           },
         });
       } else if (selectedPaymentMethod === "bank") {
-        // For manual transfer, check if we can upload payment proof
-        if (booking.status === "COMPLETED") {
-          // Backend bug: Manual transfer was marked as completed instead of waiting for payment
-          toast.warning(
-            "Booking created, but payment proof upload is not available due to a system configuration. Please contact support to upload your payment proof."
-          );
-          setCurrentStep(3);
-
-          // Still show success and redirect
-          setTimeout(() => {
-            router.push("dashboard/guest/bookings");
-          }, 3000);
-        } else {
-          // Normal flow: booking is waiting for payment
-          setIsUploadModalOpen(true);
-          toast.success("Booking created! Please upload payment proof.");
-        }
+        // For manual transfer, immediately open payment proof dialog
+        toast.success(
+          "Booking created! Please upload payment proof within 1 hour."
+        );
+        setIsUploadModalOpen(true);
+        setCurrentStep(3); // Move to step 3 as booking is created
       }
     } catch (error) {
       console.error("Error creating booking:", error);
@@ -304,7 +293,7 @@ function BookingContent() {
 
       // Redirect to bookings dashboard after 2 seconds
       setTimeout(() => {
-        router.push("dashboard/guest/bookings");
+        router.push("/dashboard/guest");
       }, 2000);
     } catch (error) {
       console.error("Error uploading payment proof:", error);
@@ -657,7 +646,7 @@ function BookingContent() {
                   <div className="mt-4">
                     <Button
                       className="w-full"
-                      onClick={() => router.push("dashboard/guest/bookings")}
+                      onClick={() => router.push("/dashboard/guest")}
                     >
                       View My Bookings
                     </Button>
