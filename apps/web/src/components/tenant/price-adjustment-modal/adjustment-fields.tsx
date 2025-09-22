@@ -70,7 +70,7 @@ export default function AdjustmentFields({
         </Label>
         <Input
           type="number"
-          step="0.01"
+          step="1"
           value={adjustValue}
           onChange={(e) => onChangeValue(e.target.value)}
           placeholder={adjustType === "PERCENTAGE" ? "10" : "50000"}
