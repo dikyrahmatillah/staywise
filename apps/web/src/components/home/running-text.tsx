@@ -2,16 +2,16 @@
 
 export default function RunningText() {
   const messages = [
-    "Limited time: Save up to 100% on select stays",
-    "24/7 support for guests",
-    "Book early for exclusive perks",
+    "Explore thoughtfully curated accommodations",
+    "Verified hosts & secure bookings",
+    "Transparent pricing — no hidden fees",
   ];
   const separator = "    —    ";
   const track = messages.join(separator);
 
   return (
     <section className="w-full bg-slate-50 border-t border-b border-slate-100">
-      <div className="overflow-hidden py-2">
+      <div className="overflow-hidden py-4">
         <div className="marquee">
           <div className="marquee__inner">
             <div className="marquee__item">
