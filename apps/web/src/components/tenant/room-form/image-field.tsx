@@ -109,7 +109,7 @@ export function ImageField({
           <div className="flex flex-col items-center gap-1 text-sm text-muted-foreground">
             <div>Click an image here to upload</div>
             <div className="text-xs text-muted-foreground">
-              PNG, JPG — max 1MB
+              PNG, JPG (Max 1MB)
             </div>
           </div>
         )}

@@ -37,7 +37,7 @@ export function RoomCard({
     <Card className="overflow-hidden hover:shadow-md transition-shadow py-0">
       <CardContent className="p-0">
         <div className="flex flex-col sm:flex-row">
-          <div className="relative w-full sm:w-64 h-48 sm:h-auto">
+          <div className="relative w-full sm:w-64 aspect-[16/9] sm:aspect-[4/3]">
             {room.imageUrl ? (
               <Image
                 src={room.imageUrl}
@@ -58,10 +58,12 @@ export function RoomCard({
             )}
           </div>
 
-          <div className="flex-1 p-6">
+          <div className="flex-1 p-4 sm:p-6">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
               <div className="space-y-2 flex-1">
-                <CardTitle className="text-xl">{room.name}</CardTitle>
+                <CardTitle className="text-lg sm:text-xl">
+                  {room.name}
+                </CardTitle>
 
                 {room.description && (
                   <p className="text-sm text-muted-foreground line-clamp-3">
@@ -77,7 +79,7 @@ export function RoomCard({
                   <span className="text-sm text-muted-foreground">/ night</span>
                 </div>
 
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
                   <div className="flex items-center gap-1">
                     <Users className="h-4 w-4" />
                     <span>
@@ -93,12 +95,12 @@ export function RoomCard({
                   </div>
                 </div>
               </div>
-
-              <div className="flex flex-row sm:flex-col gap-2">
+              <div className="flex flex-row sm:flex-col gap-2 flex-wrap">
                 <Button
                   size="sm"
                   variant="outline"
                   onClick={() => onEdit(room)}
+                  className="w-full sm:w-auto justify-center"
                 >
                   <Edit className="h-4 w-4 mr-1" />
                   Edit Room
@@ -108,6 +110,7 @@ export function RoomCard({
                   size="sm"
                   variant="outline"
                   onClick={() => onManageAvailability(room)}
+                  className="w-full sm:w-auto justify-center"
                 >
                   <CalendarDays className="h-4 w-4 mr-1" />
                   Availability
@@ -117,6 +120,7 @@ export function RoomCard({
                   size="sm"
                   variant="outline"
                   onClick={() => onManagePriceAdjustment(room)}
+                  className="w-full sm:w-auto justify-center"
                 >
                   <TrendingUp className="h-4 w-4 mr-1" />
                   Price Rules
@@ -126,7 +130,7 @@ export function RoomCard({
                   size="sm"
                   variant="outline"
                   onClick={() => onDelete(room.id)}
-                  className="text-red-600 border-red-300 hover:bg-red-50"
+                  className="w-full sm:w-auto text-red-600 border-red-300 hover:bg-red-50"
                 >
                   <Trash2 className="h-4 w-4 mr-1" />
                   Delete Room
@@ -134,7 +138,7 @@ export function RoomCard({
               </div>
             </div>
 
-            <div className="mt-4 pt-4 border-t flex flex-wrap gap-4 text-xs text-muted-foreground">
+            <div className="mt-4 pt-4 border-t flex flex-col sm:flex-row flex-wrap gap-4 text-xs text-muted-foreground">
               <div className="flex items-center gap-1">
                 <Calendar className="h-3 w-3" />
                 <span>

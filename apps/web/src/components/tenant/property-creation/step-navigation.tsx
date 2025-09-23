@@ -8,7 +8,7 @@ export interface Step {
   id: number;
   number: number;
   title: string;
-  description: string;
+  description?: string;
 }
 
 interface StepNavigationProps {
@@ -113,17 +113,6 @@ export function StepNavigation({ steps, currentStep }: StepNavigationProps) {
                     {step.description}
                   </p>
                 </div>
-
-                {index < steps.length - 1 && (
-                  <div className="absolute top-5 left-full w-full h-0.5 -translate-y-1/2 z-0">
-                    <div
-                      className={cn("h-full transition-colors duration-200", {
-                        "bg-primary": step.number < currentStep,
-                        "bg-muted": step.number >= currentStep,
-                      })}
-                    />
-                  </div>
-                )}
               </div>
             );
           })}
