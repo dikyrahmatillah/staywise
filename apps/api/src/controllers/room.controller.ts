@@ -147,7 +147,7 @@ export class RoomController {
       const result = await roomService.blockRoomDates(roomId, data);
 
       response.status(200).json({
-        message: "Room dates blocked successfully",
+        message: "Room dates marked unavailable successfully",
         data: result,
       });
     } catch (error) {
@@ -166,7 +166,7 @@ export class RoomController {
       const result = await roomService.unblockRoomDates(roomId, data);
 
       response.status(200).json({
-        message: "Room dates unblocked successfully",
+        message: "Room dates marked available successfully",
         data: result,
       });
     } catch (error) {

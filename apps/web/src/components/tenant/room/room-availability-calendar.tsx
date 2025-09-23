@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+// RoomAvailabilityCalendar
+// Dialog component to toggle a room's unavailable dates with optimistic updates.
+
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Calendar } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -10,15 +12,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { useRoomAvailability } from "@/hooks/useRoomAvailability";
-import { cn } from "@/lib/utils";
 import {
-  generateCalendarDates,
   formatDateKey,
-  isCurrentMonth as isSameMonth,
+  generateCalendarDates,
   isPastDate,
 } from "@/lib/date-utils";
+import CalendarHeader from "./room-availability-calendar/calendar-header";
+import CalendarGrid from "./room-availability-calendar/calendar-grid";
+import CalendarLegend from "./room-availability-calendar/calendar-legend";
+import ErrorAlert from "./room-availability-calendar/error-alert";
 
 interface RoomAvailabilityCalendarProps {
   roomId: string;
@@ -34,14 +38,17 @@ export function RoomAvailabilityCalendar({
   onOpenChange,
 }: RoomAvailabilityCalendarProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [optimisticOverrides, setOptimisticOverrides] = useState<
+    Map<string, boolean>
+  >(new Map());
 
   const {
     loading,
     error,
-    fetchBlockedDates,
-    blockDates,
-    unblockDates,
-    isDateBlocked,
+    fetchUnavailableDates,
+    markDatesUnavailable,
+    unmarkDatesUnavailable,
+    isDateUnavailable,
   } = useRoomAvailability(roomId);
 
   const getCalendarDates = useCallback(
@@ -49,43 +56,61 @@ export function RoomAvailabilityCalendar({
     [currentDate]
   );
 
-  const isCurrentMonth = useCallback(
-    (date: Date) => isSameMonth(date, currentDate),
-    [currentDate]
-  );
-
   const handleDateClick = useCallback(
     async (date: Date) => {
       if (isPastDate(date)) return;
-
       const dateKey = formatDateKey(date);
-      if (isDateBlocked(dateKey)) {
-        await unblockDates([dateKey]);
-      } else {
-        await blockDates([dateKey]);
+      const currentlyBlocked = optimisticOverrides.has(dateKey)
+        ? optimisticOverrides.get(dateKey)!
+        : isDateUnavailable(dateKey);
+
+      setOptimisticOverrides((prev) => {
+        const next = new Map(prev);
+        next.set(dateKey, !currentlyBlocked);
+        return next;
+      });
+
+      try {
+        if (currentlyBlocked) {
+          await unmarkDatesUnavailable([dateKey]);
+        } else {
+          await markDatesUnavailable([dateKey]);
+        }
+      } finally {
       }
     },
-    [isDateBlocked, unblockDates, blockDates]
+    [
+      isDateUnavailable,
+      markDatesUnavailable,
+      optimisticOverrides,
+      unmarkDatesUnavailable,
+    ]
   );
 
   const navigateMonth = useCallback((direction: "prev" | "next") => {
     setCurrentDate((prev) => {
-      const newDate = new Date(prev);
-      newDate.setMonth(newDate.getMonth() + (direction === "prev" ? -1 : 1));
-      return newDate;
+      const next = new Date(prev);
+      next.setMonth(next.getMonth() + (direction === "prev" ? -1 : 1));
+      return next;
     });
   }, []);
 
   useEffect(() => {
     if (!open || !roomId) return;
 
-    const year = currentDate.getFullYear();
-    const month = currentDate.getMonth();
-    const startDate = new Date(year, month, 1);
-    const endDate = new Date(year, month + 1, 0);
+    const gridDates = generateCalendarDates(currentDate);
+    if (!gridDates.length) return;
 
-    fetchBlockedDates(formatDateKey(startDate), formatDateKey(endDate));
-  }, [open, roomId, currentDate, fetchBlockedDates]);
+    const startDate = gridDates[0];
+    const endDate = gridDates[gridDates.length - 1];
+
+    void fetchUnavailableDates(
+      formatDateKey(startDate),
+      formatDateKey(endDate)
+    ).then(() => {
+      setOptimisticOverrides(new Map());
+    });
+  }, [open, roomId, currentDate, fetchUnavailableDates]);
 
   const calendarDates = useMemo(() => getCalendarDates(), [getCalendarDates]);
   const monthYear = useMemo(
@@ -94,111 +119,62 @@ export function RoomAvailabilityCalendar({
     [currentDate]
   );
 
+  // Resolve blocked status, honoring any optimistic overrides
+  const getIsBlocked = useCallback(
+    (date: Date) => {
+      const key = formatDateKey(date);
+      return optimisticOverrides.has(key)
+        ? (optimisticOverrides.get(key) as boolean)
+        : isDateUnavailable(key);
+    },
+    [isDateUnavailable, optimisticOverrides]
+  );
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5" />
-            Block Dates - {roomName}
+            Unavailable Dates - {roomName}
           </DialogTitle>
           <DialogDescription>
-            Block specific dates when this room cannot be rented. Rooms are
-            available by default unless blocked.
+            Mark specific dates as unavailable when this room cannot be rented.
+            Rooms are available by default unless marked unavailable.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
-          {error && (
-            <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
-              {error}
-            </div>
-          )}
+          {error && <ErrorAlert message={error} />}
 
-          <div className="grid place-content-center">
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => navigateMonth("prev")}
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <h3 className="text-lg font-semibold min-w-[200px] text-center">
-                {monthYear}
-              </h3>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => navigateMonth("next")}
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
+          <CalendarHeader
+            monthLabel={monthYear}
+            onPrev={() => navigateMonth("prev")}
+            onNext={() => navigateMonth("next")}
+          />
 
           <Card>
             <CardContent className="p-4">
-              <div className="grid grid-cols-7 gap-1 mb-2">
-                {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(
-                  (day) => (
-                    <div
-                      key={day}
-                      className="p-2 text-center text-sm font-medium text-muted-foreground"
-                    >
-                      {day}
-                    </div>
-                  )
-                )}
-              </div>
-
-              <div className="grid grid-cols-7 gap-1">
-                {calendarDates.map((date) => {
-                  const dateKey = formatDateKey(date);
-                  const isBlocked = isDateBlocked(dateKey);
-                  const isCurrentMonthDate = isCurrentMonth(date);
-                  const isPast = isPastDate(date);
-
-                  return (
-                    <button
-                      key={dateKey}
-                      onClick={() => handleDateClick(date)}
-                      disabled={isPast || loading}
-                      className={cn(
-                        "p-2 text-sm rounded-md border transition-colors relative",
-                        "hover:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500",
-                        !isCurrentMonthDate && "text-muted-foreground",
-                        isPast && "opacity-50 cursor-not-allowed",
-                        isBlocked
-                          ? "bg-red-100 border-red-300 text-red-800"
-                          : "bg-green-100 border-green-300 text-green-800",
-                        !isPast && !loading && "cursor-pointer"
-                      )}
-                    >
-                      {date.getDate()}
-                    </button>
-                  );
-                })}
-              </div>
+              <CalendarGrid
+                dates={calendarDates}
+                currentDate={currentDate}
+                loading={loading}
+                getIsBlocked={getIsBlocked}
+                onDateClick={handleDateClick}
+              />
             </CardContent>
           </Card>
-          <div className="flex gap-4 text-sm">
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-green-100 border border-green-300 rounded"></div>
-              <span>Available (Default)</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-red-100 border border-red-300 rounded"></div>
-              <span>Blocked</span>
-            </div>
-          </div>
+
+          <CalendarLegend />
 
           <div className="text-sm text-muted-foreground">
-            Click on any date to toggle between available (green) and blocked
-            (red).
+            Click on any date to toggle between available (green) and
+            unavailable (red).
           </div>
         </div>
       </DialogContent>
     </Dialog>
   );
 }
+
+export default RoomAvailabilityCalendar;

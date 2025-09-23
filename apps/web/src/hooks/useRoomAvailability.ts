@@ -1,151 +1,160 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSession } from "next-auth/react";
-import axios from "axios";
 import { toast } from "sonner";
 import type {
   RoomAvailability,
   RoomAvailabilityApiResponse,
-  BlockDatesRequest,
-  UnblockDatesRequest,
+  MarkDatesUnavailableRequest,
+  UnmarkDatesUnavailableRequest,
 } from "@/types/room";
 import { api } from "@/lib/axios";
-import { setAuthToken } from "@/lib/axios";
+import { getErrorMessage } from "@/lib/errors";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export function useRoomAvailability(roomId: string) {
-  const { data: session, status } = useSession();
-  const [blockedDates, setBlockedDates] = useState<RoomAvailability[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { status } = useSession();
+  const queryClient = useQueryClient();
+  const [range, setRange] = useState<{ startDate?: string; endDate?: string }>(
+    {}
+  );
 
-  const authToken = session?.user?.accessToken ?? null;
+  const enabled = Boolean(roomId);
+  const baseKey = useMemo(
+    () => ["roomAvailability", roomId] as const,
+    [roomId]
+  );
+  const queryKey = useMemo(
+    () =>
+      range.startDate || range.endDate
+        ? ([...baseKey, range] as const)
+        : baseKey,
+    [baseKey, range]
+  );
 
-  const fetchBlockedDates = useCallback(
-    async (startDate?: string, endDate?: string) => {
-      if (!authToken || !roomId) return;
-
-      setLoading(true);
-      setError(null);
-
-      try {
-        const params = new URLSearchParams();
-        if (startDate) params.append("startDate", startDate);
-        if (endDate) params.append("endDate", endDate);
-
-        const res = await api.get<RoomAvailabilityApiResponse>(
-          `/rooms/${roomId}/availability?${params.toString()}`
-        );
-        setBlockedDates(res.data.data);
-      } catch (err) {
-        const errorMessage =
-          axios.isAxiosError(err) && err.response?.data?.message
-            ? (err.response.data.message as string)
-            : "Failed to fetch blocked dates";
-        console.error("fetchBlockedDates:", err);
-        setError(errorMessage);
-        toast.error(errorMessage);
-      } finally {
-        setLoading(false);
-      }
+  const {
+    data: availabilityData,
+    isPending,
+    isFetching,
+    error: availabilityError,
+    refetch,
+  } = useQuery<RoomAvailability[], Error>({
+    queryKey,
+    enabled,
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (range.startDate) params.append("startDate", range.startDate);
+      if (range.endDate) params.append("endDate", range.endDate);
+      const suffix = params.toString() ? `?${params.toString()}` : "";
+      const res = await api.get<RoomAvailabilityApiResponse>(
+        `/rooms/${roomId}/availability${suffix}`
+      );
+      return res.data.data;
     },
-    [authToken, roomId]
-  );
-
-  const blockDates = useCallback(
-    async (dates: string[]) => {
-      if (!authToken) return toast.error("Authentication required");
-      if (dates.length === 0) return toast.error("No dates provided to block");
-
-      try {
-        const res = await api.post<RoomAvailabilityApiResponse>(
-          `/rooms/${roomId}/block`,
-          { dates } as BlockDatesRequest
-        );
-
-        const newBlocked = res.data.data;
-        setBlockedDates((prev) => {
-          const merged = [...prev];
-          newBlocked.forEach((b) => {
-            const idx = merged.findIndex((m) => m.date === b.date);
-            if (idx >= 0) merged[idx] = b;
-            else merged.push(b);
-          });
-          return merged.sort(
-            (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-          );
-        });
-
-        toast.success(
-          `Blocked ${dates.length} date${dates.length > 1 ? "s" : ""}`
-        );
-        return newBlocked;
-      } catch (err) {
-        const errorMessage =
-          axios.isAxiosError(err) && err.response?.data?.message
-            ? (err.response.data.message as string)
-            : "Failed to block dates";
-        console.error("blockDates:", err);
-        toast.error(errorMessage);
-        throw err;
-      }
-    },
-    [authToken, roomId]
-  );
-
-  const unblockDates = useCallback(
-    async (dates: string[]) => {
-      if (!authToken) return toast.error("Authentication required");
-      if (dates.length === 0)
-        return toast.error("No dates provided to unblock");
-
-      try {
-        await api.post(`/rooms/${roomId}/unblock`, {
-          dates,
-        } as UnblockDatesRequest);
-        setBlockedDates((prev) => prev.filter((p) => !dates.includes(p.date)));
-        toast.success(
-          `Unblocked ${dates.length} date${dates.length > 1 ? "s" : ""}`
-        );
-      } catch (err) {
-        const errorMessage =
-          axios.isAxiosError(err) && err.response?.data?.message
-            ? (err.response.data.message as string)
-            : "Failed to unblock dates";
-        console.error("unblockDates:", err);
-        toast.error(errorMessage);
-        throw err;
-      }
-    },
-    [authToken, roomId]
-  );
-
-  const isDateBlocked = useCallback(
-    (date: string) => blockedDates.some((b) => b.date === date),
-    [blockedDates]
-  );
-  const isDateAvailable = useCallback(
-    (date: string) => !isDateBlocked(date),
-    [isDateBlocked]
-  );
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
+    retry: 1,
+  });
 
   useEffect(() => {
-    setAuthToken(authToken);
-    if (status === "authenticated" && authToken && roomId) {
-      fetchBlockedDates();
-    } else if (status !== "loading") {
-      setLoading(false);
+    if (availabilityError) {
+      toast.error(
+        getErrorMessage(availabilityError, "Failed to fetch unavailable dates")
+      );
     }
-  }, [status, authToken, roomId, fetchBlockedDates]);
+  }, [availabilityError]);
+
+  const unavailableDates: RoomAvailability[] = useMemo(
+    () => availabilityData ?? [],
+    [availabilityData]
+  );
+  const loading =
+    status === "loading"
+      ? true
+      : isPending || (isFetching && unavailableDates.length === 0);
+  const error = availabilityError
+    ? getErrorMessage(availabilityError, "Failed to fetch unavailable dates")
+    : null;
+
+  const invalidateAllAvailability = () =>
+    queryClient.invalidateQueries({ queryKey: baseKey, exact: false });
+
+  const markUnavailableDatesMutation = useMutation<
+    RoomAvailability[],
+    unknown,
+    string[]
+  >({
+    mutationFn: async (dates) => {
+      if (!dates?.length)
+        throw new Error("No dates provided to mark unavailable");
+      const res = await api.post<RoomAvailabilityApiResponse>(
+        `/rooms/${roomId}/block`,
+        { dates } as MarkDatesUnavailableRequest
+      );
+      return res.data.data;
+    },
+    onSuccess: (_data, variables) => {
+      const count = variables?.length ?? 0;
+      toast.success(`Marked ${count} date${count > 1 ? "s" : ""} unavailable`);
+    },
+    onError: (err: unknown) =>
+      toast.error(getErrorMessage(err, "Failed to mark dates unavailable")),
+    onSettled: () => {
+      invalidateAllAvailability();
+    },
+  });
+
+  const unmarkUnavailableDatesMutation = useMutation<void, unknown, string[]>({
+    mutationFn: async (dates) => {
+      if (!dates?.length)
+        throw new Error("No dates provided to unmark unavailable");
+      await api.post(`/rooms/${roomId}/unblock`, {
+        dates,
+      } as UnmarkDatesUnavailableRequest);
+    },
+    onSuccess: (_data, variables) => {
+      const count = variables?.length ?? 0;
+      toast.success(`Marked ${count} date${count > 1 ? "s" : ""} available`);
+    },
+    onError: (err: unknown) =>
+      toast.error(getErrorMessage(err, "Failed to unmark dates unavailable")),
+    onSettled: () => {
+      invalidateAllAvailability();
+    },
+  });
+
+  const fetchUnavailableDates = useCallback(
+    (startDate?: string, endDate?: string) => {
+      setRange({ startDate, endDate });
+      return refetch();
+    },
+    [refetch]
+  );
+
+  const markDatesUnavailable = (dates: string[]) =>
+    markUnavailableDatesMutation.mutateAsync(dates);
+  const unmarkDatesUnavailable = (dates: string[]) =>
+    unmarkUnavailableDatesMutation.mutateAsync(dates);
+
+  const isDateUnavailable = useCallback(
+    (date: string) => unavailableDates.some((b) => b.date === date),
+    [unavailableDates]
+  );
+  const isDateAvailable = useCallback(
+    (date: string) => !isDateUnavailable(date),
+    [isDateUnavailable]
+  );
 
   return {
-    blockedDates,
+    unavailableDates,
     loading,
+    isEmpty: !loading && unavailableDates.length === 0,
     error,
-    fetchBlockedDates,
-    blockDates,
-    unblockDates,
-    isDateBlocked,
+    fetchUnavailableDates,
+    markDatesUnavailable,
+    unmarkDatesUnavailable,
+    isDateUnavailable,
     isDateAvailable,
   };
 }
