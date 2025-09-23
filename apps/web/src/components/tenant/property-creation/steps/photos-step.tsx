@@ -28,6 +28,7 @@ type PictureItem =
 export function PhotosStep() {
   const { formData, updateFormData } = usePropertyCreation();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const dropRef = useRef<HTMLDivElement>(null);
 
   const [newPhoto, setNewPhoto] = useState<PhotoFormData>({
     note: "",
@@ -35,27 +36,38 @@ export function PhotosStep() {
 
   const pictures = formData.pictures || [];
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      if (!file.type.startsWith("image/")) {
-        alert("Please select an image file");
-        return;
-      }
+  const handleFiles = (files: FileList | File[]) => {
+    const valid: { file: File; note?: string; description?: string }[] = [];
+    const max = 12; // guard against excessive uploads
+    Array.from(files)
+      .slice(0, max)
+      .forEach((file) => {
+        if (!file.type.startsWith("image/")) return;
+        if (file.size > 1024 * 1024) return;
+        valid.push({ file, note: "", description: "" });
+      });
 
-      if (file.size > 1024 * 1024) {
-        alert("File size must be less than 1MB");
-        return;
-      }
+    if (valid.length === 0) return;
 
-      const previewUrl = URL.createObjectURL(file);
-
+    // If only one file and no current selection, show preview in the composer
+    if (valid.length === 1 && !newPhoto.file) {
+      const previewUrl = URL.createObjectURL(valid[0].file);
       setNewPhoto((prev) => ({
         ...prev,
-        file,
+        file: valid[0].file,
         preview: previewUrl,
       }));
+      return;
     }
+
+    // Otherwise append to pictures immediately
+    updateFormData({ pictures: [...pictures, ...valid] });
+  };
+
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+    handleFiles(files);
   };
 
   const handleRemoveNewImage = () => {
@@ -180,7 +192,28 @@ export function PhotosStep() {
 
           <div className="space-y-4">
             {!newPhoto.file ? (
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+              <div
+                ref={dropRef}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  dropRef.current?.classList.add("ring-2", "ring-primary/30");
+                }}
+                onDragLeave={() =>
+                  dropRef.current?.classList.remove("ring-2", "ring-primary/30")
+                }
+                onDrop={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  dropRef.current?.classList.remove(
+                    "ring-2",
+                    "ring-primary/30"
+                  );
+                  if (e.dataTransfer?.files?.length)
+                    handleFiles(e.dataTransfer.files);
+                }}
+                className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center transition-all"
+              >
                 <Upload className="w-12 h-12 mx-auto mb-4 text-gray-400" />
                 <p className="text-gray-600 mb-2">
                   Upload a property image (Max 1MB)
@@ -192,6 +225,7 @@ export function PhotosStep() {
                   ref={fileInputRef}
                   type="file"
                   accept="image/*"
+                  multiple
                   onChange={handleImageUpload}
                   className="hidden"
                 />

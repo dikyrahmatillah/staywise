@@ -1,9 +1,8 @@
 "use client";
 
-import { Check, ChevronRight } from "lucide-react";
+import { Check, ChevronRight, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
+import { useState } from "react";
 
 export interface Step {
   id: number;
@@ -18,38 +17,44 @@ interface StepNavigationProps {
 }
 
 export function StepNavigation({ steps, currentStep }: StepNavigationProps) {
-  const progress = ((currentStep - 1) / (steps.length - 1)) * 100;
   const currentStepData = steps.find((step) => step.number === currentStep);
+  const [mobileExpanded, setMobileExpanded] = useState(false);
+
+  const toggleMobile = () => setMobileExpanded((v) => !v);
 
   return (
     <div className="w-full space-y-6">
       <div className="block lg:hidden">
-        <div className="flex items-center justify-between mb-4">
-          <div className="text-sm font-medium text-gray-900">
-            Step {currentStep} of {steps.length}
-          </div>
-          <Badge variant="outline" className="text-xs">
-            {Math.round(progress)}% Complete
-          </Badge>
-        </div>
-
-        <Progress value={progress} className="h-3 mb-4" />
-
         {currentStepData && (
-          <div className="text-center">
-            <h3 className="text-lg font-semibold text-gray-900">
-              {currentStepData.title}
-            </h3>
-            <p className="text-sm text-gray-600 mt-1">
-              {currentStepData.description}
-            </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">
+                {currentStepData.title}
+              </h3>
+              <p className="text-sm text-gray-600 mt-1">
+                {currentStepData.description}
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={toggleMobile}
+              aria-expanded={mobileExpanded}
+              aria-controls="mobile-step-list"
+              className="ml-4 inline-flex items-center justify-center rounded-md p-2 text-sm text-gray-600 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-primary"
+              title={mobileExpanded ? "Collapse steps" : "Expand steps"}
+            >
+              <ChevronDown
+                className={cn("w-5 h-5 transition-transform duration-200", {
+                  "rotate-180": mobileExpanded,
+                })}
+              />
+            </button>
           </div>
         )}
       </div>
 
       <div className="hidden lg:block">
-        <Progress value={progress} className="h-2 mb-8" />
-
         <div className="grid grid-cols-7 gap-4">
           {steps.map((step, index) => {
             const isCompleted = step.number < currentStep;
@@ -69,11 +74,14 @@ export function StepNavigation({ steps, currentStep }: StepNavigationProps) {
               >
                 <div
                   className={cn(
-                    "flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all duration-200",
+                    "flex items-center justify-center w-10 h-10 rounded-full border transition-all duration-200",
                     {
-                      "bg-green-500 border-green-500 text-white": isCompleted,
-                      "bg-blue-600 border-blue-600 text-white": isCurrent,
-                      "bg-gray-100 border-gray-300 text-gray-500": isUpcoming,
+                      "bg-primary text-primary-foreground border-primary":
+                        isCompleted,
+                      "bg-primary/90 text-primary-foreground border-primary/80":
+                        isCurrent,
+                      "bg-muted text-muted-foreground border-transparent":
+                        isUpcoming,
                     }
                   )}
                 >
@@ -89,9 +97,8 @@ export function StepNavigation({ steps, currentStep }: StepNavigationProps) {
                     className={cn(
                       "text-sm font-medium transition-colors duration-200",
                       {
-                        "text-green-600": isCompleted,
-                        "text-blue-600": isCurrent,
-                        "text-gray-500": isUpcoming,
+                        "text-primary": isCompleted || isCurrent,
+                        "text-muted-foreground": isUpcoming,
                       }
                     )}
                   >
@@ -99,9 +106,8 @@ export function StepNavigation({ steps, currentStep }: StepNavigationProps) {
                   </h4>
                   <p
                     className={cn("text-xs transition-colors duration-200", {
-                      "text-green-500": isCompleted,
-                      "text-blue-500": isCurrent,
-                      "text-gray-400": isUpcoming,
+                      "text-primary/70": isCompleted || isCurrent,
+                      "text-muted-foreground": isUpcoming,
                     })}
                   >
                     {step.description}
@@ -112,8 +118,8 @@ export function StepNavigation({ steps, currentStep }: StepNavigationProps) {
                   <div className="absolute top-5 left-full w-full h-0.5 -translate-y-1/2 z-0">
                     <div
                       className={cn("h-full transition-colors duration-200", {
-                        "bg-green-500": step.number < currentStep,
-                        "bg-gray-300": step.number >= currentStep,
+                        "bg-primary": step.number < currentStep,
+                        "bg-muted": step.number >= currentStep,
                       })}
                     />
                   </div>
@@ -125,68 +131,81 @@ export function StepNavigation({ steps, currentStep }: StepNavigationProps) {
       </div>
 
       <div className="block lg:hidden mt-6">
-        <div className="space-y-2">
-          {steps.map((step) => {
-            const isCompleted = step.number < currentStep;
-            const isCurrent = step.number === currentStep;
-            const isUpcoming = step.number > currentStep;
+        <div
+          id="mobile-step-list"
+          className={cn(
+            "space-y-2 overflow-hidden transition-[max-height] duration-300",
+            {
+              "max-h-0": !mobileExpanded,
+              "max-h-[1000px]": mobileExpanded,
+            }
+          )}
+        >
+          {mobileExpanded &&
+            steps.map((step) => {
+              const isCompleted = step.number < currentStep;
+              const isCurrent = step.number === currentStep;
+              const isUpcoming = step.number > currentStep;
 
-            return (
-              <div
-                key={step.id}
-                className={cn(
-                  "flex items-center p-3 rounded-lg transition-all duration-200",
-                  {
-                    "bg-green-50 border border-green-200": isCompleted,
-                    "bg-blue-50 border border-blue-200": isCurrent,
-                    "bg-gray-50 border border-gray-200": isUpcoming,
-                  }
-                )}
-              >
+              return (
                 <div
+                  key={step.id}
                   className={cn(
-                    "flex items-center justify-center w-8 h-8 rounded-full border-2 mr-3",
+                    "flex items-center p-3 rounded-lg transition-all duration-200 border",
                     {
-                      "bg-green-500 border-green-500 text-white": isCompleted,
-                      "bg-blue-600 border-blue-600 text-white": isCurrent,
-                      "bg-gray-100 border-gray-300 text-gray-500": isUpcoming,
+                      "bg-primary/5 border-primary/20":
+                        isCompleted || isCurrent,
+                      "bg-muted/40 border-transparent": isUpcoming,
                     }
                   )}
                 >
-                  {isCompleted ? (
-                    <Check className="w-4 h-4" />
-                  ) : (
-                    <span className="text-xs font-semibold">{step.number}</span>
+                  <div
+                    className={cn(
+                      "flex items-center justify-center w-8 h-8 rounded-full border mr-3",
+                      {
+                        "bg-primary text-primary-foreground border-primary":
+                          isCompleted,
+                        "bg-primary/90 text-primary-foreground border-primary/80":
+                          isCurrent,
+                        "bg-muted text-muted-foreground border-transparent":
+                          isUpcoming,
+                      }
+                    )}
+                  >
+                    {isCompleted ? (
+                      <Check className="w-4 h-4" />
+                    ) : (
+                      <span className="text-xs font-semibold">
+                        {step.number}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex-1">
+                    <h4
+                      className={cn("text-sm font-medium", {
+                        "text-primary": isCompleted || isCurrent,
+                        "text-muted-foreground": isUpcoming,
+                      })}
+                    >
+                      {step.title}
+                    </h4>
+                    <p
+                      className={cn("text-xs mt-1", {
+                        "text-primary/70": isCompleted || isCurrent,
+                        "text-muted-foreground": isUpcoming,
+                      })}
+                    >
+                      {step.description}
+                    </p>
+                  </div>
+
+                  {isCurrent && (
+                    <ChevronRight className="w-5 h-5 text-primary" />
                   )}
                 </div>
-
-                <div className="flex-1">
-                  <h4
-                    className={cn("text-sm font-medium", {
-                      "text-green-600": isCompleted,
-                      "text-blue-600": isCurrent,
-                      "text-gray-500": isUpcoming,
-                    })}
-                  >
-                    {step.title}
-                  </h4>
-                  <p
-                    className={cn("text-xs mt-1", {
-                      "text-green-500": isCompleted,
-                      "text-blue-500": isCurrent,
-                      "text-gray-400": isUpcoming,
-                    })}
-                  >
-                    {step.description}
-                  </p>
-                </div>
-
-                {isCurrent && (
-                  <ChevronRight className="w-5 h-5 text-blue-600" />
-                )}
-              </div>
-            );
-          })}
+              );
+            })}
         </div>
       </div>
     </div>

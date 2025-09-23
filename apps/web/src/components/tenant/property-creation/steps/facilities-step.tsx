@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { usePropertyCreation } from "../property-creation-context";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import type { CreateFacilityInput, AmenityType } from "@repo/schemas";
+import { Button } from "@/components/ui/button";
 
 import {
   Wifi,
@@ -113,6 +114,7 @@ export function FacilitiesStep() {
   const [facilityNotes, setFacilityNotes] = useState<Record<string, string>>(
     {}
   );
+  const [query, setQuery] = useState("");
 
   const facilities = formData.facilities || [];
   const selectedFacilities = facilities.map(
@@ -151,13 +153,48 @@ export function FacilitiesStep() {
     }
   };
 
+  const clearAll = () => {
+    updateFormData({ facilities: [] });
+    setFacilityNotes({});
+  };
+
+  const filteredCategories = useMemo(() => {
+    if (!query.trim()) return FACILITY_CATEGORIES;
+    const q = query.toLowerCase();
+    const result: Record<string, string[]> = {};
+    Object.entries(FACILITY_CATEGORIES).forEach(([category, items]) => {
+      const matches = items.filter((key) =>
+        FACILITY_LABELS[key].toLowerCase().includes(q)
+      );
+      if (matches.length) result[category] = matches;
+    });
+    return result;
+  }, [query]);
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Facilities & Amenities</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        {Object.entries(FACILITY_CATEGORIES).map(
+        <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+          <div className="flex-1">
+            <Input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search facilities (e.g., WiFi, Gym, Balcony)"
+            />
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={clearAll}
+            disabled={facilities.length === 0}
+          >
+            Clear All
+          </Button>
+        </div>
+        {Object.entries(filteredCategories).map(
           ([category, categoryFacilities]) => (
             <div key={category} className="space-y-3">
               <Label className="text-base font-medium">{category}</Label>

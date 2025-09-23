@@ -19,7 +19,6 @@ export const propertySchema = z.object({
   address: z.string(),
   latitude: z.number().min(-90).max(90).optional(),
   longitude: z.number().min(-180).max(180).optional(),
-  maxGuests: z.number().min(1),
 });
 
 const coerceOptionalInt = (min = 0) =>
@@ -63,6 +62,7 @@ export const propertyResponseSchema = propertySchema
   .omit({ tenantId: true, propertyCategoryId: true, customCategoryId: true })
   .extend({
     id: z.string(),
+    maxGuests: z.number().int().min(1),
     PropertyCategory: propertyCategorySchema.optional().nullable(),
     CustomCategory: customCategorySchema.optional().nullable(),
     Rooms: z.array(roomSummarySchema),
@@ -108,7 +108,6 @@ export const createPropertyInputSchema = z
     address: z.string(),
     latitude: z.number().min(-90).max(90).optional(),
     longitude: z.number().min(-180).max(180).optional(),
-    maxGuests: z.number().int().min(1),
     slug: z.string().max(150).optional(),
     pictures: z.array(createPropertyPictureSchema).default([]),
     facilities: z.array(createFacilitySchema).default([]),
@@ -131,7 +130,6 @@ export const updatePropertyInputSchema = z.object({
   address: z.string().optional(),
   latitude: z.number().min(-90).max(90).optional().nullable(),
   longitude: z.number().min(-180).max(180).optional().nullable(),
-  maxGuests: z.number().int().min(1).optional(),
   pictures: z.array(createPropertyPictureSchema).optional(),
   facilities: z.array(createFacilitySchema).optional(),
   propertyCategoryId: z.uuid().optional(),

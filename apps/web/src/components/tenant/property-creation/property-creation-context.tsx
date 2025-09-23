@@ -83,7 +83,7 @@ export function PropertyCreationProvider({
   const isStepValid = (step: number): boolean => {
     switch (step) {
       case 1:
-        return !!(formData.name && formData.description && formData.maxGuests);
+        return !!(formData.name && formData.description);
       case 2:
         return !!(formData.country && formData.city && formData.address);
       case 3:
@@ -109,7 +109,7 @@ export function PropertyCreationProvider({
         );
       case 7:
         return (
-          !!(formData.name && formData.description && formData.maxGuests) &&
+          !!(formData.name && formData.description) &&
           !!(formData.country && formData.city && formData.address) &&
           !!(
             formData.propertyCategoryId ||
@@ -154,7 +154,6 @@ export function PropertyCreationProvider({
     formDataToSend.append("country", formData.country || "");
     formDataToSend.append("city", formData.city || "");
     formDataToSend.append("address", formData.address || "");
-    formDataToSend.append("maxGuests", String(formData.maxGuests || 1));
 
     if (formData.latitude)
       formDataToSend.append("latitude", String(formData.latitude));
