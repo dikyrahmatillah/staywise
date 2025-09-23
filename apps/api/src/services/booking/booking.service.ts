@@ -112,6 +112,22 @@ export class BookingService {
         },
       });
 
+      await prisma.gatewayPayment.upsert({
+        where: { orderId: booking.id },
+        update: {
+          providerRef: orderId,
+          snapToken: transaction.token,
+          status: "pending",
+        },
+        create: {
+          orderId: booking.id,
+          provider: "midtrans",
+          providerRef: orderId,
+          snapToken: transaction.token,
+          status: "pending",
+        },
+      });
+
       return { ...booking, snapToken: transaction.token };
     }
 

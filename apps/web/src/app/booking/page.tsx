@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
@@ -75,6 +75,42 @@ function BookingContent() {
   const [createdBooking, setCreatedBooking] =
     useState<CreateBookingResponse | null>(null);
 
+  useEffect(() => {
+    const loadMidtransScript = () => {
+      // Check if script already exists
+      if (document.getElementById("midtrans-script")) {
+        return;
+      }
+
+      const script = document.createElement("script");
+      script.id = "midtrans-script";
+      script.src = "https://app.sandbox.midtrans.com/snap/snap.js";
+      script.setAttribute(
+        "data-client-key",
+        process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY || ""
+      );
+
+      document.head.appendChild(script);
+
+      script.onload = () => {
+        console.log("Midtrans Snap script loaded successfully");
+      };
+
+      script.onerror = () => {
+        console.error("Failed to load Midtrans Snap script");
+      };
+    };
+
+    loadMidtransScript();
+
+    // Cleanup function
+    return () => {
+      const script = document.getElementById("midtrans-script");
+      if (script) {
+        document.head.removeChild(script);
+      }
+    };
+  }, []);
   const getBookingDetails = () => {
     const checkInParam = searchParams.get("checkIn");
     const checkOutParam = searchParams.get("checkOut");
@@ -177,8 +213,13 @@ function BookingContent() {
       setCreatedBooking(booking);
 
       if (selectedPaymentMethod === "midtrans" && booking.snapToken) {
-        // Redirect to Midtrans payment page
-        // @ts-expect-error - Midtrans snap global object may not be available
+        if (typeof window === "undefined" || !window.snap) {
+          toast.error(
+            "Payment system is loading. Please try again in a moment."
+          );
+          setIsProcessing(false);
+          return;
+        }
         window.snap.pay(booking.snapToken, {
           onSuccess: function (result: MidtransResult) {
             console.log("Payment success:", result);
@@ -332,7 +373,7 @@ function BookingContent() {
 
   // Redirect to login if not authenticated
   if (!session) {
-    router.push("/auth/login");
+    router.push("/signin");
     return <div>Redirecting to login...</div>;
   }
 
