@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { api } from "@/lib/axios";
+import { useProperty } from "@/hooks/useProperty";
 
 import type { Property, LocationValue, EditPropertyFormData } from "./types";
 
@@ -44,45 +45,28 @@ export function useEditProperty(propertyId: string) {
     }));
   };
 
+  const { property: fetchedProperty, loading: propLoading } =
+    useProperty(propertyId);
+
   useEffect(() => {
-    const fetchProperty = async () => {
-      try {
-        setLoading(true);
-        const response = await api.get(`/properties/id/${propertyId}`, {
-          headers: {
-            Authorization: `Bearer ${session?.user?.accessToken}`,
-          },
-        });
+    setLoading(Boolean(propLoading));
+  }, [propLoading]);
 
-        const propertyData = response.data.data as Property;
-        setProperty(propertyData);
-        setFormData({
-          name: propertyData.name || "",
-          description: propertyData.description || "",
-          country: propertyData.country || "",
-          city: propertyData.city || "",
-          address: propertyData.address || "",
-          maxGuests: propertyData.maxGuests || 1,
-          latitude: propertyData.latitude?.toString() || "",
-          longitude: propertyData.longitude?.toString() || "",
-        });
-      } catch (error: unknown) {
-        console.error("Error fetching property:", error);
-        const errorMessage =
-          error && typeof error === "object" && "response" in error
-            ? (error as { response?: { data?: { message?: string } } }).response
-                ?.data?.message
-            : "Failed to update property";
-        toast.error(errorMessage);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (session?.user?.accessToken && propertyId) {
-      fetchProperty();
+  useEffect(() => {
+    if (fetchedProperty) {
+      setProperty(fetchedProperty);
+      setFormData({
+        name: fetchedProperty.name || "",
+        description: fetchedProperty.description || "",
+        country: fetchedProperty.country || "",
+        city: fetchedProperty.city || "",
+        address: fetchedProperty.address || "",
+        maxGuests: fetchedProperty.maxGuests || 1,
+        latitude: fetchedProperty.latitude?.toString() || "",
+        longitude: fetchedProperty.longitude?.toString() || "",
+      });
     }
-  }, [propertyId, session?.user?.accessToken]);
+  }, [fetchedProperty]);
 
   useEffect(() => {
     if (selectedImages.length === 0) {

@@ -29,7 +29,6 @@ export class PropertyService {
           address: data.address,
           latitude: data.latitude ?? null,
           longitude: data.longitude ?? null,
-          maxGuests: data.maxGuests,
           Facilities: mapFacilities(data.facilities),
           Pictures: mapPictures(data.pictures),
           Rooms: mapRooms(data.rooms),
@@ -338,7 +337,6 @@ export class PropertyService {
       if (data.address !== undefined) updateData.address = data.address;
       if (data.latitude !== undefined) updateData.latitude = data.latitude;
       if (data.longitude !== undefined) updateData.longitude = data.longitude;
-      if (data.maxGuests !== undefined) updateData.maxGuests = data.maxGuests;
 
       // Handle category updates
       if (

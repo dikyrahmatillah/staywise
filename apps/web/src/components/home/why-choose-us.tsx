@@ -26,10 +26,6 @@ export default function WhyChooseUs() {
   return (
     <section className="w-full py-8 md:py-12">
       <div className="container mx-auto max-w-6xl px-4 md:px-6">
-        <div className=" mb-8">
-          <h2 className="text-xl md:text-3xl font-bold mb-2">Why choose us?</h2>
-        </div>
-
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
           {items.map((it) => (
             <Card key={it.id} className="flex flex-row items-center gap-2 p-0">

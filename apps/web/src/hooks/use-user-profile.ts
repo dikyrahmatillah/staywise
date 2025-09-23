@@ -1,8 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import api from "@/lib/axios";
+// ...existing code...
 import { useSession } from "next-auth/react";
+import { api } from "@/lib/axios";
+import useAuthToken from "@/hooks/useAuthToken";
+import useApiQuery from "@/hooks/useApiQuery";
+import { getErrorMessage } from "@/lib/errors";
 
 export interface UserProfile {
   id: string;
@@ -15,86 +18,29 @@ export interface UserProfile {
 }
 
 export function useUserProfile() {
-  const { data: session } = useSession();
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: session, status } = useSession();
 
-  const fetchProfile = async () => {
-    if (!session?.user?.accessToken) {
-      setLoading(false);
-      return;
-    }
+  useAuthToken(session);
 
-    try {
-      setLoading(true);
-      const response = await api.get("/auth/profile", {
-        headers: {
-          Authorization: `Bearer ${session.user.accessToken}`,
-        },
-      });
+  const { data, isPending, isFetching, error, refetch } = useApiQuery<
+    UserProfile,
+    Error
+  >({
+    queryKey: ["user-profile"],
+    enabled: Boolean(session?.user?.accessToken),
+    queryFn: async () => {
+      const res = await api.get<{ message?: string; data: UserProfile }>(
+        "/auth/profile"
+      );
+      return res.data.data;
+    },
+    errorMessage: "Failed to fetch profile",
+  });
 
-      setProfile(response.data.data);
-      setError(null);
-    } catch (err: unknown) {
-      console.error("Error fetching profile:", err);
-      let errorMessage = "Failed to fetch profile";
-
-      if (err && typeof err === "object" && "response" in err) {
-        const axiosError = err as {
-          response?: { data?: { message?: string } };
-        };
-        errorMessage =
-          axiosError.response?.data?.message || "Failed to fetch profile";
-      }
-
-      setError(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (!session?.user?.accessToken) {
-      setLoading(false);
-      return;
-    }
-
-    const fetchProfileData = async () => {
-      try {
-        setLoading(true);
-        const response = await api.get("/auth/profile", {
-          headers: {
-            Authorization: `Bearer ${session.user.accessToken}`,
-          },
-        });
-
-        setProfile(response.data.data);
-        setError(null);
-      } catch (err: unknown) {
-        console.error("Error fetching profile:", err);
-        let errorMessage = "Failed to fetch profile";
-
-        if (err && typeof err === "object" && "response" in err) {
-          const axiosError = err as {
-            response?: { data?: { message?: string } };
-          };
-          errorMessage =
-            axiosError.response?.data?.message || "Failed to fetch profile";
-        }
-
-        setError(errorMessage);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProfileData();
-  }, [session?.user?.accessToken]);
-
-  const refetch = () => {
-    fetchProfile();
-  };
-
-  return { profile, loading, error, refetch };
+  return {
+    profile: data ?? null,
+    loading: status === "loading" ? true : isPending || isFetching,
+    error: error ? getErrorMessage(error, "Failed to fetch profile") : null,
+    refetch,
+  } as const;
 }

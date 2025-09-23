@@ -1,10 +1,13 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useMemo } from "react";
 import { useSession } from "next-auth/react";
-import axios from "axios";
+import useApiQuery from "@/hooks/useApiQuery";
 import { toast } from "sonner";
 import type { PropertyResponse, RoomResponse } from "@repo/schemas";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { api } from "@/lib/axios";
+import { getErrorMessage } from "@/lib/errors";
 
 type TenantProperty = PropertyResponse & {
   Pictures?: { imageUrl: string; note?: string }[];
@@ -12,73 +15,65 @@ type TenantProperty = PropertyResponse & {
   _count?: { Bookings?: number; Reviews?: number };
 };
 
-const createApiInstance = (accessToken?: string) => {
-  const api = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1",
+export function useTenantProperties(tenantId: string) {
+  const { status } = useSession();
+  const queryClient = useQueryClient();
+  const enabled = Boolean(tenantId);
+  const queryKey = ["tenant-properties", tenantId] as const;
+
+  const {
+    data: propertiesData,
+    isPending,
+    isFetching,
+    error: queryError,
+    refetch,
+  } = useApiQuery<TenantProperty[], Error>({
+    queryKey,
+    enabled,
+    queryFn: async () => {
+      const res = await api.get<{ message?: string; data: TenantProperty[] }>(
+        `/properties/tenant/${tenantId}`
+      );
+      return res.data.data || [];
+    },
+    errorMessage: "Failed to load properties",
   });
 
-  if (accessToken) {
-    api.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
-  }
-
-  return api;
-};
-
-export function useTenantProperties(tenantId: string) {
-  const { data: session } = useSession();
-  const [properties, setProperties] = useState<TenantProperty[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchProperties = useCallback(async () => {
-    if (!session?.user?.accessToken) {
-      setLoading(false);
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setError(null);
-      const api = createApiInstance(session.user.accessToken);
-      const response = await api.get(`/properties/tenant/${tenantId}`);
-      setProperties(response.data.data || []);
-    } catch (err) {
-      console.error("Error fetching properties:", err);
-      setError("Failed to load properties");
-      toast.error("Failed to load properties");
-    } finally {
-      setLoading(false);
-    }
-  }, [tenantId, session?.user?.accessToken]);
-
-  const deleteProperty = useCallback(
-    async (propertyId: string) => {
-      if (!session?.user?.accessToken) return;
-
-      try {
-        const api = createApiInstance(session.user.accessToken);
-        await api.delete(`/properties/id/${propertyId}`);
-        setProperties((props) => props.filter((p) => p.id !== propertyId));
-        toast.success("Property deleted successfully");
-      } catch (err) {
-        console.error("Error deleting property:", err);
-        toast.error("Failed to delete property");
-      }
-    },
-    [session?.user?.accessToken]
+  const properties: TenantProperty[] = useMemo(
+    () => propertiesData ?? [],
+    [propertiesData]
   );
+  const loading =
+    status === "loading"
+      ? true
+      : isPending || (isFetching && properties.length === 0);
+  const error = queryError
+    ? getErrorMessage(queryError, "Failed to load properties")
+    : null;
 
-  useEffect(() => {
-    if (session?.user?.accessToken) {
-      fetchProperties();
-    }
-  }, [fetchProperties, session?.user?.accessToken]);
+  const deleteMutation = useMutation<void, unknown, string>({
+    mutationFn: async (propertyId) => {
+      await api.delete(`/properties/id/${propertyId}`);
+    },
+    onSuccess: () => {
+      toast.success("Property deleted successfully");
+    },
+    onError: (err: unknown) => {
+      toast.error(getErrorMessage(err, "Failed to delete property"));
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey });
+    },
+  });
+
+  const deleteProperty = (propertyId: string) =>
+    deleteMutation.mutateAsync(propertyId);
 
   return {
     properties,
     loading,
     error,
-    refetch: fetchProperties,
+    refetch,
     deleteProperty,
   };
 }

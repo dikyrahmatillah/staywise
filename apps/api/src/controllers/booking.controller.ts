@@ -15,23 +15,49 @@ export class BookingController {
     }
   }
 
-  async getAllBookings(request: Request, response: Response, next: NextFunction) {
-    try {
-const userRole = (request as any).user?.role;
+async getAllBookings(request: Request, response: Response, next: NextFunction) {
+  try {
+    const userRole = (request as any).user?.role;
     const userId = (request as any).user?.id;
-    const { propertyId } = request.query;
+    
+    // Extract pagination and filter parameters
+    const { 
+      propertyId, 
+      page = 1, 
+      limit = 10, 
+      search,
+      status 
+    } = request.query;
+
+    // Convert to numbers and validate
+    const pageNum = Math.max(1, parseInt(page as string));
+    const limitNum = Math.min(50, Math.max(1, parseInt(limit as string))); // Cap at 50
 
     let bookings;
+    let total;
+    
+    const filters = {
+      page: pageNum,
+      limit: limitNum,
+      search: search as string,
+      status: status as string,
+      propertyId: propertyId as string || undefined
+    };
 
     if (userRole === 'GUEST') {
-      bookings = await bookingService.getBookings({
-        userId,
-        propertyId: propertyId as string || undefined
+      const result = await bookingService.getBookingsWithPagination({
+        ...filters,
+        userId
       });
+      bookings = result.data;
+      total = result.total;
     } else if (userRole === 'TENANT') {
       if (propertyId) {
         // Verify tenant owns this property
-        const hasAccess = await bookingService.verifyTenantPropertyAccess(userId, propertyId as string);
+        const hasAccess = await bookingService.verifyTenantPropertyAccess(
+          userId, 
+          propertyId as string
+        );
         if (!hasAccess) {
           return response.status(403).json({
             success: false,
@@ -39,10 +65,14 @@ const userRole = (request as any).user?.role;
             data: null,
           });
         }
-        bookings = await bookingService.getBookings({ propertyId: propertyId as string });
-      } else {
-        bookings = await bookingService.getBookings({ tenantId: userId });
       }
+      
+      const result = await bookingService.getBookingsWithPagination({
+        ...filters,
+        tenantId: propertyId ? undefined : userId
+      });
+      bookings = result.data;
+      total = result.total;
     } else {
       return response.status(403).json({
         success: false,
@@ -51,10 +81,23 @@ const userRole = (request as any).user?.role;
       });
     }
 
+    // Calculate pagination metadata
+    const totalPages = Math.ceil(total / limitNum);
+    const hasNextPage = pageNum < totalPages;
+    const hasPrevPage = pageNum > 1;
+
     return response.json({
       success: true,
       count: bookings.length,
       data: bookings,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total,
+        totalPages,
+        hasNextPage,
+        hasPrevPage
+      },
       propertyId: propertyId || null,
     });
   } catch (error: any) {

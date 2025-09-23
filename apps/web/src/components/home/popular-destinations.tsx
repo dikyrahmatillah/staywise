@@ -18,7 +18,7 @@ const destinations = [
     id: 2,
     name: "JAKARTA CITY",
     image:
-      "https://images.unsplash.com/photo-1555993539-1732b0258ff1?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1590930754517-64d5fffa06ac?auto=format&fit=crop&w=800&q=80",
     href: "/properties?location=jakarta",
   },
   {
@@ -79,10 +79,10 @@ export default function PopularDestinations() {
         <div className="relative">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-2xl font-bold sm:text-4xl text-slate-900">
+              <h2 className="text-xl font-bold sm:text-3xl text-slate-900">
                 Popular Destinations
               </h2>
-              <p className="text-slate-600">
+              <p className="text-sm md:text-base text-slate-600">
                 Explore top locations for your next staycation
               </p>
             </div>

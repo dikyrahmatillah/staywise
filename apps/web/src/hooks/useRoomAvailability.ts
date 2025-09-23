@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import type {
@@ -11,7 +11,8 @@ import type {
 } from "@/types/room";
 import { api } from "@/lib/axios";
 import { getErrorMessage } from "@/lib/errors";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import useApiQuery from "@/hooks/useApiQuery";
 
 export function useRoomAvailability(roomId: string) {
   const { status } = useSession();
@@ -39,7 +40,7 @@ export function useRoomAvailability(roomId: string) {
     isFetching,
     error: availabilityError,
     refetch,
-  } = useQuery<RoomAvailability[], Error>({
+  } = useApiQuery<RoomAvailability[], Error>({
     queryKey,
     enabled,
     queryFn: async () => {
@@ -52,18 +53,8 @@ export function useRoomAvailability(roomId: string) {
       );
       return res.data.data;
     },
-    staleTime: 60_000,
-    gcTime: 5 * 60_000,
-    retry: 1,
+    errorMessage: "Failed to fetch unavailable dates",
   });
-
-  useEffect(() => {
-    if (availabilityError) {
-      toast.error(
-        getErrorMessage(availabilityError, "Failed to fetch unavailable dates")
-      );
-    }
-  }, [availabilityError]);
 
   const unavailableDates: RoomAvailability[] = useMemo(
     () => availabilityData ?? [],

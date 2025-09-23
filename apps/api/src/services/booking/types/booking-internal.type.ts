@@ -14,6 +14,18 @@ export interface BookingCreationData
   paymentMethod?: BookingPaymentMethod;
 }
 
+// In your types file
+export interface BookingFilters {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: string;
+  userId?: string;
+  tenantId?: string;
+  propertyId?: string;
+  includeExpired?: boolean;
+}
+
 // Cron job configuration (API internal)
 export interface CronJobConfig {
   name: string;

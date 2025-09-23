@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useMemo } from "react";
 import { useSession } from "next-auth/react";
-import axios from "axios";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/axios";
 import { toast } from "sonner";
 import type {
@@ -11,137 +11,131 @@ import type {
   PriceAdjustmentApiResponse,
   CreatePriceAdjustmentRequest,
 } from "@/types/room";
-import { setAuthToken } from "@/lib/axios";
-
-function getErrorMessage(err: unknown, fallback: string) {
-  if (axios.isAxiosError(err) && err.response?.data?.message) {
-    return err.response.data.message as string;
-  }
-  return fallback;
-}
+import useAuthToken from "@/hooks/useAuthToken";
+import useApiQuery from "@/hooks/useApiQuery";
+import { getErrorMessage } from "@/lib/errors";
 
 export function usePriceAdjustments(roomId: string) {
   const { data: session, status } = useSession();
-  const [priceAdjustments, setPriceAdjustments] = useState<PriceAdjustment[]>(
-    []
-  );
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
   const authToken = session?.user?.accessToken ?? null;
 
-  const fetchPriceAdjustments = useCallback(async () => {
-    if (!authToken || !roomId) return;
+  useAuthToken(session);
 
-    setLoading(true);
-    setError(null);
+  const queryKey = useMemo(
+    () => ["rooms", roomId, "price-adjustments"] as const,
+    [roomId]
+  );
 
-    try {
+  const query = useApiQuery<PriceAdjustment[], Error>({
+    queryKey,
+    queryFn: async () => {
       const res = await api.get<PriceAdjustmentsApiResponse>(
         `/rooms/${roomId}/price-adjustments`
       );
-      setPriceAdjustments(res.data.data);
-    } catch (err) {
-      const msg = getErrorMessage(err, "Failed to fetch price adjustments");
-      console.error("fetchPriceAdjustments:", err);
-      setError(msg);
+      return res.data.data;
+    },
+    enabled: status === "authenticated" && !!authToken && !!roomId,
+    errorMessage: "Failed to fetch price adjustments",
+  });
+
+  const queryClient = useQueryClient();
+
+  const createMutation = useMutation<
+    PriceAdjustment,
+    unknown,
+    CreatePriceAdjustmentRequest
+  >({
+    mutationFn: async (adjustmentData: CreatePriceAdjustmentRequest) => {
+      if (!authToken) throw new Error("Authentication required");
+      const res = await api.post<PriceAdjustmentApiResponse>(
+        `/rooms/${roomId}/price-adjustments`,
+        adjustmentData
+      );
+      return res.data.data;
+    },
+    onSuccess(newItem: PriceAdjustment) {
+      queryClient.setQueryData<PriceAdjustment[] | undefined>(queryKey, (old) =>
+        old ? [...old, newItem] : [newItem]
+      );
+      toast.success("Price adjustment created successfully");
+    },
+    onError(err: unknown) {
+      const msg = getErrorMessage(err, "Failed to create price adjustment");
       toast.error(msg);
-    } finally {
-      setLoading(false);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey });
+    },
+  });
+
+  const updateMutation = useMutation<
+    PriceAdjustment,
+    unknown,
+    {
+      adjustmentId: string;
+      adjustmentData: Partial<CreatePriceAdjustmentRequest>;
     }
-  }, [authToken, roomId]);
-
-  const createPriceAdjustment = useCallback(
-    async (adjustmentData: CreatePriceAdjustmentRequest) => {
-      if (!authToken) return toast.error("Authentication required");
-
-      try {
-        const res = await api.post<PriceAdjustmentApiResponse>(
-          `/rooms/${roomId}/price-adjustments`,
-          adjustmentData
-        );
-        setPriceAdjustments((p) => [...p, res.data.data]);
-        toast.success("Price adjustment created successfully");
-        return res.data.data;
-      } catch (err) {
-        const msg = getErrorMessage(err, "Failed to create price adjustment");
-        console.error("createPriceAdjustment:", err);
-        toast.error(msg);
-        throw err;
-      }
+  >({
+    mutationFn: async ({ adjustmentId, adjustmentData }) => {
+      if (!authToken) throw new Error("Authentication required");
+      const res = await api.put<PriceAdjustmentApiResponse>(
+        `/rooms/price-adjustments/${adjustmentId}`,
+        adjustmentData
+      );
+      return res.data.data;
     },
-    [authToken, roomId]
-  );
-
-  const updatePriceAdjustment = useCallback(
-    async (
-      adjustmentId: string,
-      adjustmentData: Partial<CreatePriceAdjustmentRequest>
-    ) => {
-      if (!authToken) return toast.error("Authentication required");
-
-      try {
-        const res = await api.put<PriceAdjustmentApiResponse>(
-          `/rooms/price-adjustments/${adjustmentId}`,
-          adjustmentData
-        );
-        setPriceAdjustments((prev) =>
-          prev.map((adjustment) =>
-            adjustment.id === adjustmentId ? res.data.data : adjustment
-          )
-        );
-        toast.success("Price adjustment updated successfully");
-        return res.data.data;
-      } catch (err) {
-        const msg = getErrorMessage(err, "Failed to update price adjustment");
-        console.error("updatePriceAdjustment:", err);
-        toast.error(msg);
-        throw err;
-      }
+    onSuccess(updated: PriceAdjustment) {
+      queryClient.setQueryData<PriceAdjustment[] | undefined>(
+        queryKey,
+        (old) =>
+          old?.map((item) => (item.id === updated.id ? updated : item)) ?? [
+            updated,
+          ]
+      );
+      toast.success("Price adjustment updated successfully");
     },
-    [authToken]
-  );
-
-  const deletePriceAdjustment = useCallback(
-    async (adjustmentId: string) => {
-      if (!authToken) return toast.error("Authentication required");
-
-      try {
-        await api.delete(`/rooms/price-adjustments/${adjustmentId}`);
-        setPriceAdjustments((prev) =>
-          prev.filter((adjustment) => adjustment.id !== adjustmentId)
-        );
-        toast.success("Price adjustment deleted successfully");
-      } catch (err) {
-        const msg = getErrorMessage(err, "Failed to delete price adjustment");
-        console.error("deletePriceAdjustment:", err);
-        toast.error(msg);
-        throw err;
-      }
+    onError(err: unknown) {
+      const msg = getErrorMessage(err, "Failed to update price adjustment");
+      toast.error(msg);
     },
-    [authToken]
-  );
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey });
+    },
+  });
 
-  useEffect(() => {
-    if (status === "loading") return;
-
-    setAuthToken(authToken);
-
-    if (status === "authenticated" && authToken && roomId) {
-      fetchPriceAdjustments();
-    } else {
-      setLoading(false);
-    }
-  }, [status, authToken, roomId, fetchPriceAdjustments]);
+  const deleteMutation = useMutation<string, unknown, string>({
+    mutationFn: async (adjustmentId: string) => {
+      if (!authToken) throw new Error("Authentication required");
+      await api.delete(`/rooms/price-adjustments/${adjustmentId}`);
+      return adjustmentId;
+    },
+    onSuccess(deletedId: string) {
+      queryClient.setQueryData<PriceAdjustment[] | undefined>(queryKey, (old) =>
+        old?.filter((a) => a.id !== deletedId)
+      );
+      toast.success("Price adjustment deleted successfully");
+    },
+    onError(err: unknown) {
+      const msg = getErrorMessage(err, "Failed to delete price adjustment");
+      toast.error(msg);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey });
+    },
+  });
 
   return {
-    priceAdjustments,
-    loading,
-    isEmpty: !loading && priceAdjustments.length === 0,
-    error,
-    fetchPriceAdjustments,
-    createPriceAdjustment,
-    updatePriceAdjustment,
-    deletePriceAdjustment,
+    priceAdjustments: query.data ?? [],
+    loading: query.isLoading,
+    error: query.error
+      ? getErrorMessage(query.error, "Failed to fetch price adjustments")
+      : null,
+    refetch: query.refetch,
+    createPriceAdjustment: createMutation.mutateAsync,
+    updatePriceAdjustment: (
+      adjustmentId: string,
+      adjustmentData: Partial<CreatePriceAdjustmentRequest>
+    ) => updateMutation.mutateAsync({ adjustmentId, adjustmentData }),
+    deletePriceAdjustment: deleteMutation.mutateAsync,
   };
 }

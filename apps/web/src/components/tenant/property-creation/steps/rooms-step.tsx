@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Trash2, Bed, Upload, X } from "lucide-react";
+import { Plus, Minus, Trash2, Bed, Upload, X, DollarSign } from "lucide-react";
 import Image from "next/image";
 
 type RoomFormData = {
@@ -221,20 +221,26 @@ export function RoomsStep() {
 
             <div className="space-y-2">
               <Label htmlFor="basePrice">Base Price (per night) *</Label>
-              <Input
-                id="basePrice"
-                type="number"
-                min={0}
-                step={0.01}
-                value={newRoom.basePrice || ""}
-                onChange={(e) =>
-                  handleNewRoomChange(
-                    "basePrice",
-                    parseFloat(e.target.value) || 0
-                  )
-                }
-                placeholder="0.00"
-              />
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                  <DollarSign className="h-4 w-4" />
+                </span>
+                <Input
+                  id="basePrice"
+                  type="number"
+                  min={0}
+                  step={0.01}
+                  value={newRoom.basePrice || ""}
+                  onChange={(e) =>
+                    handleNewRoomChange(
+                      "basePrice",
+                      parseFloat(e.target.value) || 0
+                    )
+                  }
+                  placeholder="0.00"
+                  className="pl-9"
+                />
+              </div>
             </div>
           </div>
 
@@ -255,15 +261,44 @@ export function RoomsStep() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="capacity">Capacity (guests) *</Label>
-              <Input
-                id="capacity"
-                type="number"
-                min={1}
-                value={newRoom.capacity || 1}
-                onChange={(e) =>
-                  handleNewRoomChange("capacity", parseInt(e.target.value) || 1)
-                }
-              />
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={() =>
+                    handleNewRoomChange(
+                      "capacity",
+                      Math.max(1, (newRoom.capacity || 1) - 1)
+                    )
+                  }
+                >
+                  <Minus className="h-4 w-4" />
+                </Button>
+                <Input
+                  id="capacity"
+                  type="number"
+                  min={1}
+                  value={newRoom.capacity || 1}
+                  onChange={(e) =>
+                    handleNewRoomChange(
+                      "capacity",
+                      parseInt(e.target.value) || 1
+                    )
+                  }
+                  className="w-24 text-center"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={() =>
+                    handleNewRoomChange("capacity", (newRoom.capacity || 1) + 1)
+                  }
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -287,15 +322,44 @@ export function RoomsStep() {
 
             <div className="space-y-2">
               <Label htmlFor="bedCount">Number of Beds</Label>
-              <Input
-                id="bedCount"
-                type="number"
-                min={1}
-                value={newRoom.bedCount || 1}
-                onChange={(e) =>
-                  handleNewRoomChange("bedCount", parseInt(e.target.value) || 1)
-                }
-              />
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={() =>
+                    handleNewRoomChange(
+                      "bedCount",
+                      Math.max(1, (newRoom.bedCount || 1) - 1)
+                    )
+                  }
+                >
+                  <Minus className="h-4 w-4" />
+                </Button>
+                <Input
+                  id="bedCount"
+                  type="number"
+                  min={1}
+                  value={newRoom.bedCount || 1}
+                  onChange={(e) =>
+                    handleNewRoomChange(
+                      "bedCount",
+                      parseInt(e.target.value) || 1
+                    )
+                  }
+                  className="w-24 text-center"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={() =>
+                    handleNewRoomChange("bedCount", (newRoom.bedCount || 1) + 1)
+                  }
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </div>
 
