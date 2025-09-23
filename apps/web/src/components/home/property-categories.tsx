@@ -70,10 +70,10 @@ export default function PropertyCategories() {
         <div className="relative">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-3xl font-bold sm:text-4xl text-slate-900">
+              <h2 className="text-xl font-bold sm:text-3xl text-slate-900">
                 Property Categories
               </h2>
-              <p className="text-slate-600">
+              <p className="text-sm md:text-base text-slate-600">
                 Browse properties by popular categories
               </p>
             </div>
