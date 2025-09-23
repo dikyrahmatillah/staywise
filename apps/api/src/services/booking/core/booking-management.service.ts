@@ -15,6 +15,80 @@ export class BookingManagementService {
     });
   }
 
+  async getBookingsWithPagination(filters: {
+    page: number;
+    limit: number;
+    search?: string;
+    status?: string;
+    userId?: string;
+    tenantId?: string;
+    propertyId?: string;
+  }) {
+    const skip = (filters.page - 1) * filters.limit;
+
+    // Build where clause
+    const where: any = {};
+
+    // Role-based filtering
+    if (filters.userId) {
+      where.userId = filters.userId;
+    }
+    if (filters.tenantId) {
+      where.tenantId = filters.tenantId;
+    }
+    if (filters.propertyId) {
+      where.propertyId = filters.propertyId;
+    }
+
+    // Status filtering
+    if (filters.status && filters.status !== "all") {
+      if (filters.status.includes(",")) {
+        // Multiple statuses (e.g., "WAITING_PAYMENT,WAITING_CONFIRMATION,PROCESSING")
+        where.status = { in: filters.status.split(",") };
+      } else {
+        where.status = filters.status;
+      }
+    }
+
+    // Search filtering
+    if (filters.search) {
+      where.OR = [
+        { orderCode: { contains: filters.search, mode: "insensitive" } },
+        {
+          User: {
+            OR: [
+              { firstName: { contains: filters.search, mode: "insensitive" } },
+              { lastName: { contains: filters.search, mode: "insensitive" } },
+              { email: { contains: filters.search, mode: "insensitive" } },
+            ],
+          },
+        },
+        {
+          Property: { name: { contains: filters.search, mode: "insensitive" } },
+        },
+      ];
+    }
+
+    // Get total count and paginated data in parallel
+    const [total, bookings] = await Promise.all([
+      prisma.booking.count({ where }),
+      prisma.booking.findMany({
+        where,
+        include: {
+          User: { select: { firstName: true, lastName: true, email: true } },
+          Property: { select: { name: true, city: true } },
+          Room: { select: { name: true } },
+          paymentProof: true,
+          gatewayPayment: true,
+        },
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: filters.limit,
+      }),
+    ]);
+
+    return { data: bookings, total };
+  }
   async getBookings(filters: BookingFilters = {}) {
     const whereClause: any = {};
 
@@ -121,7 +195,12 @@ export class BookingManagementService {
 
   async getActiveBookings() {
     return this.getBookings({
-      status: ["WAITING_PAYMENT", "WAITING_CONFIRMATION", "PROCESSING", "COMPLETED"],
+      status: [
+        "WAITING_PAYMENT",
+        "WAITING_CONFIRMATION",
+        "PROCESSING",
+        "COMPLETED",
+      ],
     });
   }
 
