@@ -32,7 +32,7 @@ export function PriceAdjustmentModal({
   const {
     priceAdjustments,
     loading,
-    fetchPriceAdjustments,
+    refetch,
     createPriceAdjustment,
     updatePriceAdjustment,
     deletePriceAdjustment,
@@ -56,8 +56,8 @@ export function PriceAdjustmentModal({
   );
 
   useEffect(() => {
-    if (open && roomId) fetchPriceAdjustments();
-  }, [open, roomId, fetchPriceAdjustments]);
+    if (open && roomId) refetch();
+  }, [open, roomId, refetch]);
 
   const handleSubmit = async (data: FormData) => {
     setSubmitting(true);

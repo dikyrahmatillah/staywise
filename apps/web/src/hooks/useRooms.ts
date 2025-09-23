@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import type { Room, RoomsApiResponse, RoomApiResponse } from "@/types/room";
 import { CreateRoomInput, UpdateRoomInput } from "@repo/schemas";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import useApiQuery from "@/hooks/useApiQuery";
 import { getErrorMessage } from "@/lib/errors";
 import { api } from "@/lib/axios";
 
@@ -21,7 +21,7 @@ export function useRooms(propertyId: string) {
     isFetching,
     error: roomsError,
     refetch,
-  } = useQuery<Room[], Error>({
+  } = useApiQuery<Room[], Error>({
     queryKey,
     enabled,
     queryFn: async () => {
@@ -30,16 +30,8 @@ export function useRooms(propertyId: string) {
       );
       return res.data.data;
     },
-    staleTime: 60_000,
-    gcTime: 5 * 60_000,
-    retry: 1,
+    errorMessage: "Failed to fetch rooms",
   });
-
-  useEffect(() => {
-    if (roomsError) {
-      toast.error(getErrorMessage(roomsError, "Failed to fetch rooms"));
-    }
-  }, [roomsError]);
 
   const rooms: Room[] = roomsData ?? [];
   const loading =

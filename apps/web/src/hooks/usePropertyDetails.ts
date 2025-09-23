@@ -1,7 +1,7 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import api from "@/lib/axios";
+import useApiQuery from "@/hooks/useApiQuery";
+import { api } from "@/lib/axios";
 
 type DetailResponse = {
   averageRating?: number | null;
@@ -9,15 +9,16 @@ type DetailResponse = {
 };
 
 async function fetchPropertyDetails(slug: string) {
-  const res = await api.get(`/properties/${slug}`);
+  const res = await api.get<{ data: DetailResponse }>(`/properties/${slug}`);
   return res.data.data as DetailResponse;
 }
 
 export function usePropertyDetails(slug?: string | null) {
-  return useQuery<DetailResponse, Error>({
+  return useApiQuery<DetailResponse, Error>({
     queryKey: ["property", slug],
     queryFn: () => fetchPropertyDetails(String(slug)),
     enabled: Boolean(slug),
+    errorMessage: "Failed to fetch property details",
   });
 }
 

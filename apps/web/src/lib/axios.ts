@@ -1,4 +1,5 @@
 import axios, { AxiosRequestHeaders } from "axios";
+import { getSession } from "next-auth/react";
 
 export const api = axios.create({
   baseURL:
@@ -15,8 +16,21 @@ export function setAuthToken(token: string | null) {
   authToken = token;
 }
 
-api.interceptors.request.use((config) => {
-  const token = authToken;
+api.interceptors.request.use(async (config) => {
+  let token = authToken;
+
+  if (!token && typeof window !== "undefined") {
+    try {
+      const session = await getSession();
+      const maybeToken =
+        session &&
+        (session as { user?: { accessToken?: string } }).user?.accessToken;
+      token = typeof maybeToken === "string" ? maybeToken : null;
+    } catch {
+      token = null;
+    }
+  }
+
   if (token) {
     const prev = (config.headers || {}) as Record<string, unknown>;
     const next = {
@@ -25,6 +39,7 @@ api.interceptors.request.use((config) => {
     } as unknown as AxiosRequestHeaders;
     config.headers = next;
   }
+
   return config;
 });
 
