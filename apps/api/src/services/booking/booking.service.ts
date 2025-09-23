@@ -137,6 +137,19 @@ export class BookingService {
   }
 
   // Management operations
+
+  async getBookingsWithPagination(filters: {
+  page: number;
+  limit: number;
+  search?: string;
+  status?: string;
+  userId?: string;
+  tenantId?: string;
+  propertyId?: string;
+}) {
+  return this.managementService.getBookingsWithPagination(filters);
+}
+
   async getAllBookings() {
     return this.managementService.getAllBookings();
   }
