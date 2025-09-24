@@ -36,7 +36,7 @@ export function TenantPropertiesList({ tenantId }: TenantPropertiesListProps) {
       <Card>
         <CardContent className="p-6 text-center">
           <div className="text-red-500 mb-2">{error}</div>
-          <Button onClick={() => refetch()} variant="outline">
+          <Button onClick={() => void refetch()} variant="outline">
             Try Again
           </Button>
         </CardContent>
