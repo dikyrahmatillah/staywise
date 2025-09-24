@@ -52,7 +52,7 @@ export default function GuestBookingPage() {
       <div className="p-6 flex justify-center items-center min-h-[400px]">
         <div className="text-center">
           <p className="text-red-600 mb-4">{error}</p>
-          <Button onClick={fetchBookings}>
+          <Button onClick={() => fetchBookings()}>
             <RefreshCw className="h-4 w-4 mr-2" />
             Retry
           </Button>
@@ -70,7 +70,7 @@ export default function GuestBookingPage() {
             View and manage your booking history
           </p>
         </div>
-        <Button variant="outline" onClick={fetchBookings} disabled={loading}>
+        <Button variant="outline" onClick={() => fetchBookings()} disabled={loading}>
           <RefreshCw
             className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`}
           />
