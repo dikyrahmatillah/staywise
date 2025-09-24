@@ -4,11 +4,13 @@ import {
   createPropertyInputSchema,
   updatePropertyInputSchema,
 } from "@repo/schemas";
-import { PropertyService } from "@/services/property.service.js";
-import { FileService } from "@/services/file.service.js";
+import { FileService } from "../services/file.service.js";
+import { PropertyCrudService } from "@/services/property-crud.service.js";
+import { PropertySearchService } from "@/services/property-search.service.js";
 
 export class PropertyController {
-  private propertyService = new PropertyService();
+  private propertyCrud = new PropertyCrudService();
+  private propertySearch = new PropertySearchService();
   private fileService = new FileService();
 
   private static querySchema = getPropertiesQuerySchema;
@@ -90,7 +92,6 @@ export class PropertyController {
             priceAdjustments: roomData.priceAdjustments || [],
           };
 
-          // If room has an image file, upload it
           if (roomData.hasImage && roomImageIndex < roomImages.length) {
             const imageUrl = await this.fileService.uploadPicture(
               roomImages[roomImageIndex].path
@@ -103,7 +104,6 @@ export class PropertyController {
         }
       }
 
-      // Combine all data
       const finalData = {
         ...propertyData,
         facilities,
@@ -113,7 +113,7 @@ export class PropertyController {
 
       const validatedData = createPropertyInputSchema.parse(finalData);
 
-      const property = await this.propertyService.createProperty(validatedData);
+      const property = await this.propertyCrud.createProperty(validatedData);
 
       response.status(201).json({
         message: "Property created successfully",
@@ -151,7 +151,7 @@ export class PropertyController {
         sortOrder: parsed.sortOrder,
       };
 
-      const result = await this.propertyService.getProperties(params);
+      const result = await this.propertySearch.searchProperties(params);
 
       response.status(200).json({
         message: "Properties fetched successfully",
@@ -173,7 +173,7 @@ export class PropertyController {
   ) => {
     try {
       const slug = request.params.slug;
-      const property = await this.propertyService.getPropertyBySlug(slug);
+      const property = await this.propertyCrud.getPropertyBySlug(slug);
       response
         .status(200)
         .json({ message: "Property fetched successfully", data: property });
@@ -190,13 +190,13 @@ export class PropertyController {
     try {
       const tenantId = request.params.tenantId;
 
-      if (request.user?.id !== tenantId) {
+      if ((request as any).user?.id !== tenantId) {
         return response.status(403).json({
           message: "Access denied: You can only view your own properties",
         });
       }
 
-      const properties = await this.propertyService.getPropertiesByTenant(
+      const properties = await this.propertyCrud.getPropertiesByTenant(
         tenantId
       );
       response.status(200).json({
@@ -221,7 +221,7 @@ export class PropertyController {
         return response.status(401).json({ message: "Unauthorized" });
       }
 
-      const result = await this.propertyService.deleteProperty(
+      const result = await this.propertyCrud.deleteProperty(
         propertyId,
         tenantId
       );
@@ -240,7 +240,7 @@ export class PropertyController {
       const propertyId = request.params.id;
       const tenantId = request.user?.id;
 
-      const property = await this.propertyService.getPropertyById(
+      const property = await this.propertyCrud.getPropertyById(
         propertyId,
         tenantId
       );
@@ -352,7 +352,7 @@ export class PropertyController {
 
       const validatedData = updatePropertyInputSchema.parse(updateData);
 
-      const property = await this.propertyService.updateProperty(
+      const property = await this.propertyCrud.updateProperty(
         propertyId,
         tenantId,
         validatedData
