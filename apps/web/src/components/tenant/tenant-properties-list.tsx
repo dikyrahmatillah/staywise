@@ -46,14 +46,21 @@ export function TenantPropertiesList({ tenantId }: TenantPropertiesListProps) {
 
   if (properties.length === 0) {
     return (
-      <Card>
+      <Card className="border-dashed border-2 hover:border-primary/50 transition-colors">
         <CardContent className="p-12 text-center">
-          <Building2 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-semibold mb-2">No Properties Yet</h3>
-          <p className="text-muted-foreground mb-4">
-            You haven&apos;t added any properties to your portfolio yet.
+          <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-6">
+            <Building2 className="h-8 w-8 text-primary" />
+          </div>
+          <h3 className="text-xl font-semibold mb-2">No Properties Yet</h3>
+          <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
+            You haven&apos;t added any properties to your portfolio yet. Start
+            building your rental business today.
           </p>
-          <Button asChild>
+          <Button
+            asChild
+            size="lg"
+            className="shadow-lg hover:shadow-xl transition-all duration-200"
+          >
             <Link href="/dashboard/tenant/properties/add">
               Add Your First Property
             </Link>

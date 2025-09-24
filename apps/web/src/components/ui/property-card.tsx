@@ -1,17 +1,11 @@
 "use client";
 
 import Image from "next/image";
+import { useState } from "react";
 import Link from "next/link";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
 import {
   MapPin,
   Users,
@@ -24,9 +18,6 @@ import {
   DollarSign,
   Building2,
   ImageIcon,
-  MoreHorizontal,
-  CalendarDays,
-  Tags,
 } from "lucide-react";
 import type { PropertyResponse } from "@repo/schemas";
 import {
@@ -35,6 +26,16 @@ import {
   getTotalRooms,
 } from "@/components/tenant/property-utils";
 import usePropertyDetails from "@/hooks/usePropertyDetails";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface PropertyCardProps {
   property: PropertyResponse;
@@ -45,6 +46,7 @@ export default function PropertyCard({
   property,
   onDelete,
 }: PropertyCardProps) {
+  const [openDelete, setOpenDelete] = useState(false);
   const totalRooms = getTotalRooms(property);
   const priceDisplay = formatPriceDisplay(property);
   const guestDisplay = formatGuestDisplay(property);
@@ -55,11 +57,11 @@ export default function PropertyCard({
   return (
     <Card
       key={property.id}
-      className="overflow-hidden hover:shadow-md transition-shadow"
+      className="overflow-hidden hover:shadow-md transition-shadow py-0"
     >
       <CardContent className="p-0">
         <div className="flex flex-col sm:flex-row">
-          <div className="relative w-full sm:w-48 h-48 sm:h-auto">
+          <div className="relative w-full sm:w-64 aspect-[16/9] sm:aspect-[4/3]">
             {property.Pictures?.[0]?.imageUrl ? (
               <Image
                 src={property.Pictures[0].imageUrl}
@@ -81,10 +83,12 @@ export default function PropertyCard({
             )}
           </div>
 
-          <div className="flex-1 p-6">
+          <div className="flex-1 p-4 sm:p-6">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
               <div className="space-y-2 flex-1">
-                <CardTitle className="text-xl">{property.name}</CardTitle>
+                <CardTitle className="text-lg sm:text-xl">
+                  {property.name}
+                </CardTitle>
 
                 <div className="flex items-center gap-1 text-muted-foreground text-sm">
                   <MapPin className="h-4 w-4" />
@@ -97,7 +101,7 @@ export default function PropertyCard({
                   {property.description}
                 </p>
 
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
                   <div className="flex items-center gap-1">
                     <Users className="h-4 w-4" />
                     <span>{guestDisplay} Guests</span>
@@ -126,15 +130,25 @@ export default function PropertyCard({
                 </div>
               </div>
 
-              <div className="flex flex-row sm:flex-col gap-2">
-                <Button size="sm" variant="outline" asChild>
+              <div className="flex flex-row sm:flex-col gap-2 flex-wrap">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  asChild
+                  className="w-full sm:w-auto justify-center"
+                >
                   <Link href={`/properties/${property.slug}`}>
                     <Eye className="h-4 w-4 mr-1" />
                     View
                   </Link>
                 </Button>
 
-                <Button size="sm" variant="outline" asChild>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  asChild
+                  className="w-full sm:w-auto justify-center"
+                >
                   <Link
                     href={`/dashboard/tenant/properties/${property.id}/edit`}
                   >
@@ -143,64 +157,58 @@ export default function PropertyCard({
                   </Link>
                 </Button>
 
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button size="sm" variant="outline">
-                      <MoreHorizontal className="h-4 w-4 mr-1" />
-                      More
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48">
-                    <DropdownMenuItem asChild>
-                      <Link
-                        href={`/dashboard/tenant/properties/${property.id}/rooms`}
-                        className="w-full flex items-center gap-2"
-                      >
-                        <Bed className="h-4 w-4" />
-                        Edit Rooms
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link
-                        href={`/dashboard/tenant/properties/${property.id}/availability`}
-                        className="w-full flex items-center gap-2"
-                      >
-                        <CalendarDays className="h-4 w-4" />
-                        Room Availability
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link
-                        href={`/dashboard/tenant/properties/${property.id}/category`}
-                        className="w-full flex items-center gap-2"
-                      >
-                        <Tags className="h-4 w-4" />
-                        Category
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link
-                        href={`/dashboard/tenant/properties/${property.id}/pricing`}
-                        className="w-full flex items-center gap-2"
-                      >
-                        <DollarSign className="h-4 w-4" />
-                        Price Adjustment
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={() => onDelete(property.id)}
-                      className="text-red-600 focus:text-red-600 cursor-pointer flex items-center gap-2"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                      Delete Property
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  asChild
+                  className="w-full sm:w-auto justify-center"
+                >
+                  <Link
+                    href={`/dashboard/tenant/properties/${property.id}/rooms`}
+                  >
+                    <Bed className="h-4 w-4 mr-1" />
+                    Edit Rooms
+                  </Link>
+                </Button>
+
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setOpenDelete(true)}
+                  className="w-full sm:w-auto text-red-600 border-red-300 hover:bg-red-50"
+                >
+                  <Trash2 className="h-4 w-4 mr-1" />
+                  Delete Property
+                </Button>
               </div>
             </div>
 
-            <div className="mt-4 pt-4 border-t flex flex-wrap gap-4 text-xs text-muted-foreground">
+            <AlertDialog open={openDelete} onOpenChange={setOpenDelete}>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete Property</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to delete this property? This action
+                    cannot be undone and will remove all associated data.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => {
+                      setOpenDelete(false);
+                      onDelete(property.id);
+                    }}
+                    className="bg-red-600 hover:bg-red-700"
+                  >
+                    Delete Property
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+
+            <div className="mt-4 pt-4 border-t flex flex-col sm:flex-row flex-wrap gap-4 text-xs text-muted-foreground">
               <div className="flex items-center gap-1">
                 <Calendar className="h-3 w-3" />
                 <span>Created: {new Date().toLocaleDateString()}</span>

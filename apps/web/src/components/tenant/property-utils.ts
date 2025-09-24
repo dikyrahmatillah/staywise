@@ -1,4 +1,5 @@
 import type { RoomResponse, PropertyResponse } from "@repo/schemas";
+import { formatRupiah } from "@/lib/formatters";
 
 export function getTotalRooms(property: PropertyResponse) {
   return property.Rooms?.length || 0;
@@ -12,8 +13,10 @@ export function getPriceRange(property: PropertyResponse) {
 
 export function formatPriceDisplay(property: PropertyResponse) {
   const { min, max } = getPriceRange(property);
-  if (min === max) return `$${min}`;
-  return `$${min} - $${max}`;
+  const formattedMin = formatRupiah(min);
+  const formattedMax = formatRupiah(max);
+
+  return min === max ? formattedMin : `${formattedMin} - ${formattedMax}`;
 }
 
 export function getGuestRange(property: PropertyResponse) {

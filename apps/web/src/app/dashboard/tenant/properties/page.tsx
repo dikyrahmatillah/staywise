@@ -9,25 +9,36 @@ export default async function TenantPropertiesPage() {
   const session = await auth();
 
   return (
-    <div className="space-y-6 p-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight">My Properties</h1>
-          <p className="text-muted-foreground">
-            Manage and view all your property listings
-          </p>
+    <div className="min-h-screen">
+      <div className="p-6 ">
+        <div className="space-y-8">
+          {/* Header Section */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+            <div className="space-y-2">
+              <h1 className="text-4xl font-bold tracking-tight ">
+                My Properties
+              </h1>
+              <p className="text-lg text-muted-foreground max-w-md">
+                Manage and view all your property listings in one place
+              </p>
+            </div>
+            <Button
+              asChild
+              size="lg"
+              className="shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
+            >
+              <Link href="/dashboard/tenant/properties/add">
+                <Plus className="h-5 w-5 mr-2" />
+                Add New Property
+              </Link>
+            </Button>
+          </div>
+
+          <PropertyStats tenantId={session!.user.id} />
+
+          <TenantPropertiesList tenantId={session!.user.id} />
         </div>
-        <Button asChild>
-          <Link href="/dashboard/tenant/properties/add">
-            <Plus className="h-4 w-4 mr-2" />
-            Add New Property
-          </Link>
-        </Button>
       </div>
-
-      <PropertyStats tenantId={session!.user.id} />
-
-      <TenantPropertiesList tenantId={session!.user.id} />
     </div>
   );
 }
