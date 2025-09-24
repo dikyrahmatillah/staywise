@@ -50,9 +50,10 @@ const PropertyRoomInfo = ({
   room: BookingTransaction["Room"];
 }) => (
   <div className="flex flex-col gap-1">
-    <span className="font-medium text-sm">{property.name}</span>
+    <span className="font-medium text-sm truncate max-w-[150px]">
+      {property.name}
+    </span>
     <span className="text-xs text-muted-foreground">{room.name}</span>
-    <span className="text-xs text-muted-foreground">{property.city}</span>
   </div>
 );
 
