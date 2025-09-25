@@ -4,7 +4,7 @@ import { nanoid } from "nanoid";
 import slugify from "@sindresorhus/slugify";
 import { PropertyRepository } from "../repositories/property.repository.js";
 import { PropertyValidator } from "../utils/property-validator.js";
-import { resolveCategoryId } from "./category.service.js";
+import { AppError } from "@/errors/app.error.js";
 import { mapFacilities, mapPictures, mapRooms } from "../utils/mappers.js";
 
 export class PropertyCrudService {
@@ -18,11 +18,15 @@ export class PropertyCrudService {
     const slug = `${slugify(data.name)}-${nanoid(6)}`;
 
     const property = await prisma.$transaction(async (tx) => {
-      const propertyCategoryId = await resolveCategoryId(tx, data);
+      const propertyCategoryId = data.propertyCategoryId;
+      if (!propertyCategoryId) {
+        throw new Error("propertyCategoryId is required");
+      }
 
       const propertyData = {
         tenantId: data.tenantId,
         propertyCategoryId,
+        customCategoryId: data.customCategoryId ?? undefined,
         name: data.name,
         slug,
         description: data.description,
@@ -109,14 +113,10 @@ export class PropertyCrudService {
     const updatedProperty = await prisma.$transaction(async (tx) => {
       const updateData: any = this.buildBasicUpdateData(data);
 
-      if (this.hasCategoryUpdate(data)) {
-        const propertyCategoryId = await resolveCategoryId(tx, data as any);
-        updateData.propertyCategoryId = propertyCategoryId;
-
-        if ("customCategoryId" in data && data.customCategoryId) {
-          updateData.customCategoryId = data.customCategoryId;
-        }
-      }
+      if (data.propertyCategoryId)
+        updateData.propertyCategoryId = data.propertyCategoryId;
+      if (data.customCategoryId)
+        updateData.customCategoryId = data.customCategoryId;
 
       const updated = await this.repository.update(propertyId, updateData);
 
@@ -142,14 +142,6 @@ export class PropertyCrudService {
     if (data.longitude !== undefined) updateData.longitude = data.longitude;
 
     return updateData;
-  }
-
-  private hasCategoryUpdate(data: UpdatePropertyInput) {
-    return (
-      "propertyCategoryId" in data ||
-      "customCategoryId" in data ||
-      "customCategory" in data
-    );
   }
 
   private async updateFacilities(

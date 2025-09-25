@@ -41,7 +41,7 @@ type RoomFormData = {
 };
 
 type PropertyFormData = Partial<CreatePropertyInput> & {
-  selectedCategory?: "existing" | "custom" | "new";
+  selectedCategory?: "existing" | "custom";
   facilities?: Array<string | { facility: string; note?: string | null }>;
   pictures?: Array<PictureFormData>;
   rooms?: Array<RoomFormData>;
@@ -87,11 +87,7 @@ export function PropertyCreationProvider({
       case 2:
         return !!(formData.country && formData.city && formData.address);
       case 3:
-        return !!(
-          formData.propertyCategoryId ||
-          formData.customCategoryId ||
-          formData.customCategory
-        );
+        return !!formData.propertyCategoryId;
       case 4:
         return !!(formData.rooms && formData.rooms.length > 0);
       case 5:
@@ -111,11 +107,7 @@ export function PropertyCreationProvider({
         return (
           !!(formData.name && formData.description) &&
           !!(formData.country && formData.city && formData.address) &&
-          !!(
-            formData.propertyCategoryId ||
-            formData.customCategoryId ||
-            formData.customCategory
-          ) &&
+          !!formData.propertyCategoryId &&
           !!(formData.rooms && formData.rooms.length > 0) &&
           !!(
             formData.pictures &&
@@ -160,16 +152,16 @@ export function PropertyCreationProvider({
     if (formData.longitude)
       formDataToSend.append("longitude", String(formData.longitude));
 
-    // Handle category selection
-    if (formData.propertyCategoryId) {
-      formDataToSend.append("propertyCategoryId", formData.propertyCategoryId);
-    } else if (formData.customCategoryId) {
+    // Handle category selection (IDs only)
+    // Default category is required by the API
+    if (!formData.propertyCategoryId) {
+      toast.error("Please select a default category before continuing");
+      return;
+    }
+
+    formDataToSend.append("propertyCategoryId", formData.propertyCategoryId);
+    if (formData.customCategoryId) {
       formDataToSend.append("customCategoryId", formData.customCategoryId);
-    } else if (formData.customCategory) {
-      formDataToSend.append(
-        "customCategory",
-        JSON.stringify(formData.customCategory)
-      );
     }
 
     // Handle facilities

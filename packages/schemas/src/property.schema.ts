@@ -90,17 +90,13 @@ export const createPropertyPictureSchema = z.object({
 export const createPropertyCategoryInput = z.union([
   z.object({ propertyCategoryId: z.uuid() }),
   z.object({ customCategoryId: z.uuid() }),
-  z.object({
-    customCategory: z.object({
-      name: z.string().min(1),
-      description: z.string().optional(),
-    }),
-  }),
 ]);
 
 export const createPropertyInputSchema = z
   .object({
     tenantId: z.uuid(),
+    propertyCategoryId: z.uuid().optional(),
+    customCategoryId: z.uuid().optional(),
     name: z.string().max(100),
     description: z.string(),
     country: z.string().max(60),
@@ -134,12 +130,6 @@ export const updatePropertyInputSchema = z.object({
   facilities: z.array(createFacilitySchema).optional(),
   propertyCategoryId: z.uuid().optional(),
   customCategoryId: z.uuid().optional(),
-  customCategory: z
-    .object({
-      name: z.string().min(1),
-      description: z.string().optional(),
-    })
-    .optional(),
 });
 
 export type CreatePropertyInput = z.infer<typeof createPropertyInputSchema>;

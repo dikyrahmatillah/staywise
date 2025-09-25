@@ -43,13 +43,10 @@ export class PropertyController {
           : undefined,
       };
 
-      if (request.body.propertyCategoryId) {
-        propertyData.propertyCategoryId = request.body.propertyCategoryId;
-      } else if (request.body.customCategoryId) {
-        propertyData.customCategoryId = request.body.customCategoryId;
-      } else if (request.body.customCategory) {
-        propertyData.customCategory = JSON.parse(request.body.customCategory);
-      }
+      propertyData.propertyCategoryId =
+        request.body.propertyCategoryId || undefined;
+      propertyData.customCategoryId =
+        request.body.customCategoryId || undefined;
 
       const facilities = request.body.facilities
         ? JSON.parse(request.body.facilities)
@@ -287,35 +284,24 @@ export class PropertyController {
       if (request.body.longitude)
         updateData.longitude = parseFloat(request.body.longitude);
 
-      // Category data
       if (request.body.propertyCategoryId) {
         updateData.propertyCategoryId = request.body.propertyCategoryId;
       } else if (request.body.customCategoryId) {
         updateData.customCategoryId = request.body.customCategoryId;
-      } else if (request.body.customCategory) {
-        updateData.customCategory = JSON.parse(request.body.customCategory);
       }
 
       // Facilities
       if (request.body.facilities) {
         updateData.facilities = JSON.parse(request.body.facilities);
       }
-
-      // Handle property images
-      // Strategy: keep any existing pictures provided by `existingPictures` and
-      // append newly uploaded files. Only remove pictures if the client sends
-      // an explicit list that omits them (client should send full desired list
-      // via `existingPictures`) or include a deletion mechanism in the future.
       const finalPictures: Array<{ imageUrl: string; note?: string | null }> =
         [];
 
-      // Start with existing pictures if provided
       if (request.body.existingPictures) {
         try {
           const existing = JSON.parse(request.body.existingPictures);
           if (Array.isArray(existing)) {
             for (const p of existing) {
-              // Expect existing pictures to at least contain imageUrl
               if (p && p.imageUrl) {
                 finalPictures.push({
                   imageUrl: p.imageUrl,
@@ -324,12 +310,9 @@ export class PropertyController {
               }
             }
           }
-        } catch (err) {
-          // ignore parse errors and continue with new uploads only
-        }
+        } catch (err) {}
       }
 
-      // Upload any new images and append
       if (propertyImages.length > 0) {
         const propertyPicturesData = request.body.propertyPictures
           ? JSON.parse(request.body.propertyPictures)
