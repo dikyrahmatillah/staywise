@@ -9,8 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
-import { CheckCircle, XCircle, Eye, FileImage, User, Mail } from "lucide-react";
+import { CheckCircle, XCircle, Eye, FileImage, User, Mail, Trash2 } from "lucide-react";
 import type { BookingTransaction } from "@repo/types";
 import type { PaymentProof } from "@repo/types";
 import { StatusBadge } from "@/components/guest/my-bookings/status-badge";
@@ -22,6 +21,7 @@ interface TenantBookingTableRowProps {
   booking: BookingTransaction;
   onApprovePayment?: (bookingId: string) => Promise<void>;
   onRejectPayment?: (bookingId: string) => Promise<void>;
+  onCancelBooking?: (bookingId: string) => Promise<void>;
   onBookingUpdate?: () => void;
 }
 
@@ -92,7 +92,6 @@ const BookingDetails = ({
 const PaymentInfo = ({
   totalAmount,
   paymentMethod,
-  paymentProof,
 }: {
   totalAmount: number;
   paymentMethod: string;
@@ -106,24 +105,6 @@ const PaymentInfo = ({
           ? "Manual Transfer"
           : "Payment Gateway"}
       </span>
-      {paymentMethod === "MANUAL_TRANSFER" && paymentProof && (
-        <Badge
-          variant={
-            paymentProof.rejectedAt
-              ? "destructive"
-              : paymentProof.acceptedAt
-              ? "default"
-              : "secondary"
-          }
-          className="text-xs w-fit"
-        >
-          {paymentProof.rejectedAt
-            ? "Proof Rejected"
-            : paymentProof.acceptedAt
-            ? "Proof Approved"
-            : "Proof Uploaded"}
-        </Badge>
-      )}
     </div>
   </div>
 );
@@ -184,10 +165,12 @@ export const TenantBookingTableRow = ({
   booking,
   onApprovePayment,
   onRejectPayment,
+  onCancelBooking,
   onBookingUpdate,
 }: TenantBookingTableRowProps) => {
   const [isApproving, setIsApproving] = useState(false);
   const [isRejecting, setIsRejecting] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
   const [paymentProofDialogOpen, setPaymentProofDialogOpen] = useState(false);
 
   const handleApprove = async () => {
@@ -222,8 +205,72 @@ export const TenantBookingTableRow = ({
     }
   };
 
+  const handleCancel = async () => {
+    if (!onCancelBooking) return;
+
+    setIsCancelling(true);
+    try {
+      await onCancelBooking(booking.id);
+      toast.success("Booking cancelled successfully");
+      onBookingUpdate?.();
+    } catch (error) {
+      console.error("Error cancelling booking:", error);
+      toast.error("Failed to cancel booking");
+    } finally {
+      setIsCancelling(false);
+    }
+  };
+
   const renderActions = () => {
-    // WAITING_CONFIRMATION + MANUAL_TRANSFER = Payment proof needs review
+        if (
+      booking.status === "WAITING_PAYMENT" &&
+      booking.paymentMethod === "MANUAL_TRANSFER"
+    ) {
+      // If no payment proof uploaded, show cancel option
+      if (!booking.paymentProof) {
+        return (
+          <div className="flex gap-2">
+            <Button
+              variant="destructive"
+              size="sm"
+              className="rounded-full px-3 h-8"
+              onClick={handleCancel}
+              disabled={isCancelling}
+            >
+              <Trash2 className="h-3 w-3 mr-1" />
+              {isCancelling ? "Cancelling..." : "Cancel"}
+            </Button>
+          </div>
+        );
+      } else {
+        // If payment proof exists, show view details (guest has uploaded, waiting for processing)
+        return (
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-full px-3 h-8"
+              onClick={() => setPaymentProofDialogOpen(true)}
+            >
+              <FileImage className="h-3 w-3 mr-1" />
+              View Proof
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-full px-4 h-8"
+              onClick={() => {
+                console.log("View booking details:", booking.id);
+              }}
+            >
+              <Eye className="h-3 w-3 mr-1" />
+              Details
+            </Button>
+          </div>
+        );
+      }
+    }
+    
     if (
       booking.status === "WAITING_CONFIRMATION" &&
       booking.paymentMethod === "MANUAL_TRANSFER" &&
@@ -289,7 +336,6 @@ export const TenantBookingTableRow = ({
   };
 
   const renderStatus = () => {
-    // Use StatusBadge for main booking status
     const statusDisplay = <StatusBadge status={booking.status} />;
 
     // For manual transfers with payment proof, show additional info
