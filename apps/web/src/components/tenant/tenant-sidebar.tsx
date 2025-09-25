@@ -1,20 +1,15 @@
 "use client";
 
-import Link from "next/link";
 import React from "react";
-import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
   Building2,
   ReceiptText,
   BarChart3,
   UserCog,
-  ChevronDown,
   Star,
 } from "lucide-react";
 import { useState } from "react";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 
 type Item = {
@@ -68,106 +63,29 @@ const nav: Group[] = [
   },
 ];
 
-function NavLink({
-  href,
-  children,
-}: {
-  href: string;
-  children: React.ReactNode;
-}) {
-  const pathname = usePathname();
-  const active = pathname === href;
+import GroupItem from "@/components/dashboard/group-item";
+import Sidebar from "@/components/dashboard/sidebar";
+
+export function TenantSidebar({ isSheet }: { isSheet?: boolean }) {
+  const [collapsed, setCollapsed] = useState(false);
+
   return (
-    <Link
-      href={href}
-      className={cn(
-        "flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors",
-        active
-          ? "bg-primary/10 text-primary dark:bg-primary/20"
-          : "text-muted-foreground hover:text-foreground hover:bg-accent"
-      )}
+    <Sidebar
+      collapsed={collapsed}
+      onToggle={() => setCollapsed((s) => !s)}
+      isSheet={isSheet}
+      title="Tenant Dashboard"
     >
-      {children}
-    </Link>
-  );
-}
-
-function GroupItem({ group }: { group: Group }) {
-  const [open, setOpen] = useState(false);
-  const hasChildren = group.items && group.items.length > 0;
-  const Icon = group.icon;
-
-  if (!hasChildren && group.href) {
-    return (
-      <li>
-        <NavLink href={group.href}>
-          <Icon className="size-4" />
-          <span>{group.label}</span>
-        </NavLink>
-      </li>
-    );
-  }
-
-  return (
-    <li>
-      <button
-        type="button"
-        onClick={() => setOpen((s) => !s)}
-        className={cn(
-          "w-full select-none rounded-md px-3 py-2 text-left text-sm text-foreground/90",
-          "hover:bg-accent hover:text-foreground flex items-center gap-2 justify-between cursor-pointer"
-        )}
-        aria-expanded={open}
-      >
-        <span className="flex items-center gap-2">
-          <Icon className="size-4" />
-          {group.label}
-        </span>
-        <ChevronDown
-          className={cn("size-4 transition-transform", open && "rotate-180")}
-        />
-      </button>
-      <div
-        className={cn(
-          "overflow-hidden transition-[grid-template-rows]",
-          open ? "grid grid-rows-[1fr]" : "grid grid-rows-[0fr]"
-        )}
-      >
-        <ul className="ml-2 border-l pl-2 text-sm text-muted-foreground overflow-hidden">
-          {group.items?.map((item) => (
-            <li key={item.href}>
-              <NavLink href={item.href}>
-                <span className="relative pl-4">
-                  <span className="absolute left-0 top-1/2 -translate-y-1/2 size-1.5 rounded-full bg-foreground/50" />
-                  {item.label}
-                </span>
-              </NavLink>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </li>
-  );
-}
-
-export function TenantSidebar() {
-  return (
-    <aside className="h-dvh w-72 shrink-0 border-r bg-background">
-      <div className="h-14 border-b px-4 text-sm font-medium flex items-center">
-        Tenant Dashboard
-      </div>
-      <ScrollArea className="h-[calc(100dvh-3.5rem)] px-2 py-3">
-        <ul className="space-y-1">
-          {nav.map((g, idx) => (
-            <React.Fragment key={g.label}>
-              <GroupItem group={g} />
-              {idx === 0 || idx === 2 || idx === 5 ? (
-                <Separator className="my-1" />
-              ) : null}
-            </React.Fragment>
-          ))}
-        </ul>
-      </ScrollArea>
-    </aside>
+      <ul className="space-y-1">
+        {nav.map((g, idx) => (
+          <React.Fragment key={g.label}>
+            <GroupItem group={g} collapsed={collapsed} />
+            {idx === 0 || idx === 2 || idx === 5 ? (
+              <Separator className="my-1" />
+            ) : null}
+          </React.Fragment>
+        ))}
+      </ul>
+    </Sidebar>
   );
 }

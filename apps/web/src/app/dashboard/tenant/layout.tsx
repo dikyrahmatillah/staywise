@@ -21,7 +21,7 @@ export default function TenantLayout({ children }: TenantLayoutProps) {
         <TenantSidebar />
       </div>
       <main className="flex-1">
-        <header className="h-14 border-b flex items-center px-4 justify-between gap-2">
+        <header className="h-14 border-b border-l flex items-center px-4 justify-between gap-2">
           <div className="flex items-center gap-2">
             <Sheet>
               <SheetTrigger asChild>
@@ -31,7 +31,7 @@ export default function TenantLayout({ children }: TenantLayoutProps) {
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="p-0">
-                <TenantSidebar />
+                <TenantSidebar isSheet />
               </SheetContent>
             </Sheet>
             <DynamicHeader />

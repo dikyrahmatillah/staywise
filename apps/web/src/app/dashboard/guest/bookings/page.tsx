@@ -38,7 +38,7 @@ export default function GuestBookingPage() {
 
   if (loading) {
     return (
-      <div className="p-6 flex justify-center items-center min-h-[400px]">
+      <div className="p-6 border-l flex justify-center items-center min-h-[400px]">
         <div className="text-center">
           <RefreshCw className="animate-spin h-8 w-8 mx-auto text-gray-600" />
           <p className="mt-2 text-gray-600">Loading your bookings...</p>
@@ -49,7 +49,7 @@ export default function GuestBookingPage() {
 
   if (error) {
     return (
-      <div className="p-6 flex justify-center items-center min-h-[400px]">
+      <div className="p-6 border-l flex justify-center items-center min-h-[400px]">
         <div className="text-center">
           <p className="text-red-600 mb-4">{error}</p>
           <Button onClick={() => fetchBookings()}>
@@ -62,7 +62,7 @@ export default function GuestBookingPage() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 border-l space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="space-y-1">
           <h1 className="text-3xl font-bold tracking-tight">My Bookings</h1>
@@ -70,7 +70,11 @@ export default function GuestBookingPage() {
             View and manage your booking history
           </p>
         </div>
-        <Button variant="outline" onClick={() => fetchBookings()} disabled={loading}>
+        <Button
+          variant="outline"
+          onClick={() => fetchBookings()}
+          disabled={loading}
+        >
           <RefreshCw
             className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`}
           />

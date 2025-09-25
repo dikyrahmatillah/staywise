@@ -1,12 +1,9 @@
 "use client";
 
-import Link from "next/link";
-import React from "react";
-import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
+import React, { useState } from "react";
 import { LayoutDashboard, ReceiptText, UserCog, Heart } from "lucide-react";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import Sidebar from "@/components/dashboard/sidebar";
 
 type Item = {
   label: string;
@@ -22,69 +19,38 @@ type Group = {
 
 const nav: Group[] = [
   { label: "Overview", icon: LayoutDashboard, href: "/dashboard/guest" },
-
-  {
-    label: "Profile & Account",
-    icon: UserCog,
-    href: "/dashboard/guest/account",
-  },
   {
     label: "Booking History",
     icon: ReceiptText,
     href: "/dashboard/guest/bookings",
   },
   {
-    label: "Favorites / Wishlist",
-    icon: Heart,
-    href: "/dashboard/guest/wishlist",
+    label: "Profile & Account",
+    icon: UserCog,
+    href: "/dashboard/guest/account",
   },
 ];
 
-function NavLink({
-  href,
-  children,
-}: {
-  href: string;
-  children: React.ReactNode;
-}) {
-  const pathname = usePathname();
-  const active = pathname === href;
-  return (
-    <Link
-      href={href}
-      className={cn(
-        "flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors",
-        active
-          ? "bg-primary/10 text-primary dark:bg-primary/20"
-          : "text-muted-foreground hover:text-foreground hover:bg-accent"
-      )}
-    >
-      {children}
-    </Link>
-  );
-}
+import GroupItem from "@/components/dashboard/group-item";
 
-export function GuestSidebar() {
+export function GuestSidebar({ isSheet }: { isSheet?: boolean }) {
+  const [collapsed, setCollapsed] = useState(false);
+
   return (
-    <aside className="h-dvh w-72 shrink-0 border-r bg-background">
-      <div className="h-14 border-b px-4 text-sm font-medium flex items-center">
-        Guest Dashboard
-      </div>
-      <ScrollArea className="h-[calc(100dvh-3.5rem)] px-2 py-3">
-        <ul className="space-y-1">
-          {nav.map((group, idx) => (
-            <React.Fragment key={group.label}>
-              <li>
-                <NavLink href={group.href!}>
-                  <group.icon className="size-4" />
-                  <span>{group.label}</span>
-                </NavLink>
-              </li>
-              {idx === 0 || idx === 2 ? <Separator className="my-1" /> : null}
-            </React.Fragment>
-          ))}
-        </ul>
-      </ScrollArea>
-    </aside>
+    <Sidebar
+      collapsed={collapsed}
+      onToggle={() => setCollapsed((s) => !s)}
+      isSheet={isSheet}
+      title="Guest Dashboard"
+    >
+      <ul className="space-y-1">
+        {nav.map((group, idx) => (
+          <React.Fragment key={group.label}>
+            <GroupItem group={group} collapsed={collapsed} />
+            {idx === 0 || idx === 2 ? <Separator className="my-1" /> : null}
+          </React.Fragment>
+        ))}
+      </ul>
+    </Sidebar>
   );
 }
