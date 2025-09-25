@@ -262,7 +262,7 @@ export function useBookings(propertyId?: string) {
     if (session?.user?.accessToken) {
       fetchBookings();
     }
-  }, [session?.user?.accessToken]);
+  }, [session?.user?.accessToken, fetchBookings]);
 
   return {
     bookings,

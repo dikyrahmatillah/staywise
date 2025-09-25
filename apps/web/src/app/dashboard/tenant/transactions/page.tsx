@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -15,6 +15,7 @@ import {
   TableBody,
   TableFooter,
   TableCell,
+  TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -51,32 +52,22 @@ export default function TenantBookingsPage() {
   // Debounce search term to avoid too many API calls
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
-  // Calculate counts for tabs (these might need to come from a separate API call for accuracy)
-  const tabCounts = useMemo(() => {
-    // Note: These counts are from current page only, not total
-    // Consider adding separate endpoint for counts or include in API response
-    const pendingApprovals = bookings.filter(
-      (booking) =>
-        booking.status === "WAITING_CONFIRMATION" &&
-        booking.paymentMethod === "MANUAL_TRANSFER"
-    ).length;
-
-    const activeBookings = bookings.filter((booking) =>
-      ["WAITING_PAYMENT", "WAITING_CONFIRMATION", "PROCESSING"].includes(
-        booking.status
-      )
-    ).length;
-
-    const completedBookings = bookings.filter(
-      (booking) => booking.status === "COMPLETED"
-    ).length;
-
-    return {
-      pendingApprovals,
-      activeBookings,
-      completedBookings,
-    };
-  }, [bookings]);
+  // Convert UI filters to API status parameter
+  const getStatusForAPI = useCallback(() => {
+    if (activeTab !== "all") {
+      switch (activeTab) {
+        case "pending":
+          return "WAITING_CONFIRMATION"; // Will need additional filtering for MANUAL_TRANSFER
+        case "active":
+          return "WAITING_PAYMENT,WAITING_CONFIRMATION,PROCESSING";
+        case "completed":
+          return "COMPLETED";
+        default:
+          return statusFilter !== "all" ? statusFilter : undefined;
+      }
+    }
+    return statusFilter !== "all" ? statusFilter : undefined;
+  }, [activeTab, statusFilter]);
 
   // Fetch data when filters change
   useEffect(() => {
@@ -95,24 +86,8 @@ export default function TenantBookingsPage() {
     statusFilter,
     activeTab,
     fetchBookings,
+    getStatusForAPI,
   ]);
-
-  // Convert UI filters to API status parameter
-  const getStatusForAPI = () => {
-    if (activeTab !== "all") {
-      switch (activeTab) {
-        case "pending":
-          return "WAITING_CONFIRMATION"; // Will need additional filtering for MANUAL_TRANSFER
-        case "active":
-          return "WAITING_PAYMENT,WAITING_CONFIRMATION,PROCESSING";
-        case "completed":
-          return "COMPLETED";
-        default:
-          return statusFilter !== "all" ? statusFilter : undefined;
-      }
-    }
-    return statusFilter !== "all" ? statusFilter : undefined;
-  };
 
   // Handle page changes
   const handlePageChange = (page: number) => {
@@ -206,10 +181,10 @@ export default function TenantBookingsPage() {
 
   return (
     <div className="space-y-6 mx-8 my-6">
-      {/* Filters and Search */}
+      {/* Search, Tabs, and Filters */}
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
         <div className="flex gap-4 flex-1">
-          <div className="relative flex-1 max-w-sm">
+          <div className="relative flex-1 w-full">
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search by order code, guest name, or property..."
@@ -218,6 +193,22 @@ export default function TenantBookingsPage() {
               className="pl-8"
             />
           </div>
+          <Tabs value={activeTab} onValueChange={handleTabChange}>
+            <TabsList className="grid grid-cols-4 mx-auto">
+              <TabsTrigger value="all" className="flex px-4">
+                All
+              </TabsTrigger>
+              <TabsTrigger value="pending" className="flex px-4">
+                Pending
+              </TabsTrigger>
+              <TabsTrigger value="active" className="flex px-4">
+                Active
+              </TabsTrigger>
+              <TabsTrigger value="completed" className="flex px-4">
+                Completed
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
           <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
             <SelectTrigger className="w-[180px]">
               <Filter className="h-4 w-4 mr-2" />
@@ -248,32 +239,23 @@ export default function TenantBookingsPage() {
         </div>
       </div>
 
-      {/* Booking Table with Tabs */}
-      <Tabs value={activeTab} onValueChange={handleTabChange}>
-        <TabsList className="grid grid-cols-4 mx-auto">
-          <TabsTrigger value="all" className="flex px-4">
-            All
-          </TabsTrigger>
-          <TabsTrigger value="pending" className="flex px-4">
-            Pending
-          </TabsTrigger>
-          <TabsTrigger value="active" className="flex px-4">
-            Active
-          </TabsTrigger>
-          <TabsTrigger value="completed" className="flex px-4">
-            Completed
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
-
       {bookings.length === 0 ? (
-        <div className="text-center py-8">
-          <p className="text-muted-foreground">
-            {searchTerm || statusFilter !== "all" || activeTab !== "all"
-              ? "No bookings match your current filters."
-              : "No bookings found."}
-          </p>
-        </div>
+        <Table>
+          <TenantBookingTableHeader />
+          <TableBody>
+            <TableRow>
+              <TableCell colSpan={6} className="px-6 py-4 text-center">
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">
+                    {searchTerm || statusFilter !== "all" || activeTab !== "all"
+                      ? "Bookings Not Found."
+                      : "No bookings match your current filters."}
+                  </p>
+                </div>
+              </TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
       ) : (
         <div className="rounded-md border">
           <Table>
@@ -285,6 +267,7 @@ export default function TenantBookingsPage() {
                   booking={booking}
                   onApprovePayment={handleApprovePayment}
                   onRejectPayment={handleRejectPayment}
+                  // onCancelBooking={cancelBooking}
                   onBookingUpdate={() =>
                     fetchBookings({
                       page: currentPage,
@@ -298,90 +281,82 @@ export default function TenantBookingsPage() {
             </TableBody>
 
             {/* Pagination Footer */}
-            {pagination && pagination.totalPages > 1 && (
-              <TableFooter>
-                <tr>
-                  <TableCell colSpan={100} className="px-6 py-4">
-                    <div className="flex items-center justify-between">
-                      <div className="text-sm text-muted-foreground">
-                        PAGE {pagination.page} OF {pagination.totalPages} (
-                        {(pagination.page - 1) * pagination.limit + 1} to{" "}
-                        {Math.min(
-                          pagination.page * pagination.limit,
-                          pagination.total
-                        )}{" "}
-                        from {pagination.total} total bookings)
-                      </div>
-
-                      <div className="flex items-center gap-1">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handlePageChange(1)}
-                          disabled={pagination.page === 1 || loading}
-                          className="px-2"
-                        >
-                          <ChevronsLeft className="h-4 w-4" />
-                        </Button>
-
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handlePageChange(pagination.page - 1)}
-                          disabled={!pagination.hasPrevPage || loading}
-                          className="px-2"
-                        >
-                          <ChevronLeft className="h-4 w-4" />
-                        </Button>
-
-                        <div className="flex gap-1">
-                          {generatePageNumbers().map((pageNum) => (
-                            <Button
-                              key={pageNum}
-                              variant={
-                                pageNum === pagination.page
-                                  ? "default"
-                                  : "outline"
-                              }
-                              size="sm"
-                              onClick={() => handlePageChange(pageNum)}
-                              disabled={loading}
-                              className="w-8 h-8"
-                            >
-                              {pageNum}
-                            </Button>
-                          ))}
-                        </div>
-
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handlePageChange(pagination.page + 1)}
-                          disabled={!pagination.hasNextPage || loading}
-                          className="px-2"
-                        >
-                          <ChevronRight className="h-4 w-4" />
-                        </Button>
-
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            handlePageChange(pagination.totalPages)
-                          }
-                          disabled={
-                            pagination.page === pagination.totalPages || loading
-                          }
-                          className="px-2"
-                        >
-                          <ChevronsRight className="h-4 w-4" />
-                        </Button>
-                      </div>
+            <TableFooter>
+              <TableRow>
+                <TableCell colSpan={100} className="px-6 py-4">
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-muted-foreground">
+                      PAGE {pagination.page} OF {pagination.totalPages} (
+                      {(pagination.page - 1) * pagination.limit + 1} to{" "}
+                      {Math.min(
+                        pagination.page * pagination.limit,
+                        pagination.total
+                      )}{" "}
+                      from {pagination.total} total bookings)
                     </div>
-                  </TableCell>
-                </tr>
-              </TableFooter>
-            )}
+
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handlePageChange(1)}
+                        disabled={pagination.page === 1 || loading}
+                        className="px-2"
+                      >
+                        <ChevronsLeft className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handlePageChange(pagination.page - 1)}
+                        disabled={!pagination.hasPrevPage || loading}
+                        className="px-2"
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
+                      <div className="flex gap-1">
+                        {generatePageNumbers().map((pageNum) => (
+                          <Button
+                            key={pageNum}
+                            variant={
+                              pageNum === pagination.page
+                                ? "default"
+                                : "outline"
+                            }
+                            size="sm"
+                            onClick={() => handlePageChange(pageNum)}
+                            disabled={loading}
+                            className="w-8 h-8"
+                          >
+                            {pageNum}
+                          </Button>
+                        ))}
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handlePageChange(pagination.page + 1)}
+                        disabled={!pagination.hasNextPage || loading}
+                        className="px-2"
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handlePageChange(pagination.totalPages)}
+                        disabled={
+                          pagination.page === pagination.totalPages || loading
+                        }
+                        className="px-2"
+                      >
+                        <ChevronsRight className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </TableCell>
+              </TableRow>
+            </TableFooter>
           </Table>
         </div>
       )}
