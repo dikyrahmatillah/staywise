@@ -2,39 +2,10 @@ import type { Prisma } from "@repo/database/generated/prisma/index.js";
 import { prisma } from "@repo/database";
 import { AppError } from "@/errors/app.error.js";
 import type {
-  CreatePropertyInput,
   CreateCustomCategoryInput,
   UpdateCustomCategoryInput,
   GetCategoriesQuery,
 } from "@repo/schemas";
-
-export async function resolveCategoryId(
-  tx: Prisma.TransactionClient,
-  data: CreatePropertyInput
-) {
-  const maybeId = (data as any).propertyCategoryId;
-  if (maybeId) return maybeId;
-
-  const incoming = (data as any).category;
-  if (incoming && typeof incoming === "object" && incoming.name) {
-    const name = String(incoming.name).trim();
-    const description = incoming.description
-      ? String(incoming.description).trim()
-      : undefined;
-
-    const { id } = await tx.propertyCategory.create({
-      data: {
-        name,
-        ...(description ? { description } : {}),
-      },
-      select: { id: true },
-    });
-
-    return id;
-  }
-
-  throw new AppError("Category is required", 400);
-}
 
 function paginate(query: GetCategoriesQuery) {
   const { page = 1, limit = 10, search } = query;

@@ -23,6 +23,9 @@ import {
 export function ReviewStep() {
   const { formData, setCurrentStep } = usePropertyCreation();
 
+  const defaultName = formData.propertyCategoryName ?? null;
+  const customName = formData.customCategoryName ?? null;
+
   const getMaxGuestsFromRooms = (): number => {
     type RoomLike = { capacity?: number };
     const capacities = (formData.rooms || []).map((room: RoomLike) =>
@@ -49,17 +52,15 @@ export function ReviewStep() {
     },
     {
       label: "Category",
-      completed: !!(
-        formData.propertyCategoryId ||
-        formData.customCategoryId ||
-        formData.customCategory
-      ),
+      completed: !!(formData.propertyCategoryId || formData.customCategoryId),
       details: formData.propertyCategoryId
-        ? "Default category selected"
+        ? `Default category selected${
+            defaultName ? `: ${formData.propertyCategoryName}` : ""
+          }`
         : formData.customCategoryId
-        ? "Custom category selected"
-        : formData.customCategory
-        ? `New category: ${formData.customCategory.name}`
+        ? `Custom category selected${
+            customName ? `: ${formData.customCategoryName}` : ""
+          }`
         : "Not selected",
     },
     {
@@ -208,27 +209,20 @@ export function ReviewStep() {
               </Button>
             </div>
             <div className="ml-7">
-              {formData.propertyCategoryId && <p>Default category selected</p>}
-              {formData.customCategoryId && <p>Custom category selected</p>}
-              {formData.customCategory && (
-                <div>
-                  <p>
-                    <span className="font-medium">New Category:</span>{" "}
-                    {formData.customCategory.name}
-                  </p>
-                  {formData.customCategory.description && (
-                    <p>
-                      <span className="font-medium">Description:</span>{" "}
-                      {formData.customCategory.description}
-                    </p>
-                  )}
-                </div>
+              {formData.propertyCategoryId && (
+                <p>
+                  Default category selected
+                  {defaultName ? `: ${defaultName}` : ""}
+                </p>
               )}
-              {!formData.propertyCategoryId &&
-                !formData.customCategoryId &&
-                !formData.customCategory && (
-                  <p className="text-gray-500">Not selected</p>
-                )}
+              {formData.customCategoryId && (
+                <p>
+                  Custom category selected{customName ? `: ${customName}` : ""}
+                </p>
+              )}
+              {!formData.propertyCategoryId && !formData.customCategoryId && (
+                <p className="text-gray-500">Not selected</p>
+              )}
             </div>
           </div>
 
