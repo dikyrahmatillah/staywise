@@ -21,7 +21,7 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
         <GuestSidebar />
       </div>
       <main className="flex-1">
-        <header className="h-14 border-b flex items-center px-4 justify-between gap-2">
+        <header className="h-14 border-b  flex items-center px-4 justify-between gap-2">
           <div className="flex items-center gap-2">
             <Sheet>
               <SheetTrigger asChild>

@@ -10,7 +10,7 @@ export default async function TenantPropertiesPage() {
 
   return (
     <div className="min-h-screen">
-      <div className="p-6 ">
+      <div className="p-6 border-l ">
         <div className="space-y-8">
           {/* Header Section */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
