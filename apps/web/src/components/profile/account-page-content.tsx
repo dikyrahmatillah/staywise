@@ -11,7 +11,7 @@ export function AccountPageContent() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="border-l flex items-center justify-center min-h-[400px]">
         <div className="flex items-center gap-3">
           <Ellipsis className="text-muted-foreground" />
           <span className="text-muted-foreground">Loading profile</span>
@@ -22,7 +22,7 @@ export function AccountPageContent() {
 
   if (error || !profile) {
     return (
-      <div className="p-6">
+      <div className="border-l p-6">
         <div className="flex items-center gap-2 p-4 bg-red-50 border border-red-200 rounded-lg">
           <AlertCircle className="h-5 w-5 text-red-600" />
           <span className="text-red-700">
@@ -34,7 +34,7 @@ export function AccountPageContent() {
   }
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="border-l space-y-6 p-6">
       <div className="space-y-1">
         <h1 className="text-3xl font-bold tracking-tight">Account Settings</h1>
         <p className="text-muted-foreground">
