@@ -129,7 +129,10 @@ export class BookingManagementService {
   }
 
   async cancelBooking(id: string) {
-    const booking = await prisma.booking.findUnique({ where: { id } });
+    const booking = await prisma.booking.findUnique({
+      where: { id },
+      include: { paymentProof: true },
+    });
 
     if (!booking) {
       throw new AppError("Booking not found", 404);
@@ -138,6 +141,13 @@ export class BookingManagementService {
     if (booking.status !== "WAITING_PAYMENT") {
       throw new AppError(
         "Only bookings waiting for payment can be canceled",
+        400
+      );
+    }
+
+    if (booking.paymentProof) {
+      throw new AppError(
+        "Cannot cancel booking after payment proof has been uploaded. Please contact support if needed.",
         400
       );
     }
@@ -151,6 +161,119 @@ export class BookingManagementService {
         User: { select: { firstName: true, lastName: true, email: true } },
       },
     });
+  }
+
+  async approvePaymentProof(bookingId: string, tenantId: string) {
+    // First, verify the booking exists and belongs to the tenant
+    const booking = await prisma.booking.findFirst({
+      where: {
+        id: bookingId,
+        tenantId: tenantId, // Ensure tenant owns the property
+      },
+      include: { paymentProof: true },
+    });
+
+    if (!booking) {
+      throw new AppError("Booking not found or access denied", 404);
+    }
+
+    if (!booking.paymentProof) {
+      throw new AppError("No payment proof found for this booking", 400);
+    }
+
+    if (booking.status !== "WAITING_CONFIRMATION") {
+      throw new AppError(
+        "Payment proof can only be approved for bookings with WAITING_CONFIRMATION status",
+        400
+      );
+    }
+
+    if (booking.paymentProof.acceptedAt) {
+      throw new AppError("Payment proof has already been approved", 400);
+    }
+
+    // Update payment proof and booking status in a transaction
+    const result = await prisma.$transaction(async (tx) => {
+      // Update payment proof
+      await tx.paymentProof.update({
+        where: { id: booking.paymentProof!.id },
+        data: {
+          acceptedAt: new Date(),
+          rejectedAt: null, // Clear any previous rejection
+        },
+      });
+
+      // Update booking status to COMPLETED
+      return await tx.booking.update({
+        where: { id: bookingId },
+        data: { status: "COMPLETED" },
+        include: {
+          Property: { select: { name: true, city: true } },
+          Room: { select: { name: true } },
+          User: { select: { firstName: true, lastName: true, email: true } },
+          paymentProof: true,
+        },
+      });
+    });
+
+    return result;
+  }
+
+  // NEW: Reject payment proof (allows re-upload)
+  async rejectPaymentProof(bookingId: string, tenantId: string) {
+    // First, verify the booking exists and belongs to the tenant
+    const booking = await prisma.booking.findFirst({
+      where: {
+        id: bookingId,
+        tenantId: tenantId, // Ensure tenant owns the property
+      },
+      include: { paymentProof: true },
+    });
+
+    if (!booking) {
+      throw new AppError("Booking not found or access denied", 404);
+    }
+
+    if (!booking.paymentProof) {
+      throw new AppError("No payment proof found for this booking", 400);
+    }
+
+    if (booking.status !== "WAITING_CONFIRMATION") {
+      throw new AppError(
+        "Payment proof can only be rejected for bookings with WAITING_CONFIRMATION status",
+        400
+      );
+    }
+
+    if (booking.paymentProof.rejectedAt) {
+      throw new AppError("Payment proof has already been rejected", 400);
+    }
+
+    // Update payment proof and booking status in a transaction
+    const result = await prisma.$transaction(async (tx) => {
+      // Update payment proof with rejection timestamp
+      await tx.paymentProof.update({
+        where: { id: booking.paymentProof!.id },
+        data: {
+          rejectedAt: new Date(),
+          acceptedAt: null, // Clear any previous acceptance
+        },
+      });
+
+      // Change booking status back to WAITING_PAYMENT for re-upload
+      return await tx.booking.update({
+        where: { id: bookingId },
+        data: { status: "WAITING_PAYMENT" },
+        include: {
+          Property: { select: { name: true, city: true } },
+          Room: { select: { name: true } },
+          User: { select: { firstName: true, lastName: true, email: true } },
+          paymentProof: true,
+        },
+      });
+    });
+
+    return result;
   }
 
   async verifyTenantPropertyAccess(

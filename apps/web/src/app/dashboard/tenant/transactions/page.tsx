@@ -41,6 +41,7 @@ export default function TenantBookingsPage() {
     fetchBookings,
     approvePaymentProof,
     rejectPaymentProof,
+    cancelBooking,
   } = useBookings();
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -267,7 +268,7 @@ export default function TenantBookingsPage() {
                   booking={booking}
                   onApprovePayment={handleApprovePayment}
                   onRejectPayment={handleRejectPayment}
-                  // onCancelBooking={cancelBooking}
+                  onCancelBooking={cancelBooking}
                   onBookingUpdate={() =>
                     fetchBookings({
                       page: currentPage,
