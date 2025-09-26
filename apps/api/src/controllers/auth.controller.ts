@@ -11,7 +11,11 @@ import { NextFunction, Request, Response } from "express";
 import { AuthService } from "@/services/auth.service.js";
 import { FileService } from "@/services/file.service.js";
 import { PasswordResetService } from "@/services/password.service.js";
-import { changeEmailRequestSchema, changeEmailSchema } from "@repo/schemas";
+import {
+  changeEmailRequestSchema,
+  changeEmailSchema,
+  OAuthUserSchema,
+} from "@repo/schemas";
 
 export class AuthController {
   private authService = new AuthService();
@@ -202,6 +206,23 @@ export class AuthController {
       const { token } = changeEmailSchema.parse(request.body);
       await this.authService.confirmChangeEmail(token);
       response.status(200).json({ message: "Email changed successfully" });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  oauthUpsertUser = async (
+    request: Request,
+    response: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const data = OAuthUserSchema.parse(request.body);
+      const result = await this.authService.oauthUpsertUser(data);
+      response.status(200).json({
+        message: "OAuth login successful",
+        data: result,
+      });
     } catch (error) {
       next(error);
     }

@@ -31,10 +31,14 @@ declare module "next-auth" {
 }
 
 export const { handlers, signIn, signOut, auth } = nextAuth({
-  // Comment out PrismaAdapter since we're using JWT sessions
-  // adapter: PrismaAdapter(prisma),
   providers: [
     GoogleProvider({
+      id: "google",
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    }),
+    GoogleProvider({
+      id: "google-tenant",
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
@@ -66,21 +70,32 @@ export const { handlers, signIn, signOut, auth } = nextAuth({
       return true;
     },
     async jwt({ token, user, account }) {
-      if (account?.provider === "google") {
+      if (account?.provider?.startsWith("google")) {
         try {
-          const resp = await api.get(`/auth/user`, {
-            params: { email: token.email },
-          });
-          const dbUser = resp?.data?.data;
-          if (dbUser) {
-            token.id = dbUser.id;
-            token.name = dbUser.name;
-            token.email = dbUser.email;
-            token.image = dbUser.image;
-            token.role = dbUser.role;
+          const email = user.email;
+          if (email) {
+            const payload = {
+              email,
+              name: user.name,
+              image: user.image,
+              role: account.provider === "google-tenant" ? "TENANT" : "GUEST",
+            };
+
+            const resp = await api.post(`/auth/oauth`, payload);
+            const dbData = resp.data.data;
+            const dbUser = dbData.user;
+
+            if (dbUser) {
+              token.id = dbUser.id;
+              token.name = dbUser.name;
+              token.email = dbUser.email;
+              token.image = dbUser.image;
+              token.role = dbUser.role;
+              token.accessToken = dbData.accessToken;
+            }
           }
         } catch (error) {
-          console.error("Error fetching user from API:", error);
+          console.error("Error handling Google OAuth login:", error);
         }
       } else if (user?.accessToken) {
         token.accessToken = user.accessToken;

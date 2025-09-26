@@ -15,6 +15,7 @@ router.post("/forgot-password", authController.requestPasswordReset);
 router.post("/reset-password", authController.resetPassword);
 router.get("/profile", verifyTokenMiddleware, authController.getProfile);
 router.get("/user", authController.getUserByEmail);
+router.post("/oauth", authController.oauthUpsertUser);
 router.put(
   "/profile",
   verifyTokenMiddleware,

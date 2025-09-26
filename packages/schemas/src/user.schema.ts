@@ -1,9 +1,10 @@
-import { email, z } from "zod";
+import { z } from "zod";
 
 export const EmailSchema = z.email("Invalid email");
 export const CommonProfileSchema = z.object({
   firstName: z.string().min(1, "Firstname is required").max(150),
   lastName: z.string().min(1, "Invalid last name").max(150).optional(),
+  name: z.string().min(1, "Invalid name").max(300).optional(),
   phone: z
     .string()
     .min(8, "Invalid phone number")
@@ -68,6 +69,13 @@ export const changeEmailRequestSchema = z.object({
   newEmail: EmailSchema,
 });
 
+export const OAuthUserSchema = z.object({
+  email: EmailSchema,
+  name: z.string().trim().min(1, "Invalid name").optional(),
+  image: z.url("Invalid avatar").optional(),
+  role: z.enum(["GUEST", "TENANT"]).optional(),
+});
+
 export type LoginInput = z.infer<typeof LoginSchema>;
 export type RegistrationStartInput = z.infer<typeof RegistrationStartSchema>;
 export type CompleteRegistrationInput = z.infer<
@@ -83,3 +91,4 @@ export type UpdateUserInput = z.infer<typeof UpdateUserSchema>;
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
 export type changeEmailInput = z.infer<typeof changeEmailSchema>;
 export type changeEmailRequestInput = z.infer<typeof changeEmailRequestSchema>;
+export type OAuthUserInput = z.infer<typeof OAuthUserSchema>;
