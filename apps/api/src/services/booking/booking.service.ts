@@ -84,11 +84,11 @@ export class BookingService {
         pricePerNight: pricePerNight,
         totalAmount: totalAmount,
         paymentMethod: data.paymentMethod,
-        expiresAt: expiresAt, // ✅ ADDED: Expiration time
+        expiresAt: expiresAt,
         status:
           data.paymentMethod === "PAYMENT_GATEWAY"
             ? "PROCESSING"
-            : "WAITING_PAYMENT", // ✅ FIXED: Manual transfers should wait for payment
+            : "WAITING_PAYMENT",
       },
     });
 
@@ -155,16 +155,16 @@ export class BookingService {
   // Management operations
 
   async getBookingsWithPagination(filters: {
-  page: number;
-  limit: number;
-  search?: string;
-  status?: string;
-  userId?: string;
-  tenantId?: string;
-  propertyId?: string;
-}) {
-  return this.managementService.getBookingsWithPagination(filters);
-}
+    page: number;
+    limit: number;
+    search?: string;
+    status?: string;
+    userId?: string;
+    tenantId?: string;
+    propertyId?: string;
+  }) {
+    return this.managementService.getBookingsWithPagination(filters);
+  }
 
   async getAllBookings() {
     return this.managementService.getAllBookings();
@@ -211,6 +211,14 @@ export class BookingService {
 
   async getPendingBookings() {
     return this.managementService.getPendingBookings();
+  }
+
+  async approvePaymentProof(bookingId: string, tenantId: string) {
+    return this.managementService.approvePaymentProof(bookingId, tenantId);
+  }
+
+  async rejectPaymentProof(bookingId: string, tenantId: string) {
+    return this.managementService.rejectPaymentProof(bookingId, tenantId);
   }
 
   // Utility operations

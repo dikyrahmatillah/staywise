@@ -199,7 +199,7 @@ export const BookingTableRow = ({
     // Show payment proof status for manual transfers
     if (booking.paymentMethod === "MANUAL_TRANSFER" && booking.paymentProof) {
       if (booking.paymentProof.rejectedAt) {
-        return <StatusBadge status="CANCELED" />;
+        return <StatusBadge status="WAITING_PAYMENT" />;
       }
       if (booking.paymentProof.acceptedAt) {
         return <StatusBadge status="COMPLETED" />;
