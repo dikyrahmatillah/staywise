@@ -1,11 +1,14 @@
 // hooks/useBookings.ts
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useSession } from "next-auth/react";
-import axios from "axios";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import type { BookingTransaction } from "@repo/types";
+import { useApiQuery } from "./useApiQuery";
+import api from "@/lib/axios"; // Use your centralized axios instance
+import { getErrorMessage } from "@/lib/errors";
 
 interface BookingsApiResponse {
   success: boolean;
@@ -29,49 +32,28 @@ interface PaginationParams {
   status?: string;
 }
 
-const createApiInstance = (accessToken?: string) => {
-  const api = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1",
-  });
+// Using centralized axios instance with automatic auth handling
 
-  if (accessToken) {
-    api.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
-  }
-
-  return api;
-};
-
-export function useBookings(propertyId?: string) {
+export function useBookings(
+  propertyId?: string,
+  initialParams: PaginationParams = { page: 1, limit: 10 }
+) {
   const { data: session } = useSession();
-  const [bookings, setBookings] = useState<BookingTransaction[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [pagination, setPagination] = useState({
-    page: 1,
-    limit: 10,
-    total: 0,
-    totalPages: 0,
-    hasNextPage: false,
-    hasPrevPage: false
-  });
+  const queryClient = useQueryClient();
 
-  const fetchBookings = useCallback(async (params: PaginationParams = {}) => {
-    console.log("=== DEBUGGING useBookings ===");
-    console.log("Session data:", session);
-    console.log("Pagination params:", params);
+  // Store current params in state to allow dynamic updates
+  const [params, setParams] = useState<PaginationParams>(initialParams);
 
-    if (!session?.user?.accessToken) {
-      console.log("No access token found!");
-      setError("Authentication required. Please log in again.");
-      return;
-    }
+  // Create query key that changes when params change - this triggers automatic refetch
+  const queryKey = ["bookings", propertyId, params] as const;
 
-    setLoading(true);
-    setError(null);
+  // Fetch function for useApiQuery
+  const fetchBookingsData =
+    useCallback(async (): Promise<BookingsApiResponse> => {
+      if (!session?.user?.accessToken) {
+        throw new Error("Authentication required. Please log in again.");
+      }
 
-    try {
-      const api = createApiInstance(session.user.accessToken);
-      
       // Build query parameters
       const queryParams = new URLSearchParams({
         page: String(params.page || 1),
@@ -79,199 +61,177 @@ export function useBookings(propertyId?: string) {
       });
 
       if (propertyId) {
-        queryParams.set('propertyId', propertyId);
+        queryParams.set("propertyId", propertyId);
       }
 
       if (params.search) {
-        queryParams.set('search', params.search);
+        queryParams.set("search", params.search);
       }
 
-      if (params.status && params.status !== 'all') {
-        queryParams.set('status', params.status);
+      if (params.status && params.status !== "all") {
+        queryParams.set("status", params.status);
       }
 
       const url = `/bookings?${queryParams.toString()}`;
-
-      console.log("📡 Making API call to:", url);
-
       const response = await api.get<BookingsApiResponse>(url);
-      console.log("✅ API Response received:");
-      console.log("Response data:", response.data);
 
-      setBookings(response.data.data);
-      setPagination(response.data.pagination);
-    } catch (err) {
-      console.error("❌ API Error:", err);
-      if (axios.isAxiosError(err)) {
-        console.error("Error response:", err.response?.data);
-        console.error("Error status:", err.response?.status);
-      }
+      return response.data;
+    }, [propertyId, params, session?.user?.accessToken]);
 
-      const errorMessage =
-        axios.isAxiosError(err) && err.response?.data?.message
-          ? err.response.data.message
-          : "Failed to fetch bookings";
-      setError(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  }, [propertyId, session]);
+  // Use the custom useApiQuery hook
+  const {
+    data: bookingsData,
+    isLoading: loading,
+    error,
+    refetch,
+  } = useApiQuery({
+    queryKey,
+    queryFn: fetchBookingsData,
+    enabled: !!session?.user?.accessToken,
+    errorMessage: "Failed to fetch bookings",
+  });
 
-  const cancelBooking = useCallback(
-    async (bookingId: string) => {
-      console.log("Cancelling booking with ID:", bookingId);
+  // Extract data from response
+  const bookings = bookingsData?.data ?? [];
+  const pagination = bookingsData?.pagination ?? {
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPages: 0,
+    hasNextPage: false,
+    hasPrevPage: false,
+  };
 
+  // Mutation for canceling booking
+  const cancelBookingMutation = useMutation({
+    mutationFn: async (bookingId: string) => {
       if (!session?.user?.accessToken) {
-        toast.error("Authentication required");
-        return;
+        throw new Error("Authentication required");
       }
 
-      try {
-        const api = createApiInstance(session.user.accessToken);
-        await api.patch(`/bookings/${bookingId}/cancel`);
+      await api.patch(`/bookings/${bookingId}/cancel`);
+      return bookingId;
+    },
+    onSuccess: () => {
+      // Invalidate and refetch bookings
+      queryClient.invalidateQueries({ queryKey: ["bookings"] });
+      toast.success("Booking cancelled successfully");
+    },
+    onError: (err) => {
+      const errorMessage = getErrorMessage(err, "Failed to cancel booking");
+      toast.error(errorMessage);
+    },
+  });
 
-        // Update local state
-        setBookings((prevBookings) =>
-          prevBookings.map((booking) =>
-            booking.id === bookingId
-              ? { ...booking, status: "CANCELED" as const }
-              : booking
-          )
-        );
+  // Mutation for approving payment proof
+  const approvePaymentProofMutation = useMutation({
+    mutationFn: async (bookingId: string) => {
+      if (!session?.user?.accessToken) {
+        throw new Error("Authentication required");
+      }
 
-        toast.success("Booking cancelled successfully");
-      } catch (err) {
-        console.error("Cancel booking error details:", {
-          bookingId,
-          url: `${process.env.NEXT_PUBLIC_API_URL}/bookings/${bookingId}/cancel`,
-          error: err
-        });
+      await api.patch(`/bookings/${bookingId}/payment-proof/approve`);
+      return bookingId;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["bookings"] });
+      toast.success("Payment proof approved successfully");
+    },
+    onError: (err) => {
+      const errorMessage = getErrorMessage(
+        err,
+        "Failed to approve payment proof"
+      );
+      toast.error(errorMessage);
+    },
+  });
 
-        const errorMessage =
-          axios.isAxiosError(err) && err.response?.data?.message
-            ? err.response.data.message
-            : "Failed to cancel booking";
-        toast.error(errorMessage);
-        throw err;
+  // Mutation for rejecting payment proof
+  const rejectPaymentProofMutation = useMutation({
+    mutationFn: async (bookingId: string) => {
+      if (!session?.user?.accessToken) {
+        throw new Error("Authentication required");
+      }
+
+      await api.patch(`/bookings/${bookingId}/payment-proof/reject`);
+      return bookingId;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["bookings"] });
+      toast.success("Payment proof rejected successfully");
+    },
+    onError: (err) => {
+      const errorMessage = getErrorMessage(
+        err,
+        "Failed to reject payment proof"
+      );
+      toast.error(errorMessage);
+    },
+  });
+
+  // Wrapper function that maintains backward compatibility for fetchBookings
+  const fetchBookings = useCallback(
+    (newParams?: PaginationParams) => {
+      if (newParams) {
+        // Update params state, which will trigger queryKey change and auto-refetch
+        setParams((prev) => ({ ...prev, ...newParams }));
+      } else {
+        // Force refetch with current params
+        refetch();
       }
     },
-    [session?.user?.accessToken]
+    [refetch]
+  );
+
+  // Wrapper functions for mutations that return Promises for backward compatibility
+  const cancelBooking = useCallback(
+    (bookingId: string): Promise<void> => {
+      return new Promise<void>((resolve, reject) => {
+        cancelBookingMutation.mutate(bookingId, {
+          onSuccess: () => resolve(),
+          onError: (error) => reject(error),
+        });
+      });
+    },
+    [cancelBookingMutation]
   );
 
   const approvePaymentProof = useCallback(
-    async (bookingId: string) => {
-      console.log("Approving payment proof for booking ID:", bookingId);
-
-      if (!session?.user?.accessToken) {
-        toast.error("Authentication required");
-        return;
-      }
-
-      try {
-        const api = createApiInstance(session.user.accessToken);
-        await api.patch(`/bookings/${bookingId}/payment-proof/approve`);
-
-        // Update local state based on your service logic
-        setBookings((prevBookings) =>
-          prevBookings.map((booking) =>
-            booking.id === bookingId
-              ? {
-                  ...booking,
-                  status: "COMPLETED" as const,
-                  paymentProof: booking.paymentProof
-                    ? {
-                        ...booking.paymentProof,
-                        acceptedAt: new Date(),
-                        rejectedAt: null
-                      }
-                    : booking.paymentProof
-                }
-              : booking
-          )
-        );
-
-        toast.success("Payment proof approved successfully");
-      } catch (err) {
-        console.error("Approve payment proof error details:", {
-          bookingId,
-          error: err
+    (bookingId: string): Promise<void> => {
+      return new Promise<void>((resolve, reject) => {
+        approvePaymentProofMutation.mutate(bookingId, {
+          onSuccess: () => resolve(),
+          onError: (error) => reject(error),
         });
-
-        const errorMessage =
-          axios.isAxiosError(err) && err.response?.data?.message
-            ? err.response.data.message
-            : "Failed to approve payment proof";
-        toast.error(errorMessage);
-        throw err;
-      }
+      });
     },
-    [session?.user?.accessToken]
+    [approvePaymentProofMutation]
   );
 
   const rejectPaymentProof = useCallback(
-    async (bookingId: string) => {
-      console.log("Rejecting payment proof for booking ID:", bookingId);
-
-      if (!session?.user?.accessToken) {
-        toast.error("Authentication required");
-        return;
-      }
-
-      try {
-        const api = createApiInstance(session.user.accessToken);
-        await api.patch(`/bookings/${bookingId}/payment-proof/reject`);
-
-        // Update local state based on your service logic
-        setBookings((prevBookings) =>
-          prevBookings.map((booking) =>
-            booking.id === bookingId
-              ? {
-                  ...booking,
-                  status: "WAITING_PAYMENT" as const,
-                  paymentProof: booking.paymentProof
-                    ? {
-                        ...booking.paymentProof,
-                        rejectedAt: new Date(),
-                        acceptedAt: null
-                      }
-                    : booking.paymentProof
-                }
-              : booking
-          )
-        );
-
-        toast.success("Payment proof rejected successfully");
-      } catch (err) {
-        console.error("Reject payment proof error details:", {
-          bookingId,
-          error: err
+    (bookingId: string): Promise<void> => {
+      return new Promise<void>((resolve, reject) => {
+        rejectPaymentProofMutation.mutate(bookingId, {
+          onSuccess: () => resolve(),
+          onError: (error) => reject(error),
         });
-
-        const errorMessage =
-          axios.isAxiosError(err) && err.response?.data?.message
-            ? err.response.data.message
-            : "Failed to reject payment proof";
-        toast.error(errorMessage);
-        throw err;
-      }
+      });
     },
-    [session?.user?.accessToken]
+    [rejectPaymentProofMutation]
   );
-
-  useEffect(() => {
-    if (session?.user?.accessToken) {
-      fetchBookings();
-    }
-  }, [session?.user?.accessToken, fetchBookings]);
 
   return {
     bookings,
     loading,
-    error,
+    error: error?.message || null,
     pagination,
     fetchBookings,
     cancelBooking,
     approvePaymentProof,
     rejectPaymentProof,
+    // Additional loading states for mutations
+    cancellingBooking: cancelBookingMutation.isPending,
+    approvingPayment: approvePaymentProofMutation.isPending,
+    rejectingPayment: rejectPaymentProofMutation.isPending,
   };
 }
