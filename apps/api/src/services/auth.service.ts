@@ -3,6 +3,7 @@ import {
   ChangePasswordInput,
   CompleteRegistrationInput,
   LoginInput,
+  OAuthUserInput,
   RegistrationStartInput,
   UpdateUserInput,
 } from "@repo/schemas";
@@ -190,5 +191,62 @@ export class AuthService {
         data: { usedAt: new Date(), status: "USED" },
       }),
     ]);
+  }
+
+  async oauthUpsertUser(input: OAuthUserInput) {
+    const email = input.email;
+    const existing = await prisma.user.findUnique({ where: { email } });
+    const desiredRole = input.role ?? "GUEST";
+
+    if (existing && desiredRole === "TENANT" && existing.role !== "TENANT") {
+      throw new AppError("Email already registered as guest", 409);
+    }
+
+    const nameFromInput = input.name?.trim();
+    const [firstName, lastName] = nameFromInput?.split(" ") ?? [];
+
+    const now = new Date();
+
+    const user = existing
+      ? await prisma.user.update({
+          where: { id: existing.id },
+          data: {
+            firstName,
+            lastName,
+            name: nameFromInput,
+            image: input.image,
+            role: desiredRole === "TENANT" ? "TENANT" : undefined,
+            emailVerified: existing.emailVerified ? undefined : now,
+          },
+        })
+      : await prisma.user.create({
+          data: {
+            email,
+            firstName,
+            lastName,
+            name: nameFromInput,
+            image: input.image,
+            role: desiredRole,
+            emailVerified: new Date(),
+          },
+        });
+
+    const accessToken = generateToken(
+      {
+        id: user.id,
+        name: user.name ?? user.firstName ?? user.email,
+        email: user.email,
+        image: user.image,
+        role: user.role,
+      },
+      "7d"
+    );
+
+    const { password: _password, ...userWithoutPassword } = user;
+
+    return {
+      user: userWithoutPassword,
+      accessToken,
+    };
   }
 }
