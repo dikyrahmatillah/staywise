@@ -56,7 +56,7 @@ export default function PagerControls({
           aria-label="Previous"
           onClick={onPrev}
           disabled={current === 0}
-          className="h-9 w-9 rounded bg-white flex items-center justify-center disabled:opacity-50"
+          className="h-9 w-9 rounded-md border-2 bg-white flex items-center justify-center disabled:opacity-50"
         >
           ‹
         </button>
@@ -64,7 +64,7 @@ export default function PagerControls({
           aria-label="Next"
           onClick={onNext}
           disabled={current === maxIndex}
-          className="h-9 w-9 rounded bg-primary text-primary-foreground flex items-center justify-center disabled:opacity-50 hover:bg-primary/90"
+          className="h-9 w-9 rounded-md bg-primary text-primary-foreground flex items-center justify-center disabled:opacity-50 hover:bg-primary/90"
         >
           ›
         </button>
