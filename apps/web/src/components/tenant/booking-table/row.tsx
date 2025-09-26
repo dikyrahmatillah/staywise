@@ -9,7 +9,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { CheckCircle, XCircle, Eye, FileImage, User, Mail, Trash2 } from "lucide-react";
+import {
+  CheckCircle,
+  XCircle,
+  Eye,
+  FileImage,
+  User,
+  Mail,
+  Trash2,
+} from "lucide-react";
 import type { BookingTransaction } from "@repo/types";
 import type { PaymentProof } from "@repo/types";
 import { StatusBadge } from "@/components/guest/my-bookings/status-badge";
@@ -130,6 +138,7 @@ const PaymentProofViewer = ({
             <Image
               src={booking.paymentProof.imageUrl}
               alt="Payment Proof"
+              fill
               className="w-full max-h-96 object-contain rounded-lg border"
             />
             <div className="text-sm text-muted-foreground space-y-1">
@@ -222,7 +231,7 @@ export const TenantBookingTableRow = ({
   };
 
   const renderActions = () => {
-        if (
+    if (
       booking.status === "WAITING_PAYMENT" &&
       booking.paymentMethod === "MANUAL_TRANSFER"
     ) {
@@ -270,7 +279,7 @@ export const TenantBookingTableRow = ({
         );
       }
     }
-    
+
     if (
       booking.status === "WAITING_CONFIRMATION" &&
       booking.paymentMethod === "MANUAL_TRANSFER" &&
