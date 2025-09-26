@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { LayoutDashboard, ReceiptText, UserCog, Heart } from "lucide-react";
+import { LayoutDashboard, ReceiptText, UserCog } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import Sidebar from "@/components/dashboard/sidebar";
 

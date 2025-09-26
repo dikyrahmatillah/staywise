@@ -1,6 +1,11 @@
 "use client";
 
-import { Check, ChevronRight, ChevronDown } from "lucide-react";
+import {
+  Check,
+  ChevronRight,
+  ChevronDown,
+  type LucideIcon,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 
@@ -9,18 +14,30 @@ export interface Step {
   number: number;
   title: string;
   description?: string;
+  icon?: LucideIcon;
 }
 
 interface StepNavigationProps {
   steps: Step[];
   currentStep: number;
+  onStepClick?: (stepNumber: number) => void;
 }
 
-export function StepNavigation({ steps, currentStep }: StepNavigationProps) {
+export function StepNavigation({
+  steps,
+  currentStep,
+  onStepClick,
+}: StepNavigationProps) {
   const currentStepData = steps.find((step) => step.number === currentStep);
   const [mobileExpanded, setMobileExpanded] = useState(false);
 
   const toggleMobile = () => setMobileExpanded((v) => !v);
+
+  const handleStepClick = (stepNumber: number) => {
+    if (onStepClick && stepNumber <= currentStep) {
+      onStepClick(stepNumber);
+    }
+  };
 
   return (
     <div className="w-full space-y-6">
@@ -41,13 +58,16 @@ export function StepNavigation({ steps, currentStep }: StepNavigationProps) {
               onClick={toggleMobile}
               aria-expanded={mobileExpanded}
               aria-controls="mobile-step-list"
-              className="ml-4 inline-flex items-center justify-center rounded-md p-2 text-sm text-gray-600 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-primary"
+              className="ml-4 inline-flex items-center justify-center rounded-md p-2 text-sm text-gray-600 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-200 hover:scale-105"
               title={mobileExpanded ? "Collapse steps" : "Expand steps"}
             >
               <ChevronDown
-                className={cn("w-5 h-5 transition-transform duration-200", {
-                  "rotate-180": mobileExpanded,
-                })}
+                className={cn(
+                  "w-5 h-5 transition-transform duration-300 ease-out",
+                  {
+                    "rotate-180": mobileExpanded,
+                  }
+                )}
               />
             </button>
           </div>
@@ -56,58 +76,71 @@ export function StepNavigation({ steps, currentStep }: StepNavigationProps) {
 
       <div className="hidden lg:block">
         <div className="grid grid-cols-7 gap-4">
-          {steps.map((step, index) => {
+          {steps.map((step) => {
             const isCompleted = step.number < currentStep;
             const isCurrent = step.number === currentStep;
             const isUpcoming = step.number > currentStep;
+            const isClickable = step.number <= currentStep;
 
             return (
               <div
                 key={step.id}
                 className={cn(
-                  "relative flex flex-col items-center text-center transition-all duration-200",
+                  "relative flex flex-col items-center text-center transition-all duration-300 group",
                   {
-                    "opacity-50": isUpcoming,
+                    "opacity-50 hover:opacity-75": isUpcoming,
                     "opacity-100": isCurrent || isCompleted,
+                    "cursor-pointer": isClickable,
+                    "cursor-not-allowed": !isClickable,
                   }
                 )}
+                onClick={() => handleStepClick(step.number)}
               >
                 <div
                   className={cn(
-                    "flex items-center justify-center w-10 h-10 rounded-full border transition-all duration-200",
+                    "relative flex items-center justify-center w-12 h-12 rounded-full border-2 transition-all duration-300 shadow-lg group-hover:shadow-xl group-hover:scale-110",
                     {
-                      "bg-primary text-primary-foreground border-primary":
+                      "bg-primary text-primary-foreground border-primary shadow-primary/25":
                         isCompleted,
-                      "bg-primary/90 text-primary-foreground border-primary/80":
+                      "bg-gradient-to-br from-primary to-primary/80 text-primary-foreground border-primary/80 shadow-primary/30 ring-4 ring-primary/10":
                         isCurrent,
-                      "bg-muted text-muted-foreground border-transparent":
+                      "bg-white text-muted-foreground border-muted-foreground/20 hover:border-primary/50 hover:text-primary hover:shadow-primary/10":
                         isUpcoming,
                     }
                   )}
                 >
                   {isCompleted ? (
-                    <Check className="w-5 h-5" />
+                    <Check className="w-6 h-6 animate-in zoom-in-50 duration-300" />
+                  ) : step.icon ? (
+                    <step.icon className="w-6 h-6" />
                   ) : (
-                    <span className="text-sm font-semibold">{step.number}</span>
+                    <span className="text-sm font-bold">{step.number}</span>
+                  )}
+
+                  {/* Pulse effect for current step */}
+                  {isCurrent && (
+                    <div className="absolute inset-0 rounded-full bg-primary/20 animate-ping" />
                   )}
                 </div>
 
-                <div className="mt-3 space-y-1">
+                <div className="mt-4 space-y-1">
                   <h4
                     className={cn(
-                      "text-sm font-medium transition-colors duration-200",
+                      "text-sm font-semibold transition-all duration-300 group-hover:scale-105",
                       {
                         "text-primary": isCompleted || isCurrent,
-                        "text-muted-foreground": isUpcoming,
+                        "text-muted-foreground group-hover:text-primary/70":
+                          isUpcoming,
                       }
                     )}
                   >
                     {step.title}
                   </h4>
                   <p
-                    className={cn("text-xs transition-colors duration-200", {
+                    className={cn("text-xs transition-all duration-300", {
                       "text-primary/70": isCompleted || isCurrent,
-                      "text-muted-foreground": isUpcoming,
+                      "text-muted-foreground group-hover:text-primary/50":
+                        isUpcoming,
                     })}
                   >
                     {step.description}
@@ -140,31 +173,34 @@ export function StepNavigation({ steps, currentStep }: StepNavigationProps) {
                 <div
                   key={step.id}
                   className={cn(
-                    "flex items-center p-3 rounded-lg transition-all duration-200 border",
+                    "flex items-center p-4 rounded-xl transition-all duration-300 border hover:shadow-md",
                     {
-                      "bg-primary/5 border-primary/20":
+                      "bg-primary/5 border-primary/20 shadow-primary/5":
                         isCompleted || isCurrent,
-                      "bg-muted/40 border-transparent": isUpcoming,
+                      "bg-muted/40 border-transparent hover:bg-muted/60":
+                        isUpcoming,
                     }
                   )}
                 >
                   <div
                     className={cn(
-                      "flex items-center justify-center w-8 h-8 rounded-full border mr-3",
+                      "flex items-center justify-center w-10 h-10 rounded-full border-2 mr-4 transition-all duration-300",
                       {
-                        "bg-primary text-primary-foreground border-primary":
+                        "bg-primary text-primary-foreground border-primary shadow-primary/25":
                           isCompleted,
-                        "bg-primary/90 text-primary-foreground border-primary/80":
+                        "bg-gradient-to-br from-primary to-primary/80 text-primary-foreground border-primary/80 shadow-primary/30 ring-2 ring-primary/10":
                           isCurrent,
-                        "bg-muted text-muted-foreground border-transparent":
+                        "bg-white text-muted-foreground border-muted-foreground/20":
                           isUpcoming,
                       }
                     )}
                   >
                     {isCompleted ? (
-                      <Check className="w-4 h-4" />
+                      <Check className="w-5 h-5" />
+                    ) : step.icon ? (
+                      <step.icon className="w-5 h-5" />
                     ) : (
-                      <span className="text-xs font-semibold">
+                      <span className="text-sm font-semibold">
                         {step.number}
                       </span>
                     )}
@@ -172,7 +208,7 @@ export function StepNavigation({ steps, currentStep }: StepNavigationProps) {
 
                   <div className="flex-1">
                     <h4
-                      className={cn("text-sm font-medium", {
+                      className={cn("text-sm font-semibold", {
                         "text-primary": isCompleted || isCurrent,
                         "text-muted-foreground": isUpcoming,
                       })}
@@ -190,7 +226,7 @@ export function StepNavigation({ steps, currentStep }: StepNavigationProps) {
                   </div>
 
                   {isCurrent && (
-                    <ChevronRight className="w-5 h-5 text-primary" />
+                    <ChevronRight className="w-5 h-5 text-primary animate-pulse" />
                   )}
                 </div>
               );
