@@ -15,7 +15,7 @@ export function SearchButton({ isSearchOpen, onToggle }: SearchButtonProps) {
       variant="outline"
       className={`search-button group h-10 px-3 py-2 rounded-full border transition-all duration-300 ease-in-out justify-start text-left font-normal cursor-pointer transform ${
         isSearchOpen
-          ? "border-primary shadow-2xl hover:scale-102 ring-2 ring-primary/50"
+          ? "border-primary hover:scale-102 ring-2 ring-primary/50"
           : "border-border shadow-sm hover:shadow-md hover:scale-102 hover:border-border/80"
       }`}
       aria-expanded={isSearchOpen}
