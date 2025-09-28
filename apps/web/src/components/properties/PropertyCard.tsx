@@ -24,7 +24,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
   const minGuests = guestRange.min;
   const maxGuests = guestRange.max;
   const averageRating = data?.averageRating || 0.0;
-  const basePrice = property.Rooms?.[0]?.basePrice;
+  const priceFrom = property.priceFrom;
 
   return (
     <Link href={`/properties/${property.slug}`} className="block" passHref>
@@ -78,7 +78,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
           <div className="flex items-center justify-between">
             <div>
               <span className="text-lg font-semibold">
-                {formatCurrency(basePrice)}
+                {formatCurrency(priceFrom || 0)}
               </span>
               <span className="text-muted-foreground text-sm">/night</span>
             </div>

@@ -5,7 +5,11 @@ export class PropertyRepository {
   private readonly includeBasic = {
     PropertyCategory: true,
     Pictures: true,
-    Rooms: true,
+    Rooms: {
+      include: {
+        PriceAdjustments: { include: { Dates: true } },
+      },
+    },
   };
 
   private readonly includeDetailed = {
@@ -59,6 +63,45 @@ export class PropertyRepository {
     return prisma.property.findMany({
       where: { id: { in: propertyIds } },
       include: this.includeBasic,
+    });
+  }
+
+  async findManyWithMinPrices(
+    where: any,
+    skip: number,
+    take: number,
+    orderBy: any,
+    checkIn?: Date,
+    checkOut?: Date
+  ) {
+    const properties = await prisma.property.findMany({
+      where,
+      skip,
+      take,
+      orderBy,
+      include: this.includeBasic,
+    });
+
+    // If no dates provided, return properties as-is
+    if (!checkIn || !checkOut) {
+      return properties;
+    }
+
+    // Import service lazily to avoid circular dependencies
+    const { PriceCalculationService } = await import(
+      "../services/price-calculation.service.js"
+    );
+
+    return properties.map((property) => {
+      const minPrice = PriceCalculationService.calculatePropertyMinPrice(
+        property.Rooms,
+        checkIn,
+        checkOut
+      );
+      return {
+        ...property,
+        priceFrom: minPrice,
+      };
     });
   }
 
