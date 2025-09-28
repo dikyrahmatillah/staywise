@@ -46,11 +46,11 @@ export function ExpandedSearch({
 
       <div
         id="expanded-search"
-        className="search-container absolute left-0 right-0 bg-white/95 backdrop-blur-xl rounded-b-3xl border-2 border-t-0 py-4 sm:py-5 px-4 sm:px-7 z-50 animate-in slide-in-from-top-2 fade-in duration-500 ease-out shadow-2xl shadow-gray-300/30"
+        className="search-container absolute left-0 right-0 bg-white/95 backdrop-blur-xl rounded-b-3xl border-2 border-t-0 py-4 sm:py-5 px-4 sm:px-7 z-50 animate-in slide-in-from-top-2 fade-in duration-500 ease-out "
         onMouseDown={(e) => e.stopPropagation()}
       >
         <div className="container flex flex-col sm:flex-row sm:flex-nowrap items-stretch sm:items-center mx-auto max-w-3xl gap-3 sm:gap-4">
-          <div className="flex flex-col sm:flex-row rounded-2xl border border-gray-300 overflow-hidden flex-1 min-w-0 shadow-xl shadow-gray-200/50 backdrop-blur-sm bg-white/80">
+          <div className="flex flex-col sm:flex-row rounded-2xl border border-gray-300 overflow-hidden flex-1 min-w-0  bg-white/80">
             <LocationInput
               location={location}
               onLocationChange={setLocation}

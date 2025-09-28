@@ -10,8 +10,8 @@ import { SearchButton } from "./search/search-button";
 import { ExpandedSearch } from "./search/expanded-search";
 import { format } from "date-fns";
 
-const openThreshold = 30;
-const closeThreshold = 120;
+const openThreshold = 5;
+const closeThreshold = 60;
 
 export function Header() {
   const router = useRouter();
