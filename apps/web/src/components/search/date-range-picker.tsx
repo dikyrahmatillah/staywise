@@ -77,8 +77,10 @@ export function DateRangePicker({
           role="button"
           tabIndex={0}
           className={cn(
-            "flex-1 min-w-0 py-2 px-3 sm:px-6 border-l border-gray-300 text-left h-12 sm:h-14 items-center overflow-hidden cursor-pointer",
-            isOpen ? "bg-gray-100" : "bg-transparent"
+            "flex-1 min-w-0 py-2 px-3 sm:px-6  border-gray-200 text-left h-12 sm:h-14 items-center overflow-hidden cursor-pointer transition-all duration-300 ease-out",
+            isOpen
+              ? "bg-white border-l-2 border-t-2 border-r-2 border-b-2 border-gray-300 rounded-xl shadow-2xl shadow-gray-200/60 transform scale-[1.02] ring-4 ring-gray-100/50"
+              : "bg-transparent hover:border-l-gray-300 hover:shadow-md"
           )}
         >
           <div className="flex items-center justify-between w-full">
