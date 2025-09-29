@@ -163,7 +163,119 @@ export class BookingManagementService {
     });
   }
 
+private generateDateRange(startDate: Date, endDate: Date): Date[] {
+  const dates: Date[] = [];
+  
+  // 🔧 FIX: Work with UTC dates to avoid timezone issues
+  const currentDate = new Date(Date.UTC(
+    startDate.getUTCFullYear(), 
+    startDate.getUTCMonth(), 
+    startDate.getUTCDate()
+  ));
+  const endDateUTC = new Date(Date.UTC(
+    endDate.getUTCFullYear(), 
+    endDate.getUTCMonth(), 
+    endDate.getUTCDate()
+  ));
+  
+  console.log(`🔍 [DEBUG] Generating date range (UTC):`);
+  console.log(`  Start: ${currentDate.toISOString().split('T')[0]} (day ${currentDate.getUTCDate()})`);
+  console.log(`  End: ${endDateUTC.toISOString().split('T')[0]} (day ${endDateUTC.getUTCDate()})`);
+  
+  while (currentDate < endDateUTC) {
+    // Create date in UTC to avoid timezone shifts
+    const dateToAdd = new Date(Date.UTC(
+      currentDate.getUTCFullYear(),
+      currentDate.getUTCMonth(),
+      currentDate.getUTCDate()
+    ));
+    dates.push(dateToAdd);
+    console.log(`  📅 [DEBUG] Adding date: ${dateToAdd.toISOString().split('T')[0]} (day ${dateToAdd.getUTCDate()})`);
+    
+    // Move to next day using UTC
+    currentDate.setUTCDate(currentDate.getUTCDate() + 1);
+  }
+  
+  console.log(`✅ [DEBUG] Generated ${dates.length} dates for blocking`);
+  return dates;
+}
+
+  private async blockDatesForBooking(
+    roomId: string,
+    checkInDate: Date,
+    checkOutDate: Date,
+    bookingId: string
+  ) {
+    try {
+      console.log(`🔒 Starting date blocking for booking ${bookingId}:`);
+      console.log(`  Room: ${roomId}`);
+      console.log(
+        `  Check-in: ${
+          checkInDate.toISOString().split("T")[0]
+        } (day ${checkInDate.getDate()})`
+      );
+      console.log(
+        `  Check-out: ${
+          checkOutDate.toISOString().split("T")[0]
+        } (day ${checkOutDate.getDate()})`
+      );
+
+      const dates = this.generateDateRange(checkInDate, checkOutDate);
+
+      if (dates.length === 0) {
+        console.warn(
+          `⚠️ No dates generated for blocking! Check date range logic.`
+        );
+        return;
+      }
+
+      const blockedDates = await Promise.all(
+        dates.map(async (date, index) => {
+          console.log(
+            `  🔒 Blocking date ${index + 1}/${dates.length}: ${
+              date.toISOString().split("T")[0]
+            } (day ${date.getDate()})`
+          );
+
+          return prisma.roomAvailability.upsert({
+            where: {
+              roomId_date: {
+                roomId,
+                date,
+              },
+            },
+            update: {
+              isAvailable: false,
+              bookingId, // Track which booking blocked this date
+            },
+            create: {
+              roomId,
+              date,
+              isAvailable: false,
+              bookingId,
+            },
+          });
+        })
+      );
+
+      console.log(
+        `✅ Successfully blocked ${blockedDates.length} dates for room ${roomId}, booking ${bookingId}`
+      );
+
+      // Log the actual blocked dates for verification
+      const blockedDateStrings = blockedDates.map(
+        (d) => d.date.toISOString().split("T")[0]
+      );
+      console.log(`📅 Blocked dates: ${blockedDateStrings.join(", ")}`);
+    } catch (error) {
+      console.error("❌ Error blocking dates for booking:", error);
+      throw error;
+    }
+  }
+
   async approvePaymentProof(bookingId: string, tenantId: string) {
+     console.log(`🚨 [DEBUG] approvePaymentProof called with bookingId: ${bookingId}, tenantId: ${tenantId}`);
+  
     // First, verify the booking exists and belongs to the tenant
     const booking = await prisma.booking.findFirst({
       where: {
@@ -192,6 +304,20 @@ export class BookingManagementService {
       throw new AppError("Payment proof has already been approved", 400);
     }
 
+    console.log(`💰 Approving payment for booking ${booking.orderCode}:`);
+    console.log(`  Booking ID: ${bookingId}`);
+    console.log(`  Room ID: ${booking.roomId}`);
+    console.log(
+      `  Check-in: ${
+        booking.checkInDate.toISOString().split("T")[0]
+      } (day ${booking.checkInDate.getDate()})`
+    );
+    console.log(
+      `  Check-out: ${
+        booking.checkOutDate.toISOString().split("T")[0]
+      } (day ${booking.checkOutDate.getDate()})`
+    );
+
     // Update payment proof and booking status in a transaction
     const result = await prisma.$transaction(async (tx) => {
       // Update payment proof
@@ -215,11 +341,24 @@ export class BookingManagementService {
         },
       });
     });
-
+    try {
+      await this.blockDatesForBooking(
+        booking.roomId,
+        booking.checkInDate,
+        booking.checkOutDate,
+        bookingId
+      );
+      console.log(`🔒 [DEBUG] blockDatesForBooking called for booking ${bookingId}`);
+    } catch (error) {
+      console.error(
+        "❌ Error blocking room dates after payment approval:",
+        error
+      );
+      // Log error but don't fail the approval process
+    }
     return result;
   }
 
-  // NEW: Reject payment proof (allows re-upload)
   async rejectPaymentProof(bookingId: string, tenantId: string) {
     // First, verify the booking exists and belongs to the tenant
     const booking = await prisma.booking.findFirst({

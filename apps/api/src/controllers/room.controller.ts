@@ -8,6 +8,7 @@ import {
 } from "@repo/schemas";
 import { roomService } from "@/services/room.service.js";
 import { FileService } from "@/services/file.service.js";
+import { prisma } from "@repo/database";
 
 export class RoomController {
   private fileService = new FileService();
@@ -250,6 +251,82 @@ export class RoomController {
       next(error);
     }
   };
+
+getUnavailableDates = async (
+  request: Request,
+  response: Response,
+  next: NextFunction
+) => {
+  try {
+    const { roomId } = request.params;
+    
+    // Get all confirmed/active bookings for this room
+    const bookings = await prisma.booking.findMany({
+      where: {
+        roomId,
+        status: {
+          in: ["WAITING_PAYMENT", "WAITING_CONFIRMATION", "PROCESSING", "COMPLETED"]
+        }
+      },
+      select: {
+        checkInDate: true,
+        checkOutDate: true,
+      }
+    });
+
+    // Get manually blocked dates from RoomAvailability
+    const blockedDates = await prisma.roomAvailability.findMany({
+      where: {
+        roomId,
+        isAvailable: false,
+      },
+      select: {
+        date: true,
+      }
+    });
+
+    // Convert bookings to array of date strings
+    const unavailableDates: string[] = [];
+    
+    // Add all dates from bookings
+    bookings.forEach(booking => {
+      const current = new Date(booking.checkInDate);
+      const end = new Date(booking.checkOutDate);
+      
+      // 🔧 FIX: Format dates without timezone issues
+      while (current < end) {
+        const year = current.getFullYear();
+        const month = String(current.getMonth() + 1).padStart(2, '0');
+        const day = String(current.getDate()).padStart(2, '0');
+        unavailableDates.push(`${year}-${month}-${day}`);
+        current.setDate(current.getDate() + 1);
+      }
+    });
+
+    // Add manually blocked dates
+    blockedDates.forEach(blocked => {
+      const date = new Date(blocked.date);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const dateStr = `${year}-${month}-${day}`;
+      if (!unavailableDates.includes(dateStr)) {
+        unavailableDates.push(dateStr);
+      }
+    });
+
+    response.status(200).json({
+      success: true,
+      message: "Unavailable dates retrieved successfully",
+      data: {
+        roomId,
+        unavailableDates: [...new Set(unavailableDates)].sort(),
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 }
 
 export const roomController = new RoomController();
