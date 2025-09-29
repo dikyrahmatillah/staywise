@@ -11,7 +11,7 @@ export default async function DashboardPage() {
   const userRole = session.user.role;
   if (userRole === "TENANT") {
     redirect("/dashboard/tenant");
-  } else if (userRole === "USER") {
+  } else if (userRole === "GUEST") {
     redirect("/dashboard/guest");
   } else {
     redirect("/");

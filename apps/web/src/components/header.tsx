@@ -8,9 +8,10 @@ import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { SearchButton } from "./search/search-button";
 import { ExpandedSearch } from "./search/expanded-search";
+import { format } from "date-fns";
 
-const openThreshold = 30;
-const closeThreshold = 120;
+const openThreshold = 5;
+const closeThreshold = 60;
 
 export function Header() {
   const router = useRouter();
@@ -102,8 +103,8 @@ export function Header() {
     const searchParams = new URLSearchParams();
 
     if (location) searchParams.set("location", location);
-    if (checkIn) searchParams.set("checkIn", checkIn.toISOString());
-    if (checkOut) searchParams.set("checkOut", checkOut.toISOString());
+    if (checkIn) searchParams.set("checkIn", format(checkIn, "yyyy-MM-dd"));
+    if (checkOut) searchParams.set("checkOut", format(checkOut, "yyyy-MM-dd"));
     if (adults > 0) searchParams.set("adults", adults.toString());
     if (children > 0) searchParams.set("children", children.toString());
     if (pets > 0) searchParams.set("pets", pets.toString());

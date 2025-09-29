@@ -91,8 +91,10 @@ export function LocationInput({
           role="button"
           tabIndex={0}
           className={cn(
-            "flex-1 min-w-0 py-2 px-3 sm:px-6 text-left h-12 sm:h-14 items-center overflow-hidden cursor-pointer",
-            isOpen ? "bg-gray-100" : "bg-transparent"
+            "flex-1 min-w-0 py-2 px-3 sm:px-6 text-left h-12 sm:h-14 items-center overflow-hidden cursor-pointer transition-all duration-300 ease-out",
+            isOpen
+              ? "bg-white border-l-4 border-t-2 border-b-2 border-r-2 border-gray-300 rounded-xl shadow-2xl shadow-gray-200/60 transform scale-[1.02] ring-4 ring-gray-100/50"
+              : "bg-transparent border-r-2 border-gray-200  hover:border-r-gray-300 hover:shadow-md"
           )}
         >
           <div className="flex items-center justify-between w-full">
@@ -106,7 +108,7 @@ export function LocationInput({
                 value={inputValue}
                 onChange={(e) => handleInputChange(e.target.value)}
                 onKeyDown={handleKeyDown}
-                className="rounded-none border-0 bg-transparent p-0 text-sm placeholder:text-gray-400 focus-visible:ring-0 h-auto w-full truncate min-w-0"
+                className="rounded-none border-0 bg-transparent p-0 text-sm placeholder:text-gray-400 focus-visible:ring-0 focus-visible:outline-none h-auto w-full truncate min-w-0 shadow-none"
               />
             </div>
             {inputValue && (
@@ -164,7 +166,7 @@ export function LocationInput({
                     <button
                       key={suggestion.placePrediction?.placeId || idx}
                       onClick={() => handleSuggestionSelect(suggestion)}
-                      className="w-full px-3 py-2 text-left hover:bg-gray-100 focus:bg-gray-100 focus:outline-none transition-colors"
+                      className="w-full px-3 py-2 text-left hover:bg-gray-100 focus:bg-gray-100 focus:outline-none transition-colors cursor-pointer"
                     >
                       <div className="flex items-start gap-3">
                         <IoLocationOutline className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
