@@ -6,6 +6,8 @@ import { upload } from "../middlewares/upload.middleware.js";
 
 const router = Router();
 
+router.get("/:roomId/unavailable-dates", roomController.getUnavailableDates);
+
 router.use(verifyTokenMiddleware);
 router.use(verifyRoleMiddleware);
 
@@ -20,7 +22,6 @@ router.get("/:roomId", roomController.getRoomById);
 router.put("/:roomId", upload.single("imageFile"), roomController.updateRoom);
 router.delete("/:roomId", roomController.deleteRoom);
 
-router.get("/:roomId/availability", roomController.getRoomAvailability);
 router.post("/:roomId/block", roomController.blockRoomDates);
 router.post("/:roomId/unblock", roomController.unblockRoomDates);
 

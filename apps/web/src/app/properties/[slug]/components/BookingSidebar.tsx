@@ -144,6 +144,43 @@ export function BookingSidebar({
     currentPrice
   );
 
+  // Check if a date range overlaps with any booked dates
+  const checkRangeOverlap = (
+    startDate: Date,
+    endDate: Date
+  ): { hasOverlap: boolean; conflictDates: string[] } => {
+    const conflicts: string[] = [];
+    const current = new Date(startDate);
+    current.setHours(0, 0, 0, 0);
+    const end = new Date(endDate);
+    end.setHours(0, 0, 0, 0);
+
+    while (current < end) {
+      const isConflict = unavailableDates.some((unavailableDate) => {
+        const unavailableDay = new Date(unavailableDate);
+        unavailableDay.setHours(0, 0, 0, 0);
+        return current.getTime() === unavailableDay.getTime();
+      });
+
+      if (isConflict) {
+        conflicts.push(
+          current.toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+          })
+        );
+      }
+
+      current.setDate(current.getDate() + 1);
+    }
+
+    return {
+      hasOverlap: conflicts.length > 0,
+      conflictDates: conflicts,
+    };
+  };
+
   const isDateDisabled = (date: Date) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -151,11 +188,16 @@ export function BookingSidebar({
     // Disable past dates
     if (date < today) return true;
 
-    // Disable unavailable dates
-    return unavailableDates.some(
-      (unavailableDate) =>
-        date.toDateString() === unavailableDate.toDateString()
-    );
+    // Disable unavailable dates from bookings
+    const isUnavailable = unavailableDates.some((unavailableDate) => {
+      const unavailableDay = new Date(unavailableDate);
+      unavailableDay.setHours(0, 0, 0, 0);
+      const currentDay = new Date(date);
+      currentDay.setHours(0, 0, 0, 0);
+      return unavailableDay.getTime() === currentDay.getTime();
+    });
+
+    return isUnavailable;
   };
 
   const isCheckoutDisabled = (date: Date) => {
@@ -231,6 +273,18 @@ export function BookingSidebar({
       return;
     }
 
+    // 🚨 CHECK FOR DATE RANGE OVERLAP BEFORE PROCEEDING
+    const overlapCheck = checkRangeOverlap(checkInDate, checkOutDate);
+    if (overlapCheck.hasOverlap) {
+      toast.error("Cannot Book: Date Conflict", {
+        description: `This room is already booked on: ${overlapCheck.conflictDates.join(
+          ", "
+        )}. Please select different dates.`,
+        duration: 8000,
+      });
+      return;
+    }
+
     // Validate booking data
     validateCurrentData();
 
@@ -258,11 +312,18 @@ export function BookingSidebar({
 
       const loadingToast = toast.loading("Processing your booking...");
 
+      const formatDateForBooking = (date: Date): string => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+
       const bookingParams = new URLSearchParams({
         propertyId: propertyId || "1",
         roomId: selectedRoom?.id || "",
-        checkIn: checkInDate!.toISOString(),
-        checkOut: checkOutDate!.toISOString(),
+        checkIn: formatDateForBooking(checkInDate!), 
+      checkOut: formatDateForBooking(checkOutDate!),
         adults: adults.toString(),
         children: childrenCount.toString(),
         pets: pets.toString(),
@@ -417,12 +478,47 @@ export function BookingSidebar({
             )}
           </div>
 
-          {checkInDate && checkOutDate && adults > 0 && !hasErrors() && (
-            <div className="flex items-center gap-2 text-green-600 bg-green-50 p-3 rounded-lg border border-green-200">
-              <CheckCircle className="h-5 w-5" />
-              <span className="text-sm font-medium">Ready to book!</span>
-            </div>
-          )}
+          {checkInDate &&
+            checkOutDate &&
+            adults > 0 &&
+            !hasErrors() &&
+            (() => {
+              const overlapCheck = checkRangeOverlap(checkInDate, checkOutDate);
+
+              if (overlapCheck.hasOverlap) {
+                return (
+                  <div className="flex items-start gap-2 text-amber-700 bg-amber-50 p-3 rounded-lg border border-amber-200">
+                    <svg
+                      className="h-5 w-5 mt-0.5 flex-shrink-0"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                      />
+                    </svg>
+                    <div className="text-xs">
+                      This room is already booked on:{" "}
+                      <span className="font-medium">
+                        {overlapCheck.conflictDates.join(", ")}
+                      </span>
+                      . Please select different dates.
+                    </div>
+                  </div>
+                );
+              }
+
+              return (
+                <div className="flex items-center gap-2 text-green-600 bg-green-50 p-3 rounded-lg border border-green-200">
+                  <CheckCircle className="h-5 w-5" />
+                  <span className="text-sm font-medium">Ready to book!</span>
+                </div>
+              );
+            })()}
 
           {nights > 0 && (
             <>
