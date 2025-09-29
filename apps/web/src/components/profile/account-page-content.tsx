@@ -2,7 +2,7 @@
 
 import { ProfileEditForm } from "@/components/profile/profile-edit-form";
 import { ChangePasswordForm } from "@/components/profile/change-password-form";
-import { useUserProfile } from "@/hooks/use-user-profile";
+import { useUserProfile } from "@/hooks/useUserProfile";
 import { AlertCircle } from "lucide-react";
 import Ellipsis from "@/components/ui/ellipsis";
 
@@ -34,18 +34,9 @@ export function AccountPageContent() {
   }
 
   return (
-    <div className="border-l space-y-6 p-6">
-      <div className="space-y-1">
-        <h1 className="text-3xl font-bold tracking-tight">Account Settings</h1>
-        <p className="text-muted-foreground">
-          Manage your profile information and account security.
-        </p>
-      </div>
-
-      <div className="space-y-6">
-        <ProfileEditForm user={profile} onProfileUpdated={refetch} />
-        <ChangePasswordForm />
-      </div>
+    <div className="space-y-6">
+      <ProfileEditForm user={profile} onProfileUpdated={refetch} />
+      <ChangePasswordForm />
     </div>
   );
 }
