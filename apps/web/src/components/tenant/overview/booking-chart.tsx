@@ -89,7 +89,9 @@ export function BookingChart() {
     // 3 months window (selected month + prev 2)
     for (let monthOffset = 2; monthOffset >= 0; monthOffset--) {
       const monthDate = new Date(selYear, selMonth - monthOffset, 1);
-      const monthName = monthDate.toLocaleDateString("en-US", { month: "short" });
+      const monthName = monthDate.toLocaleDateString("en-US", {
+        month: "short",
+      });
       const ranges = getWeekRanges(monthDate);
       const isCurrentMonth =
         monthDate.getMonth() === new Date().getMonth() &&
@@ -121,10 +123,7 @@ export function BookingChart() {
   }, [bookings, selectedMonth]);
 
   // Tooltip (typed)
-  const CustomTooltip = ({
-    active,
-    payload,
-  }: TooltipProps<number, string>) => {
+  const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload as ChartDataPoint;
       return (
@@ -231,7 +230,7 @@ export function BookingChart() {
               onMouseLeave={() => setActiveIndex(-1)}
               margin={{ bottom: 40 }}
             >
-              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#d7d7d7" />
               <XAxis
                 dataKey="label"
                 axisLine={false}

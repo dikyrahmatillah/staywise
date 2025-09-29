@@ -7,6 +7,7 @@ import { upload } from "../middlewares/upload.middleware.js";
 const router = Router();
 
 router.get("/:roomId/unavailable-dates", roomController.getUnavailableDates);
+router.get("/:roomId/availability", roomController.getRoomAvailability);
 
 router.use(verifyTokenMiddleware);
 router.use(verifyRoleMiddleware);

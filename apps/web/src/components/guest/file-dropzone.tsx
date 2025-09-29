@@ -3,8 +3,9 @@
 import type React from "react";
 
 import { useCallback, useState, useRef } from "react";
-import { Upload, FileImage, AlertCircle } from "lucide-react";
+import { FileImage, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 interface FileDropzoneProps {
   onFileSelect: (file: File) => void;
@@ -141,14 +142,20 @@ export function FileDropzone({
           ) : (
             <div
               className={cn(
-                "p-3 rounded-full transition-colors",
-                isDragOver ? "bg-blue-100" : "bg-gray-100"
+                "transition-colors",
+                isDragOver ? "bg-blue-100" : "bg-transparent"
               )}
             >
               {isDragOver ? (
                 <FileImage className="h-6 w-6 text-blue-600" />
               ) : (
-                <Upload className="h-6 w-6 text-gray-600" />
+                <Image
+                  src="/assets/upload.png"
+                  alt="Upload Payment Proof"
+                  width={64}
+                  height={64}
+                  className="h-16 w-16 object-contain"
+                />
               )}
             </div>
           )}
