@@ -1,12 +1,11 @@
 "use client";
 
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -14,30 +13,20 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { UpdateUserSchema, UpdateUserInput } from "@repo/schemas";
-import api from "@/lib/axios";
-import { Camera, Loader2 } from "lucide-react";
+import { useUserProfile } from "@/hooks/useUserProfile";
+import { Loader2, Sparkles } from "lucide-react";
 import { useSession } from "next-auth/react";
-
-interface ProfileEditFormProps {
-  user: {
-    id: string;
-    email: string;
-    firstName: string;
-    lastName?: string | null;
-    phone?: string | null;
-    image?: string | null;
-  };
-  onProfileUpdated?: () => void;
-}
+import { AvatarUpload } from "./avatar-upload";
+import { ProfileFormSections } from "./profile-form-sections";
+import type { ProfileEditFormProps } from "./types";
 
 export function ProfileEditForm({
   user,
   onProfileUpdated,
 }: ProfileEditFormProps) {
   const { data: session } = useSession();
+  const { updateProfile } = useUserProfile();
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(
     user.image || null
@@ -47,6 +36,7 @@ export function ProfileEditForm({
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm<UpdateUserInput>({
     resolver: zodResolver(UpdateUserSchema),
@@ -58,46 +48,12 @@ export function ProfileEditForm({
     },
   });
 
-  const validateFile = (file: File): string | null => {
-    if (file.size > 1024 * 1024) {
-      return "File size must be less than 1MB";
-    }
-
-    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif"];
-    if (!allowedTypes.includes(file.type)) {
-      return "Only JPG, JPEG, PNG, and GIF files are allowed";
-    }
-
-    return null;
-  };
-
-  const onSelectAvatar = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (!file) {
-        setAvatarFile(null);
-        setAvatarPreview(user.image || null);
-        return;
-      }
-
-      const error = validateFile(file);
-      if (error) {
-        toast.error(error);
-        e.target.value = "";
-        setAvatarFile(null);
-        setAvatarPreview(user.image || null);
-        return;
-      }
-
+  const handleAvatarChange = useCallback(
+    (file: File | null, preview: string | null) => {
       setAvatarFile(file);
-
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setAvatarPreview(event.target?.result as string);
-      };
-      reader.readAsDataURL(file);
+      setAvatarPreview(preview);
     },
-    [user.image]
+    []
   );
 
   const onSubmit = useCallback(
@@ -111,171 +67,100 @@ export function ProfileEditForm({
         setIsUploading(true);
 
         const formData = new FormData();
-
         if (data.firstName) formData.append("firstName", data.firstName);
         if (data.lastName) formData.append("lastName", data.lastName);
         if (data.phone) formData.append("phone", data.phone);
         if (data.email) formData.append("email", data.email);
+        if (avatarFile) formData.append("image", avatarFile);
 
-        if (avatarFile) {
-          formData.append("image", avatarFile);
-        }
-
-        await api.put("/auth/profile", formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${session.user.accessToken}`,
-          },
-        });
-
-        toast.success("Profile updated successfully!");
-
-        if (onProfileUpdated) {
-          onProfileUpdated();
-        }
-      } catch (error: unknown) {
-        console.error("Profile update error:", error);
-        let errorMessage = "Failed to update profile";
-
-        if (error && typeof error === "object" && "response" in error) {
-          const axiosError = error as {
-            response?: { data?: { message?: string } };
-          };
-          errorMessage =
-            axiosError.response?.data?.message || "Failed to update profile";
-        }
-
-        toast.error(errorMessage);
+        await updateProfile(formData);
+        onProfileUpdated?.();
       } finally {
         setIsUploading(false);
       }
     },
-    [avatarFile, onProfileUpdated, session?.user?.accessToken]
+    [avatarFile, onProfileUpdated, session?.user?.accessToken, updateProfile]
   );
 
-  const getInitials = (firstName: string, lastName?: string | null) => {
-    return `${firstName.charAt(0)}${
-      lastName ? lastName.charAt(0) : ""
-    }`.toUpperCase();
+  const accountBadgeLabel = useMemo(() => {
+    const role = (session?.user as { role?: string } | undefined)?.role;
+    return role ? `${role} account` : "Active member";
+  }, [session?.user]);
+
+  const handleCancel = () => {
+    reset();
+    setAvatarPreview(user.image || null);
+    setAvatarFile(null);
   };
+
+  const isDisabled = isSubmitting || isUploading;
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Profile Information</CardTitle>
-          <CardDescription>
-            Update your personal information and profile picture.
-          </CardDescription>
+      <Card className="relative overflow-hidden border-border/50 bg-background/95 shadow-xl ring-1 ring-border/40 backdrop-blur">
+        <div className="pointer-events-none absolute inset-0 " />
+        <CardHeader className="relative z-[1] pb-4">
+          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div className="space-y-2">
+              <CardTitle className="text-2xl font-semibold">
+                Personal profile
+              </CardTitle>
+              <CardDescription className="max-w-xl text-muted-foreground/80">
+                Keep your account details polished so each stay feels perfectly
+                tailored to you.
+              </CardDescription>
+            </div>
+            <Badge
+              variant="outline"
+              className="flex w-fit items-center gap-2 rounded-full border-primary/20 bg-primary/5 px-4 py-1.5 text-sm font-medium text-primary md:self-center"
+            >
+              <Sparkles className="h-3.5 w-3.5" />
+              {accountBadgeLabel}
+            </Badge>
+          </div>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            {/* Avatar Section */}
-            <div className="flex items-center gap-4">
-              <Avatar className="h-20 w-20">
-                <AvatarImage
-                  src={avatarPreview || undefined}
-                  alt="Profile picture"
-                />
-                <AvatarFallback className="text-lg">
-                  {getInitials(user.firstName, user.lastName)}
-                </AvatarFallback>
-              </Avatar>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Label htmlFor="avatar" className="cursor-pointer">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
-                      <Camera className="h-4 w-4" />
-                      Change photo
-                    </div>
-                  </Label>
-                </div>
-                <Input
-                  id="avatar"
-                  type="file"
-                  accept=".jpg,.jpeg,.png,.gif,image/jpeg,image/png,image/gif"
-                  disabled={isSubmitting || isUploading}
-                  onChange={onSelectAvatar}
-                  className="hidden"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Max 1MB. JPG, JPEG, PNG, GIF.
-                </p>
-              </div>
-            </div>
-
-            <Separator />
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="firstName">First Name *</Label>
-                <Input
-                  id="firstName"
-                  disabled={isSubmitting || isUploading}
-                  {...register("firstName")}
-                />
-                {errors.firstName && (
-                  <p className="text-xs text-red-500">
-                    {errors.firstName.message}
-                  </p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="lastName">Last Name</Label>
-                <Input
-                  id="lastName"
-                  disabled={isSubmitting || isUploading}
-                  {...register("lastName")}
-                />
-                {errors.lastName && (
-                  <p className="text-xs text-red-500">
-                    {errors.lastName.message}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="email">Email *</Label>
-              <Input
-                id="email"
-                type="email"
-                disabled={isSubmitting || isUploading}
-                {...register("email")}
+        <CardContent className="relative z-[1] space-y-8 pt-2">
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="flex flex-col gap-8"
+          >
+            <div className="grid gap-8 lg:grid-cols-[minmax(0,320px)_minmax(0,1fr)]">
+              <AvatarUpload
+                user={user}
+                avatarFile={avatarFile}
+                avatarPreview={avatarPreview}
+                isUploading={isUploading}
+                onAvatarChange={handleAvatarChange}
               />
-              {errors.email && (
-                <p className="text-xs text-red-500">{errors.email.message}</p>
-              )}
-            </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="phone">Phone Number</Label>
-              <Input
-                id="phone"
-                type="tel"
-                placeholder="+1234567890"
-                disabled={isSubmitting || isUploading}
-                {...register("phone")}
+              <ProfileFormSections
+                register={register}
+                errors={errors}
+                disabled={isDisabled}
               />
-              {errors.phone && (
-                <p className="text-xs text-red-500">{errors.phone.message}</p>
-              )}
             </div>
 
-            <div className="flex justify-end">
+            <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                disabled={isDisabled}
+                onClick={handleCancel}
+              >
+                Cancel
+              </Button>
               <Button
                 type="submit"
-                disabled={isSubmitting || isUploading}
-                className="min-w-[100px]"
+                disabled={isDisabled}
+                className="sm:min-w-[140px]"
               >
-                {isSubmitting || isUploading ? (
+                {isDisabled ? (
                   <>
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Updating...
                   </>
                 ) : (
-                  "Update Profile"
+                  "Save changes"
                 )}
               </Button>
             </div>
