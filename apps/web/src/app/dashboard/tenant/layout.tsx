@@ -20,14 +20,12 @@ export default function TenantLayout({ children }: TenantLayoutProps) {
       <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_20%_20%,hsl(var(--primary)/0.12),transparent_45%),radial-gradient(circle_at_80%_0%,hsl(var(--primary)/0.08),transparent_50%),radial-gradient(circle_at_40%_80%,hsl(var(--primary)/0.1),transparent_55%)]" />
 
       <div className="relative mx-auto flex min-h-screen w-full max-w-[1400px] px-3 sm:px-6 lg:px-10">
-        {/* Sidebar - desktop */}
         <div className="hidden md:block pt-10 pb-8">
           <div className="h-full rounded-3xl border border-slate-200/70 bg-white/70 backdrop-blur-xl shadow-[0_20px_60px_-35px_rgba(15,23,42,0.55)] dark:border-slate-800/70 dark:bg-slate-900/70">
             <TenantSidebar />
           </div>
         </div>
 
-        {/* Main panel */}
         <main className="flex-1 pb-10 pt-10 md:pl-8">
           <div className="flex h-full min-w-0 flex-col rounded-3xl border border-slate-200/70 bg-white/75 p-4 shadow-[0_18px_50px_-30px_rgba(15,23,42,0.55)] backdrop-blur-2xl transition-shadow dark:border-slate-800/70 dark:bg-slate-900/75 sm:p-6 lg:p-8">
             <header className="sticky top-0 z-30 mx:-4 -mt-4 mb-6 flex items-center justify-between border-b border-slate-200/60 bg-white/70 px-4 py-4 backdrop-blur-xl dark:border-slate-800/60 dark:bg-slate-900/60 sm:mx-0 sm:-mt-6 sm:rounded-2xl sm:px-6">
@@ -52,10 +50,6 @@ export default function TenantLayout({ children }: TenantLayoutProps) {
                 </Sheet>
 
                 <DynamicHeader />
-              </div>
-
-              <div className="hidden items-center gap-2 text-sm font-medium text-slate-500 dark:text-slate-400 md:flex">
-                {/* header actions populated in subsequent steps */}
               </div>
             </header>
 
