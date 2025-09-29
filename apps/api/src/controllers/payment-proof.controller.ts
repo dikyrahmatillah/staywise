@@ -22,10 +22,7 @@ export class PaymentProofController {
       // Find booking by orderId (booking.id or booking.orderCode)
       const booking = await prisma.booking.findFirst({
         where: {
-          OR: [
-            { id: orderId },
-            { orderCode: orderId }
-          ],
+          OR: [{ id: orderId }, { orderCode: orderId }],
           userId: userId,
         },
       });
@@ -57,7 +54,10 @@ export class PaymentProofController {
       });
 
       if (existingProof && !existingProof.rejectedAt) {
-        throw new AppError("Payment proof already uploaded for this booking", 400);
+        throw new AppError(
+          "Payment proof already uploaded for this booking",
+          400
+        );
       }
 
       // Upload to Cloudinary
@@ -83,7 +83,7 @@ export class PaymentProofController {
       // Update booking status to WAITING_CONFIRMATION
       const updatedBooking = await prisma.booking.update({
         where: { id: booking.id },
-        data: { 
+        data: {
           status: "WAITING_CONFIRMATION",
           expiresAt: null,
         },
@@ -115,10 +115,7 @@ export class PaymentProofController {
       // Find booking by orderId
       const booking = await prisma.booking.findFirst({
         where: {
-          OR: [
-            { id: orderId },
-            { orderCode: orderId }
-          ],
+          OR: [{ id: orderId }, { orderCode: orderId }],
         },
         include: {
           Property: { select: { tenantId: true } },
@@ -130,7 +127,7 @@ export class PaymentProofController {
       }
 
       // Check access permissions
-      const hasAccess = 
+      const hasAccess =
         booking.userId === userId || // Guest owns booking
         (userRole === "TENANT" && booking.Property.tenantId === userId); // Tenant owns property
 
@@ -171,10 +168,7 @@ export class PaymentProofController {
       // Find booking by orderId
       const booking = await prisma.booking.findFirst({
         where: {
-          OR: [
-            { id: orderId },
-            { orderCode: orderId }
-          ],
+          OR: [{ id: orderId }, { orderCode: orderId }],
           userId: userId,
         },
       });
@@ -194,7 +188,10 @@ export class PaymentProofController {
 
       // Only allow deletion if proof was rejected or booking is still waiting for payment
       if (booking.status !== "WAITING_PAYMENT" && !paymentProof.rejectedAt) {
-        throw new AppError("Cannot delete payment proof for confirmed bookings", 400);
+        throw new AppError(
+          "Cannot delete payment proof for confirmed bookings",
+          400
+        );
       }
 
       // Delete payment proof
@@ -206,7 +203,7 @@ export class PaymentProofController {
       if (booking.status === "WAITING_CONFIRMATION") {
         await prisma.booking.update({
           where: { id: booking.id },
-          data: { 
+          data: {
             status: "WAITING_PAYMENT",
             expiresAt: new Date(Date.now() + 60 * 60 * 1000), // Reset 1-hour timer
           },
@@ -240,11 +237,12 @@ export class PaymentProofController {
       // Find booking and verify tenant ownership
       const booking = await prisma.booking.findFirst({
         where: {
-          OR: [
-            { id: orderId },
-            { orderCode: orderId }
-          ],
+          OR: [{ id: orderId }, { orderCode: orderId }],
           Property: { tenantId: userId },
+        },
+        include: {
+          Room: { select: { name: true } },
+          Property: { select: { name: true } },
         },
       });
 
@@ -256,11 +254,103 @@ export class PaymentProofController {
         throw new AppError("Booking is not waiting for confirmation", 400);
       }
 
+      // 🚨 CHECK FOR OVERLAPPING BOOKINGS
+      console.log("🔍 Checking for overlapping bookings...");
+      console.log("Current booking:", {
+        id: booking.id,
+        orderCode: booking.orderCode,
+        roomId: booking.roomId,
+        checkIn: booking.checkInDate,
+        checkOut: booking.checkOutDate,
+      });
+
+      const overlappingBookings = await prisma.booking.findMany({
+        where: {
+          id: { not: booking.id }, // Exclude current booking
+          roomId: booking.roomId,
+          status: {
+            in: [
+              "WAITING_PAYMENT",
+              "WAITING_CONFIRMATION",
+              "PROCESSING",
+              "COMPLETED",
+            ],
+          },
+          OR: [
+            // Case 1: Existing booking starts during this period
+            {
+              AND: [
+                { checkInDate: { gte: booking.checkInDate } },
+                { checkInDate: { lt: booking.checkOutDate } },
+              ],
+            },
+            // Case 2: Existing booking ends during this period
+            {
+              AND: [
+                { checkOutDate: { gt: booking.checkInDate } },
+                { checkOutDate: { lte: booking.checkOutDate } },
+              ],
+            },
+            // Case 3: Existing booking completely contains this period
+            {
+              AND: [
+                { checkInDate: { lte: booking.checkInDate } },
+                { checkOutDate: { gte: booking.checkOutDate } },
+              ],
+            },
+          ],
+        },
+        select: {
+          id: true,
+          orderCode: true,
+          status: true,
+          checkInDate: true,
+          checkOutDate: true,
+          User: {
+            select: {
+              firstName: true,
+              lastName: true,
+              email: true,
+            },
+          },
+        },
+      });
+
+      console.log("Found overlapping bookings:", overlappingBookings.length);
+
+      if (overlappingBookings.length > 0) {
+        console.log(
+          "❌ BLOCKING: Overlapping bookings detected!",
+          overlappingBookings
+        );
+
+        // Format conflict details for error message
+        const conflicts = overlappingBookings
+          .map((b) => {
+            const guestName =
+              [b.User.firstName, b.User.lastName].filter(Boolean).join(" ") ||
+              "Unknown Guest";
+            return `${b.orderCode} (${guestName}, ${
+              b.status
+            }, ${b.checkInDate.toLocaleDateString()} - ${b.checkOutDate.toLocaleDateString()})`;
+          })
+          .join("; ");
+
+        throw new AppError(
+          `Cannot approve: Room "${booking.Room.name}" already has ${overlappingBookings.length} confirmed booking(s) for these dates. Conflicts: ${conflicts}`,
+          409 // 409 Conflict status code
+        );
+      }
+
+      console.log(
+        "✅ No overlapping bookings found. Proceeding with approval..."
+      );
+
       // Update payment proof and booking status
       await prisma.$transaction([
         prisma.paymentProof.update({
           where: { orderId: booking.id },
-          data: { 
+          data: {
             acceptedAt: new Date(),
             reviewedBy: userId,
           },
@@ -270,6 +360,11 @@ export class PaymentProofController {
           data: { status: "COMPLETED" },
         }),
       ]);
+
+      console.log(
+        "✅ Payment approved successfully for booking:",
+        booking.orderCode
+      );
 
       return response.json({
         success: true,
@@ -299,10 +394,7 @@ export class PaymentProofController {
       // Find booking and verify tenant ownership
       const booking = await prisma.booking.findFirst({
         where: {
-          OR: [
-            { id: orderId },
-            { orderCode: orderId }
-          ],
+          OR: [{ id: orderId }, { orderCode: orderId }],
           Property: { tenantId: userId },
         },
       });
@@ -319,14 +411,14 @@ export class PaymentProofController {
       await prisma.$transaction([
         prisma.paymentProof.update({
           where: { orderId: booking.id },
-          data: { 
+          data: {
             rejectedAt: new Date(),
             reviewedBy: userId,
           },
         }),
         prisma.booking.update({
           where: { id: booking.id },
-          data: { 
+          data: {
             status: "WAITING_PAYMENT",
             expiresAt: new Date(Date.now() + 60 * 60 * 1000), // Reset 1-hour timer
           },
@@ -336,8 +428,8 @@ export class PaymentProofController {
       return response.json({
         success: true,
         message: "Payment proof rejected successfully",
-        data: { 
-          bookingId: booking.id, 
+        data: {
+          bookingId: booking.id,
           orderCode: booking.orderCode,
         },
       });

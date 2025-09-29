@@ -54,11 +54,15 @@ export class BookingService {
     }
 
     // Calculate booking details
-    const checkIn = new Date(data.checkInDate);
-    const checkOut = new Date(data.checkOutDate);
+    const checkIn = new Date(data.checkInDate + 'T00:00:00.000Z');
+    const checkOut = new Date(data.checkOutDate + 'T00:00:00.000Z');
     const nights = Math.ceil(
       (checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24)
     );
+
+    console.log(`📅 [DEBUG] Backend date parsing:`);
+console.log(`  Input checkIn: "${data.checkInDate}" → Parsed: ${checkIn.toISOString().split('T')[0]} (day ${checkIn.getUTCDate()})`);
+console.log(`  Input checkOut: "${data.checkOutDate}" → Parsed: ${checkOut.toISOString().split('T')[0]} (day ${checkOut.getUTCDate()})`);
 
     // Convert Decimal to number and calculate total
     const pricePerNight = Number(room.basePrice);

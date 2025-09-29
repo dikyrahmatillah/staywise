@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/axios";
 import type { Amenities } from "./components/types";
@@ -65,11 +65,35 @@ async function fetchProperty(slug: string): Promise<DetailResponse> {
 
 export function PropertyDetailClient({ slug }: { slug: string }) {
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
+  const [unavailableDates, setUnavailableDates] = useState<Date[]>([]);
 
   const { data, isLoading, error } = useQuery<DetailResponse, Error>({
     queryKey: ["property", slug],
     queryFn: () => fetchProperty(slug),
   });
+
+  // Fetch unavailable dates when room is selected
+  const { data: unavailableDatesData } = useQuery({
+    queryKey: ["unavailable-dates", selectedRoom?.id],
+    queryFn: async () => {
+      if (!selectedRoom?.id) return null;
+      const res = await api.get(`/rooms/${selectedRoom.id}/unavailable-dates`);
+      return res.data.data;
+    },
+    enabled: !!selectedRoom?.id,
+  });
+
+  // Update unavailable dates when data changes
+  useEffect(() => {
+    if (unavailableDatesData?.unavailableDates) {
+      const dates = unavailableDatesData.unavailableDates.map(
+        (dateStr: string) => new Date(dateStr + 'T00:00:00')
+      );
+      setUnavailableDates(dates);
+    } else {
+      setUnavailableDates([]);
+    }
+  }, [unavailableDatesData]);
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Failed to load property</div>;
@@ -173,6 +197,7 @@ export function PropertyDetailClient({ slug }: { slug: string }) {
               maxGuests={guestRange.max}
               propertyId={property.id}
               selectedRoom={selectedRoom}
+              unavailableDates={unavailableDates}
             />
           </div>
         </div>

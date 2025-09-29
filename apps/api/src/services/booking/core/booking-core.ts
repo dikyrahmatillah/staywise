@@ -13,6 +13,7 @@ import type {
   AvailabilityCheckParams,
 } from "@repo/types";
 import type { BookingCreationData } from "@/services/booking/types/booking-internal.type.js";
+import { faker } from "@faker-js/faker";
 
 export class BookingCoreService {
   private utilsService: BookingUtilsService;
@@ -20,6 +21,7 @@ export class BookingCoreService {
   constructor() {
     this.utilsService = new BookingUtilsService();
   }
+
   async createBooking(data: BookingCreationData) {
     const validation = this.validateBookingInput(data);
 
@@ -69,8 +71,118 @@ export class BookingCoreService {
       );
     }
 
-    const checkInDate = new Date(data.checkIn);
-    const checkOutDate = new Date(data.checkOut);
+    // 🔧 FIX: Parse dates as local dates without timezone conversion
+    const parseLocalDate = (dateInput: string | Date): Date => {
+      // If it's already a Date object, use it directly
+      if (dateInput instanceof Date) {
+        return new Date(dateInput);
+      }
+
+      // If it's a date-only string (YYYY-MM-DD), parse it as local date
+      if (
+        typeof dateInput === "string" &&
+        /^\d{4}-\d{2}-\d{2}$/.test(dateInput)
+      ) {
+        const [year, month, day] = dateInput.split("-").map(Number);
+        return new Date(year, month - 1, day); // month is 0-indexed
+      }
+
+      // Otherwise, parse normally
+      return new Date(dateInput);
+    };
+
+    const checkInDate = parseLocalDate(data.checkIn);
+    const checkOutDate = parseLocalDate(data.checkOut);
+
+    // Set time to noon to avoid any timezone edge cases
+    checkInDate.setHours(12, 0, 0, 0);
+    checkOutDate.setHours(12, 0, 0, 0);
+
+    console.log("📅 Parsed dates:", {
+      checkIn: checkInDate,
+      checkOut: checkOutDate,
+      checkInISO: checkInDate.toISOString(),
+      checkOutISO: checkOutDate.toISOString(),
+    });
+
+    // 🚨 CHECK FOR OVERLAPPING BOOKINGS BEFORE CREATING
+    console.log("🔍 Checking for overlapping bookings before creation...");
+    console.log("Booking details:", {
+      roomId: data.roomId,
+      checkIn: checkInDate,
+      checkOut: checkOutDate,
+    });
+
+    const overlappingBookings = await prisma.booking.findMany({
+      where: {
+        roomId: data.roomId,
+        status: {
+          in: [
+            "WAITING_PAYMENT",
+            "WAITING_CONFIRMATION",
+            "PROCESSING",
+            "COMPLETED",
+          ],
+        },
+        OR: [
+          // Case 1: New booking starts during existing booking
+          {
+            AND: [
+              { checkInDate: { lte: checkInDate } },
+              { checkOutDate: { gt: checkInDate } },
+            ],
+          },
+          // Case 2: New booking ends during existing booking
+          {
+            AND: [
+              { checkInDate: { lt: checkOutDate } },
+              { checkOutDate: { gte: checkOutDate } },
+            ],
+          },
+          // Case 3: New booking completely contains existing booking
+          {
+            AND: [
+              { checkInDate: { gte: checkInDate } },
+              { checkOutDate: { lte: checkOutDate } },
+            ],
+          },
+        ],
+      },
+      select: {
+        id: true,
+        orderCode: true,
+        checkInDate: true,
+        checkOutDate: true,
+        status: true,
+      },
+    });
+
+    if (overlappingBookings.length > 0) {
+      console.log(
+        "❌ BLOCKING: Overlapping bookings detected!",
+        overlappingBookings
+      );
+
+      const conflicts = overlappingBookings
+        .map(
+          (b) =>
+            `${
+              b.orderCode
+            } (${b.checkInDate.toLocaleDateString()} - ${b.checkOutDate.toLocaleDateString()}, ${
+              b.status
+            })`
+        )
+        .join("; ");
+
+      throw new AppError(
+        `This room is already booked for the selected dates. Please choose different dates. Conflicting bookings: ${conflicts}`,
+        409 // 409 Conflict
+      );
+    }
+
+    console.log(
+      "✅ No overlapping bookings. Proceeding with booking creation..."
+    );
 
     // Use our validation utilities for calculating nights
     const nights = Math.ceil(
@@ -81,8 +193,8 @@ export class BookingCoreService {
     const availability = await this.checkRoomAvailability(
       data.propertyId,
       data.roomId,
-      data.checkIn.toString(),
-      data.checkOut.toString()
+      checkInDate.toISOString(),
+      checkOutDate.toISOString()
     );
 
     if (!availability.available) {

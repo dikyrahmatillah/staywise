@@ -229,12 +229,16 @@ model RoomAvailability {
     roomId      String
     date        DateTime
     isAvailable Boolean  @default(true)
+    bookingId   String?
     createdAt   DateTime @default(now())
 
-    Room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
+    Room    Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+    Booking Booking? @relation("RoomAvailabilityBooking", fields: [bookingId], references: [id], onDelete: SetNull)
+    
 
     @@unique([roomId, date])
     @@index([roomId])
+    @@index([bookingId])
 }
 
 model PriceAdjustment {
@@ -292,9 +296,10 @@ model Booking {
     Property Property @relation(fields: [propertyId], references: [id])
     Room     Room     @relation(fields: [roomId], references: [id])
 
-    paymentProof   PaymentProof?   @relation("BookingPaymentProof")
-    gatewayPayment GatewayPayment? @relation("BookingGatewayPayment")
-    review         Review?         @relation("BookingReview")
+    paymentProof     PaymentProof?      @relation("BookingPaymentProof")
+    gatewayPayment   GatewayPayment?    @relation("BookingGatewayPayment")
+    review           Review?            @relation("BookingReview")
+    RoomAvailability RoomAvailability[] @relation("RoomAvailabilityBooking")
 
     @@index([tenantId])
     @@index([userId])
