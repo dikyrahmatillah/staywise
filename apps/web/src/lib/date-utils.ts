@@ -20,8 +20,16 @@ export const generateCalendarDates = (baseDate: Date): Date[] => {
   return dates;
 };
 
-export const formatDateKey = (date: Date): string =>
-  date.toISOString().split("T")[0];
+export const formatDateKey = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+
+  const paddedMonth = month < 10 ? `0${month}` : `${month}`;
+  const paddedDay = day < 10 ? `0${day}` : `${day}`;
+
+  return `${year}-${paddedMonth}-${paddedDay}`;
+};
 
 export const isCurrentMonth = (date: Date, baseDate: Date): boolean =>
   date.getMonth() === baseDate.getMonth();
