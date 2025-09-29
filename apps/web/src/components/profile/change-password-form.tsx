@@ -1,12 +1,10 @@
 "use client";
 
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
@@ -16,9 +14,14 @@ import {
 } from "@/components/ui/card";
 import { changePasswordSchema, ChangePasswordInput } from "@repo/schemas";
 import api from "@/lib/axios";
-import { Loader2, Eye, EyeOff } from "lucide-react";
-import { useState } from "react";
+import { Loader2, Lock, ShieldCheck, ShieldEllipsis } from "lucide-react";
 import { useSession } from "next-auth/react";
+import { PasswordInput } from "./password-input";
+import {
+  PasswordChecklist,
+  PasswordStrengthIndicator,
+} from "./password-strength";
+import { calculatePasswordInsights } from "./utils";
 
 export function ChangePasswordForm() {
   const { data: session } = useSession();
@@ -29,6 +32,7 @@ export function ChangePasswordForm() {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors, isSubmitting },
     reset,
   } = useForm<ChangePasswordInput & { confirmPassword: string }>({
@@ -43,6 +47,12 @@ export function ChangePasswordForm() {
         })
     ),
   });
+
+  const newPasswordValue = watch("newPassword");
+  const passwordInsights = useMemo(
+    () => calculatePasswordInsights(newPasswordValue),
+    [newPasswordValue]
+  );
 
   const onSubmit = useCallback(
     async (data: ChangePasswordInput) => {
@@ -82,126 +92,90 @@ export function ChangePasswordForm() {
         toast.error(errorMessage);
       }
     },
-    [reset, session?.user?.accessToken]
+    [session?.user?.accessToken, reset]
   );
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Change Password</CardTitle>
-        <CardDescription>
-          Update your account password. Make sure to use a strong password.
-        </CardDescription>
+    <Card className="relative overflow-hidden border-border/50 bg-background/95 shadow-xl ring-1 ring-border/40">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(14,17,26,0.05),transparent_60%)]" />
+      <CardHeader className="relative z-[1]">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div>
+            <CardTitle className="text-2xl font-semibold">
+              Change password
+            </CardTitle>
+            <CardDescription>
+              Refresh your credentials and keep your account invulnerable.
+            </CardDescription>
+          </div>
+        </div>
       </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="currentPassword">Current Password</Label>
-            <div className="relative">
-              <Input
-                id="currentPassword"
-                type={showCurrentPassword ? "text" : "password"}
-                disabled={isSubmitting}
-                {...register("currentPassword")}
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-              >
-                {showCurrentPassword ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
-              </Button>
-            </div>
-            {errors.currentPassword && (
-              <p className="text-xs text-red-500">
-                {errors.currentPassword.message}
-              </p>
-            )}
-          </div>
+      <CardContent className="relative z-[1]">
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,320px)_minmax(0,1fr)]">
+          <PasswordChecklist insights={passwordInsights} />
 
-          <div className="space-y-2">
-            <Label htmlFor="newPassword">New Password</Label>
-            <div className="relative">
-              <Input
-                id="newPassword"
-                type={showNewPassword ? "text" : "password"}
-                disabled={isSubmitting}
-                {...register("newPassword")}
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                onClick={() => setShowNewPassword(!showNewPassword)}
-              >
-                {showNewPassword ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
-              </Button>
-            </div>
-            {errors.newPassword && (
-              <p className="text-xs text-red-500">
-                {errors.newPassword.message}
-              </p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Confirm New Password</Label>
-            <div className="relative">
-              <Input
-                id="confirmPassword"
-                type={showConfirmPassword ? "text" : "password"}
-                disabled={isSubmitting}
-                {...register("confirmPassword")}
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              >
-                {showConfirmPassword ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
-              </Button>
-            </div>
-            {errors.confirmPassword && (
-              <p className="text-xs text-red-500">
-                {errors.confirmPassword.message}
-              </p>
-            )}
-          </div>
-
-          <div className="flex justify-end">
-            <Button
-              type="submit"
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <PasswordInput
+              id="currentPassword"
+              label="Current password"
+              icon={Lock}
+              showPassword={showCurrentPassword}
+              onToggleShow={() => setShowCurrentPassword(!showCurrentPassword)}
               disabled={isSubmitting}
-              className="min-w-[120px]"
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  Changing...
-                </>
-              ) : (
-                "Change Password"
-              )}
-            </Button>
-          </div>
-        </form>
+              error={errors.currentPassword?.message}
+              register={register}
+            />
+
+            <PasswordInput
+              id="newPassword"
+              label="New password"
+              icon={ShieldEllipsis}
+              showPassword={showNewPassword}
+              onToggleShow={() => setShowNewPassword(!showNewPassword)}
+              disabled={isSubmitting}
+              error={errors.newPassword?.message}
+              register={register}
+            />
+
+            <PasswordInput
+              id="confirmPassword"
+              label="Confirm new password"
+              icon={ShieldCheck}
+              showPassword={showConfirmPassword}
+              onToggleShow={() => setShowConfirmPassword(!showConfirmPassword)}
+              disabled={isSubmitting}
+              error={errors.confirmPassword?.message}
+              register={register}
+            />
+
+            <PasswordStrengthIndicator insights={passwordInsights} />
+
+            <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
+              <Button
+                type="button"
+                variant="ghost"
+                disabled={isSubmitting}
+                onClick={() => reset()}
+              >
+                Reset fields
+              </Button>
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="sm:min-w-[160px]"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Updating...
+                  </>
+                ) : (
+                  "Update password"
+                )}
+              </Button>
+            </div>
+          </form>
+        </div>
       </CardContent>
     </Card>
   );

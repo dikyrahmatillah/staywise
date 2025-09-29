@@ -16,29 +16,47 @@ interface GuestLayoutProps {
 
 export default function GuestLayout({ children }: GuestLayoutProps) {
   return (
-    <div className="flex min-h-[calc(100vh-12rem)]">
-      <div className="hidden md:block">
-        <GuestSidebar />
-      </div>
-      <main className="flex-1">
-        <header className="h-14 border-b border-l flex items-center px-4 justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="outline" size="icon" className="md:hidden">
-                  <Menu className="size-4" />
-                  <span className="sr-only">Open Menu</span>
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="p-0">
-                <GuestSidebar isSheet />
-              </SheetContent>
-            </Sheet>
-            <DynamicHeader />
+    <div className="relative min-h-screen bg-gradient-to-br from-slate-50 via-white to-sky-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_20%_20%,hsl(var(--primary)/0.12),transparent_45%),radial-gradient(circle_at_80%_0%,hsl(var(--primary)/0.08),transparent_50%),radial-gradient(circle_at_40%_80%,hsl(var(--primary)/0.1),transparent_55%)]" />
+
+      <div className="relative mx-auto flex min-h-screen w-full max-w-[1400px] px-3 sm:px-6 lg:px-10">
+        <div className="hidden md:block pt-10 pb-8">
+          <div className="h-full rounded-3xl border border-slate-200/70 bg-white/70 backdrop-blur-xl shadow-[0_20px_60px_-35px_rgba(15,23,42,0.55)] dark:border-slate-800/70 dark:bg-slate-900/70">
+            <GuestSidebar />
           </div>
-        </header>
-        <section className="flex-1 font-sans">{children}</section>
-      </main>
+        </div>
+
+        <main className="flex-1 pb-10 pt-10 md:pl-8">
+          <div className="flex h-full min-w-0 flex-col rounded-3xl border border-slate-200/70 bg-white/75 p-4 shadow-[0_18px_50px_-30px_rgba(15,23,42,0.55)] backdrop-blur-2xl transition-shadow dark:border-slate-800/70 dark:bg-slate-900/75 sm:p-6 lg:p-8">
+            <header className="sticky top-0 z-30 mx:-4 -mt-4 mb-6 flex items-center justify-between border-b border-slate-200/60 bg-white/70 px-4 py-4 backdrop-blur-xl dark:border-slate-800/60 dark:bg-slate-900/60 sm:mx-0 sm:-mt-6 sm:rounded-2xl sm:px-6">
+              <div className="flex items-center gap-3">
+                <Sheet>
+                  <SheetTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="md:hidden h-10 w-10 border-slate-200/60 bg-white/80 text-slate-600 shadow-sm transition-colors hover:bg-slate-100/80 dark:border-slate-800/60 dark:bg-slate-900/70 dark:text-slate-300 dark:hover:bg-slate-800"
+                    >
+                      <Menu className="h-5 w-5" />
+                      <span className="sr-only">Open sidebar</span>
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent
+                    side="left"
+                    className="w-80 border-r border-slate-200/70 bg-white/90 p-0 backdrop-blur-xl dark:border-slate-800/70 dark:bg-slate-950/90"
+                  >
+                    <GuestSidebar isSheet />
+                  </SheetContent>
+                </Sheet>
+
+                <DynamicHeader />
+              </div>
+            </header>
+
+            {children}
+          </div>
+        </main>
+      </div>
     </div>
   );
 }
