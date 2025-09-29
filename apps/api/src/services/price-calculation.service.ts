@@ -44,7 +44,7 @@ export class PriceCalculationService {
 
     const prices: number[] = [];
     const current = new Date(startDate);
-    while (current <= endDate) {
+    while (current < endDate) {
       prices.push(this.calculateEffectivePrice(room, current));
       current.setDate(current.getDate() + 1);
     }

@@ -2,9 +2,31 @@ import type { GetPropertiesParams } from "@repo/schemas";
 import { prisma } from "@repo/database";
 import { PropertyRepository } from "../repositories/property.repository.js";
 import { PriceCalculationService } from "./price-calculation.service.js";
+import { isValid, isSameDay, addDays, startOfDay } from "date-fns";
 
 export class PropertySearchService {
   private repository = new PropertyRepository();
+
+  private normalizeDates(checkIn?: string, checkOut?: string) {
+    const defaultCheckIn = startOfDay(new Date());
+    const defaultCheckOut = addDays(defaultCheckIn, 1);
+
+    const checkInDate = checkIn
+      ? startOfDay(new Date(checkIn))
+      : defaultCheckIn;
+    let checkOutDate = checkOut
+      ? startOfDay(new Date(checkOut))
+      : checkIn
+      ? checkInDate
+      : defaultCheckOut;
+
+    if (isSameDay(checkInDate, checkOutDate)) {
+      checkOutDate = addDays(checkOutDate, 1);
+    }
+
+    return { checkInDate, checkOutDate };
+  }
+
   async searchProperties(params: GetPropertiesParams = {}) {
     const skip = params.skip ?? 0;
     const take = params.take ?? 10;
@@ -18,6 +40,7 @@ export class PropertySearchService {
       checkIn,
       checkOut,
     } = params;
+
     const where: any = {};
 
     if (destination) {
@@ -33,17 +56,17 @@ export class PropertySearchService {
       where.PropertyCategory = {
         is: { name: { contains: category, mode: "insensitive" } },
       };
+
     if (typeof guest === "number") where.maxGuests = { gte: guest };
     if (typeof pets === "number" && pets > 0)
       where.Facilities = { some: { facility: "PET_FRIENDLY" } };
 
-    if (checkIn && checkOut) {
-      const checkInDate = new Date(checkIn);
-      const checkOutDate = new Date(checkOut);
-      if (
-        !Number.isNaN(checkInDate.getTime()) &&
-        !Number.isNaN(checkOutDate.getTime())
-      ) {
+    if (checkIn) {
+      const { checkInDate, checkOutDate } = this.normalizeDates(
+        checkIn,
+        checkOut
+      );
+      if (isValid(checkInDate) && isValid(checkOutDate)) {
         where.Bookings = {
           none: {
             AND: [
@@ -52,7 +75,7 @@ export class PropertySearchService {
             ],
           },
         };
-        // Ensure rooms don't have explicit unavailable dates in the range
+
         where.Rooms = {
           some: {
             RoomAvailabilities: {
@@ -69,10 +92,10 @@ export class PropertySearchService {
     }
 
     if (params.sortBy === "price") {
-      const checkInDate = checkIn ? new Date(checkIn) : new Date();
-      const checkOutDate = checkOut
-        ? new Date(checkOut)
-        : new Date(Date.now() + 24 * 60 * 60 * 1000);
+      const { checkInDate, checkOutDate } = this.normalizeDates(
+        checkIn,
+        checkOut
+      );
 
       const matchingProperties = await prisma.property.findMany({
         where,
@@ -88,24 +111,23 @@ export class PropertySearchService {
       });
 
       const propertiesWithAvailableRooms = matchingProperties.filter(
-        (property) => {
-          return property.Rooms.some((room: any) =>
+        (property: any) =>
+          (property.Rooms || []).some((room: any) =>
             PriceCalculationService.isRoomAvailable(
               room,
               checkInDate,
               checkOutDate,
               guest || 1
             )
-          );
-        }
+          )
       );
 
       if (propertiesWithAvailableRooms.length === 0)
         return { properties: [], total: 0 };
 
       const propertiesWithMinPrice = propertiesWithAvailableRooms
-        .map((property) => {
-          const availableRooms = property.Rooms.filter((room: any) =>
+        .map((property: any) => {
+          const availableRooms = (property.Rooms || []).filter((room: any) =>
             PriceCalculationService.isRoomAvailable(
               room,
               checkInDate,
@@ -113,19 +135,21 @@ export class PropertySearchService {
               guest || 1
             )
           );
+
           const priceFrom = PriceCalculationService.calculatePropertyMinPrice(
             availableRooms,
             checkInDate,
             checkOutDate
           );
+
           return {
             id: property.id,
             priceFrom: priceFrom === 0 ? Number.POSITIVE_INFINITY : priceFrom,
           };
         })
-        .filter((p) => p.priceFrom !== Number.POSITIVE_INFINITY);
+        .filter((p: any) => p.priceFrom !== Number.POSITIVE_INFINITY);
 
-      propertiesWithMinPrice.sort((a, b) => {
+      propertiesWithMinPrice.sort((a: any, b: any) => {
         if (a.priceFrom === b.priceFrom) return 0;
         return (params.sortOrder || "asc") === "asc"
           ? a.priceFrom - b.priceFrom
@@ -134,11 +158,11 @@ export class PropertySearchService {
 
       const pagedIds = propertiesWithMinPrice
         .slice(skip, skip + take)
-        .map((p) => p.id);
+        .map((p: any) => p.id);
       const total = propertiesWithMinPrice.length;
 
       const properties = await this.repository.findManyByIds(pagedIds);
-      const itemsById = new Map(properties.map((item) => [item.id, item]));
+      const itemsById = new Map(properties.map((item: any) => [item.id, item]));
       const orderedProperties = pagedIds
         .map((id) => itemsById.get(id))
         .filter(Boolean) as typeof properties;
@@ -150,8 +174,10 @@ export class PropertySearchService {
       params.sortBy === "name"
         ? { name: params.sortOrder || "asc" }
         : { createdAt: "desc" };
-    const defaultCheckIn = new Date();
-    const defaultCheckOut = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    const { checkInDate, checkOutDate } = this.normalizeDates(
+      checkIn,
+      checkOut
+    );
 
     const [properties, total] = await Promise.all([
       this.repository.findManyWithMinPrices(
@@ -159,8 +185,9 @@ export class PropertySearchService {
         skip,
         take,
         orderBy,
-        checkIn ? new Date(checkIn) : defaultCheckIn,
-        checkOut ? new Date(checkOut) : defaultCheckOut
+        checkInDate,
+        checkOutDate,
+        guest
       ),
       this.repository.count(where),
     ]);

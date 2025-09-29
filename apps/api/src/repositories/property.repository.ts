@@ -7,6 +7,7 @@ export class PropertyRepository {
     Pictures: true,
     Rooms: {
       include: {
+        RoomAvailabilities: true,
         PriceAdjustments: { include: { Dates: true } },
       },
     },
@@ -72,37 +73,49 @@ export class PropertyRepository {
     take: number,
     orderBy: any,
     checkIn?: Date,
-    checkOut?: Date
+    checkOut?: Date,
+    guest?: number
   ) {
     const properties = await prisma.property.findMany({
       where,
-      skip,
-      take,
       orderBy,
       include: this.includeBasic,
     });
 
-    // If no dates provided, return properties as-is
     if (!checkIn || !checkOut) {
-      return properties;
+      return properties.slice(skip, skip + take);
     }
 
-    // Import service lazily to avoid circular dependencies
     const { PriceCalculationService } = await import(
       "../services/price-calculation.service.js"
     );
 
-    return properties.map((property) => {
-      const minPrice = PriceCalculationService.calculatePropertyMinPrice(
-        property.Rooms,
-        checkIn,
-        checkOut
-      );
-      return {
-        ...property,
-        priceFrom: minPrice,
-      };
-    });
+    const withPrices = properties
+      .map((property) => {
+        const availableRooms = (property.Rooms || []).filter((room: any) =>
+          PriceCalculationService.isRoomAvailable(
+            room,
+            checkIn as Date,
+            checkOut as Date,
+            guest || 1
+          )
+        );
+
+        const minPrice = availableRooms.length
+          ? PriceCalculationService.calculatePropertyMinPrice(
+              availableRooms,
+              checkIn,
+              checkOut
+            )
+          : undefined;
+        return {
+          ...property,
+          priceFrom: minPrice,
+        };
+      })
+      .filter((p) => typeof p.priceFrom !== "undefined");
+
+    return withPrices.slice(skip, skip + take);
   }
 
   async count(where: Prisma.PropertyWhereInput): Promise<number> {
