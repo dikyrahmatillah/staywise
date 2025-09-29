@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useDefaultCategories } from "@/hooks/useCategories";
 import type { GetPropertiesQuery } from "@repo/schemas";
 
 export interface FiltersBarProps {
@@ -23,6 +24,9 @@ export interface FiltersBarProps {
 export function FiltersBar({ params, onChange }: FiltersBarProps) {
   const [nameFilter, setNameFilter] = useState(params.name || "");
   const [categoryFilter, setCategoryFilter] = useState(params.category || "");
+
+  const { categories: defaultCategories, loading: categoriesLoading } =
+    useDefaultCategories();
 
   useEffect(() => {
     setNameFilter(params.name || "");
@@ -89,14 +93,30 @@ export function FiltersBar({ params, onChange }: FiltersBarProps) {
           <div className="space-y-2">
             <Label htmlFor="category">Category</Label>
             <div className="relative">
-              <Input
-                id="category"
-                type="text"
-                placeholder="Search by category..."
-                value={categoryFilter}
-                onChange={(e) => setCategoryFilter(e.target.value)}
-                className="pr-8"
-              />
+              <Select
+                value={categoryFilter ? categoryFilter : "__any__"}
+                onValueChange={(value) => {
+                  const mapped = value === "__any__" ? "" : value;
+                  setCategoryFilter(mapped);
+                  onChange({ category: mapped });
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue
+                    placeholder={
+                      categoriesLoading ? "Loading..." : "All categories"
+                    }
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__any__">All categories</SelectItem>
+                  {defaultCategories.map((c) => (
+                    <SelectItem key={c.id} value={c.name}>
+                      {c.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               {categoryFilter && (
                 <button
                   type="button"
@@ -137,7 +157,7 @@ export function FiltersBar({ params, onChange }: FiltersBarProps) {
                 <SelectValue placeholder="Sort by..." />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">Default</SelectItem>
+                <SelectItem value="none">Recommended</SelectItem>
                 <SelectItem value="name-asc">Name (A-Z)</SelectItem>
                 <SelectItem value="name-desc">Name (Z-A)</SelectItem>
                 <SelectItem value="price-asc">Price (Low to High)</SelectItem>
