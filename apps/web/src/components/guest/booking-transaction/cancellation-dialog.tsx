@@ -98,7 +98,7 @@ export const BookingCancellationDialog = ({
             </DialogTitle>
           </DialogHeader>
 
-          <div className="space-y-4">
+          <div className="space-y-4 font-sans">
             {/* Warning Card */}
             <Card className="p-4 border-destructive bg-destructive/10">
               <div className="flex items-center gap-2 text-destructive">

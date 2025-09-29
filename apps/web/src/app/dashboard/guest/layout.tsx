@@ -37,7 +37,7 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
             <DynamicHeader />
           </div>
         </header>
-        <section className="flex-1">{children}</section>
+        <section className="flex-1 font-sans">{children}</section>
       </main>
     </div>
   );
