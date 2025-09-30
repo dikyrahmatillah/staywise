@@ -22,7 +22,6 @@ import { useCallback } from "react";
 
 export function HeaderBlock({ name }: { name: string }) {
   const getShareUrl = useCallback(() => {
-    // Prefer canonical/current URL. In Next.js client components `location` is available.
     try {
       return window.location.href;
     } catch {

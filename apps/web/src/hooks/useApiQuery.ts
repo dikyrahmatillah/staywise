@@ -1,9 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
 import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
-import { toast } from "sonner";
-import { getErrorMessage } from "@/lib/errors";
 import defaultQueryOptions from "@/lib/query";
 
 type Params<TData, TError> = {
@@ -11,6 +8,7 @@ type Params<TData, TError> = {
   queryFn: () => Promise<TData>;
   enabled?: boolean;
   errorMessage?: string;
+  silent?: boolean;
   options?: UseQueryOptions<TData, TError, TData, readonly unknown[]>;
 };
 
@@ -18,7 +16,6 @@ export function useApiQuery<TData, TError = Error>({
   queryKey,
   queryFn,
   enabled = true,
-  errorMessage,
   options,
 }: Params<TData, TError>) {
   const baseOptions = defaultQueryOptions as UseQueryOptions<
@@ -42,21 +39,6 @@ export function useApiQuery<TData, TError = Error>({
     enabled,
     ...mergedOptions,
   });
-
-  const queryError = res.error;
-
-  useEffect(() => {
-    if (queryError) {
-      try {
-        toast.error(
-          getErrorMessage(
-            queryError as unknown,
-            errorMessage ?? "Failed to load data"
-          )
-        );
-      } catch {}
-    }
-  }, [queryError, errorMessage]);
 
   return res;
 }
