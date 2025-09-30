@@ -357,7 +357,7 @@ export class PaymentProofController {
         }),
         prisma.booking.update({
           where: { id: booking.id },
-          data: { status: "COMPLETED" },
+          data: { status: "PROCESSING" },
         }),
       ]);
 
