@@ -37,16 +37,14 @@ export function FiltersBar({ params, onChange }: FiltersBarProps) {
             </div>
           </div>
         </div>
-        <div className="hidden md:block">
-          <FiltersForm
-            nameFilter={nameFilter}
-            setNameFilter={setNameFilter}
-            categoryFilter={categoryFilter}
-            setCategoryFilter={setCategoryFilter}
-            params={params}
-            onChange={onChange}
-          />
-        </div>
+        <FiltersForm
+          nameFilter={nameFilter}
+          setNameFilter={setNameFilter}
+          categoryFilter={categoryFilter}
+          setCategoryFilter={setCategoryFilter}
+          params={params}
+          onChange={onChange}
+        />
       </div>
     </div>
   );

@@ -1,10 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
-import api from "@/lib/axios";
-import type { Amenities } from "./components/types";
-import type { ApiResponse } from "@/types/api";
+import React from "react";
+import usePropertyDetails from "@/hooks/usePropertyDetails";
 import { HeaderBlock } from "./components/HeaderBlock";
 import { ImageGallery } from "./components/ImageGallery";
 import { StatsHeader } from "./components/StatsHeader";
@@ -14,90 +11,21 @@ import { Reviews } from "./components/Reviews";
 import { BookingSidebar } from "./components/BookingSidebar";
 import { RoomsSection } from "./components/RoomsSection";
 import { LocationSection } from "./components/LocationSection";
-
-type Room = {
-  id: string;
-  name: string;
-  basePrice: string | number;
-  bedCount?: number;
-  bedType?: string | null;
-  maxGuests?: number;
-  capacity?: number;
-  imageUrl?: string | null;
-};
-
-type DetailResponse = {
-  id: string;
-  name: string;
-  city: string;
-  address: string;
-  description?: string | null;
-  maxGuests?: number;
-  Rooms: Room[];
-  Facilities: { id: string; propertyId: string; facility: Amenities }[];
-  Pictures: {
-    id: string;
-    propertyId: string;
-    imageUrl: string;
-    note?: string | null;
-  }[];
-  Reviews: {
-    id: string;
-    rating: number;
-    comment: string;
-    createdAt: string;
-    User: {
-      firstName: string | null;
-      lastName: string | null;
-      image?: string | null;
-    };
-  }[];
-  reviewCount?: number;
-  averageRating?: number | null;
-  latitude?: number | string | null;
-  longitude?: number | string | null;
-};
-
-async function fetchProperty(slug: string): Promise<DetailResponse> {
-  const res = await api.get<ApiResponse<DetailResponse>>(`/properties/${slug}`);
-  return res.data.data;
-}
+import type { Room } from "@/types/property-detail";
 
 export function PropertyDetailClient({ slug }: { slug: string }) {
-  const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
-  const [unavailableDates, setUnavailableDates] = useState<Date[]>([]);
-
-  const { data, isLoading, error } = useQuery<DetailResponse, Error>({
-    queryKey: ["property", slug],
-    queryFn: () => fetchProperty(slug),
-  });
-
-  // Fetch unavailable dates when room is selected
-  const { data: unavailableDatesData } = useQuery({
-    queryKey: ["unavailable-dates", selectedRoom?.id],
-    queryFn: async () => {
-      if (!selectedRoom?.id) return null;
-      const res = await api.get(`/rooms/${selectedRoom.id}/unavailable-dates`);
-      return res.data.data;
-    },
-    enabled: !!selectedRoom?.id,
-  });
-
-  // Update unavailable dates when data changes
-  useEffect(() => {
-    if (unavailableDatesData?.unavailableDates) {
-      const dates = unavailableDatesData.unavailableDates.map(
-        (dateStr: string) => new Date(dateStr + 'T00:00:00')
-      );
-      setUnavailableDates(dates);
-    } else {
-      setUnavailableDates([]);
-    }
-  }, [unavailableDatesData]);
+  const {
+    data: property,
+    isLoading,
+    error,
+    selectedRoom,
+    setSelectedRoom,
+    unavailableDates,
+  } = usePropertyDetails(slug);
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Failed to load property</div>;
-  const property = data as DetailResponse;
+  if (!property) return <div>Property not found</div>;
 
   const images = property.Pictures?.map((p) => p.imageUrl) ?? [];
 
@@ -120,7 +48,6 @@ export function PropertyDetailClient({ slug }: { slug: string }) {
   const totalBedrooms = property.Rooms?.length || 1;
   const totalBeds =
     property.Rooms?.reduce((sum, room) => sum + (room.bedCount || 0), 0) || 0;
-  // derive guest capacity range using shared helper
   type PropLike = { Rooms?: unknown[]; maxGuests?: number };
   const guestRange = getGuestRange(property as PropLike);
 

@@ -5,17 +5,7 @@ import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/booking-formatters";
 import Image from "next/image";
 import { Bed, Users } from "lucide-react";
-
-type Room = {
-  id: string;
-  name: string;
-  basePrice: string | number;
-  bedCount?: number;
-  bedType?: string | null;
-  capacity?: number;
-  description?: string | null;
-  imageUrl?: string | null;
-};
+import type { Room } from "@/types/property-detail";
 
 interface RoomsSectionProps {
   rooms: Room[];
@@ -74,7 +64,7 @@ export function RoomsSection({
                   handleRoomSelect(room);
                 }
               }}
-              className={`w-full flex border p-0 hover:shadow-lg transition-shadow rounded-md overflow-hidden cursor-pointer ${
+              className={`w-full flex border p-0 hover:shadow-lg hover:border-primary transition-shadow rounded-md overflow-hidden cursor-pointer ${
                 isSelected ? "border-primary ring-2 ring-primary/20" : ""
               }`}
             >

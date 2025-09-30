@@ -17,5 +17,6 @@ export function useProperties(params: GetPropertiesQuery = {}) {
   return useApiQuery<ApiListResponse<Property>, Error>({
     queryKey: ["properties", params],
     queryFn: () => fetchProperties(params),
+    silent: true,
   });
 }
