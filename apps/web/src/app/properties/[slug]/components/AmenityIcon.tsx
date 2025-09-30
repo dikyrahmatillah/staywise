@@ -18,7 +18,7 @@ import {
   Image as ImageIcon,
   Users,
 } from "lucide-react";
-import type { Amenities } from "./types";
+import type { Amenities } from "@/types/property-detail";
 
 type IconProps = React.ComponentProps<typeof Wifi>;
 type IconType = React.ComponentType<IconProps>;

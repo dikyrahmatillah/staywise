@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format, parseISO } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Star } from "lucide-react";
-import type { ReviewItem } from "./types";
+import type { ReviewItem } from "@/types/property-detail";
 
 export function Reviews({
   reviews,

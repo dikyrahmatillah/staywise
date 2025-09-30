@@ -1,7 +1,7 @@
 "use client";
 
 import { Bed } from "lucide-react";
-import type { SleepingArrangement } from "./types";
+import type { SleepingArrangement } from "@/types/property-detail";
 
 export function SleepingArrangements({
   data,

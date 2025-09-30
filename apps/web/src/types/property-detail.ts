@@ -1,9 +1,17 @@
-import type { Amenities } from "@/app/properties/[slug]/components/types";
+import type {
+  AmenityType,
+  PropertyResponse,
+  RoomResponse,
+  CreatePropertyPictureInput,
+} from "@repo/schemas";
 
-export type Room = {
-  id: string;
-  name: string;
-  basePrice: string | number;
+export type Amenities = AmenityType;
+export type Property = PropertyResponse & {
+  facilities?: { id: string; propertyId: string; facility: Amenities }[];
+};
+
+export type Facility = { id: string; propertyId: string; facility: Amenities };
+export type Room = RoomResponse & {
   bedCount?: number;
   bedType?: string | null;
   maxGuests?: number;
@@ -20,12 +28,10 @@ export type DetailResponse = {
   maxGuests?: number;
   Rooms: Room[];
   Facilities: { id: string; propertyId: string; facility: Amenities }[];
-  Pictures: {
+  Pictures: (CreatePropertyPictureInput & {
     id: string;
     propertyId: string;
-    imageUrl: string;
-    note?: string | null;
-  }[];
+  })[];
   Reviews: {
     id: string;
     rating: number;
@@ -42,5 +48,42 @@ export type DetailResponse = {
   latitude?: number | string | null;
   longitude?: number | string | null;
 };
+
+export interface SleepingArrangement {
+  room: string;
+  beds: string;
+}
+
+export interface ReviewItem {
+  id: string;
+  author: string;
+  avatar: string;
+  rating: number;
+  date: string;
+  comment: string;
+}
+
+export interface NearbyPropertyItem {
+  id: string;
+  name: string;
+  image: string;
+  guests: number;
+  bedrooms: number;
+  bathrooms: number;
+  priceFrom: number;
+}
+
+export interface StatsHeaderProps {
+  city: string;
+  address?: string | null;
+  description?: string | null;
+  rating: number;
+  reviewCount: number;
+  maxGuests?: number | null;
+  minGuests?: number | null;
+  bedrooms: number;
+  totalBeds?: number;
+  bedTypeSummary?: string;
+}
 
 export default DetailResponse;

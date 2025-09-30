@@ -2,6 +2,7 @@
 
 import { Users, Bed, Star, MapPin, Home } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import type { StatsHeaderProps } from "@/types/property-detail";
 
 export function StatsHeader({
   city,
@@ -14,18 +15,7 @@ export function StatsHeader({
   bedrooms,
   totalBeds,
   bedTypeSummary,
-}: {
-  city: string;
-  address?: string | null;
-  description?: string | null;
-  rating: number;
-  reviewCount: number;
-  maxGuests?: number | null;
-  minGuests?: number | null;
-  bedrooms: number;
-  totalBeds?: number;
-  bedTypeSummary?: string;
-}) {
+}: StatsHeaderProps) {
   return (
     <div className="mb-10">
       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">

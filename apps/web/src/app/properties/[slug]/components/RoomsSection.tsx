@@ -5,17 +5,7 @@ import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/booking-formatters";
 import Image from "next/image";
 import { Bed, Users } from "lucide-react";
-
-type Room = {
-  id: string;
-  name: string;
-  basePrice: string | number;
-  bedCount?: number;
-  bedType?: string | null;
-  capacity?: number;
-  description?: string | null;
-  imageUrl?: string | null;
-};
+import type { Room } from "@/types/property-detail";
 
 interface RoomsSectionProps {
   rooms: Room[];
