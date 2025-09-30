@@ -1,5 +1,5 @@
 import type { Property } from "@/types/property";
-import { PropertyCard } from "./PropertyCard";
+import { PropertyCard } from "./property-card";
 
 interface PropertiesGridProps {
   properties: Property[];

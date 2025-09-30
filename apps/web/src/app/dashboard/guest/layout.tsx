@@ -3,7 +3,7 @@ import { GuestSidebar } from "@/components/guest/guest-sidebar";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
-import { DynamicHeader } from "../../../components/guest/dynamic-header";
+import { Breadcrumb } from "../../../components/guest/breadcrumb";
 
 export const metadata: Metadata = {
   title: "StayWise Guest",
@@ -28,7 +28,7 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
 
         <main className="flex-1 pb-10 pt-10 md:pl-8">
           <div className="flex h-full min-w-0 flex-col rounded-3xl border border-slate-200/70 bg-white/75 p-4 shadow-[0_18px_50px_-30px_rgba(15,23,42,0.55)] backdrop-blur-2xl transition-shadow dark:border-slate-800/70 dark:bg-slate-900/75 sm:p-6 lg:p-8">
-            <header className="sticky top-0 z-30 mx:-4 -mt-4 mb-6 flex items-center justify-between border-b border-slate-200/60 bg-white/70 px-4 py-4 backdrop-blur-xl dark:border-slate-800/60 dark:bg-slate-900/60 sm:mx-0 sm:-mt-6 sm:rounded-2xl sm:px-6">
+            <header className="sticky top-0 z-30 mx:-4 -mt-4 mb-6 flex items-center justify-between border-b border-slate-200/60 bg-white/70  py-4 backdrop-blur-xl dark:border-slate-800/60 dark:bg-slate-900/60 sm:mx-0 sm:-mt-6 sm:rounded-2xl ">
               <div className="flex items-center gap-3">
                 <Sheet>
                   <SheetTrigger asChild>
@@ -49,7 +49,7 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                   </SheetContent>
                 </Sheet>
 
-                <DynamicHeader />
+                <Breadcrumb />
               </div>
             </header>
 

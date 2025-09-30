@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
   DialogContent,
@@ -111,54 +112,79 @@ export function CategoryManagement() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight">
-            Category Management
-          </h1>
-          <p className="text-muted-foreground">
-            Manage property categories and classifications
-          </p>
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
+      <section className="relative overflow-visible rounded-2xl">
+        <div className="grid gap-4 md:grid-cols-[1fr_auto] md:items-center">
+          <div className="flex items-start gap-4">
+            <div>
+              <h1 className="text-2xl font-semibold tracking-tight">
+                Category Management
+              </h1>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 justify-end">
+            <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+              <DialogTrigger asChild>
+                <Button size="lg">
+                  <Plus className="mr-2 h-4 w-4" />
+                  New category
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Create Custom Category</DialogTitle>
+                  <DialogDescription>
+                    Add a new custom category for your properties.
+                  </DialogDescription>
+                </DialogHeader>
+                <CategoryForm
+                  onSubmit={handleCreateCategory}
+                  onCancel={() => setCreateDialogOpen(false)}
+                  isLoading={actionLoading}
+                />
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
+      </section>
+
+      <Tabs defaultValue="custom" className="space-y-6">
+        <div className="flex flex-col gap-4">
+          <TabsList className="w-full">
+            <TabsTrigger
+              value="custom"
+              className="flex-1 px-4 py-2 text-sm text-center cursor-pointer"
+            >
+              Custom categories
+            </TabsTrigger>
+            <TabsTrigger
+              value="default"
+              className="flex-1 px-4 py-2 text-sm text-center cursor-pointer"
+            >
+              Default library
+            </TabsTrigger>
+          </TabsList>
         </div>
 
-        <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Custom Category
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Create Custom Category</DialogTitle>
-              <DialogDescription>
-                Add a new custom category for your properties.
-              </DialogDescription>
-            </DialogHeader>
-            <CategoryForm
-              onSubmit={handleCreateCategory}
-              onCancel={() => setCreateDialogOpen(false)}
-              isLoading={actionLoading}
-            />
-          </DialogContent>
-        </Dialog>
-      </div>
+        <TabsContent value="custom" className="space-y-6">
+          <CustomCategoriesSection
+            categories={customCategories}
+            loading={customLoading}
+            error={customError}
+            onEdit={openEditDialog}
+            onDelete={openDeleteDialog}
+          />
+        </TabsContent>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <DefaultCategoriesSection
-          categories={defaultCategories}
-          loading={defaultLoading}
-          error={defaultError}
-        />
-        <CustomCategoriesSection
-          categories={customCategories}
-          loading={customLoading}
-          error={customError}
-          onEdit={openEditDialog}
-          onDelete={openDeleteDialog}
-        />
-      </div>
+        <TabsContent value="default" className="space-y-6">
+          <DefaultCategoriesSection
+            categories={defaultCategories}
+            loading={defaultLoading}
+            error={defaultError}
+          />
+        </TabsContent>
+      </Tabs>
 
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogContent>

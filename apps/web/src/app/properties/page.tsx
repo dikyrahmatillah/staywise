@@ -1,12 +1,14 @@
 "use client";
 
 import { Suspense } from "react";
+import { AlertCircle, SearchX } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Ellipsis from "@/components/ui/ellipsis";
 import { useProperties } from "@/hooks/useProperties";
-import { FiltersBar } from "@/components/properties/FiltersBar";
-import { PropertiesSummary } from "@/components/properties/PropertiesSummary";
-import { PropertiesGrid } from "@/components/properties/PropertiesGrid";
-import { Pagination } from "@/components/properties/Pagination";
+import { FiltersBar } from "@/components/properties/filters-bar";
+import { PropertiesSummary } from "@/components/properties/properties-summary";
+import { PropertiesGrid } from "@/components/properties/properties-grid";
+import { Pagination } from "@/components/properties/pagination";
 import { usePropertySearchParams } from "@/hooks/usePropertySearchParams";
 
 function formatLocation(location: string) {
@@ -49,69 +51,78 @@ function PropertiesPageInner() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8">
-        <FiltersBar params={params} onChange={updateSearchParams} />
+      <div className="relative">
+        <div className="container mx-auto px-4 pb-16 pt-10">
+          <div className="mt-12 space-y-10">
+            <FiltersBar params={params} onChange={updateSearchParams} />
 
-        {/* Results summary */}
-        <PropertiesSummary
-          total={totalProperties}
-          params={params}
-          isLoading={isLoading}
-          onChange={updateSearchParams}
-          formatLocation={formatLocation}
-          toTitleCase={toTitleCase}
-        />
-
-        {/* Loading State */}
-        {isLoading && (
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Loading properties...</p>
-          </div>
-        )}
-
-        {/* Error State */}
-        {isError && (
-          <div className="text-center py-12">
-            <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-6 max-w-md mx-auto">
-              <p className="text-destructive font-medium mb-2">
-                Failed to load properties
-              </p>
-              <p className="text-sm text-muted-foreground">
-                {error instanceof Error
-                  ? error.message
-                  : "An unexpected error occurred."}
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* No Results */}
-        {!isLoading && !isError && properties.length === 0 && (
-          <div className="text-center py-12">
-            <div className="bg-muted/30 rounded-lg p-8 max-w-md mx-auto">
-              <p className="text-lg font-medium mb-2">No properties found</p>
-              <p className="text-muted-foreground mb-4">
-                Try adjusting your search criteria or clearing filters.
-              </p>
-              <Button variant="outline" onClick={clearFilters}>
-                Clear Filters
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {/* Properties Grid */}
-        {!isLoading && !isError && properties.length > 0 && (
-          <>
-            <PropertiesGrid properties={properties} />
-            <Pagination
-              totalPages={totalPages}
+            <PropertiesSummary
+              total={totalProperties}
               params={params}
-              onPage={handlePageChange}
+              isLoading={isLoading}
+              onChange={updateSearchParams}
+              formatLocation={formatLocation}
+              toTitleCase={toTitleCase}
             />
-          </>
-        )}
+
+            {isLoading && (
+              <div className="space-y-6">
+                <div className="flex flex-col items-center justify-center gap-3 text-sm font-medium text-muted-foreground">
+                  <Ellipsis size={12} className="inline-block" />
+                  <div className="mt-2 text-sm text-muted-foreground">
+                    Fetching curated stays for you...
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {isError && (
+              <div className="rounded-3xl border border-destructive/40 bg-destructive/10 p-8 text-center w-full">
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/20 text-destructive mx-auto">
+                  <AlertCircle className="h-6 w-6" />
+                </div>
+                <h2 className="text-lg font-semibold text-destructive">
+                  Failed to load properties
+                </h2>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {error instanceof Error
+                    ? error.message
+                    : "An unexpected error occurred."}
+                </p>
+              </div>
+            )}
+
+            {!isLoading && !isError && properties.length === 0 && (
+              <div className="rounded-3xl border border-border/60 bg-card/70 p-10 text-center shadow-sm backdrop-blur-sm w-full">
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary mx-auto">
+                  <SearchX className="h-6 w-6" />
+                </div>
+                <h2 className="text-xl font-semibold">No properties found</h2>
+                <p className="mt-2 text-muted-foreground">
+                  Try adjusting your search criteria.
+                </p>
+                <Button
+                  variant="outline"
+                  className="mt-6"
+                  onClick={clearFilters}
+                >
+                  Clear filters
+                </Button>
+              </div>
+            )}
+
+            {!isLoading && !isError && properties.length > 0 && (
+              <div className="space-y-10">
+                <PropertiesGrid properties={properties} />
+                <Pagination
+                  totalPages={totalPages}
+                  params={params}
+                  onPage={handlePageChange}
+                />
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
