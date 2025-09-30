@@ -39,18 +39,20 @@ export function StatsHeader({
           <h2 className="text-3xl font-serif mb-2">{city}</h2>
         </div>
 
-        <div className="flex-shrink-0">
-          <div className="rounded-full bg-white shadow-sm border border-slate-100 px-4 py-2 inline-flex items-center gap-3 hover:shadow-md transition-shadow">
-            <div className="flex items-center gap-1">
-              <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-              <span className="font-semibold">{rating.toFixed(1)}</span>
+        {reviewCount ? (
+          <div className="flex-shrink-0">
+            <div className="rounded-full bg-white shadow-sm border border-slate-100 px-4 py-2 inline-flex items-center gap-3 hover:shadow-md transition-shadow">
+              <div className="flex items-center gap-1">
+                <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                <span className="font-semibold">{rating.toFixed(1)}</span>
+              </div>
+              <Separator orientation="vertical" className="h-4" />
+              <span className="text-sm font-medium">
+                {reviewCount} review{reviewCount !== 1 ? "s" : ""}
+              </span>
             </div>
-            <Separator orientation="vertical" className="h-4" />
-            <span className="text-sm font-medium">
-              {reviewCount} review{reviewCount !== 1 ? "s" : ""}
-            </span>
           </div>
-        </div>
+        ) : null}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">

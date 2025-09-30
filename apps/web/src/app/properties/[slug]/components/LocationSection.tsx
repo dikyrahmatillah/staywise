@@ -1,7 +1,6 @@
 "use client";
 
-import { MapPin, Navigation } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { MapPin } from "lucide-react";
 
 export function LocationSection({
   address,
@@ -14,34 +13,12 @@ export function LocationSection({
   latitude?: number | null;
   longitude?: number | null;
 }) {
-  const openInMaps = () => {
-    if (typeof latitude === "number" && typeof longitude === "number") {
-      window.open(
-        `https://www.google.com/maps?q=${latitude},${longitude}`,
-        "_blank"
-      );
-    } else {
-      const query = encodeURIComponent(
-        `${address ? address + ", " : ""}${city}`
-      );
-      window.open(`https://www.google.com/maps/search/${query}`, "_blank");
-    }
-  };
-
   return (
     <section id="location" className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <h3 className="text-xl font-bold text-slate-800">Location</h3>
         </div>
-        <Button
-          onClick={openInMaps}
-          variant="outline"
-          className="flex items-center gap-2 rounded-full border-slate-300 hover:border-primary hover:text-primary transition-all duration-200"
-        >
-          <Navigation className="h-3 w-3" />
-          <span className="font-medium">Open in Maps</span>
-        </Button>
       </div>
 
       <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
@@ -62,7 +39,7 @@ export function LocationSection({
                 <iframe
                   title="Property location"
                   src={fallback}
-                  className="w-full h-full border-0 group-hover:scale-105 transition-transform duration-500"
+                  className="w-full h-full border-0"
                   allowFullScreen
                   loading="lazy"
                 />
@@ -77,7 +54,7 @@ export function LocationSection({
               <iframe
                 title="Property location"
                 src={src}
-                className="w-full h-full border-0 group-hover:scale-105 transition-transform duration-500"
+                className="w-full h-full border-0"
                 allowFullScreen
                 loading="lazy"
               />
