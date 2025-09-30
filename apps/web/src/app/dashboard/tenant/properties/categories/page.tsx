@@ -8,8 +8,8 @@ export const metadata: Metadata = {
 
 export default async function CategoriesProperty() {
   return (
-    <div className="p-6">
+    <section className="min-h-screen">
       <CategoryManagement />
-    </div>
+    </section>
   );
 }
