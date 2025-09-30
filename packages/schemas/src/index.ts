@@ -6,3 +6,4 @@ export * from "./category.schema.js";
 export * from "./room.schema.js";
 export * from "./facility.schema.js";
 export * from "./payment-proof.schema.js";
+export * from "./review.schema.js";
