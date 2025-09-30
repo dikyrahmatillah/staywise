@@ -16,11 +16,13 @@ export function Reviews({
 }) {
   const [showAll, setShowAll] = useState(false);
 
+  if (!reviews || reviews.length === 0 || total === 0) return null;
+
   const visibleReviews = showAll ? reviews : reviews.slice(0, 3);
 
   return (
     <section id="reviews">
-      <h3 className="text-xl font-semibold mb-4">Reviews</h3>
+      <h3 className="text-xl font-semibold mb-6">Reviews</h3>
       <div className="space-y-6">
         {visibleReviews.map((review) => (
           <div key={review.id} className="border-b pb-6 last:border-b-0">

@@ -29,10 +29,10 @@ export function StatsHeader({
   return (
     <div className="mb-10">
       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
-        <div className="flex-1">
-          <div className="flex items-center gap-2 text-muted-foreground mb-1">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 text-muted-foreground mb-1 min-w-0">
             <MapPin className="h-4 w-4" />
-            <p className="text-sm">
+            <p className="text-sm truncate" title={`${address}, ${city}`}>
               {address}, {city}
             </p>
           </div>

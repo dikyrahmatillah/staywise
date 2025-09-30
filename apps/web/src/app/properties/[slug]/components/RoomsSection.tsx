@@ -74,7 +74,7 @@ export function RoomsSection({
                   handleRoomSelect(room);
                 }
               }}
-              className={`w-full flex border p-0 hover:shadow-lg transition-shadow rounded-md overflow-hidden cursor-pointer ${
+              className={`w-full flex border p-0 hover:shadow-lg hover:border-primary transition-shadow rounded-md overflow-hidden cursor-pointer ${
                 isSelected ? "border-primary ring-2 ring-primary/20" : ""
               }`}
             >

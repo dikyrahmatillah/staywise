@@ -72,7 +72,17 @@ export function PropertyDetailClient({ slug }: { slug: string }) {
     queryFn: () => fetchProperty(slug),
   });
 
-  // Fetch unavailable dates when room is selected
+  useEffect(() => {
+    if (!data) return;
+    if (selectedRoom) return;
+
+    const firstRoom =
+      data.Rooms && data.Rooms.length > 0 ? data.Rooms[0] : null;
+    if (firstRoom) {
+      setSelectedRoom(firstRoom as Room);
+    }
+  }, [data, selectedRoom]);
+
   const { data: unavailableDatesData } = useQuery({
     queryKey: ["unavailable-dates", selectedRoom?.id],
     queryFn: async () => {
@@ -83,11 +93,10 @@ export function PropertyDetailClient({ slug }: { slug: string }) {
     enabled: !!selectedRoom?.id,
   });
 
-  // Update unavailable dates when data changes
   useEffect(() => {
     if (unavailableDatesData?.unavailableDates) {
       const dates = unavailableDatesData.unavailableDates.map(
-        (dateStr: string) => new Date(dateStr + 'T00:00:00')
+        (dateStr: string) => new Date(dateStr + "T00:00:00")
       );
       setUnavailableDates(dates);
     } else {
@@ -120,7 +129,6 @@ export function PropertyDetailClient({ slug }: { slug: string }) {
   const totalBedrooms = property.Rooms?.length || 1;
   const totalBeds =
     property.Rooms?.reduce((sum, room) => sum + (room.bedCount || 0), 0) || 0;
-  // derive guest capacity range using shared helper
   type PropLike = { Rooms?: unknown[]; maxGuests?: number };
   const guestRange = getGuestRange(property as PropLike);
 

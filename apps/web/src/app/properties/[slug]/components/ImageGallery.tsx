@@ -130,7 +130,7 @@ export function ImageGallery({
             <Button
               variant="ghost"
               size="icon"
-              className="absolute top-4 right-4 text-white bg-black/50 hover:bg-black/70 z-10"
+              className="absolute top-4 right-4 text-white bg-black/50 z-10"
               onClick={() => setOpen(false)}
             >
               <X className="h-6 w-6" />
