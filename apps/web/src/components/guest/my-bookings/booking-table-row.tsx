@@ -11,6 +11,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import type { CreateReviewInput } from "@/types/review";
 import type { BookingTransaction } from "@repo/types";
 import { PropertyInfo } from "@/components/guest/my-bookings/property-info";
 import { BookingInfo } from "@/components/guest/my-bookings/booking-info";
@@ -18,8 +19,10 @@ import { PaymentInfo } from "@/components/guest/my-bookings/payment-info";
 import { StatusBadge } from "@/components/guest/my-bookings/status-badge";
 import { PaymentProofUpload } from "@/components/guest/booking-transaction/payment-proof-upload";
 import { BookingCancellationDialog } from "@/components/guest/booking-transaction/cancellation-dialog";
-import { Upload, CreditCard, Eye, X, FileImage } from "lucide-react";
+import { ReviewDialog } from "@/components/guest/reviews/review-dialog";
+import { Upload, CreditCard, Eye, X, FileImage, Star } from "lucide-react";
 import { useBookings } from "@/hooks/useBookings";
+import { useReviews, useCanReview, useBookingReview } from "@/hooks/useReview";
 import { toast } from "sonner";
 
 interface BookingTableRowProps {
@@ -37,8 +40,13 @@ export const BookingTableRow = ({
   const [paymentProofViewDialogOpen, setPaymentProofViewDialogOpen] =
     useState(false);
   const [cancellationDialogOpen, setCancellationDialogOpen] = useState(false);
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
+
   const { cancelBooking } = useBookings();
+  const { createReview, isSubmitting } = useReviews();
+  const { canReview } = useCanReview(booking.id);
+  const { review } = useBookingReview(booking.id);
 
   const handleCancelBooking = async (bookingId: string) => {
     setIsCancelling(true);
@@ -62,6 +70,11 @@ export const BookingTableRow = ({
     } catch (error) {
       console.error("Error auto-cancelling booking:", error);
     }
+  };
+
+  const handleReviewSubmit = async (data: CreateReviewInput) => {
+    await createReview(data);
+    onBookingUpdate?.(); // Refresh to show review status
   };
 
   const renderPaymentAction = () => {
@@ -181,6 +194,63 @@ export const BookingTableRow = ({
       );
     }
 
+    // For COMPLETED status, show review button or review status
+    if (booking.status === "COMPLETED") {
+      const isPastCheckout = new Date() > new Date(booking.checkOutDate);
+
+      if (review) {
+        // Already reviewed - show review indicator and details button
+        return (
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-full px-4 h-10 border-yellow-400 text-yellow-700 hover:bg-yellow-50"
+              onClick={() => setReviewDialogOpen(true)}
+            >
+              <Star className="h-4 w-4 mr-2 fill-yellow-400" />
+              {review.rating}/5
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-full px-4 h-10"
+              onClick={() => onViewDetails?.(booking)}
+            >
+              <Eye className="h-4 w-4 mr-2" />
+              Details
+            </Button>
+          </div>
+        );
+      }
+
+      if (canReview && isPastCheckout) {
+        // Can leave review - show review button
+        return (
+          <div className="flex gap-2">
+            <Button
+              variant="default"
+              size="sm"
+              className="rounded-full px-4 h-10 bg-yellow-500 hover:bg-yellow-600"
+              onClick={() => setReviewDialogOpen(true)}
+            >
+              <Star className="h-4 w-4 mr-2" />
+              Leave Review
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-full px-4 h-10"
+              onClick={() => onViewDetails?.(booking)}
+            >
+              <Eye className="h-4 w-4 mr-2" />
+              Details
+            </Button>
+          </div>
+        );
+      }
+    }
+
     // For other statuses, show details button
     return (
       <Button
@@ -196,6 +266,19 @@ export const BookingTableRow = ({
   };
 
   const getStatusDisplay = () => {
+    // Show review status for completed bookings
+    if (booking.status === "COMPLETED" && review) {
+      return (
+        <div className="flex flex-col items-center gap-1">
+          <StatusBadge status="COMPLETED" />
+          <div className="flex items-center gap-1 text-xs text-yellow-600">
+            <Star className="h-3 w-3 fill-yellow-400" />
+            <span>Reviewed</span>
+          </div>
+        </div>
+      );
+    }
+
     // Show payment proof status for manual transfers
     if (booking.paymentMethod === "MANUAL_TRANSFER" && booking.paymentProof) {
       if (booking.paymentProof.rejectedAt) {
@@ -259,6 +342,16 @@ export const BookingTableRow = ({
         onOpenChange={setCancellationDialogOpen}
         onConfirmCancel={handleCancelBooking}
         isLoading={isCancelling}
+      />
+
+      {/* Review Dialog */}
+      <ReviewDialog
+        open={reviewDialogOpen}
+        onOpenChange={setReviewDialogOpen}
+        bookingId={booking.id}
+        propertyName={booking.Property?.name || "Property"}
+        onSubmit={handleReviewSubmit}
+        isSubmitting={isSubmitting}
       />
     </>
   );
