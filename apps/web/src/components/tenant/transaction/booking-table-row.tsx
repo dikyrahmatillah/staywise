@@ -44,7 +44,9 @@ const GuestInfo = ({ user }: { user: BookingTransaction["User"] }) => (
     </div>
     <div className="flex items-center gap-2">
       <Mail className="h-3 w-3 text-muted-foreground" />
-      <span className="text-xs text-muted-foreground">{user.email}</span>
+      <span className="text-xs text-muted-foreground truncate max-w-[150px]">
+        {user.email}
+      </span>
     </div>
   </div>
 );
@@ -242,7 +244,7 @@ export const TenantBookingTableRow = ({
             <Button
               variant="destructive"
               size="sm"
-              className="rounded-full px-3 h-8"
+              className="rounded-sm px-3 h-8"
               onClick={handleCancel}
               disabled={isCancelling}
             >
@@ -254,28 +256,14 @@ export const TenantBookingTableRow = ({
       } else {
         // If payment proof exists, show view details (guest has uploaded, waiting for processing)
         return (
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="rounded-full px-3 h-8"
-              onClick={() => setPaymentProofDialogOpen(true)}
-            >
-              <FileImage className="h-3 w-3 mr-1" />
-              View Proof
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="rounded-full px-4 h-8"
-              onClick={() => {
-                console.log("View booking details:", booking.id);
-              }}
-            >
-              <Eye className="h-3 w-3 mr-1" />
-              Details
-            </Button>
-          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="rounded-sm"
+            onClick={() => setPaymentProofDialogOpen(true)}
+          >
+            <FileImage className="h-3 w-3" />
+          </Button>
         );
       }
     }
@@ -293,7 +281,7 @@ export const TenantBookingTableRow = ({
           <Button
             variant="outline"
             size="sm"
-            className="rounded-full px-3 h-8"
+            className="rounded-sm px-3 h-8"
             onClick={() => setPaymentProofDialogOpen(true)}
           >
             <FileImage className="h-3 w-3 mr-1" />
@@ -304,7 +292,7 @@ export const TenantBookingTableRow = ({
           <Button
             variant="default"
             size="sm"
-            className="rounded-full px-3 h-8 bg-green-600 hover:bg-green-700"
+            className="rounded-sm px-3 h-8 bg-green-600 hover:bg-green-700"
             onClick={handleApprove}
             disabled={isApproving}
           >
@@ -316,7 +304,7 @@ export const TenantBookingTableRow = ({
           <Button
             variant="destructive"
             size="sm"
-            className="rounded-full px-3 h-8"
+            className="rounded-sm px-3 h-8"
             onClick={handleReject}
             disabled={isRejecting}
           >
@@ -332,14 +320,13 @@ export const TenantBookingTableRow = ({
       <Button
         variant="outline"
         size="sm"
-        className="rounded-full px-4 h-8"
+        className="rounded-sm h-8"
         onClick={() => {
           // Handle general details view
           console.log("View booking details:", booking.id);
         }}
       >
-        <Eye className="h-3 w-3 mr-1" />
-        Details
+        <Eye className="h-3 w-3" />
       </Button>
     );
   };
