@@ -1,13 +1,13 @@
 // components/TransactionsList.tsx
 
 import { Table, TableBody } from "@/components/ui/table";
-import { TenantBookingTableHeader } from "@/components/tenant/transaction/booking-table-header";
-import { TenantBookingTableRow } from "@/components/tenant/transaction/booking-table-row";
-import { TransactionsPagination } from "@/components/tenant/transaction/transaction-pagination";
+import { TenantBookingTableHeader } from "@/components/tenant/transaction/components/booking-table-header";
+import { TenantBookingTableRow } from "@/components/tenant/transaction/table-row/booking-table-row";
+import { TransactionsPagination } from "@/components/tenant/transaction/components/transaction-pagination";
 import type { Booking, PaginationInfo } from "@/types/transaction";
 
 interface TransactionsListProps {
-  bookings: Booking[];  // ✅ NOT any[]
+  bookings: Booking[]; // ✅ NOT any[]
   pagination: PaginationInfo;
   loading: boolean;
   onApprovePayment: (bookingId: string) => Promise<void>;

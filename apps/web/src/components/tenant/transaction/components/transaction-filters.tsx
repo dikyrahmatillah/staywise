@@ -56,7 +56,7 @@ export const TransactionsFilters = ({
 
         {/* Status Filter */}
         <Select value={statusFilter} onValueChange={onStatusFilterChange}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-[140px] truncate">
             <Filter className="h-4 w-4 mr-2" />
             <SelectValue placeholder="Filter by status" />
           </SelectTrigger>
