@@ -68,45 +68,42 @@ export const RoomManagementStats = ({
     return type.charAt(0) + type.slice(1).toLowerCase();
   };
 
-  const metricCards = useMemo(
-    () => {
-      const formatPriceRange = () => {
-        const { min, max } = stats.priceRange;
-        if (min === max) {
-          return formatCurrency(min);
-        }
-        return `${formatCurrency(min)} - ${formatCurrency(max)}`;
-      };
+  const metricCards = useMemo(() => {
+    const formatPriceRange = () => {
+      const { min, max } = stats.priceRange;
+      if (min === max) {
+        return formatCurrency(min);
+      }
+      return `${formatCurrency(min)} - ${formatCurrency(max)}`;
+    };
 
-      return [
-        {
-          title: "Total rooms",
-          value: loading ? "…" : stats.totalRooms.toString(),
-          description: "Currently in view",
-          icon: Bed,
-        },
-        {
-          title: "Total capacity",
-          value: loading ? "…" : stats.totalCapacity.toString(),
-          description: "Maximum guests per night",
-          icon: Users,
-        },
-        {
-          title: "Price range",
-          value: loading ? "…" : formatPriceRange(),
-          description: "Per room, per night",
-          icon: Wallet,
-        },
-        {
-          title: "Popular bed type",
-          value: loading ? "…" : formatBedType(stats.mostCommonBedType),
-          description: "Across filtered rooms",
-          icon: Layers,
-        },
-      ];
-    },
-    [loading, stats]
-  );
+    return [
+      {
+        title: "Total rooms",
+        value: loading ? "…" : stats.totalRooms.toString(),
+        description: "Currently in view",
+        icon: Bed,
+      },
+      {
+        title: "Total capacity",
+        value: loading ? "…" : stats.totalCapacity.toString(),
+        description: "Maximum guests per night",
+        icon: Users,
+      },
+      {
+        title: "Price range",
+        value: loading ? "…" : formatPriceRange(),
+        description: "Per room, per night",
+        icon: Wallet,
+      },
+      {
+        title: "Popular bed type",
+        value: loading ? "…" : formatBedType(stats.mostCommonBedType),
+        description: "Across filtered rooms",
+        icon: Layers,
+      },
+    ];
+  }, [loading, stats]);
 
   if (rooms.length === 0) return null;
 

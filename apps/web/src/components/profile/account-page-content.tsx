@@ -5,6 +5,7 @@ import { ChangePasswordForm } from "@/components/profile/change-password-form";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { AlertCircle } from "lucide-react";
 import Ellipsis from "@/components/ui/ellipsis";
+import DashboardPageHeader from "@/components/dashboard/dashboard-page-header";
 
 export function AccountPageContent() {
   const { profile, loading, error, refetch } = useUserProfile();
@@ -34,7 +35,11 @@ export function AccountPageContent() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
+      <DashboardPageHeader
+        title="Account Settings"
+        description="Manage your account settings and preferences."
+      />
       <ProfileEditForm user={profile} onProfileUpdated={refetch} />
       <ChangePasswordForm />
     </div>
