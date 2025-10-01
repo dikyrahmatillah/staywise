@@ -3,15 +3,9 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { Plus } from "lucide-react";
+import DashboardPageHeader from "@/components/dashboard/dashboard-page-header";
 import {
   useCustomCategories,
   useDefaultCategories,
@@ -21,11 +15,10 @@ import {
   UpdateCustomCategoryInput,
   CustomCategoryResponse,
 } from "@repo/schemas";
-import { toast } from "sonner";
 import { DefaultCategoriesSection } from "./default-categories-section";
 import { CustomCategoriesSection } from "./custom-categories-section";
-import { CategoryForm } from "./category-form";
 import { DeleteCategoryDialog } from "./delete-category-dialog";
+import { CategoryFormDialog } from "./category-form-dialog";
 
 export function CategoryManagement() {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -54,13 +47,9 @@ export function CategoryManagement() {
     setActionLoading(true);
     try {
       await createCategory(data);
-      toast.success("Category created successfully");
       setCreateDialogOpen(false);
-    } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Failed to create category"
-      );
-      throw error;
+    } catch {
+      throw new Error("Failed to create category");
     } finally {
       setActionLoading(false);
     }
@@ -71,14 +60,10 @@ export function CategoryManagement() {
     setActionLoading(true);
     try {
       await updateCategory(selectedCategory.id, data);
-      toast.success("Category updated successfully");
       setEditDialogOpen(false);
       setSelectedCategory(null);
-    } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Failed to update category"
-      );
-      throw error;
+    } catch {
+      throw new Error("Failed to update category");
     } finally {
       setActionLoading(false);
     }
@@ -89,13 +74,8 @@ export function CategoryManagement() {
     setActionLoading(true);
     try {
       await deleteCategory(selectedCategory.id);
-      toast.success("Category deleted successfully");
       setDeleteDialogOpen(false);
       setSelectedCategory(null);
-    } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Failed to delete category"
-      );
     } finally {
       setActionLoading(false);
     }
@@ -114,39 +94,32 @@ export function CategoryManagement() {
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
       <section className="relative overflow-visible rounded-2xl">
-        <div className="grid gap-4 md:grid-cols-[1fr_auto] md:items-center">
-          <div className="flex items-start gap-4">
-            <div>
-              <h1 className="text-2xl font-semibold tracking-tight">
-                Category Management
-              </h1>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 justify-end">
-            <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-              <DialogTrigger asChild>
-                <Button size="lg">
-                  <Plus className="mr-2 h-4 w-4" />
-                  New category
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Create Custom Category</DialogTitle>
-                  <DialogDescription>
-                    Add a new custom category for your properties.
-                  </DialogDescription>
-                </DialogHeader>
-                <CategoryForm
+        <DashboardPageHeader
+          title="Category Management"
+          description="Create and manage custom categories."
+          action={
+            <div className="flex items-center gap-3 justify-end">
+              <Dialog
+                open={createDialogOpen}
+                onOpenChange={setCreateDialogOpen}
+              >
+                <DialogTrigger asChild>
+                  <Button size="lg">
+                    <Plus className="mr-2 h-4 w-4" />
+                    New category
+                  </Button>
+                </DialogTrigger>
+                <CategoryFormDialog
+                  title="Create Custom Category"
+                  description={"Add a new custom category for your properties."}
                   onSubmit={handleCreateCategory}
                   onCancel={() => setCreateDialogOpen(false)}
                   isLoading={actionLoading}
                 />
-              </DialogContent>
-            </Dialog>
-          </div>
-        </div>
+              </Dialog>
+            </div>
+          }
+        />
       </section>
 
       <Tabs defaultValue="custom" className="space-y-6">
@@ -187,25 +160,19 @@ export function CategoryManagement() {
       </Tabs>
 
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit Category</DialogTitle>
-            <DialogDescription>
-              Update the category information.
-            </DialogDescription>
-          </DialogHeader>
-          {selectedCategory && (
-            <CategoryForm
-              category={selectedCategory}
-              onSubmit={handleUpdateCategory}
-              onCancel={() => {
-                setEditDialogOpen(false);
-                setSelectedCategory(null);
-              }}
-              isLoading={actionLoading}
-            />
-          )}
-        </DialogContent>
+        {selectedCategory && (
+          <CategoryFormDialog
+            title="Edit Category"
+            description={"Update the category information."}
+            category={selectedCategory}
+            onSubmit={handleUpdateCategory}
+            onCancel={() => {
+              setEditDialogOpen(false);
+              setSelectedCategory(null);
+            }}
+            isLoading={actionLoading}
+          />
+        )}
       </Dialog>
 
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
