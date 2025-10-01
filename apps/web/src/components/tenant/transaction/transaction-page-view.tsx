@@ -5,18 +5,18 @@ import { TransactionsList } from "@/components/tenant/transaction/transaction-li
 import { EmptyState } from "@/components/tenant/transaction/empty-state";
 import { LoadingState } from "@/components/tenant/transaction/loading-state";
 import { ErrorState } from "@/components/tenant/transaction/error-state";
-import type { PaginationInfo, TransactionsFilters as FiltersType } from "@/types/transaction";
+import type { PaginationInfo, TransactionsFilters as FiltersType, Booking } from "@/types/transaction";
 
 interface TransactionsPageViewProps {
-  bookings: any[];
+  bookings: Booking[];
   loading: boolean;
   error: string | null;
   pagination: PaginationInfo;
   filters: FiltersType;
   hasActiveFilters: boolean;
   onSearchChange: (value: string) => void;
-  onTabChange: (tab: any) => void;
-  onStatusFilterChange: (status: any) => void;
+  onTabChange: (tab: string) => void;
+  onStatusFilterChange: (status: string) => void;
   onPageSizeChange: (size: string) => void;
   onPageChange: (page: number) => void;
   onApprovePayment: (bookingId: string) => Promise<void>;

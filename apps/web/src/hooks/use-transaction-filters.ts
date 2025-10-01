@@ -1,3 +1,5 @@
+// hooks/useTransactionsFilters.ts
+
 import { useState, useCallback } from "react";
 import type {
   TransactionTab,
@@ -12,19 +14,20 @@ export const useTransactionsFilters = () => {
   const [pageSize, setPageSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
 
+  // Handlers accept string and cast internally
   const handleSearchChange = useCallback((value: string) => {
     setSearchTerm(value);
     setCurrentPage(1);
   }, []);
 
-  const handleTabChange = useCallback((tab: TransactionTab) => {
-    setActiveTab(tab);
+  const handleTabChange = useCallback((tab: string) => {
+    setActiveTab(tab as TransactionTab);
     setCurrentPage(1);
     setStatusFilter("all");
   }, []);
 
-  const handleStatusFilterChange = useCallback((status: TransactionStatus) => {
-    setStatusFilter(status);
+  const handleStatusFilterChange = useCallback((status: string) => {
+    setStatusFilter(status as TransactionStatus);
     setCurrentPage(1);
   }, []);
 

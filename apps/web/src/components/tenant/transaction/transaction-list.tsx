@@ -4,10 +4,10 @@ import { Table, TableBody } from "@/components/ui/table";
 import { TenantBookingTableHeader } from "@/components/tenant/transaction/booking-table-header";
 import { TenantBookingTableRow } from "@/components/tenant/transaction/booking-table-row";
 import { TransactionsPagination } from "@/components/tenant/transaction/transaction-pagination";
-import type { PaginationInfo } from "@/types/transaction";
+import type { Booking, PaginationInfo } from "@/types/transaction";
 
 interface TransactionsListProps {
-  bookings: any[];
+  bookings: Booking[];  // ✅ NOT any[]
   pagination: PaginationInfo;
   loading: boolean;
   onApprovePayment: (bookingId: string) => Promise<void>;

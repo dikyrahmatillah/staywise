@@ -1,3 +1,5 @@
+import type { BookingTransaction } from "@repo/types";
+
 export type TransactionTab = "all" | "pending" | "active" | "completed";
 
 export type TransactionStatus =
@@ -7,6 +9,9 @@ export type TransactionStatus =
   | "PROCESSING"
   | "COMPLETED"
   | "CANCELED";
+
+// Use the existing BookingTransaction type from your shared types package
+export type Booking = BookingTransaction;
 
 export interface TransactionsFilters {
   searchTerm: string;
