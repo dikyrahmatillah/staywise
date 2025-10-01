@@ -6,7 +6,7 @@ import { useEffect, useCallback } from "react";
 import { useBookings } from "@/hooks/useBookings";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useTransactionsFilters } from "@/hooks/use-transaction-filters";
-import { TransactionsPageView } from "@/components/tenant/transaction/transaction-page-view";
+import { TransactionsPageView } from "@/components/tenant/transaction/components/transaction-page-view";
 import { getStatusForAPI, hasActiveFilters } from "@/utils/transaction-filter";
 import type { TransactionsFetchParams } from "@/types/transaction";
 

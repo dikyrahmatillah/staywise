@@ -1,5 +1,5 @@
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
-import { TenantBookingTableHeader } from "@/components/tenant/transaction/booking-table-header";
+import { TenantBookingTableHeader } from "@/components/tenant/transaction/components/booking-table-header";
 
 interface EmptyStateProps {
   hasActiveFilters: boolean;

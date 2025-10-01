@@ -1,11 +1,15 @@
 // components/TransactionsPageView.tsx
 
-import { TransactionsFilters } from "@/components/tenant/transaction/transaction-filters";
-import { TransactionsList } from "@/components/tenant/transaction/transaction-list";
-import { EmptyState } from "@/components/tenant/transaction/empty-state";
-import { LoadingState } from "@/components/tenant/transaction/loading-state";
-import { ErrorState } from "@/components/tenant/transaction/error-state";
-import type { PaginationInfo, TransactionsFilters as FiltersType, Booking } from "@/types/transaction";
+import { TransactionsFilters } from "@/components/tenant/transaction/components/transaction-filters";
+import { TransactionsList } from "@/components/tenant/transaction/components/transaction-list";
+import { EmptyState } from "@/components/tenant/transaction/components/empty-state";
+import { LoadingState } from "@/components/tenant/transaction/components/loading-state";
+import { ErrorState } from "@/components/tenant/transaction/components/error-state";
+import type {
+  PaginationInfo,
+  TransactionsFilters as FiltersType,
+  Booking,
+} from "@/types/transaction";
 
 interface TransactionsPageViewProps {
   bookings: Booking[];
