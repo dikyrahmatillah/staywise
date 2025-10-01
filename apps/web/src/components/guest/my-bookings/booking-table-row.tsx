@@ -285,7 +285,7 @@ export const BookingTableRow = ({
         return <StatusBadge status="WAITING_PAYMENT" />;
       }
       if (booking.paymentProof.acceptedAt) {
-        return <StatusBadge status="COMPLETED" />;
+        return <StatusBadge status="PROCESSING" />;
       }
       return (
         <div className="flex flex-col items-center gap-1">

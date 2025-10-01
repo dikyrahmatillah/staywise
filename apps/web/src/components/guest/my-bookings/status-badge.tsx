@@ -1,7 +1,10 @@
 import { Badge } from "@/components/ui/badge";
 import type { OrderStatus, StatusConfig, BadgeVariant } from "@repo/types";
 
-const statusConfigs: Record<OrderStatus, StatusConfig & { variant: BadgeVariant }> = {
+const statusConfigs: Record<
+  OrderStatus,
+  StatusConfig & { variant: BadgeVariant }
+> = {
   WAITING_PAYMENT: {
     variant: "secondary",
     className: "bg-yellow-100 text-yellow-800 hover:bg-yellow-100",
@@ -16,8 +19,8 @@ const statusConfigs: Record<OrderStatus, StatusConfig & { variant: BadgeVariant 
   },
   PROCESSING: {
     variant: "destructive",
-    className: "bg-red-100 text-red-800 hover:bg-red-100",
-    dot: "bg-red-500",
+    className: "bg-purple-100 text-purple-800 hover:bg-purple-100",
+    dot: "bg-purple-500",
     label: "Processing",
   },
   COMPLETED: {

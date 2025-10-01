@@ -329,10 +329,10 @@ private generateDateRange(startDate: Date, endDate: Date): Date[] {
         },
       });
 
-      // Update booking status to COMPLETED
+      // Update booking status to PROCESSING
       return await tx.booking.update({
         where: { id: bookingId },
-        data: { status: "COMPLETED" },
+        data: { status: "PROCESSING" },
         include: {
           Property: { select: { name: true, city: true } },
           Room: { select: { name: true } },

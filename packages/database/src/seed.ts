@@ -491,7 +491,7 @@ async function seed() {
         created.status === "PROCESSING" ||
         created.status === "COMPLETED"
       ) {
-        const accepted = created.status === "COMPLETED" ? new Date() : null;
+        const accepted = created.status === "PROCESSING" ? new Date() : null;
         const rejected = null;
         await prisma.paymentProof.create({
           data: {
@@ -518,9 +518,9 @@ async function seed() {
               .alphanumeric({ length: 10 })
               .toUpperCase(),
             paidAmount:
-              created.status === "COMPLETED" ? totalAmount.toString() : null,
-            paidAt: created.status === "COMPLETED" ? new Date() : null,
-            status: created.status === "COMPLETED" ? "paid" : "pending",
+              created.status === "PROCESSING" ? totalAmount.toString() : null,
+            paidAt: created.status === "PROCESSING" ? new Date() : null,
+            status: created.status === "PROCESSING" ? "paid" : "pending",
             payload: {
               channel: faker.helpers.arrayElement(["cc", "va", "ewallet"]),
               note: faker.lorem.sentence(),

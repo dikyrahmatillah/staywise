@@ -61,26 +61,23 @@ export default function Dashboard() {
           <div className="mb-8">
             <EnhancedStats />
           </div>
-          <div className="mb-8">
+          <div className="grid grid-cols-2 gap-4">
             <BookingChart />
-          </div>
-
-          {/* Deals Table */}
-          <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 border-0">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>Booking Details</CardTitle>
-              <Select defaultValue="october">
-                <SelectTrigger className="w-32 border-0 shadow-sm">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="october">October</SelectItem>
-                  <SelectItem value="november">November</SelectItem>
-                  <SelectItem value="december">December</SelectItem>
-                </SelectContent>
-              </Select>
-            </CardHeader>
-            {/* <CardContent>
+            <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 border-0">
+              <CardHeader className="flex items-center justify-between">
+                <CardTitle>Booking Details</CardTitle>
+                <Select defaultValue="october">
+                  <SelectTrigger className="w-32 border-0 shadow-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="october">October</SelectItem>
+                    <SelectItem value="november">November</SelectItem>
+                    <SelectItem value="december">December</SelectItem>
+                  </SelectContent>
+                </Select>
+              </CardHeader>
+              {/* <CardContent>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
@@ -151,7 +148,10 @@ export default function Dashboard() {
                 </table>
               </div>
             </CardContent> */}
-          </Card>
+            </Card>
+          </div>
+
+          {/* Deals Table */}
         </main>
       </div>
     </div>
