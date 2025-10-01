@@ -65,8 +65,7 @@ export function RoomManagement() {
   }, [rooms, searchTerm, bedTypeFilter]);
 
   const hasRooms = rooms.length > 0;
-  const hasActiveFilters =
-    filteredRooms.length === 0 && hasRooms && !loading;
+  const hasActiveFilters = filteredRooms.length === 0 && hasRooms && !loading;
 
   const handleSubmit = async (data: CreateRoomInput | UpdateRoomInput) => {
     if (editingRoom) {
@@ -108,7 +107,6 @@ export function RoomManagement() {
 
   return (
     <div className="space-y-6">
-      {/* Header Section */}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="space-y-1">
           <div className="flex items-center gap-2 mb-2">
