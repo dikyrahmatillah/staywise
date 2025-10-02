@@ -2,7 +2,7 @@
     "name": "@repo/api",
     "type": "module",
     "scripts": {
-        "build": "tsc",
+        "build": "tsc --project tsconfig.build.json",
         "dev": "cross-env NODE_ENV=development tsx --watch src/index.ts",
         "start": "npm run build && cross-env NODE_ENV=production node dist/index.js"
     },
