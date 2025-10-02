@@ -31,6 +31,7 @@ export class App {
         credentials: true,
       })
     );
+    this.app.use(express.json());
   }
 
   setupRoutes() {

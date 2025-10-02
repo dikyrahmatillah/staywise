@@ -4,7 +4,6 @@ import { nanoid } from "nanoid";
 import slugify from "@sindresorhus/slugify";
 import { PropertyRepository } from "../repositories/property.repository.js";
 import { PropertyValidator } from "../utils/property-validator.js";
-import { AppError } from "@/errors/app.error.js";
 import { mapFacilities, mapPictures, mapRooms } from "../utils/mappers.js";
 
 export class PropertyCrudService {

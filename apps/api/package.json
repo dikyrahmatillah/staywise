@@ -2,7 +2,7 @@
     "name": "api",
     "type": "module",
     "scripts": {
-        "build": "tsc --project tsconfig.build.json",
+        "build": "tsc",
         "dev": "cross-env NODE_ENV=development tsx --watch src/index.ts",
         "start": "npm run build && cross-env NODE_ENV=production node dist/index.js"
     },
@@ -24,7 +24,6 @@
         "ngrok": "^5.0.0-beta.2",
         "node-cron": "^4.2.1",
         "resend": "^6.0.1",
-        "serverless-http": "^4.0.0",
         "streamifier": "^0.1.1",
         "winston": "^3.17.0"
     },
