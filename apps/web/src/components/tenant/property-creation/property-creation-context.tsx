@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, ReactNode } from "react";
+import { useRouter } from "next/navigation";
 import { CreatePropertyInput } from "@repo/schemas";
 import { usePropertyCreation as usePropertyCreationHook } from "@/hooks/usePropertyCreation";
 import { useSession } from "next-auth/react";
@@ -69,6 +70,8 @@ export function PropertyCreationProvider({
   const { data: session } = useSession();
   const { createProperty, isCreating } = usePropertyCreationHook();
 
+  const router = useRouter();
+
   const [formData, setFormData] = useState<PropertyFormData>({
     facilities: [],
     pictures: [],
@@ -87,11 +90,11 @@ export function PropertyCreationProvider({
       case 2:
         return !!(formData.country && formData.city && formData.address);
       case 3:
-        return !!formData.propertyCategoryId;
+        return !!(formData.propertyCategoryId || formData.customCategoryId);
       case 4:
         return !!(formData.rooms && formData.rooms.length > 0);
       case 5:
-        return true; // Facilities are optional
+        return true;
       case 6:
         return !!(
           formData.pictures &&
@@ -107,7 +110,7 @@ export function PropertyCreationProvider({
         return (
           !!(formData.name && formData.description) &&
           !!(formData.country && formData.city && formData.address) &&
-          !!formData.propertyCategoryId &&
+          !!(formData.propertyCategoryId || formData.customCategoryId) &&
           !!(formData.rooms && formData.rooms.length > 0) &&
           !!(
             formData.pictures &&
@@ -136,10 +139,8 @@ export function PropertyCreationProvider({
     console.log("Session user.id:", session.user.id);
     console.log("Raw form data:", formData);
 
-    // Create FormData for file uploads
     const formDataToSend = new FormData();
 
-    // Add basic property data
     formDataToSend.append("tenantId", session.user.id);
     formDataToSend.append("name", formData.name || "");
     formDataToSend.append("description", formData.description || "");
@@ -152,19 +153,18 @@ export function PropertyCreationProvider({
     if (formData.longitude)
       formDataToSend.append("longitude", String(formData.longitude));
 
-    // Handle category selection (IDs only)
-    // Default category is required by the API
-    if (!formData.propertyCategoryId) {
-      toast.error("Please select a default category before continuing");
+    if (!formData.propertyCategoryId && !formData.customCategoryId) {
+      toast.error("Please select a category before continuing");
       return;
     }
 
-    formDataToSend.append("propertyCategoryId", formData.propertyCategoryId);
+    if (formData.propertyCategoryId) {
+      formDataToSend.append("propertyCategoryId", formData.propertyCategoryId);
+    }
     if (formData.customCategoryId) {
       formDataToSend.append("customCategoryId", formData.customCategoryId);
     }
 
-    // Handle facilities
     if (formData.facilities && formData.facilities.length > 0) {
       formDataToSend.append(
         "facilities",
@@ -182,7 +182,6 @@ export function PropertyCreationProvider({
       );
     }
 
-    // Handle property pictures - append files and notes
     const propertyPictures: Array<{
       note?: string | null;
       fileIndex?: number;
@@ -198,13 +197,11 @@ export function PropertyCreationProvider({
             fileIndex: propertyFileIndex++,
           });
         } else if (typeof picture === "string") {
-          // Handle existing URL case (shouldn't happen in new flow but keeping for safety)
           propertyPictures.push({ note: null });
         } else if (
           typeof picture === "object" &&
           (picture.url || picture.imageUrl)
         ) {
-          // Handle existing URL case (shouldn't happen in new flow but keeping for safety)
           propertyPictures.push({
             note: picture.description || picture.note || null,
           });
@@ -219,7 +216,6 @@ export function PropertyCreationProvider({
       );
     }
 
-    // Handle rooms with their images
     const roomsData: Array<{
       name: string;
       description?: string;
@@ -280,7 +276,6 @@ export function PropertyCreationProvider({
           roomData.hasImage = true;
           roomData.fileIndex = roomFileIndex++;
         } else if (room.imageUrl) {
-          // Handle existing URL case (shouldn't happen in new flow but keeping for safety)
           roomData.hasImage = false;
         }
 
@@ -290,9 +285,10 @@ export function PropertyCreationProvider({
 
     formDataToSend.append("rooms", JSON.stringify(roomsData));
 
-    console.log("FormData prepared for submission");
-
-    await createProperty(formDataToSend);
+    const result = await createProperty(formDataToSend);
+    if (result) {
+      router.push("/dashboard/tenant/properties");
+    }
   };
 
   return (
