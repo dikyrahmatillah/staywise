@@ -9,6 +9,11 @@ type Props = {
   onNext: () => void;
   className?: string;
   onJump?: (index: number) => void;
+  nextLabel?: string;
+  prevLabel?: string;
+  canGoNext?: boolean;
+  canGoPrev?: boolean;
+  isLoading?: boolean;
 };
 
 export default function PagerControls({
@@ -18,6 +23,11 @@ export default function PagerControls({
   onNext,
   className = "",
   onJump,
+  nextLabel,
+  prevLabel,
+  canGoNext = true,
+  canGoPrev = true,
+  isLoading = false,
 }: Props) {
   const trackRef = React.useRef<HTMLDivElement | null>(null);
 
@@ -51,22 +61,47 @@ export default function PagerControls({
         </div>
       </div>
 
-      <div className="flex gap-2">
+      <div className="flex gap-3">
         <button
-          aria-label="Previous"
+          aria-label={prevLabel || "Previous"}
           onClick={onPrev}
-          disabled={current === 0}
-          className="h-9 w-9 rounded-md border-2 bg-white flex items-center justify-center disabled:opacity-50 cursor-pointer"
+          disabled={current === 0 || !canGoPrev || isLoading}
+          className="rounded-md border-2 bg-white flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors w-10 h-10"
         >
-          ‹
+          {/* Visible text: keep only the symbol for compactness, aria-label preserves full text for screen readers */}
+          <span aria-hidden="true" className="text-lg">
+            ‹
+          </span>
         </button>
         <button
-          aria-label="Next"
+          aria-label={nextLabel || "Next"}
           onClick={onNext}
-          disabled={current === maxIndex}
-          className="h-9 w-9 rounded-md bg-primary text-primary-foreground flex items-center justify-center disabled:opacity-50 hover:bg-primary/90 cursor-pointer"
+          disabled={!canGoNext || isLoading}
+          className={`rounded-md bg-primary text-primary-foreground flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary/90 transition-colors relative ${
+            nextLabel ? "px-4 py-2 min-w-[140px]" : "w-10 h-10"
+          }`}
         >
-          ›
+          {isLoading ? (
+            nextLabel ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary-foreground border-t-transparent mr-2"></div>
+                {/* keep loading text brief and explicit when label exists */}
+                Creating...
+              </>
+            ) : (
+              // symbol-only mode: show spinner only to keep the button compact
+              <div
+                className="animate-spin rounded-full h-4 w-4 border-2 border-primary-foreground border-t-transparent"
+                aria-hidden="true"
+              />
+            )
+          ) : nextLabel ? (
+            <span>{nextLabel}</span>
+          ) : (
+            <span aria-hidden="true" className="text-lg">
+              ›
+            </span>
+          )}
         </button>
       </div>
     </div>

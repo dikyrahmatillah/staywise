@@ -21,12 +21,14 @@ interface StepNavigationProps {
   steps: Step[];
   currentStep: number;
   onStepClick?: (stepNumber: number) => void;
+  isStepAccessible?: (stepNumber: number) => boolean;
 }
 
 export function StepNavigation({
   steps,
   currentStep,
   onStepClick,
+  isStepAccessible,
 }: StepNavigationProps) {
   const currentStepData = steps.find((step) => step.number === currentStep);
   const [mobileExpanded, setMobileExpanded] = useState(false);
@@ -34,7 +36,10 @@ export function StepNavigation({
   const toggleMobile = () => setMobileExpanded((v) => !v);
 
   const handleStepClick = (stepNumber: number) => {
-    if (onStepClick && stepNumber <= currentStep) {
+    const canAccess =
+      stepNumber <= currentStep || isStepAccessible?.(stepNumber) === true;
+
+    if (onStepClick && canAccess) {
       onStepClick(stepNumber);
     }
   };
@@ -80,7 +85,8 @@ export function StepNavigation({
             const isCompleted = step.number < currentStep;
             const isCurrent = step.number === currentStep;
             const isUpcoming = step.number > currentStep;
-            const isClickable = step.number <= currentStep;
+            const hasData = isStepAccessible?.(step.number) === true;
+            const isClickable = step.number <= currentStep || hasData;
 
             return (
               <div
@@ -88,8 +94,8 @@ export function StepNavigation({
                 className={cn(
                   "relative flex flex-col items-center text-center transition-all duration-300 group",
                   {
-                    "opacity-50 hover:opacity-75": isUpcoming,
-                    "opacity-100": isCurrent || isCompleted,
+                    "opacity-50 hover:opacity-75": isUpcoming && !hasData,
+                    "opacity-100": isCurrent || isCompleted || hasData,
                     "cursor-pointer": isClickable,
                     "cursor-not-allowed": !isClickable,
                   }
@@ -105,7 +111,9 @@ export function StepNavigation({
                       "bg-gradient-to-br from-primary to-primary/80 text-primary-foreground border-primary/80 shadow-primary/30 ring-4 ring-primary/10":
                         isCurrent,
                       "bg-white text-muted-foreground border-muted-foreground/20 hover:border-primary/50 hover:text-primary hover:shadow-primary/10":
-                        isUpcoming,
+                        isUpcoming && !hasData,
+                      "bg-gradient-to-br from-primary/10 to-primary/5 text-primary border-primary/40 hover:border-primary/60 hover:text-primary shadow-primary/10":
+                        isUpcoming && hasData,
                     }
                   )}
                 >
@@ -128,9 +136,9 @@ export function StepNavigation({
                     className={cn(
                       "text-sm font-semibold transition-all duration-300 group-hover:scale-105",
                       {
-                        "text-primary": isCompleted || isCurrent,
+                        "text-primary": isCompleted || isCurrent || hasData,
                         "text-muted-foreground group-hover:text-primary/70":
-                          isUpcoming,
+                          isUpcoming && !hasData,
                       }
                     )}
                   >
@@ -138,9 +146,9 @@ export function StepNavigation({
                   </h4>
                   <p
                     className={cn("text-xs transition-all duration-300", {
-                      "text-primary/70": isCompleted || isCurrent,
+                      "text-primary/70": isCompleted || isCurrent || hasData,
                       "text-muted-foreground group-hover:text-primary/50":
-                        isUpcoming,
+                        isUpcoming && !hasData,
                     })}
                   >
                     {step.description}
@@ -168,6 +176,8 @@ export function StepNavigation({
               const isCompleted = step.number < currentStep;
               const isCurrent = step.number === currentStep;
               const isUpcoming = step.number > currentStep;
+              const hasData = isStepAccessible?.(step.number) === true;
+              const isClickable = step.number <= currentStep || hasData;
 
               return (
                 <div
@@ -178,9 +188,23 @@ export function StepNavigation({
                       "bg-primary/5 border-primary/20 shadow-primary/5":
                         isCompleted || isCurrent,
                       "bg-muted/40 border-transparent hover:bg-muted/60":
-                        isUpcoming,
+                        isUpcoming && !hasData,
+                      "bg-primary/5 border-primary/20 hover:bg-primary/10":
+                        isUpcoming && hasData,
+                      "cursor-pointer": isClickable,
+                      "cursor-not-allowed opacity-60": !isClickable,
                     }
                   )}
+                  onClick={() => handleStepClick(step.number)}
+                  role="button"
+                  tabIndex={isClickable ? 0 : -1}
+                  onKeyDown={(event) => {
+                    if (!isClickable) return;
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      handleStepClick(step.number);
+                    }
+                  }}
                 >
                   <div
                     className={cn(
@@ -191,7 +215,9 @@ export function StepNavigation({
                         "bg-gradient-to-br from-primary to-primary/80 text-primary-foreground border-primary/80 shadow-primary/30 ring-2 ring-primary/10":
                           isCurrent,
                         "bg-white text-muted-foreground border-muted-foreground/20":
-                          isUpcoming,
+                          isUpcoming && !hasData,
+                        "bg-gradient-to-br from-primary/10 to-primary/5 text-primary border-primary/40":
+                          isUpcoming && hasData,
                       }
                     )}
                   >
@@ -209,16 +235,16 @@ export function StepNavigation({
                   <div className="flex-1">
                     <h4
                       className={cn("text-sm font-semibold", {
-                        "text-primary": isCompleted || isCurrent,
-                        "text-muted-foreground": isUpcoming,
+                        "text-primary": isCompleted || isCurrent || hasData,
+                        "text-muted-foreground": isUpcoming && !hasData,
                       })}
                     >
                       {step.title}
                     </h4>
                     <p
                       className={cn("text-xs mt-1", {
-                        "text-primary/70": isCompleted || isCurrent,
-                        "text-muted-foreground": isUpcoming,
+                        "text-primary/70": isCompleted || isCurrent || hasData,
+                        "text-muted-foreground": isUpcoming && !hasData,
                       })}
                     >
                       {step.description}
