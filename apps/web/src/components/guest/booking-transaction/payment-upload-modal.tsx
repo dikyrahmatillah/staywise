@@ -1,5 +1,3 @@
-// apps/web/src/app/booking/components/payment-upload-modal.tsx
-
 "use client";
 
 import { useRouter } from "next/navigation";
