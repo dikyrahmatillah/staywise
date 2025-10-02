@@ -10,7 +10,6 @@ import categoryRouter from "./routers/category.router.js";
 import roomRouter from "./routers/room.router.js";
 import webhookRouter from "./routers/webhook.route.js";
 import reviweRouter from "./routers/review.router.js";
-import { th } from "@faker-js/faker";
 
 export class App {
   app: Application;
