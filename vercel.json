@@ -1,8 +1,0 @@
-{
-  "version": 2,
-  "buildCommand": "turbo run build --filter=web",
-  "outputDirectory": "apps/web/.next",
-  "installCommand": "npm install",
-  "framework": null,
-  "ignoreCommand": "bash -c 'if [[ \"$VERCEL_GIT_COMMIT_REF\" == \"main\" || \"$VERCEL_GIT_COMMIT_REF\" == \"staging\" ]] ; then exit 1; else exit 0; fi'"
-}

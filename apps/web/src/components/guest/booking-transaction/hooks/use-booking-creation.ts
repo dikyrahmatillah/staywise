@@ -1,21 +1,14 @@
-// apps/web/src/app/booking/hooks/use-booking-creation.ts
-
 "use client";
 
 import { useSession } from "next-auth/react";
 import axios from "axios";
-import { toast } from "sonner";
 import { useBookingContext } from "../context/booking-context";
 import type { CreateBookingResponse } from "../types/booking.types";
 
 export function useBookingCreation() {
   const { data: session } = useSession();
-  const {
-    bookingDetails,
-    selectedPaymentMethod,
-    nights,
-    totalPrice,
-  } = useBookingContext();
+  const { bookingDetails, selectedPaymentMethod, nights, totalPrice } =
+    useBookingContext();
 
   const createApiInstance = () => {
     const api = axios.create({
@@ -92,32 +85,32 @@ export function useBookingCreation() {
 
   const handleError = (error: unknown): string => {
     console.error("Booking error:", error);
-    
+
     if (axios.isAxiosError(error)) {
       const responseData = error.response?.data;
-      
+
       if (error.response?.status === 400) {
         if (responseData?.message) return responseData.message;
         if (responseData?.error) return responseData.error;
         if (typeof responseData === "string") return responseData;
         return "Invalid request. Please check your data and try again.";
       }
-      
+
       if (error.response?.status === 401) {
         return "Authentication failed. Please log in again.";
       }
-      
+
       if (error.response?.status === 404) {
         return "Booking not found. Please try creating a new booking.";
       }
-      
+
       if (error.response?.status === 413) {
         return "File too large. Maximum size is 1MB.";
       }
-      
+
       return error.response?.data?.message || "An error occurred";
     }
-    
+
     return "An unexpected error occurred";
   };
 
