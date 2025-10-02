@@ -2,6 +2,7 @@ import React from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Navigation } from "lucide-react";
+import { X } from "lucide-react";
 
 interface Props {
   value: string;
@@ -25,9 +26,20 @@ export function LocationSearchInput({
         placeholder="Search for a location..."
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className={inputClassName}
+        className={`${inputClassName} truncate overflow-hidden whitespace-nowrap pr-12`}
+        title={value}
         autoComplete="off"
       />
+      {value && value.length > 0 && (
+        <button
+          type="button"
+          aria-label="Clear"
+          onClick={() => onChange("")}
+          className="absolute right-11 p-2 text-gray-500 hover:text-gray-700 cursor-pointer"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      )}
       <Button
         type="button"
         variant="outline"

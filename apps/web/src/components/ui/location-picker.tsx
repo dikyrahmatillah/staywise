@@ -20,6 +20,11 @@ interface LocationPickerProps {
   };
   apiKey: string;
   className?: string;
+  onFieldsChange?: (fields: {
+    address?: string;
+    city?: string;
+    country?: string;
+  }) => void;
 }
 
 export function LocationPicker({
@@ -27,6 +32,7 @@ export function LocationPicker({
   initialLocation,
   apiKey,
   className = "",
+  onFieldsChange,
 }: LocationPickerProps) {
   const {
     selectedLocation,
@@ -39,8 +45,7 @@ export function LocationPicker({
     handleSuggestionSelect,
     handleCurrentLocation,
     handleMapClick,
-    onMapLoad,
-  } = useLocationPicker({ onLocationSelect, initialLocation });
+  } = useLocationPicker({ onLocationSelect, initialLocation, onFieldsChange });
 
   interface GoogleWindow {
     google?: {
@@ -72,14 +77,17 @@ export function LocationPicker({
                   isLoading={isLoading}
                 />
 
-                {searchValue.length >= 3 && (
-                  <LocationSuggestionList
-                    suggestions={suggestions}
-                    isLoading={suggestionsLoading}
-                    error={suggestionsError}
-                    onSelect={handleSuggestionSelect}
-                  />
-                )}
+                {searchValue.length >= 3 &&
+                  (suggestionsLoading ||
+                    suggestions.length > 0 ||
+                    !!suggestionsError) && (
+                    <LocationSuggestionList
+                      suggestions={suggestions}
+                      isLoading={suggestionsLoading}
+                      error={suggestionsError}
+                      onSelect={handleSuggestionSelect}
+                    />
+                  )}
               </div>
             </div>
           </div>
@@ -98,7 +106,6 @@ export function LocationPicker({
               }
               zoom={selectedLocation ? 15 : 10}
               onClick={handleMapClick}
-              onLoad={onMapLoad}
               options={{
                 streetViewControl: false,
                 mapTypeControl: false,

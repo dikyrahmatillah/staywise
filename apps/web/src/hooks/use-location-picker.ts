@@ -1,57 +1,38 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import {
-  PlacesAutocompleteSuggestion,
-  AddressComponent,
-} from "@/types/google-places";
+import type { PlacesAutocompleteSuggestion } from "@/types/google-places";
 import { useLocationAutocomplete } from "@/hooks/use-location-autocomplete";
 import { toast } from "sonner";
-import axios from "axios";
+import { getLocationDetails, type LocationDetails } from "@/lib/location.utils";
+import { processPlaceSelection } from "@/lib/google-places.service";
 
 interface UseLocationPickerProps {
-  onLocationSelect: (location: {
-    lat: number;
-    lng: number;
-    address: string;
-    city: string;
-    country: string;
-  }) => void;
+  onLocationSelect: (location: LocationDetails) => void;
   initialLocation?: {
     lat: number;
     lng: number;
   };
+  onFieldsChange?: (fields: {
+    address?: string;
+    city?: string;
+    country?: string;
+  }) => void;
 }
+
+type LatLng = { lat: number; lng: number };
 
 export function useLocationPicker({
   onLocationSelect,
   initialLocation,
+  onFieldsChange,
 }: UseLocationPickerProps) {
-  const getCityCountry = (components?: AddressComponent[]) => {
-    if (!components?.length) return { city: "Unknown", country: "Unknown" };
-    const findByType = (type: string) =>
-      components.find((c) => c.types.includes(type))?.long_name;
-    const city =
-      findByType("locality") ||
-      findByType("administrative_area_level_1") ||
-      "Unknown";
-    const country = findByType("country") || "Unknown";
-    return { city, country };
-  };
-
-  const getPlaceDetails = async (placeId: string) => {
-    const resp = await axios.get(`/api/google-places/details`, {
-      params: { place_id: placeId },
-    });
-    return resp.data?.result;
-  };
-
-  type LatLng = { lat: number; lng: number };
   const [selectedLocation, setSelectedLocation] = useState<LatLng | null>(
     initialLocation || null
   );
   const [isLoading, setIsLoading] = useState(false);
   const [searchValue, setSearchValue] = useState("");
+  const [suppressSuggestions, setSuppressSuggestions] = useState(false);
 
   const {
     suggestions,
@@ -62,83 +43,80 @@ export function useLocationPicker({
   } = useLocationAutocomplete();
 
   useEffect(() => {
-    const q = searchValue.trim();
-    if (q.length >= 3) {
-      fetchSuggestions(q);
+    if (suppressSuggestions) return;
+
+    const query = searchValue.trim();
+    if (query.length >= 3) {
+      fetchSuggestions(query);
     } else {
       clearSuggestions();
     }
-  }, [searchValue, fetchSuggestions, clearSuggestions]);
+  }, [searchValue, fetchSuggestions, clearSuggestions, suppressSuggestions]);
+
+  const updateSearchValue = useCallback((value: string) => {
+    setSuppressSuggestions(false);
+    setSearchValue(value);
+  }, []);
+
+  const notifyLocationChange = useCallback(
+    (location: LocationDetails) => {
+      onLocationSelect(location);
+      if (onFieldsChange) {
+        onFieldsChange({
+          address: location.address,
+          city: location.city,
+          country: location.country,
+        });
+      }
+    },
+    [onLocationSelect, onFieldsChange]
+  );
 
   const extractLocationDetails = useCallback(
     async (lat: number, lng: number) => {
       setIsLoading(true);
       try {
-        const { data } = await axios.get(`/api/google-places/geocode`, {
-          params: { lat, lng },
-        });
-        if (data.results && data.results.length > 0) {
-          const result = data.results[0];
-          const { city, country } = getCityCountry(result.address_components);
-          onLocationSelect({
-            lat,
-            lng,
-            address: result.formatted_address,
-            city,
-            country,
-          });
+        const locationDetails = await getLocationDetails(lat, lng);
+        if (locationDetails) {
+          notifyLocationChange(locationDetails);
         }
-      } catch {
-        toast.error("Failed to retrieve address details. Please try again.");
       } finally {
         setIsLoading(false);
       }
     },
-    [onLocationSelect]
+    [notifyLocationChange]
   );
 
   const handleSuggestionSelect = useCallback(
     async (suggestion: PlacesAutocompleteSuggestion) => {
       setIsLoading(true);
       try {
-        const placeId = suggestion.placePrediction?.placeId;
-        if (!placeId) {
-          toast.error("Invalid place selection");
+        const locationDetails = await processPlaceSelection(suggestion);
+
+        if (!locationDetails) {
           return;
         }
 
-        const result = await getPlaceDetails(placeId);
-        const loc = result?.geometry?.location;
-        if (!loc) {
-          toast.error("Location not available for the selected place");
-          return;
-        }
-
-        const { lat, lng } = loc;
-        setSelectedLocation({ lat, lng });
-
-        const mainText =
-          suggestion.placePrediction?.structuredFormat?.mainText?.text ??
-          suggestion.placePrediction?.text?.text ??
-          "";
-        const address = result.formatted_address ?? mainText;
-
-        const { city, country } = getCityCountry(result.address_components);
-        setSearchValue(address);
-        onLocationSelect({ lat, lng, address, city, country });
+        setSelectedLocation({
+          lat: locationDetails.lat,
+          lng: locationDetails.lng,
+        });
+        updateSearchValue(locationDetails.address);
+        setSuppressSuggestions(true);
+        notifyLocationChange(locationDetails);
         clearSuggestions();
-      } catch {
-        toast.error("Failed to select place");
       } finally {
         setIsLoading(false);
       }
     },
-    [onLocationSelect, clearSuggestions]
+    [notifyLocationChange, clearSuggestions, updateSearchValue]
   );
 
   const handleCurrentLocation = useCallback(() => {
-    if (!navigator.geolocation)
-      return toast.error("Geolocation is not supported by this browser.");
+    if (!navigator.geolocation) {
+      toast.error("Geolocation is not supported by this browser.");
+      return;
+    }
 
     setIsLoading(true);
     navigator.geolocation.getCurrentPosition(
@@ -147,15 +125,17 @@ export function useLocationPicker({
         setSelectedLocation({ lat: latitude, lng: longitude });
         await extractLocationDetails(latitude, longitude);
       },
-      (err) => {
+      (error) => {
         setIsLoading(false);
-        const code = err?.code;
-        const msgMap: Record<number, string> = {
-          1: "Location access denied by user.",
-          2: "Location information is unavailable.",
-          3: "Location request timed out.",
-        };
-        toast.error(msgMap[code] ?? "An unknown error occurred.");
+        const errorMessage =
+          (
+            {
+              1: "Location access denied by user.",
+              2: "Location information is unavailable.",
+              3: "Location request timed out.",
+            } as Record<number, string>
+          )[error?.code as number] ?? "An unknown error occurred.";
+        toast.error(errorMessage);
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
     );
@@ -173,19 +153,16 @@ export function useLocationPicker({
     [extractLocationDetails]
   );
 
-  const onMapLoad = useCallback(() => {}, []);
-
   return {
     selectedLocation,
     isLoading,
     searchValue,
-    setSearchValue,
+    setSearchValue: updateSearchValue,
     suggestions,
     suggestionsLoading,
     suggestionsError,
     handleSuggestionSelect,
     handleCurrentLocation,
     handleMapClick,
-    onMapLoad,
   };
 }
