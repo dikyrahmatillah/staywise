@@ -394,7 +394,7 @@ async function seed() {
     });
     availabilityMap.set(
       room.id,
-      new Set(avails.map((a) => toISODate(new Date(a.date))))
+      new Set(avails.map((a: { date: Date }) => toISODate(new Date(a.date))))
     );
   }
 

@@ -3,6 +3,12 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   transpilePackages: ["@repo/database"],
+
+  // Production optimizations
+  reactStrictMode: true,
+  poweredByHeader: false,
+  compress: true,
+
   // Image optimization
   images: {
     remotePatterns: [
@@ -20,13 +26,6 @@ const nextConfig: NextConfig = {
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
-
-  // Production optimizations
-  reactStrictMode: true,
-  swcMinify: true,
-
-  // Performance optimizations
-  compress: true,
 
   // Security headers
   async headers() {
@@ -56,7 +55,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: "Referrer-Policy",
-            value: "strict-origin-when-cross-origin",
+            value: "origin-when-cross-origin",
           },
           {
             key: "Permissions-Policy",
@@ -65,14 +64,6 @@ const nextConfig: NextConfig = {
         ],
       },
     ];
-  },
-
-  // Output configuration for Vercel
-  output: "standalone",
-
-  // Experimental features for better performance
-  experimental: {
-    optimizePackageImports: ["lucide-react", "@radix-ui/react-icons"],
   },
 };
 
