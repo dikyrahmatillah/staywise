@@ -1,10 +1,9 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { Camera, X } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Camera, X, Upload } from "lucide-react";
 import Image from "next/image";
 import React from "react";
 
@@ -21,7 +20,7 @@ type Props = {
 };
 
 export function ImagesCard({
-  existingPictures,
+  existingPictures = [],
   onRemoveExisting,
   selectedImages,
   setSelectedImages,
@@ -29,145 +28,126 @@ export function ImagesCard({
   onRemoveSelected,
   hiddenFileInput,
 }: Props) {
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+    const newImages = files.filter((file) => file.type.startsWith("image/"));
+    setSelectedImages((prev) => [...prev, ...newImages]);
+  };
+
+  const totalImages = existingPictures.length + selectedImages.length;
+
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Camera className="h-5 w-5" />
-          Property Images
+      <CardHeader className="pb-4">
+        <CardTitle className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Camera className="h-5 w-5 text-primary" />
+            Property Images
+          </div>
+          <Badge variant="secondary" className="text-xs">
+            {totalImages} images
+          </Badge>
         </CardTitle>
+        <p className="text-sm text-muted-foreground">
+          Upload high-quality images to showcase your property
+        </p>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {existingPictures && existingPictures.length > 0 && (
-            <div>
-              <h4 className="text-sm font-medium mb-2">Current Images</h4>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 py-1">
-                {existingPictures.map((picture) => (
-                  <div
-                    key={picture.id}
-                    className="relative w-full h-40 overflow-hidden rounded-md"
-                  >
-                    <Image
-                      src={picture.imageUrl}
-                      alt="Property"
-                      width={320}
-                      height={200}
-                      className="w-full h-full object-cover rounded-md"
-                    />
-
-                    <button
-                      type="button"
-                      onClick={() => onRemoveExisting(picture.id)}
-                      className="absolute top-2 right-2 z-10 inline-flex h-6 w-6 items-center justify-center rounded-full bg-white/80 text-sm text-red-600 hover:bg-white cursor-pointer"
-                      aria-label="Remove image"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-
-                    {picture.note && (
-                      <p className="text-xs text-muted-foreground mt-1 truncate">
-                        {picture.note}
-                      </p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <div className="my-4">
-            <Separator />
-          </div>
-
-          <div className="space-y-4">
-            <Label htmlFor="images">Add New Images</Label>
-            <input
-              id="images-hidden"
-              ref={hiddenFileInput}
-              type="file"
-              multiple
-              accept="image/*"
-              onChange={(e) => {
-                const files = Array.from(e.target.files || []);
-                setSelectedImages((prev) => [...prev, ...files]);
-              }}
-              className="hidden"
-            />
-
-            <div className="mt-1 flex items-center gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => hiddenFileInput.current?.click()}
-              >
-                Choose Files
-              </Button>
-
-              <div className="text-sm text-muted-foreground">
-                {selectedImages.length === 0 ? (
-                  "No files selected"
-                ) : (
-                  <span title={selectedImages.map((f) => f.name).join(", ")}>
-                    {selectedImages
-                      .slice(0, 3)
-                      .map((f) => f.name)
-                      .join(", ")}
-                    {selectedImages.length > 3 && (
-                      <span className="ml-2 text-muted-foreground">
-                        +{selectedImages.length - 3} more
-                      </span>
-                    )}
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {selectedImages.length > 0 && (
-              <div className="mt-2">
-                <p className="text-sm text-muted-foreground">
-                  {selectedImages.length} new image(s) selected
-                </p>
-
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 py-1 mt-2">
-                  {selectedImagePreviews.map((src, idx) => (
-                    <div
-                      key={idx}
-                      role="button"
-                      tabIndex={0}
-                      onClick={() => hiddenFileInput.current?.click()}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ")
-                          hiddenFileInput.current?.click();
-                      }}
-                      className="relative w-full h-40 overflow-hidden rounded-md cursor-pointer"
-                    >
-                      <Image
-                        src={src}
-                        alt={`preview-${idx}`}
-                        width={320}
-                        height={200}
-                        className="w-full h-full object-cover rounded-md"
-                      />
-
-                      <button
-                        type="button"
-                        onClick={(ev) => {
-                          ev.stopPropagation();
-                          onRemoveSelected(idx);
-                        }}
-                        className="absolute top-2 right-2 z-10 inline-flex h-6 w-6 items-center justify-center rounded-full bg-white/80 text-sm text-red-600 hover:bg-white cursor-pointer"
-                        aria-label="Remove selected image"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
+      <CardContent className="space-y-6">
+        <div className="flex justify-center">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => hiddenFileInput.current?.click()}
+            className="w-full max-w-sm"
+          >
+            <Upload className="h-4 w-4 mr-2" />
+            Upload New Images
+          </Button>
         </div>
+
+        <input
+          ref={hiddenFileInput}
+          type="file"
+          multiple
+          accept="image/*"
+          onChange={handleImageSelect}
+          className="hidden"
+        />
+
+        {existingPictures.length > 0 && (
+          <div className="space-y-4">
+            <h4 className="text-sm font-medium">Current Images</h4>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {existingPictures.map((picture, index) => (
+                <div
+                  key={picture.id}
+                  className="relative group w-full h-40 overflow-hidden rounded-lg border"
+                >
+                  <Image
+                    src={picture.imageUrl}
+                    alt={`Property image ${index + 1}`}
+                    fill
+                    className="object-cover"
+                  />
+                  {index === 0 && (
+                    <Badge className="absolute top-2 left-2 text-xs">
+                      Main
+                    </Badge>
+                  )}
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => onRemoveExisting(picture.id)}
+                    className="absolute top-2 right-2 h-7 w-7 p-0 opacity-0 group-hover:opacity-100"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {selectedImages.length > 0 && (
+          <div className="space-y-4">
+            <h4 className="text-sm font-medium">New Images</h4>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {selectedImagePreviews.map((preview, index) => (
+                <div
+                  key={index}
+                  className="relative group w-full h-40 overflow-hidden rounded-lg border"
+                >
+                  <Image
+                    src={preview}
+                    alt={`New image ${index + 1}`}
+                    fill
+                    className="object-cover"
+                  />
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => onRemoveSelected(index)}
+                    className="absolute top-2 right-2 h-7 w-7 p-0 opacity-0 group-hover:opacity-100"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {totalImages === 0 && (
+          <div className="text-center py-8">
+            <Camera className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">
+              No images uploaded yet
+            </p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

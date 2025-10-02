@@ -19,7 +19,6 @@ export type EditPropertyFormData = {
   country: string;
   city: string;
   address: string;
-  maxGuests: number;
   latitude: string;
   longitude: string;
 };

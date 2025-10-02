@@ -36,11 +36,15 @@ export function LocationCard({
 }: Props) {
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <MapPin className="h-5 w-5" />
-          Location
+      <CardHeader className="pb-4">
+        <CardTitle className="flex items-center gap-2 text-lg">
+          <MapPin className="h-5 w-5 text-primary" />
+          Location & Address
         </CardTitle>
+        <p className="text-sm text-muted-foreground">
+          Specify the exact location of your property for guests to find it
+          easily
+        </p>
       </CardHeader>
       <CardContent className="space-y-4">
         {apiKey && (
@@ -58,6 +62,17 @@ export function LocationCard({
                     : undefined
                 }
                 className="border rounded-lg p-4"
+                onFieldsChange={(fields) => {
+                  onChange({
+                    target: { name: "address", value: fields.address ?? "" },
+                  } as unknown as React.ChangeEvent<HTMLInputElement>);
+                  onChange({
+                    target: { name: "city", value: fields.city ?? "" },
+                  } as unknown as React.ChangeEvent<HTMLInputElement>);
+                  onChange({
+                    target: { name: "country", value: fields.country ?? "" },
+                  } as unknown as React.ChangeEvent<HTMLInputElement>);
+                }}
               />
             </div>
           </div>
