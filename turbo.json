@@ -3,17 +3,29 @@
   "ui": "tui",
   "tasks": {
     "build": {
-      "dependsOn": ["^build"],
-      "inputs": ["$TURBO_DEFAULT$", ".env*", "prisma/schema.prisma"],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**", "generated/**"],
-      "env": ["DATABASE_URL", "DIRECT_URL"]
+      "dependsOn": [
+        "^build"
+      ],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        ".env*",
+        "prisma/schema.prisma"
+      ],
+      "outputs": [
+        ".next/**",
+        "!.next/cache/**",
+        "dist/**",
+        "generated/**"
+      ]
     },
     "dev": {
       "persistent": true,
       "cache": false
     },
     "start": {
-      "dependsOn": ["build"]
+      "dependsOn": [
+        "build"
+      ]
     }
   }
 }
