@@ -14,7 +14,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { DollarSign, Edit, Percent, Trash2 } from "lucide-react";
+import { DollarSign, Edit, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import type { PriceAdjustment } from "./types";
 import { calcAdjustedPrice, formatIdr } from "./utils";
