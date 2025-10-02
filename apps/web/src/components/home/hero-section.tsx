@@ -3,9 +3,7 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import type React from "react";
-import { useRouter } from "next/navigation";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+// import { useRouter } from "next/navigation";
 
 const BACKGROUNDS = [
   "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=2000&q=80",
@@ -19,27 +17,28 @@ const BACKGROUNDS = [
 
 export default function HeroSection() {
   const [bg, setBg] = useState<string>(BACKGROUNDS[0]);
-  const router = useRouter();
+  // const router = useRouter();
 
-  const [location, setLocation] = useState("");
-  const [checkIn, setCheckIn] = useState("");
-  const [checkOut, setCheckOut] = useState("");
-  const [guests, setGuests] = useState("2");
+  // Search functionality - commented out for now
+  // const [location, setLocation] = useState("");
+  // const [checkIn, setCheckIn] = useState("");
+  // const [checkOut, setCheckOut] = useState("");
+  // const [guests, setGuests] = useState("2");
 
   useEffect(() => {
     const idx = Math.floor(Math.random() * BACKGROUNDS.length);
     setBg(BACKGROUNDS[idx]);
   }, []);
 
-  const onSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    const params = new URLSearchParams();
-    if (location) params.set("location", location);
-    if (checkIn) params.set("checkIn", checkIn);
-    if (checkOut) params.set("checkOut", checkOut);
-    if (guests) params.set("guests", guests);
-    router.push(`/properties?${params.toString()}`);
-  };
+  // const onSearch = (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   const params = new URLSearchParams();
+  //   if (location) params.set("location", location);
+  //   if (checkIn) params.set("checkIn", checkIn);
+  //   if (checkOut) params.set("checkOut", checkOut);
+  //   if (guests) params.set("guests", guests);
+  //   router.push(`/properties?${params.toString()}`);
+  // };
 
   return (
     <section className="relative w-full py-12 md:py-24 lg:py-32 xl:py-48 bg-transparent">
