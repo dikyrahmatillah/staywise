@@ -5,6 +5,7 @@ interface PropertyInfoProps {
     | {
         name: string;
         city: string;
+        imageUrl?: string;
       }
     | undefined;
   room:
@@ -25,7 +26,7 @@ export const PropertyInfo = ({ property, room }: PropertyInfoProps) => {
           </div>
         </div>
         <div className="flex flex-col gap-1 min-w-0">
-          <h3 className="font-medium text-base leading-6 line-clamp-2 text-gray-500">
+          <h3 className="font-medium text-base truncate w-[120px] leading-6 line-clamp-2 text-gray-500">
             Property data unavailable
           </h3>
           <p className="text-xs text-muted-foreground leading-[18px]">
@@ -42,7 +43,7 @@ export const PropertyInfo = ({ property, room }: PropertyInfoProps) => {
     <div className="flex items-center gap-4">
       <div className="h-15 w-20 shrink-0 rounded-2xl overflow-hidden">
         <Image
-          src="/placeholder.svg"
+          src={property.imageUrl || "/images/placeholder.png"}
           alt={property.name}
           width={80}
           height={60}
@@ -50,7 +51,7 @@ export const PropertyInfo = ({ property, room }: PropertyInfoProps) => {
         />
       </div>
       <div className="flex flex-col gap-1 min-w-0">
-        <h3 className="font-medium text-base leading-6 line-clamp-2">
+        <h3 className="font-medium truncate w-[120px] text-base leading-6 line-clamp-2">
           {property.name}
         </h3>
         <p className="text-xs text-muted-foreground leading-[18px]">
