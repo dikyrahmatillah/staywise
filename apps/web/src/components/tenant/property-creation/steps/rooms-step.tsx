@@ -13,16 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Plus,
-  Trash2,
-  Bed,
-  Upload,
-  X,
-  DollarSign,
-  Users,
-  Hotel,
-} from "lucide-react";
+import { Plus, Trash2, Bed, Upload, X, DollarSign, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";

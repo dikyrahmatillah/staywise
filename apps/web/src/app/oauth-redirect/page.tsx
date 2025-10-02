@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 
-export default function OAuthRedirectPage() {
+function OAuthRedirectContent() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -34,5 +34,19 @@ export default function OAuthRedirectPage() {
     <div className="flex items-center justify-center h-48">
       <p className="text-sm text-muted-foreground">Redirecting...</p>
     </div>
+  );
+}
+
+export default function OAuthRedirectPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center h-48">
+          <p className="text-sm text-muted-foreground">Loading...</p>
+        </div>
+      }
+    >
+      <OAuthRedirectContent />
+    </Suspense>
   );
 }
