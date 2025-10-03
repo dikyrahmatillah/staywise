@@ -10,9 +10,6 @@ import { SearchButton } from "./search/search-button";
 import { ExpandedSearch } from "./search/expanded-search";
 import { format } from "date-fns";
 
-const openThreshold = 5;
-const closeThreshold = 60;
-
 export function Header() {
   const router = useRouter();
   const pathname = usePathname();
@@ -25,6 +22,7 @@ export function Header() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isAtTop, setIsAtTop] = useState(true);
   const [userClosedSearch, setUserClosedSearch] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [locationOpen, setLocationOpen] = useState(false);
   const [datesOpen, setDatesOpen] = useState(false);
   const [guestsOpen, setGuestsOpen] = useState(false);
@@ -32,22 +30,21 @@ export function Header() {
   useEffect(() => {
     const onScroll = () => {
       const scrollTop = window.pageYOffset;
-      const nearTop = scrollTop < openThreshold;
+      const nearTop = scrollTop < 5;
 
-      if (isAtTop !== nearTop) setIsAtTop(nearTop);
+      setIsAtTop(nearTop);
 
       const isDesktop =
         typeof window !== "undefined" && window.innerWidth >= 640;
-      const shouldAutoOpen =
-        (pathname === "/" || pathname === "/properties") && isDesktop;
+      const auto =
+        isDesktop && (pathname === "/" || pathname === "/properties");
 
-      if (scrollTop >= closeThreshold) {
-        if (isSearchOpen && !userClosedSearch && shouldAutoOpen)
-          setIsSearchOpen(false);
+      if (scrollTop >= 60) {
+        if (isSearchOpen && !userClosedSearch && auto) setIsSearchOpen(false);
         return;
       }
 
-      if (nearTop && !isSearchOpen && !userClosedSearch && shouldAutoOpen) {
+      if (mounted && nearTop && !isSearchOpen && !userClosedSearch && auto) {
         setIsSearchOpen(true);
       }
     };
@@ -55,10 +52,30 @@ export function Header() {
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
 
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-    };
-  }, [isSearchOpen, userClosedSearch, isAtTop, pathname]);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [isSearchOpen, userClosedSearch, pathname, mounted]);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    const isDesktop = typeof window !== "undefined" && window.innerWidth >= 640;
+    const shouldAutoOpen =
+      (pathname === "/" || pathname === "/properties") && isDesktop;
+
+    if (shouldAutoOpen) {
+      setUserClosedSearch(false);
+      setIsSearchOpen(true);
+      return;
+    }
+
+    setIsSearchOpen(false);
+    setUserClosedSearch(false);
+    setLocationOpen(false);
+    setDatesOpen(false);
+    setGuestsOpen(false);
+  }, [pathname]);
 
   useEffect(() => {
     if (isAtTop) {
