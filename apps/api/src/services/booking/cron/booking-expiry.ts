@@ -1,11 +1,10 @@
-import { prisma } from "@repo/database";
+import { prisma } from "@/configs/prisma.config.js";
 
 export class BookingExpiryService {
-
   static async cancelExpiredBookings() {
     try {
       const now = new Date();
-      
+
       // Find expired bookings
       const expiredBookings = await prisma.booking.findMany({
         where: {
@@ -29,7 +28,7 @@ export class BookingExpiryService {
       const result = await prisma.booking.updateMany({
         where: {
           id: {
-            in: expiredBookings.map(b => b.id),
+            in: expiredBookings.map((b) => b.id),
           },
         },
         data: {
@@ -40,7 +39,6 @@ export class BookingExpiryService {
 
       console.log(`Cancelled ${result.count} expired bookings`);
       return { cancelledCount: result.count };
-      
     } catch (error) {
       console.error("Error cancelling expired bookings:", error);
       throw error;

@@ -1,4 +1,4 @@
-import { prisma } from "@repo/database";
+import { prisma } from "@/configs/prisma.config.js";
 import { AppError } from "@/errors/app.error.js";
 import { cloudinary } from "@/configs/cloudinary.config.js";
 import { uploadToCloudinary } from "@/middlewares/upload-payment-proof.middleware.js";
@@ -128,7 +128,11 @@ export class PaymentProofService {
     }
   }
 
-   async reviewPaymentProof(orderId: string, reviewerId: string, status: PaymentProofStatus) {
+  async reviewPaymentProof(
+    orderId: string,
+    reviewerId: string,
+    status: PaymentProofStatus
+  ) {
     const booking = await prisma.booking.findUnique({
       where: { id: orderId },
       include: { paymentProof: true },

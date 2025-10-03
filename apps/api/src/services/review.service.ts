@@ -1,4 +1,4 @@
-import { prisma } from "@repo/database";
+import { prisma } from "@/configs/prisma.config.js";
 import { AppError } from "@/errors/app.error.js";
 import type {
   CreateReviewInput,
@@ -27,10 +27,7 @@ export class ReviewService {
 
     // Check if booking is completed
     if (booking.status !== "COMPLETED") {
-      throw new AppError(
-        "You can only review completed bookings",
-        400
-      );
+      throw new AppError("You can only review completed bookings", 400);
     }
 
     // Check if checkout date has passed
@@ -44,10 +41,7 @@ export class ReviewService {
 
     // Check if review already exists
     if (booking.review) {
-      throw new AppError(
-        "You have already reviewed this booking",
-        400
-      );
+      throw new AppError("You have already reviewed this booking", 400);
     }
 
     // Create review
@@ -79,7 +73,11 @@ export class ReviewService {
     return review;
   }
 
-  async updateReview(userId: string, reviewId: string, data: UpdateReviewInput) {
+  async updateReview(
+    userId: string,
+    reviewId: string,
+    data: UpdateReviewInput
+  ) {
     const existingReview = await prisma.review.findUnique({
       where: { id: reviewId },
     });
@@ -250,7 +248,10 @@ export class ReviewService {
     };
   }
 
-  async canUserReviewBooking(userId: string, bookingId: string): Promise<{
+  async canUserReviewBooking(
+    userId: string,
+    bookingId: string
+  ): Promise<{
     canReview: boolean;
     reason?: string;
   }> {

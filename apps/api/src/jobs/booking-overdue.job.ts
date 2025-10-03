@@ -1,4 +1,4 @@
-import { prisma } from "@repo/database";
+import { prisma } from "@/configs/prisma.config.js";
 import { AppError } from "@/errors/app.error.js";
 import { BookingStatusUpdate } from "@/types/booking.types.js";
 
@@ -7,12 +7,12 @@ export class BookingOverdueJob {
     const now = new Date();
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     try {
       const overdueBookings = await prisma.booking.findMany({
         where: {
           status: { in: ["WAITING_CONFIRMATION", "PROCESSING"] },
-          checkInDate: { lt: today }
+          checkInDate: { lt: today },
         },
         include: {
           Property: { select: { name: true } },
@@ -29,30 +29,35 @@ export class BookingOverdueJob {
       const updateResult = await prisma.booking.updateMany({
         where: {
           status: { in: ["WAITING_CONFIRMATION", "PROCESSING"] },
-          checkInDate: { lt: today }
+          checkInDate: { lt: today },
         },
-        data: { status: "CANCELED" }
+        data: { status: "CANCELED" },
       });
 
-      console.log(`[${now.toISOString()}] Canceled ${updateResult.count} overdue bookings`);
-      
-      overdueBookings.forEach(booking => {
+      console.log(
+        `[${now.toISOString()}] Canceled ${updateResult.count} overdue bookings`
+      );
+
+      overdueBookings.forEach((booking) => {
         console.log(`  - Booking ${booking.orderCode} canceled (overdue)`);
       });
 
       return {
         canceledCount: updateResult.count,
-        bookings: overdueBookings.map(booking => ({
+        bookings: overdueBookings.map((booking) => ({
           id: booking.id,
           orderCode: booking.orderCode,
           userEmail: booking.User?.email,
           propertyName: booking.Property?.name,
           roomName: booking.Room?.name,
-          checkInDate: booking.checkInDate
-        }))
+          checkInDate: booking.checkInDate,
+        })),
       };
     } catch (error) {
-      console.error(`[${now.toISOString()}] Error canceling overdue bookings:`, error);
+      console.error(
+        `[${now.toISOString()}] Error canceling overdue bookings:`,
+        error
+      );
       throw new AppError("Failed to cancel overdue bookings", 500);
     }
   }
