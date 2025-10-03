@@ -1,5 +1,5 @@
 import { Worker, QueueEvents, Job } from "bullmq";
-import { redis } from "@/configs/redis.config.js";
+import { bullConnection } from "@/configs/redis.config.js";
 import {
   TOKEN_EXPIRE_QUEUE,
   TokenExpireJobData,
@@ -7,7 +7,9 @@ import {
 import logger from "@/utils/logger.js";
 import { prisma } from "@/configs/prisma.config.js";
 
-const events = new QueueEvents(TOKEN_EXPIRE_QUEUE, { connection: redis });
+const events = new QueueEvents(TOKEN_EXPIRE_QUEUE, {
+  connection: bullConnection,
+});
 events.on("failed", (evt: { jobId: string; failedReason?: string }) => {
   logger.error(
     `Token expire job ${evt.jobId} failed: ${evt.failedReason ?? "unknown"}`
@@ -40,7 +42,7 @@ export const tokenExpirationWorker = new Worker<TokenExpireJobData>(
       data: { status: "EXPIRED" },
     });
   },
-  { connection: redis }
+  { connection: bullConnection }
 );
 
 process.on("SIGINT", async () => {

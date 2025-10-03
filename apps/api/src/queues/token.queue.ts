@@ -1,5 +1,5 @@
 import { Queue } from "bullmq";
-import { redis } from "@/configs/redis.config.js";
+import { bullConnection } from "@/configs/redis.config.js";
 
 export type TokenExpireJobData = {
   token: string;
@@ -10,7 +10,7 @@ export const TOKEN_EXPIRE_QUEUE = "token-expire" as const;
 export const tokenExpireQueue = new Queue<TokenExpireJobData>(
   TOKEN_EXPIRE_QUEUE,
   {
-    connection: redis,
+    connection: bullConnection,
     defaultJobOptions: {
       removeOnComplete: true,
       removeOnFail: 50,
