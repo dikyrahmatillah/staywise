@@ -1,4 +1,4 @@
-import { prisma } from "@repo/database";
+import { prisma } from "@/configs/prisma.config.js";
 import { ResetPasswordWithTokenInput } from "@repo/schemas";
 import { AppError } from "@/errors/app.error.js";
 import { EmailService } from "./email.service.js";

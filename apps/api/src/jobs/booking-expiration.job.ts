@@ -1,16 +1,16 @@
-import { prisma } from "@repo/database";
+import { prisma } from "@/configs/prisma.config.js";
 import { AppError } from "@/errors/app.error.js";
 import { BookingStatusUpdate } from "@/types/booking.types.js";
 
 export class BookingExpirationJob {
   async execute(): Promise<BookingStatusUpdate> {
     const now = new Date();
-    
+
     try {
       const expiredBookings = await prisma.booking.findMany({
         where: {
           status: "WAITING_PAYMENT",
-          expiresAt: { lt: now }
+          expiresAt: { lt: now },
         },
         include: {
           Property: { select: { name: true } },
@@ -27,27 +27,31 @@ export class BookingExpirationJob {
       const updateResult = await prisma.booking.updateMany({
         where: {
           status: "WAITING_PAYMENT",
-          expiresAt: { lt: now }
+          expiresAt: { lt: now },
         },
-        data: { status: "CANCELED" }
+        data: { status: "CANCELED" },
       });
 
-      console.log(`[${now.toISOString()}] Expired ${updateResult.count} bookings`);
-      
-      expiredBookings.forEach(booking => {
-        console.log(`  - Booking ${booking.orderCode} (User: ${booking.User?.firstName} ${booking.User?.lastName}) expired`);
+      console.log(
+        `[${now.toISOString()}] Expired ${updateResult.count} bookings`
+      );
+
+      expiredBookings.forEach((booking) => {
+        console.log(
+          `  - Booking ${booking.orderCode} (User: ${booking.User?.firstName} ${booking.User?.lastName}) expired`
+        );
       });
 
       return {
         expiredCount: updateResult.count,
-        bookings: expiredBookings.map(booking => ({
+        bookings: expiredBookings.map((booking) => ({
           id: booking.id,
           orderCode: booking.orderCode,
           userEmail: booking.User?.email,
           propertyName: booking.Property?.name,
           roomName: booking.Room?.name,
-          expiresAt: booking.expiresAt
-        }))
+          expiresAt: booking.expiresAt,
+        })),
       };
     } catch (error) {
       console.error(`[${now.toISOString()}] Error expiring bookings:`, error);

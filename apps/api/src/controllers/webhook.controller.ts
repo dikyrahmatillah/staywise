@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import crypto from "crypto";
-import { prisma } from "@repo/database";
-import { OrderStatus } from "@repo/database/generated/prisma/index.js";
+import { prisma } from "@/configs/prisma.config.js";
+import { OrderStatus } from "@/generated/prisma/index.js";
 import { EmailService } from "@/services/email.service.js";
 
 const emailService = new EmailService();

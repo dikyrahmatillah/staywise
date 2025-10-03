@@ -1,7 +1,7 @@
 import logger from "@/utils/logger.js";
 import { Request, Response, NextFunction } from "express";
 import z, { ZodError } from "zod";
-import { Prisma } from "@repo/database/generated/prisma";
+import { Prisma } from "@/generated/prisma/index.js";
 import { AppError } from "@/errors/app.error.js";
 
 export function errorMiddleware(

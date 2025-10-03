@@ -1,4 +1,4 @@
-import { prisma } from "@repo/database";
+import { prisma } from "@/configs/prisma.config.js";
 import { AppError } from "@/errors/app.error.js";
 import { generateToken } from "@/utils/jwt.js";
 import { enqueueTokenExpiration } from "@/queues/token.queue.js";
