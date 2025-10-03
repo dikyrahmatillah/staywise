@@ -6,6 +6,14 @@ import Link from "next/link";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Dialog } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import {
   MapPin,
   Users,
@@ -18,7 +26,12 @@ import {
   DollarSign,
   Building2,
   ImageIcon,
+  MoreHorizontal,
+  Tag,
+  Sparkles,
 } from "lucide-react";
+import { CategorySelectDialog } from "@/components/tenant/properties/category-select-dialog";
+import { FacilitiesFormDialog } from "@/components/tenant/properties/facilities-form-dialog";
 import type { PropertyResponse } from "@repo/schemas";
 import {
   formatPriceDisplay,
@@ -47,6 +60,8 @@ export default function PropertyCard({
   onDelete,
 }: PropertyCardProps) {
   const [openDelete, setOpenDelete] = useState(false);
+  const [openCategory, setOpenCategory] = useState(false);
+  const [openFacilities, setOpenFacilities] = useState(false);
   const totalRooms = getTotalRooms(property);
   const priceDisplay = formatPriceDisplay(property);
   const guestDisplay = formatGuestDisplay(property);
@@ -171,15 +186,78 @@ export default function PropertyCard({
                   </Link>
                 </Button>
 
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => setOpenDelete(true)}
-                  className="w-full sm:w-auto text-red-600 border-red-300 hover:bg-red-50"
-                >
-                  <Trash2 className="h-4 w-4 mr-1" />
-                  Delete Property
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="w-full sm:w-auto justify-center"
+                    >
+                      <MoreHorizontal className="h-4 w-4 mr-1" />
+                      More
+                    </Button>
+                  </DropdownMenuTrigger>
+
+                  <DropdownMenuContent
+                    align="end"
+                    sideOffset={8}
+                    className="!w-44"
+                  >
+                    <DropdownMenuItem
+                      onSelect={(e) => {
+                        e.preventDefault();
+                        setOpenCategory(true);
+                      }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <Tag className="h-4 w-4" />
+                        Edit Category
+                      </div>
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem
+                      onSelect={(e) => {
+                        e.preventDefault();
+                        setOpenFacilities(true);
+                      }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <Sparkles className="h-4 w-4" />
+                        Edit Facilities
+                      </div>
+                    </DropdownMenuItem>
+
+                    <DropdownMenuSeparator />
+
+                    <DropdownMenuItem
+                      className="text-destructive"
+                      onSelect={(e) => {
+                        e.preventDefault();
+                        setOpenDelete(true);
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      Delete Property
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                {/* Category dialog */}
+                <Dialog open={openCategory} onOpenChange={setOpenCategory}>
+                  <CategorySelectDialog
+                    propertyId={property.id}
+                    defaultCategoryId={property.propertyCategoryId ?? null}
+                    customCategoryId={property.customCategoryId ?? null}
+                    onClose={() => setOpenCategory(false)}
+                  />
+                </Dialog>
+
+                {/* Facilities dialog */}
+                <Dialog open={openFacilities} onOpenChange={setOpenFacilities}>
+                  <FacilitiesFormDialog
+                    propertyId={property.id}
+                    onClose={() => setOpenFacilities(false)}
+                  />
+                </Dialog>
               </div>
             </div>
 
