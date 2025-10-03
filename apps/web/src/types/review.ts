@@ -17,7 +17,7 @@ export interface Review {
   };
 }
 
-export interface CreateReviewInput {
+export interface  CreateReviewInput {
   orderId: string;
   rating: number;
   comment: string;
