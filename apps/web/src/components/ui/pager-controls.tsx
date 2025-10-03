@@ -31,6 +31,9 @@ export default function PagerControls({
 }: Props) {
   const trackRef = React.useRef<HTMLDivElement | null>(null);
 
+  const prevDisabled = current === 0 || !canGoPrev || isLoading;
+  const nextDisabled = !canGoNext || isLoading;
+
   const handleClick = (e: React.MouseEvent) => {
     if (!trackRef.current || typeof onJump !== "function") return;
     const rect = trackRef.current.getBoundingClientRect();
@@ -65,10 +68,11 @@ export default function PagerControls({
         <button
           aria-label={prevLabel || "Previous"}
           onClick={onPrev}
-          disabled={current === 0 || !canGoPrev || isLoading}
-          className="rounded-md border-2 bg-white flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors w-10 h-10"
+          disabled={prevDisabled}
+          className={`rounded-md border-2 bg-white flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors w-10 h-10 ${
+            prevDisabled ? "" : "cursor-pointer"
+          }`}
         >
-          {/* Visible text: keep only the symbol for compactness, aria-label preserves full text for screen readers */}
           <span aria-hidden="true" className="text-lg">
             ‹
           </span>
@@ -76,20 +80,18 @@ export default function PagerControls({
         <button
           aria-label={nextLabel || "Next"}
           onClick={onNext}
-          disabled={!canGoNext || isLoading}
+          disabled={nextDisabled}
           className={`rounded-md bg-primary text-primary-foreground flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary/90 transition-colors relative ${
             nextLabel ? "px-4 py-2 min-w-[140px]" : "w-10 h-10"
-          }`}
+          } ${nextDisabled ? "" : "cursor-pointer"}`}
         >
           {isLoading ? (
             nextLabel ? (
               <>
                 <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary-foreground border-t-transparent mr-2"></div>
-                {/* keep loading text brief and explicit when label exists */}
                 Creating...
               </>
             ) : (
-              // symbol-only mode: show spinner only to keep the button compact
               <div
                 className="animate-spin rounded-full h-4 w-4 border-2 border-primary-foreground border-t-transparent"
                 aria-hidden="true"
