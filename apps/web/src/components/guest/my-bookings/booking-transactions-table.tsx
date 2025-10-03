@@ -1,3 +1,6 @@
+// apps/web/src/components/guest/my-bookings/booking-transactions-table.tsx
+// Updated to use the refactored BookingCard
+
 import {
   Table,
   TableBody,
@@ -7,16 +10,19 @@ import {
 } from "@/components/ui/table";
 import type { BookingTransaction } from "@repo/types";
 import { BookingTableRow } from "./booking-table-row";
+// Updated import - now points to the refactored booking-card folder
 import { BookingCard } from "./booking-card";
 
 interface BookingTransactionsTableProps {
   bookingTransactions: BookingTransaction[];
   onViewDetails?: (booking: BookingTransaction) => void;
+  onBookingUpdate?: () => void; // Added this prop
 }
 
 export const BookingTransactionsTable = ({
   bookingTransactions,
   onViewDetails,
+  onBookingUpdate, // Added this prop
 }: BookingTransactionsTableProps) => {
   if (!bookingTransactions || bookingTransactions.length === 0) {
     return (
@@ -25,6 +31,7 @@ export const BookingTransactionsTable = ({
       </div>
     );
   }
+
   return (
     <div className="w-full">
       {/* Desktop Table */}
@@ -55,6 +62,7 @@ export const BookingTransactionsTable = ({
                 key={booking.id}
                 booking={booking}
                 onViewDetails={onViewDetails}
+                onBookingUpdate={onBookingUpdate} // Pass the callback
               />
             ))}
           </TableBody>
@@ -68,16 +76,13 @@ export const BookingTransactionsTable = ({
             key={booking.id}
             booking={booking}
             onViewDetails={onViewDetails}
+            onBookingUpdate={onBookingUpdate} // Pass the callback
           />
         ))}
       </div>
 
-      {/* Empty State */}
-      {bookingTransactions.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground">No booking transactions found</p>
-        </div>
-      )}
+      {/* Empty State - This is redundant with the check at the top */}
+      {/* Removed duplicate empty state */}
     </div>
   );
 };
