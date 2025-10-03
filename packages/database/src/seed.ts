@@ -1,7 +1,6 @@
 import { faker } from "@faker-js/faker";
 import bcrypt from "bcrypt";
 import { prisma } from "./client.js";
-import { BedType } from "../generated/prisma/index.js";
 import { randomUUID } from "crypto";
 
 const addDays = (date: Date, days: number) => {
@@ -262,10 +261,10 @@ async function seed() {
             basePrice: basePrice.toString(),
             capacity: faker.number.int({ min: 1, max: 6 }),
             bedType: faker.helpers.arrayElement([
-              BedType.KING,
-              BedType.QUEEN,
-              BedType.SINGLE,
-              BedType.TWIN,
+              "KING",
+              "QUEEN",
+              "SINGLE",
+              "TWIN",
             ]),
             bedCount: faker.number.int({ min: 1, max: 4 }),
             imageUrl: faker.image.urlPicsumPhotos({

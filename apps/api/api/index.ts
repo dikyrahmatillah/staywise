@@ -1,6 +1,6 @@
 import { App } from "../src/app.js";
 
 const appInstance = new App();
-const app = appInstance.app; // Express instance from your class
+const app = appInstance.app;
 
 export default app;
