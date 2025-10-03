@@ -7,7 +7,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 
 export interface Step {
   id: number;
@@ -35,14 +35,17 @@ export function StepNavigation({
 
   const toggleMobile = () => setMobileExpanded((v) => !v);
 
-  const handleStepClick = (stepNumber: number) => {
-    const canAccess =
-      stepNumber <= currentStep || isStepAccessible?.(stepNumber) === true;
+  const handleStepClick = useCallback(
+    (stepNumber: number) => {
+      const canAccess =
+        stepNumber <= currentStep || isStepAccessible?.(stepNumber) === true;
 
-    if (onStepClick && canAccess) {
-      onStepClick(stepNumber);
-    }
-  };
+      if (onStepClick && canAccess) {
+        onStepClick(stepNumber);
+      }
+    },
+    [currentStep, isStepAccessible, onStepClick]
+  );
 
   return (
     <div className="w-full space-y-6">

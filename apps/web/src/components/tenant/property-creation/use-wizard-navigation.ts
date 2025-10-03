@@ -27,7 +27,12 @@ export function useWizardNavigation() {
 
   const transitionToStep = useCallback(
     (nextStep: number) => {
-      if (nextStep === currentStep || nextStep < 1 || nextStep > TOTAL_STEPS) {
+      if (
+        nextStep === currentStep ||
+        nextStep < 1 ||
+        nextStep > TOTAL_STEPS ||
+        isTransitioning
+      ) {
         return;
       }
 
@@ -37,11 +42,15 @@ export function useWizardNavigation() {
 
       transitionTimeout.current = setTimeout(() => {
         setCurrentStep(nextStep);
-        setIsTransitioning(false);
-        transitionTimeout.current = null;
-      }, 180);
+
+        // Small delay to ensure step content updates before removing transition state
+        requestAnimationFrame(() => {
+          setIsTransitioning(false);
+          transitionTimeout.current = null;
+        });
+      }, 150);
     },
-    [clearTransitionTimeout, currentStep, setCurrentStep]
+    [clearTransitionTimeout, currentStep, setCurrentStep, isTransitioning]
   );
 
   const hasStepData = useCallback(

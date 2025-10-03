@@ -80,24 +80,18 @@ interface WizardStepContentProps {
 export function WizardStepContent({
   children,
   isTransitioning,
-  direction,
 }: WizardStepContentProps) {
   return (
     <div
       className={cn(
-        "bg-white/80 supports-[backdrop-filter]:bg-white/60 backdrop-blur-xl rounded-2xl shadow-lg border border-white/30 min-h-[500px] sm:min-h-[600px] p-4 sm:p-6 lg:p-8 ring-1 ring-black/5 transition-all duration-300",
+        "bg-white/80 supports-[backdrop-filter]:bg-white/60 backdrop-blur-xl rounded-2xl shadow-lg border border-white/30 min-h-[500px] sm:min-h-[600px] p-4 sm:p-6 lg:p-8 ring-1 ring-black/5 transition-opacity duration-200",
         {
-          "animate-in slide-in-from-right-5 fade-in-20":
-            isTransitioning && direction === "forward",
-          "animate-in slide-in-from-left-5 fade-in-20":
-            isTransitioning && direction === "backward",
-          "animate-in fade-in-20 slide-in-from-bottom-2": !isTransitioning,
+          "opacity-0": isTransitioning,
+          "opacity-100": !isTransitioning,
         }
       )}
     >
-      <div className="animate-in fade-in-20 slide-in-from-bottom-1 duration-300 delay-100">
-        {children}
-      </div>
+      {children}
     </div>
   );
 }

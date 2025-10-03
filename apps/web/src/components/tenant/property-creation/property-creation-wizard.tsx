@@ -54,12 +54,11 @@ function PropertyCreationWizardContent() {
           </div>
 
           <WizardStepContent
-            key={currentStep}
             isTransitioning={isTransitioning}
             direction={direction}
           >
             <WizardStepHeader step={currentStepData} />
-            {renderStepContent(currentStep)}
+            <div key={currentStep}>{renderStepContent(currentStep)}</div>
           </WizardStepContent>
 
           <div className="bg-white/70 supports-[backdrop-filter]:bg-white/50 backdrop-blur-xl rounded-2xl shadow-lg border border-white/20 p-4 sm:p-6 ring-1 ring-black/5 animate-in fade-in-50 slide-in-from-bottom-2">
