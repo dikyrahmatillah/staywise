@@ -1,9 +1,22 @@
-import { Redis } from "ioredis";
+import { Redis } from "@upstash/redis";
+import type { ConnectionOptions } from "bullmq";
 
-const REDIS_URL = process.env.REDIS_URL || "redis://127.0.0.1:6379";
+const UPSTASH_REST_URL = process.env.UPSTASH_REDIS_REST_URL;
+const UPSTASH_REST_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
 
-export const redis = new Redis(REDIS_URL, {
-  maxRetriesPerRequest: null,
-  enableReadyCheck: false,
+if (!UPSTASH_REST_URL || !UPSTASH_REST_TOKEN) {
+  throw new Error(
+    "Missing Upstash config: set UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN environment variables"
+  );
+}
+
+export const redis = new Redis({
+  url: UPSTASH_REST_URL,
+  token: UPSTASH_REST_TOKEN,
 });
 export type RedisClient = typeof redis;
+
+export const bullConnection: ConnectionOptions =
+  redis as unknown as ConnectionOptions;
+
+export default redis;
