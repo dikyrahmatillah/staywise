@@ -6,6 +6,8 @@ import { Save, Loader2, Building2 } from "lucide-react";
 import { BasicInfoCard } from "./edit-property-form/basic-info-card";
 import { LocationCard } from "./edit-property-form/location-card";
 import { ImagesCard } from "./edit-property-form/images-card";
+import { CategoryCard } from "./edit-property-form/category-card";
+import { FacilitiesCard } from "./edit-property-form/facilities-card";
 import { useEditProperty } from "@/hooks/useEditProperty";
 
 interface EditPropertyFormProps {
@@ -28,6 +30,8 @@ export function EditPropertyForm({ propertyId }: EditPropertyFormProps) {
     removeExistingPicture,
     removeSelectedImage,
     handleSubmit,
+    refreshProperty,
+    setPropertyFacilities,
   } = useEditProperty(propertyId);
 
   if (loading) {
@@ -113,6 +117,17 @@ export function EditPropertyForm({ propertyId }: EditPropertyFormProps) {
               }}
               onChange={handleInputChange}
               onLocationSelect={handleLocationSelect}
+            />
+
+            <CategoryCard property={property} onUpdate={refreshProperty} />
+
+            <FacilitiesCard
+              property={property}
+              onChange={(next) =>
+                setPropertyFacilities(
+                  next.map((f) => ({ facility: f.facility, note: f.note }))
+                )
+              }
             />
 
             <ImagesCard

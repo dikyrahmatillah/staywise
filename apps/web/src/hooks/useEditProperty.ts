@@ -28,6 +28,31 @@ function buildFormData(
   if (formData.latitude) fd.append("latitude", formData.latitude);
   if (formData.longitude) fd.append("longitude", formData.longitude);
 
+  if (property?.propertyCategoryId) {
+    fd.append("propertyCategoryId", property.propertyCategoryId);
+  }
+  if (property?.customCategoryId) {
+    fd.append("customCategoryId", property.customCategoryId);
+  }
+
+  if (property?.Facilities) {
+    fd.append(
+      "facilities",
+      JSON.stringify(
+        property.Facilities.map(
+          (facility: {
+            id: string;
+            facility: string;
+            note?: string | null;
+          }) => ({
+            facility: facility.facility,
+            note: facility.note,
+          })
+        )
+      )
+    );
+  }
+
   if (property?.Pictures) {
     fd.append(
       "existingPictures",
@@ -89,8 +114,30 @@ export function useEditProperty(propertyId: string) {
     }));
   };
 
-  const { property: fetchedProperty, loading: propLoading } =
-    useProperty(propertyId);
+  const {
+    property: fetchedProperty,
+    loading: propLoading,
+    refetch,
+  } = useProperty(propertyId);
+
+  const refreshProperty = async () => {
+    const result = await refetch();
+    if (result.data) {
+      setProperty(result.data);
+    }
+  };
+
+  const setPropertyFacilities = (
+    next: { facility: string; note?: string | null; id?: string }[] | null
+  ) => {
+    setProperty((prev: Property | null) => {
+      if (!prev) return prev;
+      const updated = Array.isArray(next)
+        ? next.map((f) => ({ facility: f.facility, note: f.note ?? null }))
+        : [];
+      return { ...prev, Facilities: updated } as Property;
+    });
+  };
 
   useEffect(() => {
     if (fetchedProperty) {
@@ -195,5 +242,7 @@ export function useEditProperty(propertyId: string) {
     removeSelectedImage,
     handleSubmit,
     updateProperty: updateMutation.mutateAsync,
+    refreshProperty,
+    setPropertyFacilities,
   } as const;
 }
