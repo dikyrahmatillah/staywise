@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker";
 import bcrypt from "bcrypt";
-import { prisma } from "./client.js";
+import { prisma } from "@/configs/prisma.config.js";
 import { randomUUID } from "crypto";
 
 const addDays = (date: Date, days: number) => {

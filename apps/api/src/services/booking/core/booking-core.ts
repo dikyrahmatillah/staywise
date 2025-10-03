@@ -1,4 +1,4 @@
-import { prisma } from "@repo/database";
+import { prisma } from "@/configs/prisma.config.js";
 import { AppError } from "@/errors/app.error.js";
 import {
   validateBookingDataSafe,
@@ -13,7 +13,6 @@ import type {
   AvailabilityCheckParams,
 } from "@repo/types";
 import type { BookingCreationData } from "@/services/booking/types/booking-internal.type.js";
-import { faker } from "@faker-js/faker";
 
 export class BookingCoreService {
   private utilsService: BookingUtilsService;

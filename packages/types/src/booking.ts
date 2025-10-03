@@ -135,7 +135,8 @@ export interface BookingValidationData {
 }
 
 // Enhanced availability result with validation
-export interface AvailabilityWithValidationResult extends RoomAvailabilityResult {
+export interface AvailabilityWithValidationResult
+  extends RoomAvailabilityResult {
   nights?: number;
   totalPrice?: number;
   validationPassed?: boolean;

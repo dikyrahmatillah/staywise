@@ -1,7 +1,7 @@
-import { prisma } from "@repo/database";
+import { prisma } from "@/configs/prisma.config.js";
 import { AppError } from "@/errors/app.error.js";
 import type { BookingFilters } from "@repo/types";
-import type { OrderStatus } from "@repo/database/generated/prisma/index.js";
+import type { OrderStatus } from "@/generated/prisma/index.js";
 
 export class BookingManagementService {
   async getAllBookings() {
@@ -163,42 +163,60 @@ export class BookingManagementService {
     });
   }
 
-private generateDateRange(startDate: Date, endDate: Date): Date[] {
-  const dates: Date[] = [];
-  
-  // 🔧 FIX: Work with UTC dates to avoid timezone issues
-  const currentDate = new Date(Date.UTC(
-    startDate.getUTCFullYear(), 
-    startDate.getUTCMonth(), 
-    startDate.getUTCDate()
-  ));
-  const endDateUTC = new Date(Date.UTC(
-    endDate.getUTCFullYear(), 
-    endDate.getUTCMonth(), 
-    endDate.getUTCDate()
-  ));
-  
-  console.log(`🔍 [DEBUG] Generating date range (UTC):`);
-  console.log(`  Start: ${currentDate.toISOString().split('T')[0]} (day ${currentDate.getUTCDate()})`);
-  console.log(`  End: ${endDateUTC.toISOString().split('T')[0]} (day ${endDateUTC.getUTCDate()})`);
-  
-  while (currentDate < endDateUTC) {
-    // Create date in UTC to avoid timezone shifts
-    const dateToAdd = new Date(Date.UTC(
-      currentDate.getUTCFullYear(),
-      currentDate.getUTCMonth(),
-      currentDate.getUTCDate()
-    ));
-    dates.push(dateToAdd);
-    console.log(`  📅 [DEBUG] Adding date: ${dateToAdd.toISOString().split('T')[0]} (day ${dateToAdd.getUTCDate()})`);
-    
-    // Move to next day using UTC
-    currentDate.setUTCDate(currentDate.getUTCDate() + 1);
+  private generateDateRange(startDate: Date, endDate: Date): Date[] {
+    const dates: Date[] = [];
+
+    // 🔧 FIX: Work with UTC dates to avoid timezone issues
+    const currentDate = new Date(
+      Date.UTC(
+        startDate.getUTCFullYear(),
+        startDate.getUTCMonth(),
+        startDate.getUTCDate()
+      )
+    );
+    const endDateUTC = new Date(
+      Date.UTC(
+        endDate.getUTCFullYear(),
+        endDate.getUTCMonth(),
+        endDate.getUTCDate()
+      )
+    );
+
+    console.log(`🔍 [DEBUG] Generating date range (UTC):`);
+    console.log(
+      `  Start: ${
+        currentDate.toISOString().split("T")[0]
+      } (day ${currentDate.getUTCDate()})`
+    );
+    console.log(
+      `  End: ${
+        endDateUTC.toISOString().split("T")[0]
+      } (day ${endDateUTC.getUTCDate()})`
+    );
+
+    while (currentDate < endDateUTC) {
+      // Create date in UTC to avoid timezone shifts
+      const dateToAdd = new Date(
+        Date.UTC(
+          currentDate.getUTCFullYear(),
+          currentDate.getUTCMonth(),
+          currentDate.getUTCDate()
+        )
+      );
+      dates.push(dateToAdd);
+      console.log(
+        `  📅 [DEBUG] Adding date: ${
+          dateToAdd.toISOString().split("T")[0]
+        } (day ${dateToAdd.getUTCDate()})`
+      );
+
+      // Move to next day using UTC
+      currentDate.setUTCDate(currentDate.getUTCDate() + 1);
+    }
+
+    console.log(`✅ [DEBUG] Generated ${dates.length} dates for blocking`);
+    return dates;
   }
-  
-  console.log(`✅ [DEBUG] Generated ${dates.length} dates for blocking`);
-  return dates;
-}
 
   private async blockDatesForBooking(
     roomId: string,
@@ -274,8 +292,10 @@ private generateDateRange(startDate: Date, endDate: Date): Date[] {
   }
 
   async approvePaymentProof(bookingId: string, tenantId: string) {
-     console.log(`🚨 [DEBUG] approvePaymentProof called with bookingId: ${bookingId}, tenantId: ${tenantId}`);
-  
+    console.log(
+      `🚨 [DEBUG] approvePaymentProof called with bookingId: ${bookingId}, tenantId: ${tenantId}`
+    );
+
     // First, verify the booking exists and belongs to the tenant
     const booking = await prisma.booking.findFirst({
       where: {
@@ -348,7 +368,9 @@ private generateDateRange(startDate: Date, endDate: Date): Date[] {
         booking.checkOutDate,
         bookingId
       );
-      console.log(`🔒 [DEBUG] blockDatesForBooking called for booking ${bookingId}`);
+      console.log(
+        `🔒 [DEBUG] blockDatesForBooking called for booking ${bookingId}`
+      );
     } catch (error) {
       console.error(
         "❌ Error blocking room dates after payment approval:",

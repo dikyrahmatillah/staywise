@@ -1,6 +1,5 @@
-// apps/api/src/controllers/payment-proof.controller.ts
 import { Request, Response, NextFunction } from "express";
-import { prisma } from "@repo/database";
+import { prisma } from "@/configs/prisma.config.js";
 import { uploadToCloudinary } from "@/middlewares/upload-payment-proof.middleware.js";
 import { AppError } from "@/errors/app.error.js";
 
