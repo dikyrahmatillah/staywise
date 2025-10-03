@@ -22,15 +22,6 @@ export class App {
   }
 
   setupMiddleware() {
-    // Security: Set security headers
-    this.app.use((req, res, next) => {
-      res.setHeader("X-Content-Type-Options", "nosniff");
-      res.setHeader("X-Frame-Options", "DENY");
-      res.setHeader("X-XSS-Protection", "1; mode=block");
-      next();
-    });
-
-    // CORS configuration
     this.app.use(
       cors({
         origin:
@@ -40,13 +31,7 @@ export class App {
         credentials: true,
       })
     );
-
-    // Body parser with size limits for security
-    this.app.use(express.json({ limit: "10mb" }));
-    this.app.use(express.urlencoded({ extended: true, limit: "10mb" }));
-
-    // Trust proxy for deployment behind reverse proxy (Vercel)
-    this.app.set("trust proxy", 1);
+    this.app.use(express.json());
   }
 
   setupRoutes() {

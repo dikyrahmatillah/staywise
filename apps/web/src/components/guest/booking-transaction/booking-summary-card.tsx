@@ -1,5 +1,3 @@
-// apps/web/src/app/booking/components/booking-summary-card.tsx
-
 "use client";
 
 import { useRouter } from "next/navigation";
@@ -17,7 +15,6 @@ export function BookingSummaryCard() {
   const {
     currentStep,
     selectedPaymentMethod,
-    selectedPaymentType,
     bookingDetails,
     nights,
     totalPrice,

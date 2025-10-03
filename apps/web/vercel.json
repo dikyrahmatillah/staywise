@@ -1,8 +1,0 @@
-{
-  "version": 2,
-  "buildCommand": "cd ../.. && npx turbo run build --filter=web",
-  "devCommand": "npm run dev",
-  "installCommand": "cd ../.. && npm install",
-  "framework": "nextjs",
-  "outputDirectory": ".next"
-}

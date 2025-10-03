@@ -30,7 +30,6 @@ export class PropertySearchService {
   async searchProperties(params: GetPropertiesParams = {}) {
     const skip = params.skip ?? 0;
     const take = params.take ?? 10;
-
     const {
       destination,
       name: nameFilter,
@@ -40,7 +39,6 @@ export class PropertySearchService {
       checkIn,
       checkOut,
     } = params;
-
     const where: any = {};
 
     if (destination) {
@@ -75,7 +73,6 @@ export class PropertySearchService {
             ],
           },
         };
-
         where.Rooms = {
           some: {
             RoomAvailabilities: {
@@ -141,7 +138,6 @@ export class PropertySearchService {
             checkInDate,
             checkOutDate
           );
-
           return {
             id: property.id,
             priceFrom: priceFrom === 0 ? Number.POSITIVE_INFINITY : priceFrom,
@@ -160,13 +156,19 @@ export class PropertySearchService {
         .slice(skip, skip + take)
         .map((p: any) => p.id);
       const total = propertiesWithMinPrice.length;
-
       const properties = await this.repository.findManyByIds(pagedIds);
       const itemsById = new Map(properties.map((item: any) => [item.id, item]));
-      const orderedProperties = pagedIds
-        .map((id) => itemsById.get(id))
-        .filter(Boolean) as typeof properties;
+      const priceMap = new Map(
+        propertiesWithMinPrice.map((p: any) => [p.id, p.priceFrom])
+      );
 
+      const orderedProperties = pagedIds
+        .map((id) => {
+          const prop = itemsById.get(id);
+          if (!prop) return null;
+          return { ...prop, priceFrom: priceMap.get(id) };
+        })
+        .filter(Boolean) as typeof properties;
       return { properties: orderedProperties, total };
     }
 
@@ -191,7 +193,6 @@ export class PropertySearchService {
       ),
       this.repository.count(where),
     ]);
-
     return { properties, total };
   }
 }
