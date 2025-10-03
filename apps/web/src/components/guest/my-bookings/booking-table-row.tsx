@@ -82,7 +82,7 @@ export const BookingTableRow = ({
     if (booking.status === "WAITING_PAYMENT") {
       if (booking.paymentMethod === "MANUAL_TRANSFER") {
         return (
-          <div className="flex gap-2">
+          <div className="flex flex-col gap-2">
             <Dialog
               open={paymentProofDialogOpen}
               onOpenChange={setPaymentProofDialogOpen}
@@ -129,7 +129,7 @@ export const BookingTableRow = ({
 
       if (booking.paymentMethod === "PAYMENT_GATEWAY") {
         return (
-          <div className="flex gap-2">
+          <div className="flex flex-col gap-2">
             <Button
               variant="default"
               size="sm"
