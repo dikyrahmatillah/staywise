@@ -1,10 +1,11 @@
 "use client";
 
 import React from "react";
-import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
+import { GoogleMap, Marker } from "@react-google-maps/api";
 import { LocationSearchInput } from "@/components/ui/location-search-input";
 import { LocationSuggestionList } from "@/components/ui/location-suggestion-list";
 import { useLocationPicker } from "@/hooks/use-location-picker";
+import { useGoogleMaps } from "@/components/providers/google-maps-provider";
 
 interface LocationPickerProps {
   onLocationSelect: (location: {
@@ -18,7 +19,6 @@ interface LocationPickerProps {
     lat: number;
     lng: number;
   };
-  apiKey: string;
   className?: string;
   onFieldsChange?: (fields: {
     address?: string;
@@ -30,10 +30,10 @@ interface LocationPickerProps {
 export function LocationPicker({
   onLocationSelect,
   initialLocation,
-  apiKey,
   className = "",
   onFieldsChange,
 }: LocationPickerProps) {
+  const { isLoaded, loadError } = useGoogleMaps();
   const {
     selectedLocation,
     isLoading,
@@ -63,71 +63,87 @@ export function LocationPicker({
     return gw.google?.maps?.Animation?.DROP as number | undefined;
   };
 
+  if (loadError) {
+    return (
+      <div className={`space-y-4 ${className}`}>
+        <div className="text-center text-red-500">
+          Error loading maps: {loadError.message}
+        </div>
+      </div>
+    );
+  }
+
+  if (!isLoaded) {
+    return (
+      <div className={`space-y-4 ${className}`}>
+        <div className="text-center text-gray-500">Loading maps...</div>
+      </div>
+    );
+  }
+
   return (
     <div className={`space-y-4 ${className}`}>
-      <LoadScript googleMapsApiKey={apiKey} libraries={["places"]}>
-        <div className="space-y-4">
-          <div className="flex gap-2">
-            <div className="flex-1">
-              <div className="relative">
-                <LocationSearchInput
-                  value={searchValue}
-                  onChange={setSearchValue}
-                  onUseCurrentLocation={handleCurrentLocation}
-                  isLoading={isLoading}
-                />
+      <div className="space-y-4">
+        <div className="flex gap-2">
+          <div className="flex-1">
+            <div className="relative">
+              <LocationSearchInput
+                value={searchValue}
+                onChange={setSearchValue}
+                onUseCurrentLocation={handleCurrentLocation}
+                isLoading={isLoading}
+              />
 
-                {searchValue.length >= 3 &&
-                  (suggestionsLoading ||
-                    suggestions.length > 0 ||
-                    !!suggestionsError) && (
-                    <LocationSuggestionList
-                      suggestions={suggestions}
-                      isLoading={suggestionsLoading}
-                      error={suggestionsError}
-                      onSelect={handleSuggestionSelect}
-                    />
-                  )}
-              </div>
+              {searchValue.length >= 3 &&
+                (suggestionsLoading ||
+                  suggestions.length > 0 ||
+                  !!suggestionsError) && (
+                  <LocationSuggestionList
+                    suggestions={suggestions}
+                    isLoading={suggestionsLoading}
+                    error={suggestionsError}
+                    onSelect={handleSuggestionSelect}
+                  />
+                )}
             </div>
           </div>
-
-          <div className="border rounded-lg overflow-hidden">
-            <GoogleMap
-              mapContainerStyle={{
-                width: "100%",
-                height: "400px",
-              }}
-              center={
-                selectedLocation || {
-                  lat: -6.2088,
-                  lng: 106.8456,
-                }
-              }
-              zoom={selectedLocation ? 15 : 10}
-              onClick={handleMapClick}
-              options={{
-                streetViewControl: false,
-                mapTypeControl: false,
-                fullscreenControl: false,
-              }}
-            >
-              {selectedLocation && (
-                <Marker
-                  position={selectedLocation}
-                  animation={getMarkerAnimation()}
-                />
-              )}
-            </GoogleMap>
-          </div>
-
-          {isLoading && (
-            <div className="text-center text-sm text-gray-500">
-              Getting location details...
-            </div>
-          )}
         </div>
-      </LoadScript>
+
+        <div className="border rounded-lg overflow-hidden">
+          <GoogleMap
+            mapContainerStyle={{
+              width: "100%",
+              height: "400px",
+            }}
+            center={
+              selectedLocation || {
+                lat: -6.2088,
+                lng: 106.8456,
+              }
+            }
+            zoom={selectedLocation ? 15 : 10}
+            onClick={handleMapClick}
+            options={{
+              streetViewControl: false,
+              mapTypeControl: false,
+              fullscreenControl: false,
+            }}
+          >
+            {selectedLocation && (
+              <Marker
+                position={selectedLocation}
+                animation={getMarkerAnimation()}
+              />
+            )}
+          </GoogleMap>
+        </div>
+
+        {isLoading && (
+          <div className="text-center text-sm text-gray-500">
+            Getting location details...
+          </div>
+        )}
+      </div>
     </div>
   );
 }
