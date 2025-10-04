@@ -22,7 +22,6 @@ export function EditPropertyForm({ propertyId }: EditPropertyFormProps) {
     formData,
     selectedImages,
     selectedImagePreviews,
-    hiddenFileInput,
     apiKey,
     handleInputChange,
     handleLocationSelect,
@@ -136,7 +135,6 @@ export function EditPropertyForm({ propertyId }: EditPropertyFormProps) {
               setSelectedImages={setSelectedImages}
               selectedImagePreviews={selectedImagePreviews}
               onRemoveSelected={removeSelectedImage}
-              hiddenFileInput={hiddenFileInput}
             />
           </div>
         </form>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -24,7 +24,6 @@ export function useEditProperty(propertyId: string) {
   const [selectedImagePreviews, setSelectedImagePreviews] = useState<string[]>(
     []
   );
-  const hiddenFileInput = useRef<HTMLInputElement | null>(null);
   const [formData, setFormData] = useState<EditPropertyFormData>({
     name: "",
     description: "",
@@ -166,7 +165,6 @@ export function useEditProperty(propertyId: string) {
     formData,
     selectedImages,
     selectedImagePreviews,
-    hiddenFileInput,
     apiKey,
     setFormData,
     handleInputChange,
