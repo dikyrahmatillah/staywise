@@ -3,9 +3,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Camera, X, Upload } from "lucide-react";
+import { Camera, X } from "lucide-react";
 import Image from "next/image";
 import React from "react";
+import { ImageUploadArea } from "@/components/tenant/shared/image-upload-area";
 
 type ExistingPicture = { id: string; imageUrl: string; note?: string | null };
 
@@ -16,7 +17,6 @@ type Props = {
   setSelectedImages: React.Dispatch<React.SetStateAction<File[]>>;
   selectedImagePreviews: string[];
   onRemoveSelected: (index: number) => void;
-  hiddenFileInput: React.RefObject<HTMLInputElement | null>;
 };
 
 export function ImagesCard({
@@ -26,13 +26,9 @@ export function ImagesCard({
   setSelectedImages,
   selectedImagePreviews,
   onRemoveSelected,
-  hiddenFileInput,
 }: Props) {
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length === 0) return;
-    const newImages = files.filter((file) => file.type.startsWith("image/"));
-    setSelectedImages((prev) => [...prev, ...newImages]);
+  const handleFilesSelected = (files: File[]) => {
+    setSelectedImages((prev) => [...prev, ...files]);
   };
 
   const totalImages = existingPictures.length + selectedImages.length;
@@ -53,26 +49,13 @@ export function ImagesCard({
           Upload high-quality images to showcase your property
         </p>
       </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="flex justify-center">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => hiddenFileInput.current?.click()}
-            className="w-full max-w-sm"
-          >
-            <Upload className="h-4 w-4 mr-2" />
-            Upload New Images
-          </Button>
-        </div>
-
-        <input
-          ref={hiddenFileInput}
-          type="file"
-          multiple
+      <CardContent className="p-8 space-y-8">
+        <ImageUploadArea
+          onFilesSelected={handleFilesSelected}
           accept="image/*"
-          onChange={handleImageSelect}
-          className="hidden"
+          maxSizeMB={1}
+          allowedFormats={["jpg", "jpeg", "png"]}
+          showEmptyState={totalImages === 0}
         />
 
         {existingPictures.length > 0 && (
@@ -137,15 +120,6 @@ export function ImagesCard({
                 </div>
               ))}
             </div>
-          </div>
-        )}
-
-        {totalImages === 0 && (
-          <div className="text-center py-8">
-            <Camera className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">
-              No images uploaded yet
-            </p>
           </div>
         )}
       </CardContent>
