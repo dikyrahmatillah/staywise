@@ -62,12 +62,12 @@ export function useEditProperty(propertyId: string) {
   };
 
   const setPropertyFacilities = (
-    next: { facility: string; note?: string | null; id?: string }[] | null
+    next: { facility: string; id?: string }[] | null
   ) => {
     setProperty((prev: Property | null) => {
       if (!prev) return prev;
       const updated = Array.isArray(next)
-        ? next.map((f) => ({ facility: f.facility, note: f.note ?? null }))
+        ? next.map((f) => ({ facility: f.facility }))
         : [];
       return { ...prev, Facilities: updated } as Property;
     });

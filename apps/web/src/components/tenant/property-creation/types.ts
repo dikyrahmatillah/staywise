@@ -36,7 +36,7 @@ export type RoomFormData = {
 
 export type PropertyFormData = Partial<CreatePropertyInput> & {
   selectedCategory?: "existing" | "custom";
-  facilities?: Array<string | { facility: string; note?: string | null }>;
+  facilities?: Array<string | { facility: string }>;
   pictures?: Array<PictureFormData>;
   rooms?: Array<RoomFormData>;
 };

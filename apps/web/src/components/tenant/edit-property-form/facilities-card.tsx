@@ -17,11 +17,11 @@ export function FacilitiesCard({
   onChange,
 }: Props) {
   const toCreateFacility = (
-    f: string | { facility?: string; note?: string | null }
+    f: string | { facility?: string }
   ): CreateFacilityInput =>
     typeof f === "string"
-      ? { facility: f as AmenityType, note: null }
-      : { facility: (f.facility as string) || "", note: f.note || null };
+      ? { facility: f as AmenityType }
+      : { facility: (f.facility as string) || "" };
 
   const initial: CreateFacilityInput[] =
     controlledSelected ??
@@ -59,19 +59,11 @@ export function FacilitiesCard({
     if (isSelected) {
       updateSelected(selected.filter((f) => f.facility !== facility));
     } else {
-      updateSelected([
-        ...selected,
-        { facility: facility as AmenityType, note: null },
-      ]);
+      updateSelected([...selected, { facility: facility as AmenityType }]);
     }
   };
 
-  const handleNoteChange = (facility: string, note: string) => {
-    const updated = selected.map((f) =>
-      f.facility === facility ? { ...f, note: note || null } : f
-    );
-    updateSelected(updated);
-  };
+  // notes removed for facilities
 
   return (
     <Card>
@@ -88,7 +80,6 @@ export function FacilitiesCard({
         <FacilitiesEditor
           selected={selected}
           onToggle={handleFacilityToggle}
-          onNoteChange={handleNoteChange}
           query={query}
           setQuery={setQuery}
         />

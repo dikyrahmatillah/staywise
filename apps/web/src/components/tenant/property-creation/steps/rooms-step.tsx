@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { usePropertyCreation } from "../property-creation-context";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -42,6 +42,7 @@ const BED_TYPES = [
 export function RoomsStep() {
   const { formData, updateFormData } = usePropertyCreation();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const dropRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLDivElement>(null);
 
   const [newRoom, setNewRoom] = useState<RoomFormData>({
@@ -55,7 +56,60 @@ export function RoomsStep() {
 
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
-  const rooms = formData.rooms || [];
+  const rooms = useMemo(() => formData.rooms || [], [formData.rooms]);
+
+  // Previews for rooms list: cache object URLs created from File objects so we don't
+  // recreate them on every render. We store created URLs in createdRef and expose
+  // a simple previews mapping keyed by room index for the UI.
+  const previewsRef = useRef<Record<number, string>>({});
+
+  useEffect(() => {
+    const next: Record<number, string> = {};
+    const usedIndices = new Set<number>();
+
+    rooms.forEach((room: RoomFormData, idx: number) => {
+      if (room.imagePreview) {
+        next[idx] = room.imagePreview;
+      } else if (room.imageFile) {
+        // reuse previously created url for this index if present
+        if (previewsRef.current[idx]) {
+          next[idx] = previewsRef.current[idx];
+        } else {
+          const url = URL.createObjectURL(room.imageFile);
+          previewsRef.current[idx] = url;
+          next[idx] = url;
+        }
+      }
+      usedIndices.add(idx);
+    });
+
+    // Revoke any created URLs that are no longer used
+    Object.keys(previewsRef.current).forEach((k) => {
+      const i = Number(k);
+      if (!usedIndices.has(i)) {
+        URL.revokeObjectURL(previewsRef.current[i]);
+        delete previewsRef.current[i];
+      }
+    });
+
+    // store next as a new ref snapshot
+    setPreviewsState(next);
+  }, [rooms]);
+
+  // local state to trigger re-render when previews change
+  const [previewsState, setPreviewsState] = useState<Record<number, string>>(
+    {}
+  );
+
+  // cleanup all created object URLs on unmount
+  useEffect(() => {
+    return () => {
+      Object.values(previewsRef.current).forEach((url) => {
+        URL.revokeObjectURL(url);
+      });
+      previewsRef.current = {};
+    };
+  }, []);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -72,7 +126,7 @@ export function RoomsStep() {
         return;
       }
 
-      // Create preview URL
+      // Create preview URLF
       const previewUrl = URL.createObjectURL(file);
 
       setNewRoom((prev) => ({
@@ -81,6 +135,20 @@ export function RoomsStep() {
         imagePreview: previewUrl,
       }));
     }
+  };
+
+  const handleFiles = (files: FileList | File[]) => {
+    if (!files || (files as FileList).length === 0) return;
+    const file = Array.from(files)[0];
+    if (!file.type.startsWith("image/")) return;
+    if (file.size > 1024 * 1024) return;
+
+    const previewUrl = URL.createObjectURL(file);
+    setNewRoom((prev) => ({
+      ...prev,
+      imageFile: file,
+      imagePreview: previewUrl,
+    }));
   };
 
   const handleRemoveImage = () => {
@@ -364,39 +432,80 @@ export function RoomsStep() {
 
             {!newRoom.imageFile ? (
               <div
-                className="relative border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl p-8 text-center hover:border-blue-300 dark:hover:border-blue-600 transition-colors cursor-pointer group"
+                ref={dropRef}
+                role="button"
+                tabIndex={0}
                 onClick={() => fileInputRef.current?.click()}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    fileInputRef.current?.click();
+                  }
+                }}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  dropRef.current?.classList.add(
+                    "ring-2",
+                    "ring-primary/40",
+                    "ring-offset-2",
+                    "bg-primary/10"
+                  );
+                }}
+                onDragLeave={() =>
+                  dropRef.current?.classList.remove(
+                    "ring-2",
+                    "ring-primary/40",
+                    "ring-offset-2",
+                    "bg-primary/10"
+                  )
+                }
+                onDrop={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  dropRef.current?.classList.remove(
+                    "ring-2",
+                    "ring-primary/40",
+                    "ring-offset-2",
+                    "bg-primary/10"
+                  );
+                  if (e.dataTransfer?.files?.length)
+                    handleFiles(e.dataTransfer.files);
+                }}
+                className="relative border-2 border-dashed border-gray-300 rounded-xl p-8 text-center transition-all duration-200 hover:border-primary/40 hover:bg-primary/10 bg-gradient-to-br from-gray-50/50 to-white cursor-pointer"
               >
-                <div className="space-y-3">
-                  <div className="mx-auto w-12 h-12 bg-blue-50 dark:bg-blue-900/30 rounded-full flex items-center justify-center group-hover:bg-blue-100 dark:group-hover:bg-blue-900/50 transition-colors">
-                    <Upload className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-primary/20 rounded-xl opacity-0 hover:opacity-100 transition-opacity duration-300" />
+                <div className="relative z-10">
+                  <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-6">
+                    <Upload className="w-8 h-8 text-primary" />
                   </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                      Click to upload room image
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      PNG, JPG up to 1MB
-                    </p>
-                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    Upload Room Image
+                  </h3>
+                  <p className="text-gray-600 mb-2">
+                    Drag and drop an image here, or click to browse
+                  </p>
+                  <p className="text-sm text-gray-500 mb-6">
+                    Maximum file size: 1MB • Supported formats: JPG, PNG
+                  </p>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
                 </div>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="hidden"
-                />
               </div>
             ) : (
               <div className="space-y-4">
                 <div className="relative inline-block">
-                  <div className="w-40 h-28 border rounded-xl overflow-hidden bg-gray-50 dark:bg-gray-800">
+                  <div className="w-full max-w-sm aspect-video border-2 border-gray-200 rounded-xl overflow-hidden shadow-lg bg-gradient-to-br from-gray-50 to-gray-100">
                     <Image
                       src={newRoom.imagePreview!}
                       alt="Room preview"
-                      width={160}
-                      height={112}
+                      width={400}
+                      height={225}
                       className="w-full h-full object-cover"
                     />
                   </div>
@@ -404,18 +513,11 @@ export function RoomsStep() {
                     type="button"
                     variant="destructive"
                     size="sm"
-                    className="absolute -top-2 -right-2 h-7 w-7 rounded-full p-0 shadow-lg"
+                    className="absolute top-3 right-3 h-8 w-8 rounded-full p-0 shadow-lg"
                     onClick={handleRemoveImage}
                   >
-                    <X className="w-3 h-3" />
+                    <X className="w-4 h-4" />
                   </Button>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span className="text-green-600 dark:text-green-400">
-                    {newRoom.imageFile.name} (
-                    {(newRoom.imageFile.size / 1024).toFixed(1)} KB)
-                  </span>
                 </div>
               </div>
             )}
@@ -481,29 +583,31 @@ export function RoomsStep() {
           </CardHeader>
           <CardContent>
             <div className="grid gap-4">
-              {rooms.map(
-                (
-                  room: {
-                    name: string;
-                    basePrice: number;
-                    capacity?: number;
-                    bedCount?: number;
-                    bedType?: string;
-                    description?: string;
-                    imageFile?: File;
-                  },
-                  index: number
-                ) => (
+              {rooms.map((room: RoomFormData, index: number) => {
+                const previewSrc = previewsState[index] || room.imagePreview;
+                return (
                   <div
                     key={index}
                     className="group relative overflow-hidden rounded-xl border bg-white dark:bg-gray-900 p-6 transition-all hover:shadow-md hover:border-blue-200 dark:hover:border-blue-800"
                   >
-                    <div className="flex items-start justify-between">
+                    <div className="flex items-start gap-2 justify-between">
                       <div className="flex-1 space-y-3">
                         <div className="flex items-center gap-3">
-                          <div className="p-2 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
-                            <Bed className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                          </div>
+                          {previewSrc ? (
+                            <div className="w-20 h-14 rounded-lg overflow-hidden bg-gray-50 dark:bg-gray-800">
+                              <Image
+                                src={previewSrc}
+                                alt={room.name || "room image"}
+                                width={80}
+                                height={56}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          ) : (
+                            <div className="p-2 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+                              <Bed className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                            </div>
+                          )}
                           <div>
                             <h3 className="font-semibold text-gray-900 dark:text-gray-100">
                               {room.name}
@@ -526,46 +630,37 @@ export function RoomsStep() {
                         </div>
 
                         {room.description && (
-                          <p className="text-sm text-gray-600 dark:text-gray-400 pl-14">
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
                             {room.description}
                           </p>
-                        )}
-
-                        {room.imageFile && (
-                          <div className="flex items-center gap-2 pl-14">
-                            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                            <span className="text-xs text-green-600 dark:text-green-400">
-                              Image: {room.imageFile.name}
-                            </span>
-                          </div>
                         )}
                       </div>
 
                       <div className="flex items-center gap-2">
                         <Button
                           type="button"
-                          variant="ghost"
+                          variant="outline"
                           size="sm"
                           onClick={() => handleEditRoom(index)}
-                          className="opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="h-8"
                         >
                           Edit
                         </Button>
 
                         <Button
                           type="button"
-                          variant="ghost"
+                          variant="destructive"
                           size="sm"
                           onClick={() => handleRemoveRoom(index)}
-                          className="opacity-0 group-hover:opacity-100 transition-opacity text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                          className="h-8"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
                     </div>
                   </div>
-                )
-              )}
+                );
+              })}
             </div>
           </CardContent>
         </Card>

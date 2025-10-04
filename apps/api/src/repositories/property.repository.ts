@@ -228,7 +228,6 @@ export class PropertyRepository {
       data: facilities.map((facility) => ({
         propertyId,
         facility: facility.facility,
-        note: facility.note,
       })),
     });
   }
