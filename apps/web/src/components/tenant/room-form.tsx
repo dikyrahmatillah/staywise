@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import type { Room } from "@/types/room";
 import type { CreateRoomInput, UpdateRoomInput } from "@repo/schemas";
-import { useRoomForm } from "./room-form/use-room-form";
+import { useRoomForm } from "@/components/tenant/room-form/use-room-form";
 import { RoomFields } from "./room-form/room-fields";
 import { ImageField } from "./room-form/image-field";
 

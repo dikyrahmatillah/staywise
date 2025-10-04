@@ -2,9 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { useParams } from "next/navigation";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Plus, RefreshCw } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useRooms } from "@/hooks/useRooms";
 import { RoomForm } from "./room-form";
 import { RoomList } from "./room-list";
@@ -27,16 +26,8 @@ export function RoomManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [bedTypeFilter, setBedTypeFilter] = useState<string>("all");
 
-  const {
-    rooms,
-    loading,
-    error,
-    fetchRooms,
-    createRoom,
-    updateRoom,
-    deleteRoom,
-    isEmpty,
-  } = useRooms(propertyId);
+  const { rooms, loading, error, createRoom, updateRoom, deleteRoom, isEmpty } =
+    useRooms(propertyId);
 
   const bedTypes = useMemo(() => {
     const unique = new Set<string>();
@@ -109,29 +100,12 @@ export function RoomManagement() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="space-y-1">
-          <div className="flex items-center gap-2 mb-2">
-            <Badge
-              variant="outline"
-              className="w-fit border-primary/40 bg-primary/10 text-primary"
-            >
-              Property #{propertyId}
-            </Badge>
-          </div>
           <h1 className="text-3xl font-bold tracking-tight">Room Management</h1>
           <p className="text-muted-foreground">
             Manage rooms for this property
           </p>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-          <Button
-            variant="outline"
-            onClick={fetchRooms}
-            disabled={loading}
-            className="w-full sm:w-auto"
-          >
-            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-            Refresh
-          </Button>
           <Button onClick={handleAddRoom} className="w-full sm:w-auto">
             <Plus className="h-4 w-4" />
             Add New Room
@@ -150,7 +124,7 @@ export function RoomManagement() {
           bedTypes={bedTypes}
           onSearchChange={setSearchTerm}
           onBedTypeChange={setBedTypeFilter}
-          onRefresh={fetchRooms}
+          onRefresh={() => {}}
           onResetFilters={handleResetFilters}
           hasActiveFilters={hasActiveFilters}
           hasRooms={hasRooms}
