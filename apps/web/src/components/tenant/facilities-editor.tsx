@@ -144,6 +144,7 @@ export function FacilitiesEditor({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search facilities (e.g., WiFi, Gym, Balcony)"
+            className="focus:ring-2 focus-visible:border-primary/50 focus-visible:ring-primary/10 transition-all duration-200"
           />
         </div>
       </div>
@@ -175,8 +176,6 @@ export function FacilitiesEditor({
                         </Badge>
                       )}
                     </div>
-
-                    {/* notes removed for facilities */}
                   </div>
                 );
               })}

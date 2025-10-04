@@ -26,9 +26,6 @@ export function getStepState(
   };
 }
 
-/**
- * Get CSS classes for step indicator based on state
- */
 export function getStepIndicatorClasses(state: StepState): string {
   const { isCompleted, isCurrent, isUpcoming, hasData } = state;
 
@@ -50,9 +47,6 @@ export function getStepIndicatorClasses(state: StepState): string {
   return `${baseClasses} bg-white text-muted-foreground border-muted-foreground/20 hover:border-primary/50 hover:text-primary hover:shadow-primary/10`;
 }
 
-/**
- * Get CSS classes for mobile step indicator based on state
- */
 export function getMobileStepIndicatorClasses(state: StepState): string {
   const { isCompleted, isCurrent, isUpcoming, hasData } = state;
 
