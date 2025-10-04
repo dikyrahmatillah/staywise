@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -38,8 +37,8 @@ export const PropertiesListFilters = ({
   hasCategoryOptions,
 }: PropertiesListFiltersProps) => {
   return (
-    <Card className="border-border/60 bg-card/60 backdrop-blur-sm">
-      <CardContent>
+    <div className="border-border/60 bg-card/60 backdrop-blur-sm rounded-md">
+      <div className="p-4">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="relative flex-1 max-w-lg">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -115,7 +114,7 @@ export const PropertiesListFilters = ({
             </Select>
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
