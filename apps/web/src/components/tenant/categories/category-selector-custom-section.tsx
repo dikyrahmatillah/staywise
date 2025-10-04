@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { Edit3, Trash2 } from "lucide-react";
+import { Edit3, Trash2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -47,22 +47,8 @@ export function CategorySelectorCustomSection({
             Tailor listings with names that guests will remember.
           </p>
         </div>
-        <Button size="sm" className="gap-2" onClick={onCreateNew}>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="h-4 w-4"
-          >
-            <path d="M5 12h14" />
-            <path d="M12 5v14" />
-          </svg>
+        <Button type="button" size="sm" className="gap-2" onClick={onCreateNew}>
+          <Plus className="h-4 w-4" />
           Add category
         </Button>
       </div>
@@ -92,24 +78,33 @@ export function CategorySelectorCustomSection({
             {sortedCategories.map((cat) => (
               <div
                 key={cat.id}
+                role="button"
+                tabIndex={0}
+                onClick={() => onSelect(cat.id)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    onSelect(cat.id);
+                  }
+                }}
+                aria-pressed={selectedId === cat.id}
                 className={cn(
-                  "group relative flex items-center gap-3 rounded-2xl border bg-card/80 p-4 transition-all duration-200",
+                  "group relative flex items-center gap-3 rounded-2xl border bg-card/80 p-3 transition-all duration-200 hover:border-primary/50 cursor-pointer",
                   selectedId === cat.id && "border-primary bg-primary/5"
                 )}
               >
-                <button
-                  type="button"
-                  onClick={() => onSelect(cat.id)}
-                  className="flex-1 text-left cursor-pointer"
-                >
+                <div className="flex-1 text-left">
                   <p className="text-sm font-semibold text-foreground">
                     {cat.name}
                   </p>
-                </button>
+                </div>
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
-                    onClick={() => onEdit(cat)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onEdit(cat);
+                    }}
                     className="rounded-md p-2 text-sm text-muted-foreground hover:bg-muted/30 cursor-pointer"
                     aria-label={`Edit ${cat.name}`}
                   >
@@ -117,7 +112,10 @@ export function CategorySelectorCustomSection({
                   </button>
                   <button
                     type="button"
-                    onClick={() => onDelete(cat)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDelete(cat);
+                    }}
                     className="rounded-md p-2 text-sm text-destructive hover:bg-muted/30 cursor-pointer"
                     aria-label={`Delete ${cat.name}`}
                   >
