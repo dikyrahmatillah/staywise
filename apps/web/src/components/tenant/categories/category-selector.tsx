@@ -111,8 +111,8 @@ export default function CategorySelector({
 
   return (
     <>
-      <Card className="border-border/60 bg-background/95 backdrop-blur-sm">
-        <CardHeader>
+      <Card>
+        <CardHeader className="mb-6">
           <CardTitle className="flex items-center gap-2 text-lg">
             <Tag className="h-5 w-5 text-primary" />
             Property Category
@@ -122,7 +122,7 @@ export default function CategorySelector({
             of our presets or create your own label to suit unique spaces.
           </p>
         </CardHeader>
-        <CardContent className="space-y-10 py-6">
+        <CardContent className="space-y-10">
           <div className="space-y-6">
             <CategorySelectorDefaultSection
               categories={defaultCategories}

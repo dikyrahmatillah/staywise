@@ -65,7 +65,7 @@ export function FacilitiesCard({
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="mb-6">
         <CardTitle className="flex items-center gap-2 text-lg">
           <Sparkles className="h-5 w-5 text-primary" />
           Facilities & Amenities
@@ -74,7 +74,7 @@ export function FacilitiesCard({
           Select amenities available at this property
         </p>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-4">
         <FacilitiesEditor
           selected={selected}
           onToggle={handleFacilityToggle}

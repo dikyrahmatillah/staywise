@@ -65,7 +65,6 @@ export function DesktopStepNavigation({
                   <span className="text-sm font-bold">{step.number}</span>
                 )}
 
-                {/* Pulse effect for current step */}
                 {state.isCurrent && (
                   <div className="absolute inset-0 rounded-full bg-primary/20 animate-ping" />
                 )}
