@@ -67,9 +67,9 @@ export function useCategorySelection(options: CategorySelectionOptions = {}) {
       : undefined;
 
     onSelectionChange?.({
-      propertyCategoryId: next || undefined,
+      propertyCategoryId: next,
       propertyCategoryName: name,
-      customCategoryId: selectedCustom || undefined,
+      customCategoryId: selectedCustom,
       customCategoryName: selectedCustom
         ? customCategories.find((c) => c.id === selectedCustom)?.name
         : undefined,
@@ -85,9 +85,9 @@ export function useCategorySelection(options: CategorySelectionOptions = {}) {
       : undefined;
 
     onSelectionChange?.({
-      customCategoryId: next || undefined,
+      customCategoryId: next,
       customCategoryName: name,
-      propertyCategoryId: selectedDefault || undefined,
+      propertyCategoryId: selectedDefault,
       propertyCategoryName: selectedDefault
         ? defaultCategories.find((c) => c.id === selectedDefault)?.name
         : undefined,

@@ -57,9 +57,7 @@ export function CategorySelectorDefaultSection({
               }
             >
               <div className="flex-1 space-y-1">
-                <p className="text-sm font-semibold text-foreground">
-                  {cat.name}
-                </p>
+                <p className="text-xs font-semibold ">{cat.name}</p>
               </div>
             </button>
           ))}

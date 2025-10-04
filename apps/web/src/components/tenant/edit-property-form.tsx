@@ -30,6 +30,7 @@ export function EditPropertyForm({ propertyId }: EditPropertyFormProps) {
     removeSelectedImage,
     handleSubmit,
     setPropertyFacilities,
+    setPropertyCategory,
   } = useEditProperty(propertyId);
 
   if (loading) {
@@ -117,7 +118,7 @@ export function EditPropertyForm({ propertyId }: EditPropertyFormProps) {
               onLocationSelect={handleLocationSelect}
             />
 
-            <CategoryCard property={property} />
+            <CategoryCard property={property} onChange={setPropertyCategory} />
 
             <FacilitiesCard
               property={property}

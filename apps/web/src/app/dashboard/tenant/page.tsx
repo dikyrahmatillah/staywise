@@ -14,7 +14,6 @@ import {
 export default function Dashboard() {
   const { data: session } = useSession();
 
-  // For debugging - remove after fixing
   console.log("Dashboard session:", {
     user: session?.user,
     role: session?.user?.role,

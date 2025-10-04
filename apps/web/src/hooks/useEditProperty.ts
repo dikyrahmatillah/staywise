@@ -60,6 +60,30 @@ export function useEditProperty(propertyId: string) {
     }
   };
 
+  const setPropertyCategory = (next: {
+    propertyCategoryId?: string;
+    propertyCategoryName?: string;
+    customCategoryId?: string;
+    customCategoryName?: string;
+  }) => {
+    setProperty((prev: Property | null) => {
+      if (!prev) return prev;
+      const propCat =
+        next.propertyCategoryId === undefined || next.propertyCategoryId === ""
+          ? undefined
+          : next.propertyCategoryId;
+      const customCat =
+        next.customCategoryId === undefined || next.customCategoryId === ""
+          ? undefined
+          : next.customCategoryId;
+      return {
+        ...prev,
+        propertyCategoryId: propCat ?? prev.propertyCategoryId,
+        customCategoryId: customCat ?? prev.customCategoryId,
+      } as Property;
+    });
+  };
+
   const setPropertyFacilities = (
     next: { facility: string; id?: string }[] | null
   ) => {
@@ -176,5 +200,6 @@ export function useEditProperty(propertyId: string) {
     updateProperty: updateMutation.mutateAsync,
     refreshProperty,
     setPropertyFacilities,
+    setPropertyCategory,
   } as const;
 }

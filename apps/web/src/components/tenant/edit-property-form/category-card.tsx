@@ -4,9 +4,15 @@ import type { Property } from "./types";
 
 type Props = {
   property: Property;
+  onChange?: (selection: {
+    propertyCategoryId?: string;
+    propertyCategoryName?: string;
+    customCategoryId?: string;
+    customCategoryName?: string;
+  }) => void;
 };
 
-export function CategoryCard({ property }: Props) {
+export function CategoryCard({ property, onChange }: Props) {
   const {
     defaultCategories,
     customCategories,
@@ -22,6 +28,7 @@ export function CategoryCard({ property }: Props) {
   } = useCategorySelection({
     initialDefaultId: property.propertyCategoryId ?? "",
     initialCustomId: property.customCategoryId ?? "",
+    onSelectionChange: onChange,
   });
 
   return (
