@@ -6,8 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 type Props = {
-  nameValue: string;
-  descriptionValue: string;
+  nameValue?: string;
+  descriptionValue?: string;
   onChange: (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => void;
@@ -43,7 +43,7 @@ export function BasicInfoFields({
           <Input
             id="name"
             name="name"
-            value={nameValue}
+            value={nameValue ?? ""}
             onChange={onChange}
             placeholder="e.g., Luxury Beachfront Villa with Ocean Views"
             className="h-12 text-base border-2 border-slate-200 focus:ring-2 focus-visible:border-primary/50 focus-visible:ring-primary/10 transition-all duration-200"
@@ -100,7 +100,7 @@ export function BasicInfoFields({
           <Textarea
             id="description"
             name="description"
-            value={descriptionValue}
+            value={descriptionValue ?? ""}
             onChange={onChange}
             placeholder="Tell guests about your property's unique features, location highlights, amenities, and what makes it special..."
             rows={5}
