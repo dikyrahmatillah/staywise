@@ -70,6 +70,7 @@ export function CategoryDialogs({
               placeholder="e.g., Seaside Villa"
               autoFocus
               maxLength={100}
+              className="focus:ring-2 focus-visible:border-primary/50 focus-visible:ring-primary/10 transition-all duration-200"
             />
             <p className="text-xs text-muted-foreground">
               Maximum 100 characters. Keep it descriptive but concise.
@@ -118,6 +119,7 @@ export function CategoryDialogs({
               placeholder="e.g., Seaside Villa"
               autoFocus
               maxLength={100}
+              className="focus:ring-2 focus-visible:border-primary/50 focus-visible:ring-primary/10 transition-all duration-200"
             />
             {error && <p className="text-xs text-destructive">{error}</p>}
           </div>
