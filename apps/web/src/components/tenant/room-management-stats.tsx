@@ -111,7 +111,7 @@ export const RoomManagementStats = ({
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       {metricCards.map((card) => (
         <Card key={card.title}>
-          <CardContent className="p-4">
+          <CardContent>
             <div className="flex items-center justify-between">
               <p className="text-sm font-medium text-muted-foreground">
                 {card.title}

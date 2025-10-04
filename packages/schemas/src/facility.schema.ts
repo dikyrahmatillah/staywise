@@ -30,7 +30,6 @@ export const amenitiesEnum = z.enum([
 
 export const createFacilitySchema = z.object({
   facility: amenitiesEnum,
-  note: z.string().optional().nullable(),
 });
 
 export type CreateFacilityInput = z.infer<typeof createFacilitySchema>;

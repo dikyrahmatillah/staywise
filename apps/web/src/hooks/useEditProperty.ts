@@ -13,48 +13,7 @@ import type {
   LocationValue,
   EditPropertyFormData,
 } from "@/components/tenant/edit-property-form/types";
-
-function buildFormData(
-  formData: EditPropertyFormData,
-  property: Property | null,
-  selectedImages: File[]
-): FormData {
-  const fd = new FormData();
-  fd.append("name", formData.name);
-  fd.append("description", formData.description);
-  fd.append("country", formData.country);
-  fd.append("city", formData.city);
-  fd.append("address", formData.address);
-  if (formData.latitude) fd.append("latitude", formData.latitude);
-  if (formData.longitude) fd.append("longitude", formData.longitude);
-
-  if (property?.Pictures) {
-    fd.append(
-      "existingPictures",
-      JSON.stringify(
-        property.Pictures.map(
-          (pic: { id: string; imageUrl: string; note?: string | null }) => ({
-            id: pic.id,
-            imageUrl: pic.imageUrl,
-            note: pic.note ?? null,
-          })
-        )
-      )
-    );
-  }
-
-  selectedImages.forEach((image) => fd.append("propertyImages", image));
-
-  if (selectedImages.length > 0) {
-    const picturesData = selectedImages.map((_, index) => ({
-      fileIndex: index,
-      note: null as string | null,
-    }));
-    fd.append("propertyPictures", JSON.stringify(picturesData));
-  }
-
-  return fd;
-}
+import { buildPropertyFormData } from "@/lib/property/build-property-form-data";
 
 export function useEditProperty(propertyId: string) {
   const { data: session } = useSession();
@@ -89,8 +48,30 @@ export function useEditProperty(propertyId: string) {
     }));
   };
 
-  const { property: fetchedProperty, loading: propLoading } =
-    useProperty(propertyId);
+  const {
+    property: fetchedProperty,
+    loading: propLoading,
+    refetch,
+  } = useProperty(propertyId);
+
+  const refreshProperty = async () => {
+    const result = await refetch();
+    if (result.data) {
+      setProperty(result.data);
+    }
+  };
+
+  const setPropertyFacilities = (
+    next: { facility: string; id?: string }[] | null
+  ) => {
+    setProperty((prev: Property | null) => {
+      if (!prev) return prev;
+      const updated = Array.isArray(next)
+        ? next.map((f) => ({ facility: f.facility }))
+        : [];
+      return { ...prev, Facilities: updated } as Property;
+    });
+  };
 
   useEffect(() => {
     if (fetchedProperty) {
@@ -174,7 +155,7 @@ export function useEditProperty(propertyId: string) {
       toast.error("Please login to continue");
       return;
     }
-    const fd = buildFormData(formData, property, selectedImages);
+    const fd = buildPropertyFormData(formData, property, selectedImages);
     return updateMutation.mutateAsync(fd);
   };
 
@@ -195,5 +176,7 @@ export function useEditProperty(propertyId: string) {
     removeSelectedImage,
     handleSubmit,
     updateProperty: updateMutation.mutateAsync,
+    refreshProperty,
+    setPropertyFacilities,
   } as const;
 }

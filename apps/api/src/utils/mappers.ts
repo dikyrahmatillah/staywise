@@ -25,7 +25,6 @@ export function mapFacilities(facilities?: FacilityInput[]) {
   return {
     create: facilities.map((f) => ({
       facility: f.facility,
-      note: f.note ?? null,
     })),
   } as const;
 }

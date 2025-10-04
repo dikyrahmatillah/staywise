@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+
 import {
   MapPin,
   Users,
@@ -13,7 +14,6 @@ import {
   Star,
   Eye,
   Edit,
-  Trash2,
   Calendar,
   DollarSign,
   Building2,
@@ -169,16 +169,6 @@ export default function PropertyCard({
                     <Bed className="h-4 w-4 mr-1" />
                     Edit Rooms
                   </Link>
-                </Button>
-
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => setOpenDelete(true)}
-                  className="w-full sm:w-auto text-red-600 border-red-300 hover:bg-red-50"
-                >
-                  <Trash2 className="h-4 w-4 mr-1" />
-                  Delete Property
                 </Button>
               </div>
             </div>

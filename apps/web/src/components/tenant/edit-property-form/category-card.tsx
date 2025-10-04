@@ -1,10 +1,12 @@
-import { usePropertyCreation } from "../property-creation-context";
 import CategorySelector from "@/components/tenant/categories/category-selector";
 import { useCategorySelection } from "@/hooks/useCategorySelection";
+import type { Property } from "./types";
 
-export function CategoryStep() {
-  const { formData, updateFormData } = usePropertyCreation();
+type Props = {
+  property: Property;
+};
 
+export function CategoryCard({ property }: Props) {
   const {
     defaultCategories,
     customCategories,
@@ -16,11 +18,8 @@ export function CategoryStep() {
     handleCustomCategorySelect,
     handleCreateCategory,
   } = useCategorySelection({
-    initialDefaultId: formData.propertyCategoryId ?? "",
-    initialCustomId: formData.customCategoryId ?? "",
-    onSelectionChange: (selection) => {
-      updateFormData(selection);
-    },
+    initialDefaultId: property.propertyCategoryId ?? "",
+    initialCustomId: property.customCategoryId ?? "",
   });
 
   return (
