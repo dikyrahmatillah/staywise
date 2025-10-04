@@ -17,6 +17,8 @@ export function CategoryCard({ property }: Props) {
     handleDefaultCategorySelect,
     handleCustomCategorySelect,
     handleCreateCategory,
+    updateCustomCategory,
+    deleteCustomCategory,
   } = useCategorySelection({
     initialDefaultId: property.propertyCategoryId ?? "",
     initialCustomId: property.customCategoryId ?? "",
@@ -33,6 +35,8 @@ export function CategoryCard({ property }: Props) {
       onDefaultSelect={handleDefaultCategorySelect}
       onCustomSelect={handleCustomCategorySelect}
       onCreate={handleCreateCategory}
+      updateCustomCategory={updateCustomCategory}
+      deleteCustomCategory={deleteCustomCategory}
     />
   );
 }
