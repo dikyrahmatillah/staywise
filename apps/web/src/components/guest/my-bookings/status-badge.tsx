@@ -1,12 +1,12 @@
+// apps/web/src/components/guest/my-bookings/status-badge.tsx
 import { Badge } from "@/components/ui/badge";
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import type { OrderStatus, StatusConfig, BadgeVariant } from "@repo/types";
-import { statusTooltips } from "@/components/guest/my-bookings/status-tooltips";
+import { statusTooltips, type StatusTooltipContent } from "@/components/guest/my-bookings/status-tooltips";
 
 const statusConfigs: Record<
   OrderStatus,
@@ -59,20 +59,24 @@ const defaultConfig = {
 
 interface StatusBadgeProps {
   status: OrderStatus;
+  tooltips?: Record<OrderStatus, StatusTooltipContent>;
 }
 
-export const StatusBadge = ({ status }: StatusBadgeProps) => {
+export const StatusBadge = ({ status, tooltips }: StatusBadgeProps) => {
   const config = statusConfigs[status] || defaultConfig;
-  const tooltipContent = statusTooltips[status];
+  
+  // Use custom tooltips if provided, otherwise use default guest tooltips
+  const tooltipSource = tooltips || statusTooltips;
+  const tooltipContent = tooltipSource[status];
 
   if (!statusConfigs[status]) {
     console.warn("StatusBadge received invalid status:", status);
   }
 
   return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <div>
           <Badge
             variant={config.variant}
             className={`${config.className} cursor-help`}
@@ -80,15 +84,15 @@ export const StatusBadge = ({ status }: StatusBadgeProps) => {
             <span className={`h-1.5 w-1.5 rounded-full ${config.dot} mr-1.5`} />
             {config.label}
           </Badge>
-        </TooltipTrigger>
-        {tooltipContent && (
-          <TooltipContent className="flex flex-wrap max-w-[200px]">
-            <p className="text-sm font-sans text-white">
-              {tooltipContent.description}
-            </p>
-          </TooltipContent>
-        )}
-      </Tooltip>
-    </TooltipProvider>
+        </div>
+      </TooltipTrigger>
+      {tooltipContent && (
+        <TooltipContent className="flex flex-wrap max-w-[200px]">
+          <p className="text-sm font-sans text-white">
+            {tooltipContent.description}
+          </p>
+        </TooltipContent>
+      )}
+    </Tooltip>
   );
 };
