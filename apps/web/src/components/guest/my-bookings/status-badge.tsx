@@ -6,7 +6,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import type { OrderStatus, StatusConfig, BadgeVariant } from "@repo/types";
-import { statusTooltips } from "@/components/guest/my-bookings/status-tooltips";
+import { statusTooltips, type StatusTooltipContent } from "@/components/guest/my-bookings/status-tooltips";
 
 const statusConfigs: Record<
   OrderStatus,
@@ -59,11 +59,13 @@ const defaultConfig = {
 
 interface StatusBadgeProps {
   status: OrderStatus;
+  tooltips?: Record<OrderStatus, StatusTooltipContent>;
 }
 
-export const StatusBadge = ({ status }: StatusBadgeProps) => {
+export const StatusBadge = ({ status, tooltips }: StatusBadgeProps) => {
   const config = statusConfigs[status] || defaultConfig;
-  const tooltipContent = statusTooltips[status];
+  const tooltipSource = tooltips || statusTooltips;
+  const tooltipContent = tooltipSource[status];
 
   if (!statusConfigs[status]) {
     console.warn("StatusBadge received invalid status:", status);
