@@ -63,8 +63,6 @@ export function FacilitiesCard({
     }
   };
 
-  // notes removed for facilities
-
   return (
     <Card>
       <CardHeader>

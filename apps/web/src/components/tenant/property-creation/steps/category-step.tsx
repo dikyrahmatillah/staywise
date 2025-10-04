@@ -15,6 +15,8 @@ export function CategoryStep() {
     handleDefaultCategorySelect,
     handleCustomCategorySelect,
     handleCreateCategory,
+    updateCustomCategory,
+    deleteCustomCategory,
   } = useCategorySelection({
     initialDefaultId: formData.propertyCategoryId ?? "",
     initialCustomId: formData.customCategoryId ?? "",
@@ -34,6 +36,8 @@ export function CategoryStep() {
       onDefaultSelect={handleDefaultCategorySelect}
       onCustomSelect={handleCustomCategorySelect}
       onCreate={handleCreateCategory}
+      updateCustomCategory={updateCustomCategory}
+      deleteCustomCategory={deleteCustomCategory}
     />
   );
 }

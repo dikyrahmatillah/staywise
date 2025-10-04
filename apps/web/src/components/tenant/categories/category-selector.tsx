@@ -1,31 +1,12 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { useState } from "react";
+import { Tag } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Loader2, Plus, Building2, BadgeCheck } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Label } from "@/components/ui/label";
-import { Badge as LucideBadge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CategorySelectorDefaultSection } from "./category-selector-default-section";
+import { CategorySelectorCustomSection } from "./category-selector-custom-section";
+import { CategoryDialogs } from "./category-dialogs";
 
 type Category = { id: string; name: string };
 
@@ -39,59 +20,53 @@ type Props = {
   onDefaultSelect: (id: string) => void;
   onCustomSelect: (id: string) => void;
   onCreate: (name: string) => Promise<void>;
+  updateCustomCategory?: (
+    id: string,
+    data: { name: string }
+  ) => Promise<unknown>;
+  deleteCustomCategory?: (id: string) => Promise<unknown>;
 };
 
 export default function CategorySelector({
   defaultCategories,
   customCategories,
-  defaultLoading = false,
   customLoading = false,
   selectedDefault,
   selectedCustom,
   onDefaultSelect,
   onCustomSelect,
   onCreate,
+  updateCustomCategory,
+  deleteCustomCategory,
 }: Props) {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
-  const [addError, setAddError] = useState<string | null>(null);
+  const [editCategoryId, setEditCategoryId] = useState<string | null>(null);
+  const [editCategoryName, setEditCategoryName] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [deleteCategoryId, setDeleteCategoryId] = useState<string | null>(null);
 
-  const sortedDefault = useMemo(
-    () =>
-      [...defaultCategories].sort((a, b) =>
-        a.name.localeCompare(b.name, undefined, { sensitivity: "base" })
-      ),
-    [defaultCategories]
-  );
-  const sortedCustom = useMemo(
-    () =>
-      [...customCategories].sort((a, b) =>
-        a.name.localeCompare(b.name, undefined, { sensitivity: "base" })
-      ),
-    [customCategories]
-  );
-
-  const reset = () => {
+  const resetCreateDialog = () => {
     setNewCategoryName("");
-    setAddError(null);
+    setError(null);
     setIsCreating(false);
   };
 
-  const handleCreate = async () => {
+  const handleCreateSubmit = async () => {
     const value = newCategoryName.trim();
     if (!value) {
-      setAddError("Category name is required");
+      setError("Category name is required");
       return;
     }
-    setAddError(null);
+    setError(null);
     setIsCreating(true);
     try {
       await onCreate(value);
-      setIsDialogOpen(false);
-      reset();
+      setIsCreateDialogOpen(false);
+      resetCreateDialog();
     } catch (err) {
-      setAddError(
+      setError(
         err instanceof Error ? err.message : "Failed to create category"
       );
     } finally {
@@ -99,227 +74,109 @@ export default function CategorySelector({
     }
   };
 
-  const CategoryOption = ({
-    id,
-    name,
-    description,
-    selected,
-    onSelect,
-  }: {
-    id: string;
-    name: string;
-    description: string;
-    selected: boolean;
-    onSelect: (id: string) => void;
-  }) => (
-    <button
-      type="button"
-      onClick={() => onSelect(id)}
-      className={cn(
-        "group relative flex h-full flex-col items-start gap-3 rounded-2xl border bg-card/80 p-4 text-left transition-all duration-200 hover:border-primary/50 hover:shadow-md",
-        selected &&
-          "border-primary bg-primary/5 shadow-[0_10px_30px_-15px_rgba(59,130,246,0.45)]"
-      )}
-    >
-      <div className="flex items-center gap-3">
-        <div
-          className={cn(
-            "flex h-10 w-10 items-center justify-center rounded-xl border bg-background text-primary transition-colors",
-            selected && "border-primary bg-primary/10"
-          )}
-        >
-          <Building2 className="h-5 w-5" />
-        </div>
-        <div className="flex-1 space-y-1">
-          <p className="text-sm font-semibold text-foreground">{name}</p>
-          <p className="text-xs text-muted-foreground">{description}</p>
-        </div>
-        {selected && (
-          <LucideBadge
-            variant="secondary"
-            className="gap-1 bg-primary/10 text-primary"
-          >
-            <BadgeCheck className="h-3.5 w-3.5" />
-            Selected
-          </LucideBadge>
-        )}
-      </div>
-    </button>
-  );
+  const handleEditSubmit = async () => {
+    if (!editCategoryId) return;
+    try {
+      await updateCustomCategory?.(editCategoryId, {
+        name: editCategoryName.trim(),
+      });
+      setEditCategoryId(null);
+      setEditCategoryName("");
+      setError(null);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to update");
+    }
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteCategoryId) return;
+    try {
+      await deleteCustomCategory?.(deleteCategoryId);
+      if (selectedCustom === deleteCategoryId) onCustomSelect("");
+      setDeleteCategoryId(null);
+      setError(null);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to delete");
+    }
+  };
+
+  const handleEdit = (category: Category) => {
+    setEditCategoryId(category.id);
+    setEditCategoryName(category.name);
+  };
+
+  const handleDelete = (category: Category) => {
+    setDeleteCategoryId(category.id);
+  };
 
   return (
-    <Card className="border-border/60 bg-background/95 shadow-lg backdrop-blur-sm">
-      <CardHeader className="border-b border-border/60 pb-6">
-        <div className="space-y-3">
-          <CardTitle className="text-2xl font-semibold tracking-tight">
+    <>
+      <Card className="border-border/60 bg-background/95 backdrop-blur-sm">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Tag className="h-5 w-5 text-primary" />
             Property Category
           </CardTitle>
-          <CardDescription className="text-sm leading-relaxed">
+          <p className="text-sm text-muted-foreground">
             Pick the category that best matches your place. You can choose one
             of our presets or create your own label to suit unique spaces.
-          </CardDescription>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-10 py-6">
-        <div className="space-y-6">
-          <section className="space-y-4">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="bg-primary/5 text-primary">
-                  Recommended
-                </Badge>
-                <span className="text-sm text-muted-foreground">
-                  Browse curated travel-friendly categories
-                </span>
-              </div>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Plus className="h-3.5 w-3.5" />
-                Picks to help guests filter your listing faster.
-              </div>
-            </div>
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-10 py-6">
+          <div className="space-y-6">
+            <CategorySelectorDefaultSection
+              categories={defaultCategories}
+              selectedId={selectedDefault}
+              onSelect={onDefaultSelect}
+            />
 
-            {defaultLoading ? (
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {Array.from({ length: 6 }).map((_, index) => (
-                  <div
-                    key={index}
-                    className="h-24 animate-pulse rounded-2xl border border-dashed border-border/50 bg-muted/20"
-                  />
-                ))}
-              </div>
-            ) : sortedDefault.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                No default categories available at the moment.
-              </p>
-            ) : (
-              <ScrollArea className="max-h-72 pr-3">
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  {sortedDefault.map((cat) => (
-                    <CategoryOption
-                      key={cat.id}
-                      id={cat.id}
-                      name={cat.name}
-                      description="Popular choice"
-                      selected={selectedDefault === cat.id}
-                      onSelect={onDefaultSelect}
-                    />
-                  ))}
-                </div>
-              </ScrollArea>
-            )}
-          </section>
+            <Separator className="bg-border/60" />
 
-          <Separator className="bg-border/60" />
+            <CategorySelectorCustomSection
+              categories={customCategories}
+              loading={customLoading}
+              selectedId={selectedCustom}
+              onSelect={onCustomSelect}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              onCreateNew={() => setIsCreateDialogOpen(true)}
+            />
+          </div>
+        </CardContent>
+      </Card>
 
-          <section className="space-y-4">
-            <div className="flex items-center justify-between gap-3">
-              <div className="space-y-1">
-                <Label className="text-sm font-medium text-foreground">
-                  Your custom categories
-                </Label>
-                <p className="text-xs text-muted-foreground">
-                  Tailor listings with names that guests will remember.
-                </p>
-              </div>
-              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button size="sm" className="gap-2">
-                    <Plus className="h-4 w-4" />
-                    Add category
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-md">
-                  <DialogHeader>
-                    <DialogTitle>Create a new category</DialogTitle>
-                    <DialogDescription>
-                      Give your category a short, memorable name.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-3">
-                    <Input
-                      value={newCategoryName}
-                      onChange={(e) => {
-                        setNewCategoryName(e.target.value);
-                        if (addError) setAddError(null);
-                      }}
-                      placeholder="e.g., Seaside Villa"
-                      autoFocus
-                      maxLength={100}
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Maximum 100 characters. Keep it descriptive but concise.
-                    </p>
-                    {addError && (
-                      <p className="text-xs text-destructive">{addError}</p>
-                    )}
-                  </div>
-                  <DialogFooter className="flex items-center justify-end gap-2">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        setIsDialogOpen(false);
-                        reset();
-                      }}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      type="button"
-                      size="sm"
-                      onClick={handleCreate}
-                      disabled={isCreating}
-                      className="gap-2"
-                    >
-                      {isCreating && (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      )}
-                      Create
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-            </div>
-
-            {customLoading ? (
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {Array.from({ length: 3 }).map((_, index) => (
-                  <div
-                    key={index}
-                    className="h-24 animate-pulse rounded-2xl border border-dashed border-border/50 bg-muted/20"
-                  />
-                ))}
-              </div>
-            ) : sortedCustom.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-border/60 bg-muted/20 p-6 text-center">
-                <p className="text-sm font-medium text-muted-foreground">
-                  You haven’t created any custom categories yet.
-                </p>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Use the “Add category” button to craft unique labels for your
-                  listings.
-                </p>
-              </div>
-            ) : (
-              <ScrollArea className="max-h-60 pr-3">
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  {sortedCustom.map((cat) => (
-                    <CategoryOption
-                      key={cat.id}
-                      id={cat.id}
-                      name={cat.name}
-                      description="Created by you"
-                      selected={selectedCustom === cat.id}
-                      onSelect={onCustomSelect}
-                    />
-                  ))}
-                </div>
-              </ScrollArea>
-            )}
-          </section>
-        </div>
-      </CardContent>
-    </Card>
+      <CategoryDialogs
+        createOpen={isCreateDialogOpen}
+        editOpen={!!editCategoryId}
+        deleteOpen={!!deleteCategoryId}
+        editCategoryName={editCategoryName}
+        newCategoryName={newCategoryName}
+        error={error}
+        isCreating={isCreating}
+        onCreateOpenChange={(open) => {
+          setIsCreateDialogOpen(open);
+          if (!open) resetCreateDialog();
+        }}
+        onEditOpenChange={(open) => {
+          if (!open) {
+            setEditCategoryId(null);
+            setEditCategoryName("");
+            setError(null);
+          }
+        }}
+        onDeleteOpenChange={(open) => {
+          if (!open) {
+            setDeleteCategoryId(null);
+            setError(null);
+          }
+        }}
+        onNewCategoryNameChange={setNewCategoryName}
+        onEditCategoryNameChange={setEditCategoryName}
+        onCreateSubmit={handleCreateSubmit}
+        onEditSubmit={handleEditSubmit}
+        onDeleteConfirm={handleDeleteConfirm}
+        onErrorClear={() => setError(null)}
+      />
+    </>
   );
 }
