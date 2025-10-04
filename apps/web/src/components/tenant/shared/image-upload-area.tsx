@@ -10,6 +10,7 @@ type Props = {
   maxSizeMB?: number;
   allowedFormats?: string[];
   showEmptyState?: boolean;
+  multiple?: boolean;
 };
 
 export function ImageUploadArea({
@@ -18,6 +19,7 @@ export function ImageUploadArea({
   maxSizeMB = 1,
   allowedFormats = ["jpg", "jpeg", "png"],
   showEmptyState = false,
+  multiple = true,
 }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dropRef = useRef<HTMLDivElement>(null);
@@ -51,7 +53,12 @@ export function ImageUploadArea({
     });
 
     if (valid.length > 0) {
-      onFilesSelected(valid);
+      if (!multiple) {
+        // when multiple is false, only pass the first valid file
+        onFilesSelected([valid[0]]);
+      } else {
+        onFilesSelected(valid);
+      }
     }
   };
 
@@ -125,7 +132,7 @@ export function ImageUploadArea({
             ref={fileInputRef}
             type="file"
             accept={accept}
-            multiple
+            multiple={multiple}
             onChange={handleImageUpload}
             className="hidden"
           />

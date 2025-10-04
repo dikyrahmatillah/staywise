@@ -1,8 +1,5 @@
 import type { PropertyFormData, PictureFormData, RoomFormData } from "./types";
 
-/**
- * Builds FormData object from property form data
- */
 export const buildPropertyFormData = (
   formData: PropertyFormData,
   tenantId: string

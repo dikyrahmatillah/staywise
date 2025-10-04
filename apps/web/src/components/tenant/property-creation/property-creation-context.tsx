@@ -60,7 +60,6 @@ export const PropertyCreationProvider = ({
           return false;
         });
       case 7:
-        // Validate all required steps
         if (!formData.name || !formData.description) return false;
         if (!formData.country || !formData.city || !formData.address)
           return false;
