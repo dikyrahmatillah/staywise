@@ -36,7 +36,7 @@ export const BookingTransactionsTable = ({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="text-base font-normal font-sans w-[35%] min-w-[200px]">
+                <TableHead className="text-base font-normal font-sans w-[25%] min-w-[200px]">
                   Booking Info
                 </TableHead>
                 <TableHead className="text-base font-normal font-sans text-center w-[20%] min-w-[140px]">
