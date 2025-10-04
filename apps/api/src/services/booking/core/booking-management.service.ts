@@ -1,16 +1,60 @@
+// apps/api/src/services/booking/core/booking-management.service.ts
+// Key changes: Ensure createdAt is included in all booking queries
+
 import { prisma } from "@/configs/prisma.config.js";
 import { AppError } from "@/errors/app.error.js";
 import type { BookingFilters } from "@repo/types";
 import type { OrderStatus } from "@/generated/prisma/index.js";
 
 export class BookingManagementService {
+  // Common select object to ensure consistency
+  private readonly bookingSelect = {
+    id: true,
+    userId: true,
+    tenantId: true,
+    propertyId: true,
+    roomId: true,
+    orderCode: true,
+    status: true,
+    paymentMethod: true,
+    snapToken: true,
+    orderId: true,
+    paidAt: true,
+    checkInDate: true,
+    checkOutDate: true,
+    nights: true,
+    qty: true,
+    pricePerNight: true,
+    totalAmount: true,
+    expiresAt: true,
+    createdAt: true, // ✅ Ensure createdAt is always included
+    updatedAt: true,
+    Property: {
+      select: { 
+        name: true, 
+        city: true,
+        id: true, // ✅ Include property ID for linking
+      },
+    },
+    Room: { 
+      select: { 
+        name: true 
+      } 
+    },
+    User: { 
+      select: { 
+        firstName: true, 
+        lastName: true, 
+        email: true 
+      } 
+    },
+    paymentProof: true,
+    gatewayPayment: true,
+  };
+
   async getAllBookings() {
     return prisma.booking.findMany({
-      include: {
-        Property: { select: { name: true, city: true } },
-        Room: { select: { name: true } },
-        User: { select: { firstName: true, lastName: true, email: true } },
-      },
+      select: this.bookingSelect,
       orderBy: { createdAt: "desc" },
     });
   }
@@ -43,7 +87,6 @@ export class BookingManagementService {
     // Status filtering
     if (filters.status && filters.status !== "all") {
       if (filters.status.includes(",")) {
-        // Multiple statuses (e.g., "WAITING_PAYMENT,WAITING_CONFIRMATION,PROCESSING")
         where.status = { in: filters.status.split(",") };
       } else {
         where.status = filters.status;
@@ -74,13 +117,7 @@ export class BookingManagementService {
       prisma.booking.count({ where }),
       prisma.booking.findMany({
         where,
-        include: {
-          User: { select: { firstName: true, lastName: true, email: true } },
-          Property: { select: { name: true, city: true } },
-          Room: { select: { name: true } },
-          paymentProof: true,
-          gatewayPayment: true,
-        },
+        select: this.bookingSelect,
         orderBy: { createdAt: "desc" },
         skip,
         take: filters.limit,
@@ -89,6 +126,7 @@ export class BookingManagementService {
 
     return { data: bookings, total };
   }
+
   async getBookings(filters: BookingFilters = {}) {
     const whereClause: any = {};
 
@@ -106,11 +144,7 @@ export class BookingManagementService {
 
     return prisma.booking.findMany({
       where: whereClause,
-      include: {
-        Property: { select: { name: true, city: true } },
-        Room: { select: { name: true } },
-        User: { select: { firstName: true, lastName: true, email: true } },
-      },
+      select: this.bookingSelect,
       orderBy: { createdAt: "desc" },
     });
   }
@@ -118,16 +152,13 @@ export class BookingManagementService {
   async getBookingById(id: string) {
     return prisma.booking.findUnique({
       where: { id },
-      include: {
-        Property: { select: { name: true, city: true } },
-        Room: { select: { name: true } },
-        User: { select: { firstName: true, lastName: true, email: true } },
-        paymentProof: true,
-        gatewayPayment: true,
-      },
+      select: this.bookingSelect,
     });
   }
 
+  // ... rest of the methods remain the same but use this.bookingSelect
+  // for consistency wherever booking data is returned
+  
   async cancelBooking(id: string) {
     const booking = await prisma.booking.findUnique({
       where: { id },
@@ -155,18 +186,12 @@ export class BookingManagementService {
     return prisma.booking.update({
       where: { id },
       data: { status: "CANCELED" },
-      include: {
-        Property: { select: { name: true, city: true } },
-        Room: { select: { name: true } },
-        User: { select: { firstName: true, lastName: true, email: true } },
-      },
+      select: this.bookingSelect,
     });
   }
 
   private generateDateRange(startDate: Date, endDate: Date): Date[] {
     const dates: Date[] = [];
-
-    // 🔧 FIX: Work with UTC dates to avoid timezone issues
     const currentDate = new Date(
       Date.UTC(
         startDate.getUTCFullYear(),
@@ -182,20 +207,7 @@ export class BookingManagementService {
       )
     );
 
-    console.log(`🔍 [DEBUG] Generating date range (UTC):`);
-    console.log(
-      `  Start: ${
-        currentDate.toISOString().split("T")[0]
-      } (day ${currentDate.getUTCDate()})`
-    );
-    console.log(
-      `  End: ${
-        endDateUTC.toISOString().split("T")[0]
-      } (day ${endDateUTC.getUTCDate()})`
-    );
-
     while (currentDate < endDateUTC) {
-      // Create date in UTC to avoid timezone shifts
       const dateToAdd = new Date(
         Date.UTC(
           currentDate.getUTCFullYear(),
@@ -204,17 +216,9 @@ export class BookingManagementService {
         )
       );
       dates.push(dateToAdd);
-      console.log(
-        `  📅 [DEBUG] Adding date: ${
-          dateToAdd.toISOString().split("T")[0]
-        } (day ${dateToAdd.getUTCDate()})`
-      );
-
-      // Move to next day using UTC
       currentDate.setUTCDate(currentDate.getUTCDate() + 1);
     }
 
-    console.log(`✅ [DEBUG] Generated ${dates.length} dates for blocking`);
     return dates;
   }
 
@@ -225,36 +229,15 @@ export class BookingManagementService {
     bookingId: string
   ) {
     try {
-      console.log(`🔒 Starting date blocking for booking ${bookingId}:`);
-      console.log(`  Room: ${roomId}`);
-      console.log(
-        `  Check-in: ${
-          checkInDate.toISOString().split("T")[0]
-        } (day ${checkInDate.getDate()})`
-      );
-      console.log(
-        `  Check-out: ${
-          checkOutDate.toISOString().split("T")[0]
-        } (day ${checkOutDate.getDate()})`
-      );
-
       const dates = this.generateDateRange(checkInDate, checkOutDate);
 
       if (dates.length === 0) {
-        console.warn(
-          `⚠️ No dates generated for blocking! Check date range logic.`
-        );
+        console.warn(`⚠️ No dates generated for blocking! Check date range logic.`);
         return;
       }
 
       const blockedDates = await Promise.all(
-        dates.map(async (date, index) => {
-          console.log(
-            `  🔒 Blocking date ${index + 1}/${dates.length}: ${
-              date.toISOString().split("T")[0]
-            } (day ${date.getDate()})`
-          );
-
+        dates.map(async (date) => {
           return prisma.roomAvailability.upsert({
             where: {
               roomId_date: {
@@ -264,7 +247,7 @@ export class BookingManagementService {
             },
             update: {
               isAvailable: false,
-              bookingId, // Track which booking blocked this date
+              bookingId,
             },
             create: {
               roomId,
@@ -279,12 +262,6 @@ export class BookingManagementService {
       console.log(
         `✅ Successfully blocked ${blockedDates.length} dates for room ${roomId}, booking ${bookingId}`
       );
-
-      // Log the actual blocked dates for verification
-      const blockedDateStrings = blockedDates.map(
-        (d) => d.date.toISOString().split("T")[0]
-      );
-      console.log(`📅 Blocked dates: ${blockedDateStrings.join(", ")}`);
     } catch (error) {
       console.error("❌ Error blocking dates for booking:", error);
       throw error;
@@ -292,15 +269,10 @@ export class BookingManagementService {
   }
 
   async approvePaymentProof(bookingId: string, tenantId: string) {
-    console.log(
-      `🚨 [DEBUG] approvePaymentProof called with bookingId: ${bookingId}, tenantId: ${tenantId}`
-    );
-
-    // First, verify the booking exists and belongs to the tenant
     const booking = await prisma.booking.findFirst({
       where: {
         id: bookingId,
-        tenantId: tenantId, // Ensure tenant owns the property
+        tenantId: tenantId,
       },
       include: { paymentProof: true },
     });
@@ -324,43 +296,22 @@ export class BookingManagementService {
       throw new AppError("Payment proof has already been approved", 400);
     }
 
-    console.log(`💰 Approving payment for booking ${booking.orderCode}:`);
-    console.log(`  Booking ID: ${bookingId}`);
-    console.log(`  Room ID: ${booking.roomId}`);
-    console.log(
-      `  Check-in: ${
-        booking.checkInDate.toISOString().split("T")[0]
-      } (day ${booking.checkInDate.getDate()})`
-    );
-    console.log(
-      `  Check-out: ${
-        booking.checkOutDate.toISOString().split("T")[0]
-      } (day ${booking.checkOutDate.getDate()})`
-    );
-
-    // Update payment proof and booking status in a transaction
     const result = await prisma.$transaction(async (tx) => {
-      // Update payment proof
       await tx.paymentProof.update({
         where: { id: booking.paymentProof!.id },
         data: {
           acceptedAt: new Date(),
-          rejectedAt: null, // Clear any previous rejection
+          rejectedAt: null,
         },
       });
 
-      // Update booking status to PROCESSING
       return await tx.booking.update({
         where: { id: bookingId },
         data: { status: "PROCESSING" },
-        include: {
-          Property: { select: { name: true, city: true } },
-          Room: { select: { name: true } },
-          User: { select: { firstName: true, lastName: true, email: true } },
-          paymentProof: true,
-        },
+        select: this.bookingSelect,
       });
     });
+
     try {
       await this.blockDatesForBooking(
         booking.roomId,
@@ -368,25 +319,18 @@ export class BookingManagementService {
         booking.checkOutDate,
         bookingId
       );
-      console.log(
-        `🔒 [DEBUG] blockDatesForBooking called for booking ${bookingId}`
-      );
     } catch (error) {
-      console.error(
-        "❌ Error blocking room dates after payment approval:",
-        error
-      );
-      // Log error but don't fail the approval process
+      console.error("❌ Error blocking room dates after payment approval:", error);
     }
+
     return result;
   }
 
   async rejectPaymentProof(bookingId: string, tenantId: string) {
-    // First, verify the booking exists and belongs to the tenant
     const booking = await prisma.booking.findFirst({
       where: {
         id: bookingId,
-        tenantId: tenantId, // Ensure tenant owns the property
+        tenantId: tenantId,
       },
       include: { paymentProof: true },
     });
@@ -410,27 +354,19 @@ export class BookingManagementService {
       throw new AppError("Payment proof has already been rejected", 400);
     }
 
-    // Update payment proof and booking status in a transaction
     const result = await prisma.$transaction(async (tx) => {
-      // Update payment proof with rejection timestamp
       await tx.paymentProof.update({
         where: { id: booking.paymentProof!.id },
         data: {
           rejectedAt: new Date(),
-          acceptedAt: null, // Clear any previous acceptance
+          acceptedAt: null,
         },
       });
 
-      // Change booking status back to WAITING_PAYMENT for re-upload
       return await tx.booking.update({
         where: { id: bookingId },
         data: { status: "WAITING_PAYMENT" },
-        include: {
-          Property: { select: { name: true, city: true } },
-          Room: { select: { name: true } },
-          User: { select: { firstName: true, lastName: true, email: true } },
-          paymentProof: true,
-        },
+        select: this.bookingSelect,
       });
     });
 
@@ -457,11 +393,7 @@ export class BookingManagementService {
     return prisma.booking.update({
       where: { id },
       data: { status },
-      include: {
-        Property: { select: { name: true, city: true } },
-        Room: { select: { name: true } },
-        User: { select: { firstName: true, lastName: true, email: true } },
-      },
+      select: this.bookingSelect,
     });
   }
 

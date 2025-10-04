@@ -1,6 +1,3 @@
-// apps/web/src/components/guest/my-bookings/booking-transactions-table.tsx
-// Updated to use the refactored BookingCard
-
 import {
   Table,
   TableBody,
@@ -10,19 +7,18 @@ import {
 } from "@/components/ui/table";
 import type { BookingTransaction } from "@repo/types";
 import { BookingTableRow } from "./booking-table-row";
-// Updated import - now points to the refactored booking-card folder
 import { BookingCard } from "./booking-card";
 
 interface BookingTransactionsTableProps {
   bookingTransactions: BookingTransaction[];
   onViewDetails?: (booking: BookingTransaction) => void;
-  onBookingUpdate?: () => void; // Added this prop
+  onBookingUpdate?: () => void;
 }
 
 export const BookingTransactionsTable = ({
   bookingTransactions,
   onViewDetails,
-  onBookingUpdate, // Added this prop
+  onBookingUpdate,
 }: BookingTransactionsTableProps) => {
   if (!bookingTransactions || bookingTransactions.length === 0) {
     return (
@@ -34,39 +30,38 @@ export const BookingTransactionsTable = ({
 
   return (
     <div className="w-full">
-      {/* Desktop Table */}
+      {/* Desktop Table - Responsive with scroll on smaller screens */}
       <div className="hidden md:block">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="text-base font-normal" colSpan={2}>
-                Property & Room
-              </TableHead>
-              <TableHead className="text-base font-normal text-center">
-                Booking Info
-              </TableHead>
-              <TableHead className="text-base font-normal text-center">
-                Total Amount
-              </TableHead>
-              <TableHead className="text-base font-normal text-center">
-                Status
-              </TableHead>
-              <TableHead className="text-base font-normal text-center">
-                Action
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {bookingTransactions.map((booking) => (
-              <BookingTableRow
-                key={booking.id}
-                booking={booking}
-                onViewDetails={onViewDetails}
-                onBookingUpdate={onBookingUpdate} // Pass the callback
-              />
-            ))}
-          </TableBody>
-        </Table>
+        <div className="overflow-x-auto rounded-lg border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="text-base font-normal font-sans w-[35%] min-w-[200px]">
+                  Booking Info
+                </TableHead>
+                <TableHead className="text-base font-normal font-sans text-center w-[20%] min-w-[140px]">
+                  Date & Time
+                </TableHead>
+                <TableHead className="text-base font-normal font-sans text-center w-[20%] min-w-[160px]">
+                  Status
+                </TableHead>
+                <TableHead className="text-base font-normal font-sans text-center w-[25%] min-w-[180px]">
+                  Action
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {bookingTransactions.map((booking) => (
+                <BookingTableRow
+                  key={booking.id}
+                  booking={booking}
+                  onViewDetails={onViewDetails}
+                  onBookingUpdate={onBookingUpdate}
+                />
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </div>
 
       {/* Mobile Card View */}
@@ -76,13 +71,10 @@ export const BookingTransactionsTable = ({
             key={booking.id}
             booking={booking}
             onViewDetails={onViewDetails}
-            onBookingUpdate={onBookingUpdate} // Pass the callback
+            onBookingUpdate={onBookingUpdate}
           />
         ))}
       </div>
-
-      {/* Empty State - This is redundant with the check at the top */}
-      {/* Removed duplicate empty state */}
     </div>
   );
 };
