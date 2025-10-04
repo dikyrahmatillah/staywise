@@ -267,10 +267,24 @@ export function RoomsStep() {
   };
 
   const handleNewRoomChange = (field: string, value: string | number) => {
-    setNewRoom((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+    setNewRoom((prev) => {
+      let nextValue: string | number = value as string | number;
+
+      if (field === "basePrice") {
+        const n = typeof value === "string" ? parseFloat(value) : value;
+        nextValue = Number.isNaN(n) ? 0 : n;
+      }
+
+      if (field === "capacity" || field === "bedCount") {
+        const n = typeof value === "string" ? parseInt(value) : value;
+        nextValue = Number.isNaN(n) ? 1 : n;
+      }
+
+      return {
+        ...prev,
+        [field]: nextValue,
+      };
+    });
   };
 
   return (
@@ -355,20 +369,15 @@ export function RoomsStep() {
                 <Input
                   id="capacity"
                   type="number"
-                  min={1}
-                  max={8}
-                  value={newRoom.capacity || 1}
+                  value={newRoom.capacity ?? 1}
                   onChange={(e) =>
                     handleNewRoomChange(
                       "capacity",
-                      Math.max(1, Math.min(8, parseInt(e.target.value || "1")))
+                      parseInt(e.target.value || "1")
                     )
                   }
                   className="h-11 w-32"
                 />
-                <p className="text-xs text-muted-foreground mt-1">
-                  Enter number of guests (1-8)
-                </p>
               </div>
 
               <div className="space-y-2">
@@ -404,27 +413,21 @@ export function RoomsStep() {
                 <Input
                   id="bedCount"
                   type="number"
-                  min={1}
-                  max={4}
-                  value={newRoom.bedCount || 1}
+                  value={newRoom.bedCount ?? 1}
                   onChange={(e) =>
                     handleNewRoomChange(
                       "bedCount",
-                      Math.max(1, Math.min(4, parseInt(e.target.value || "1")))
+                      parseInt(e.target.value || "1")
                     )
                   }
                   className="h-11 w-32"
                 />
-                <p className="text-xs text-muted-foreground mt-1">
-                  Enter number of beds (1-4)
-                </p>
               </div>
             </div>
           </div>
 
           <Separator />
 
-          {/* Image Upload */}
           <div className="space-y-4">
             <Label className="text-sm font-medium">
               Room Image <span className="text-gray-400">(Optional)</span>
@@ -472,9 +475,9 @@ export function RoomsStep() {
                   if (e.dataTransfer?.files?.length)
                     handleFiles(e.dataTransfer.files);
                 }}
-                className="relative border-2 border-dashed border-gray-300 rounded-xl p-8 text-center transition-all duration-200 hover:border-primary/40 hover:bg-primary/10 bg-gradient-to-br from-gray-50/50 to-white cursor-pointer"
+                className="relative border-2 border-dashed border-gray-300 rounded-xl p-8 text-center transition-all duration-200 hover:border-primary/40 bg-gradient-to-br from-gray-50/50 to-white cursor-pointer"
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-primary/20 rounded-xl opacity-0 hover:opacity-100 transition-opacity duration-300" />
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-primary/20 rounded-xl opacity-0 transition-opacity duration-300" />
                 <div className="relative z-10">
                   <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-6">
                     <Upload className="w-8 h-8 text-primary" />
@@ -572,7 +575,6 @@ export function RoomsStep() {
           </CardContent>
         </Card>
       )}
-      {/* Existing Rooms */}
       {rooms.length > 0 && (
         <Card>
           <CardHeader>

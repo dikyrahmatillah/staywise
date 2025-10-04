@@ -51,7 +51,6 @@ export function MobileStepNavigation({
 
   return (
     <div className="block lg:hidden">
-      {/* Current Step Header */}
       {currentStepData && (
         <div className="flex items-center justify-between">
           <div>
@@ -83,7 +82,6 @@ export function MobileStepNavigation({
         </div>
       )}
 
-      {/* Expandable Step List */}
       <div
         id="mobile-step-list"
         className={cn(
