@@ -2,9 +2,8 @@
 
 import { TableCell, TableRow } from "@/components/ui/table";
 import type { BookingTransaction } from "@repo/types";
-import { PropertyInfo } from "@/components/guest/my-bookings/property-info";
-import { BookingInfo } from "@/components/guest/my-bookings/booking-info";
-import { PaymentInfo } from "@/components/guest/my-bookings/payment-info";
+import { PropertyBookingInfo } from "@/components/guest/my-bookings/property-booking-info";
+import { DateTimeInfo } from "@/components/guest/my-bookings/date-time-info";
 import { BookingCancellationDialog } from "@/components/guest/booking-transaction/cancellation-dialog";
 import { ReviewDialog } from "@/components/guest/reviews/review-dialog";
 import { useCanReview, useBookingReview } from "@/hooks/useReview";
@@ -47,45 +46,40 @@ export const BookingTableRow = ({
   return (
     <BookingTableRowProvider value={contextValue}>
       <TableRow className="hover:bg-muted/50">
-        {/* Property & Room Info */}
-        <TableCell colSpan={2} className="py-4">
-          <PropertyInfo property={booking.Property} room={booking.Room} />
-        </TableCell>
-
-        {/* Booking Details */}
-        <TableCell className="text-center py-4">
-          <BookingInfo
-            orderCode={booking.orderCode}
-            checkInDate={booking.checkInDate}
-            checkOutDate={booking.checkOutDate}
+        {/* Booking Info: Property Name (clickable), Room, Nights */}
+        <TableCell className="py-4 pr-4">
+          <PropertyBookingInfo
+            propertyId={booking.propertyId}
+            propertyName={booking.Property?.name || "Unknown Property"}
+            roomName={booking.Room?.name || "Unknown Room"}
             nights={booking.nights}
+            truncate={true} // Enable truncation with tooltip
           />
         </TableCell>
 
-        {/* Total Amount */}
-        <TableCell className="text-center py-4">
-          <PaymentInfo
-            totalAmount={booking.totalAmount}
-            paymentMethod={booking.paymentMethod}
-          />
+        {/* Date & Time: Created At */}
+        <TableCell className="text-center py-4 px-2">
+          <DateTimeInfo createdAt={booking.createdAt} />
         </TableCell>
 
-        {/* Status */}
-        <TableCell className="text-center py-4">
+        {/* Status: With Tooltip */}
+        <TableCell className="text-center py-4 px-2">
           <div className="flex justify-center">
             <BookingTableRowStatus />
           </div>
         </TableCell>
 
         {/* Action */}
-        <TableCell className="text-center py-4">
-          <BookingTableRowActions
-            paymentProofDialog={dialogs.paymentProofDialog}
-            paymentProofViewDialog={dialogs.paymentProofViewDialog}
-            cancellationDialog={dialogs.cancellationDialog}
-            reviewDialog={dialogs.reviewDialog}
-            onPaymentProofExpire={() => handlePaymentProofExpire(booking.id)}
-          />
+        <TableCell className="text-center py-4 pl-2">
+          <div className="flex justify-center">
+            <BookingTableRowActions
+              paymentProofDialog={dialogs.paymentProofDialog}
+              paymentProofViewDialog={dialogs.paymentProofViewDialog}
+              cancellationDialog={dialogs.cancellationDialog}
+              reviewDialog={dialogs.reviewDialog}
+              onPaymentProofExpire={() => handlePaymentProofExpire(booking.id)}
+            />
+          </div>
         </TableCell>
       </TableRow>
 

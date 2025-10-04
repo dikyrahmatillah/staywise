@@ -32,10 +32,10 @@ export default async function GuestDashboardPage() {
           </div>
 
           {/* Empty State Content */}
-          <h2 className="text-2xl font-semibold text-gray-900 mb-3">
+          <h2 className="text-2xl font-semibold font-sans text-gray-900 mb-3">
             Welcome to StayWise!
           </h2>
-          <p className="text-gray-600 mb-8">
+          <p className="text-gray-600 font-sans mb-8">
             You haven&apos;t made any bookings yet. Start exploring amazing
             places to stay and create your first memorable experience.
           </p>
@@ -44,11 +44,11 @@ export default async function GuestDashboardPage() {
           <div className="space-y-3">
             <Link
               href="/properties"
-              className="inline-block w-full sm:w-auto px-6 py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary/80 transition-colors"
+              className="inline-block w-full sm:w-auto px-6 py-3 bg-primary text-white font-medium font-sans rounded-lg hover:bg-primary/80 transition-colors"
             >
               Browse Properties
             </Link>
-            <div className="text-sm text-gray-500">
+            <div className="text-sm font-sans text-gray-500">
               Discover your perfect stay
             </div>
           </div>

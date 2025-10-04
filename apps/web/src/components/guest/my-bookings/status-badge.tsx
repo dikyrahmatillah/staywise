@@ -1,5 +1,12 @@
 import { Badge } from "@/components/ui/badge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type { OrderStatus, StatusConfig, BadgeVariant } from "@repo/types";
+import { statusTooltips } from "@/components/guest/my-bookings/status-tooltips";
 
 const statusConfigs: Record<
   OrderStatus,
@@ -56,15 +63,32 @@ interface StatusBadgeProps {
 
 export const StatusBadge = ({ status }: StatusBadgeProps) => {
   const config = statusConfigs[status] || defaultConfig;
+  const tooltipContent = statusTooltips[status];
 
   if (!statusConfigs[status]) {
     console.warn("StatusBadge received invalid status:", status);
   }
 
   return (
-    <Badge variant={config.variant} className={config.className}>
-      <span className={`h-1.5 w-1.5 rounded-full ${config.dot} mr-1.5`} />
-      {config.label}
-    </Badge>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Badge
+            variant={config.variant}
+            className={`${config.className} cursor-help`}
+          >
+            <span className={`h-1.5 w-1.5 rounded-full ${config.dot} mr-1.5`} />
+            {config.label}
+          </Badge>
+        </TooltipTrigger>
+        {tooltipContent && (
+          <TooltipContent className="flex flex-wrap max-w-[200px]">
+            <p className="text-sm font-sans text-white">
+              {tooltipContent.description}
+            </p>
+          </TooltipContent>
+        )}
+      </Tooltip>
+    </TooltipProvider>
   );
 };
