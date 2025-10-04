@@ -65,9 +65,8 @@ const appendFacilities = (
   }
 
   const facilities = propertyData.facilities.map(
-    (facility: string | { facility: string; note?: string | null }) => ({
+    (facility: string | { facility: string }) => ({
       facility: typeof facility === "string" ? facility : facility.facility,
-      note: typeof facility === "object" ? facility.note : null,
     })
   );
 

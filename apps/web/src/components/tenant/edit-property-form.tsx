@@ -124,7 +124,7 @@ export function EditPropertyForm({ propertyId }: EditPropertyFormProps) {
               property={property}
               onChange={(next) =>
                 setPropertyFacilities(
-                  next.map((f) => ({ facility: f.facility, note: f.note }))
+                  next.map((f) => ({ facility: f.facility }))
                 )
               }
             />

@@ -31,13 +31,8 @@ export function buildPropertyFormData(
       "facilities",
       JSON.stringify(
         property.Facilities.map(
-          (facility: {
-            id: string;
-            facility: string;
-            note?: string | null;
-          }) => ({
+          (facility: { id: string; facility: string }) => ({
             facility: facility.facility,
-            note: facility.note,
           })
         )
       )

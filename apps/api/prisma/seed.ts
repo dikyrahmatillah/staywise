@@ -241,9 +241,6 @@ async function seed() {
           data: chosen.map((facility) => ({
             propertyId: property.id,
             facility: facility as any,
-            note: faker.datatype.boolean()
-              ? faker.lorem.words({ min: 2, max: 6 })
-              : null,
           })),
         });
       }

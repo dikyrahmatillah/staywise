@@ -193,7 +193,6 @@ model PropertyFacility {
     id         String    @id @default(uuid())
     propertyId String
     facility   Amenities
-    note       String?   @db.Text
     createdAt  DateTime  @default(now())
 
     Property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)

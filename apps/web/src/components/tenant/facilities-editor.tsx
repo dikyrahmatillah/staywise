@@ -110,7 +110,6 @@ type FacilityItem = CreateFacilityInput;
 type Props = {
   selected: FacilityItem[];
   onToggle: (facility: string) => void;
-  onNoteChange: (facility: string, note: string) => void;
   query: string;
   setQuery: (q: string) => void;
 };
@@ -118,7 +117,6 @@ type Props = {
 export function FacilitiesEditor({
   selected,
   onToggle,
-  onNoteChange,
   query,
   setQuery,
 }: Props) {
@@ -178,17 +176,7 @@ export function FacilitiesEditor({
                       )}
                     </div>
 
-                    {isSelected && (
-                      <Input
-                        placeholder={`Optional note for ${FACILITY_LABELS[facility]}...`}
-                        value={
-                          selected.find((s) => s.facility === facility)?.note ||
-                          ""
-                        }
-                        onChange={(e) => onNoteChange(facility, e.target.value)}
-                        className="text-sm"
-                      />
-                    )}
+                    {/* notes removed for facilities */}
                   </div>
                 );
               })}
