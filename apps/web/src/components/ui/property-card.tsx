@@ -17,6 +17,7 @@ import {
   Calendar,
   DollarSign,
   Building2,
+  Trash2,
   ImageIcon,
 } from "lucide-react";
 import type { PropertyResponse } from "@repo/schemas";
@@ -169,6 +170,16 @@ export default function PropertyCard({
                     <Bed className="h-4 w-4 mr-1" />
                     Edit Rooms
                   </Link>
+                </Button>
+
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="w-full sm:w-auto text-red-600 border-red-300 hover:bg-red-50 justify-center"
+                  onClick={() => setOpenDelete(true)}
+                >
+                  <Trash2 className="h-4 w-4 mr-1" />
+                  Delete
                 </Button>
               </div>
             </div>

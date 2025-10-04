@@ -22,24 +22,36 @@ function segmentTitle(segment: string, fullPath: string) {
   return segment.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
+function isIdSegment(seg: string) {
+  if (!seg) return false;
+  const numeric = /^\d+$/;
+  const uuid =
+    /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+  const hex24 = /^[0-9a-fA-F]{24}$/;
+  return numeric.test(seg) || uuid.test(seg) || hex24.test(seg);
+}
+
 export function Breadcrumb() {
   const pathname = usePathname() || "/";
 
-  const segments = pathname.split("/").filter(Boolean);
-  const crumbs = segments.map((seg, idx) => {
-    const path = "/" + segments.slice(0, idx + 1).join("/");
+  const rawSegments = pathname.split("/").filter(Boolean);
+
+  const crumbs = rawSegments.map((seg, idx) => {
+    const path = "/" + rawSegments.slice(0, idx + 1).join("/");
     return { seg, path };
   });
 
-  if (crumbs.length === 0) {
+  const visibleCrumbs = crumbs.filter((c) => !isIdSegment(c.seg));
+
+  if (visibleCrumbs.length === 0) {
     return <h1 className="text-lg font-semibold tracking-tight">Dashboard</h1>;
   }
 
   return (
     <nav aria-label="Breadcrumb">
       <ol className="flex items-center gap-2 text-sm text-muted-foreground">
-        {crumbs.map((c, i) => {
-          const isLast = i === crumbs.length - 1;
+        {visibleCrumbs.map((c, i) => {
+          const isLast = i === visibleCrumbs.length - 1;
           const title = segmentTitle(c.seg, c.path);
 
           return (
