@@ -28,6 +28,8 @@ export function useCategorySelection(options: CategorySelectionOptions = {}) {
     categories: customCategories,
     loading: customLoading,
     createCategory,
+    updateCategory,
+    deleteCategory,
     refetch: refetchCustom,
   } = useCustomCategories();
 
@@ -59,7 +61,6 @@ export function useCategorySelection(options: CategorySelectionOptions = {}) {
   const handleDefaultCategorySelect = (categoryId: string) => {
     const next = selectedDefault === categoryId ? "" : categoryId;
     setSelectedDefault(next);
-    if (next) setSelectedCustom("");
 
     const name = next
       ? defaultCategories.find((c) => c.id === next)?.name
@@ -68,15 +69,16 @@ export function useCategorySelection(options: CategorySelectionOptions = {}) {
     onSelectionChange?.({
       propertyCategoryId: next || undefined,
       propertyCategoryName: name,
-      customCategoryId: undefined,
-      customCategoryName: undefined,
+      customCategoryId: selectedCustom || undefined,
+      customCategoryName: selectedCustom
+        ? customCategories.find((c) => c.id === selectedCustom)?.name
+        : undefined,
     });
   };
 
   const handleCustomCategorySelect = (categoryId: string) => {
     const next = selectedCustom === categoryId ? "" : categoryId;
     setSelectedCustom(next);
-    if (next) setSelectedDefault("");
 
     const name = next
       ? customCategories.find((c) => c.id === next)?.name
@@ -85,8 +87,10 @@ export function useCategorySelection(options: CategorySelectionOptions = {}) {
     onSelectionChange?.({
       customCategoryId: next || undefined,
       customCategoryName: name,
-      propertyCategoryId: undefined,
-      propertyCategoryName: undefined,
+      propertyCategoryId: selectedDefault || undefined,
+      propertyCategoryName: selectedDefault
+        ? defaultCategories.find((c) => c.id === selectedDefault)?.name
+        : undefined,
     });
   };
 
@@ -94,13 +98,13 @@ export function useCategorySelection(options: CategorySelectionOptions = {}) {
     const created = await createCategory({ name });
     await refetchCustom();
     setSelectedCustom(created.id);
-    setSelectedDefault("");
-
     onSelectionChange?.({
       customCategoryId: created.id,
       customCategoryName: created.name,
-      propertyCategoryId: undefined,
-      propertyCategoryName: undefined,
+      propertyCategoryId: selectedDefault || undefined,
+      propertyCategoryName: selectedDefault
+        ? defaultCategories.find((c) => c.id === selectedDefault)?.name
+        : undefined,
     });
   };
 
@@ -114,5 +118,7 @@ export function useCategorySelection(options: CategorySelectionOptions = {}) {
     handleDefaultCategorySelect,
     handleCustomCategorySelect,
     handleCreateCategory,
+    updateCustomCategory: updateCategory,
+    deleteCustomCategory: deleteCategory,
   };
 }
