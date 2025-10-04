@@ -1,4 +1,3 @@
-// apps/web/src/components/tenant/bookings/tenant-booking-table-header.tsx
 import { TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 export const TenantBookingTableHeader = () => {
