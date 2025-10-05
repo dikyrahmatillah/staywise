@@ -27,16 +27,7 @@ import {
   getTotalRooms,
 } from "@/components/tenant/property-utils";
 import usePropertyDetails from "@/hooks/usePropertyDetails";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import DeleteConfirmDialog from "./delete-confirm-dialog";
 
 interface PropertyCardProps {
   property: PropertyResponse;
@@ -76,12 +67,17 @@ export default function PropertyCard({
               </div>
             )}
 
-            {(property.PropertyCategory || property.CustomCategory) && (
-              <Badge variant="secondary" className="absolute top-2 left-2">
-                {property.PropertyCategory?.name ||
-                  property.CustomCategory?.name}
+            <div className="absolute top-2 left-2 flex items-center gap-2">
+              <Badge variant="secondary">
+                {property.PropertyCategory?.name}
               </Badge>
-            )}
+
+              {property.CustomCategory ? (
+                <Badge variant="secondary" className="text-xs">
+                  {property.CustomCategory?.name}
+                </Badge>
+              ) : null}
+            </div>
           </div>
 
           <div className="flex-1 p-4 sm:p-6">
@@ -184,30 +180,14 @@ export default function PropertyCard({
               </div>
             </div>
 
-            <AlertDialog open={openDelete} onOpenChange={setOpenDelete}>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Delete Property</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Are you sure you want to delete this property? This action
-                    cannot be undone and will remove all associated data.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={() => {
-                      setOpenDelete(false);
-                      onDelete(property.id);
-                    }}
-                    className="bg-red-600 hover:bg-red-700"
-                  >
-                    Delete Property
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+            <DeleteConfirmDialog
+              open={openDelete}
+              onOpenChange={setOpenDelete}
+              onConfirm={() => onDelete(property.id)}
+              title="Delete Property"
+              description="Are you sure you want to delete this property? This action cannot be undone and will remove all associated data."
+              confirmLabel="Delete Property"
+            />
 
             <div className="mt-4 pt-4 border-t flex flex-col sm:flex-row flex-wrap gap-4 text-xs text-muted-foreground">
               <div className="flex items-center gap-1">

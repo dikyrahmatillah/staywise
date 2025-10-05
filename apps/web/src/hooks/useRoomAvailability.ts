@@ -87,7 +87,7 @@ export function useRoomAvailability(roomId: string) {
     },
     onSuccess: (_data, variables) => {
       const count = variables?.length ?? 0;
-      toast.success(`Marked ${count} date${count > 1 ? "s" : ""} unavailable`);
+      toast.error(`Marked ${count} date${count > 1 ? "s" : ""} unavailable`);
     },
     onError: (err: unknown) =>
       toast.error(getErrorMessage(err, "Failed to mark dates unavailable")),

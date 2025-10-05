@@ -7,16 +7,7 @@ import Ellipsis from "@/components/ui/ellipsis";
 import { RoomListEmpty } from "./room/room-list-empty";
 import { PriceAdjustmentModal } from "./price-adjustment-modal";
 import { RoomCard } from "./room/room-card";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import DeleteConfirmDialog from "@/components/ui/delete-confirm-dialog";
 
 interface RoomListProps {
   rooms: Room[];
@@ -98,30 +89,16 @@ export function RoomList({
         </div>
       )}
 
-      <AlertDialog
+      <DeleteConfirmDialog
         open={!!deleteRoomId}
         onOpenChange={() => setDeleteRoomId(null)}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Room</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete this room? This action cannot be
-              undone. All bookings and related data for this room will be
-              affected.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleConfirmDelete}
-              className="bg-red-600 hover:bg-red-700"
-            >
-              Delete Room
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        onConfirm={handleConfirmDelete}
+        title="Delete Room"
+        description={
+          "Are you sure you want to delete this room? This action cannot be undone. All bookings and related data for this room will be affected."
+        }
+        confirmLabel="Delete Room"
+      />
 
       {availabilityRoomId && (
         <RoomAvailabilityCalendar

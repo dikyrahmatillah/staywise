@@ -112,10 +112,8 @@ export class PropertyCrudService {
     const updatedProperty = await prisma.$transaction(async (tx) => {
       const updateData: any = this.buildBasicUpdateData(data);
 
-      if (data.propertyCategoryId)
-        updateData.propertyCategoryId = data.propertyCategoryId;
-      if (data.customCategoryId)
-        updateData.customCategoryId = data.customCategoryId;
+      updateData.propertyCategoryId = data.propertyCategoryId || null;
+      updateData.customCategoryId = data.customCategoryId || null;
 
       const updated = await this.repository.update(propertyId, updateData);
 

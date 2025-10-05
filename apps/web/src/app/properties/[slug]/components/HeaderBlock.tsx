@@ -53,7 +53,7 @@ export function HeaderBlock({ name }: { name: string }) {
       toast.success("Link copied to clipboard");
     } catch (err: unknown) {
       console.debug("clipboard write failed", err);
-      toast("Unable to copy automatically");
+      toast.error("Unable to copy automatically");
     }
   }, [getShareUrl]);
 
