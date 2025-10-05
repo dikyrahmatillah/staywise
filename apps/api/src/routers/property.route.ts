@@ -1,5 +1,7 @@
 import { Router } from "express";
-import { propertyController } from "../controllers/property.controller.js";
+import { propertyCreateController } from "../controllers/property-create.controller.js";
+import { propertyQueryController } from "../controllers/property-query.controller.js";
+import { propertyManageController } from "../controllers/property-manage.controller.js";
 import { verifyTokenMiddleware } from "../middlewares/verifyToken.middleware.js";
 import { verifyRoleMiddleware } from "../middlewares/verifyRole.middleware.js";
 import { upload } from "../middlewares/upload.middleware.js";
@@ -14,36 +16,36 @@ router.post(
     { name: "propertyImages", maxCount: 10 },
     { name: "roomImages", maxCount: 20 },
   ]),
-  propertyController.createProperty
+  propertyCreateController.createProperty
 );
-router.get("/", propertyController.getProperties);
+router.get("/", propertyQueryController.getProperties);
 router.get(
   "/tenant/:tenantId",
   verifyTokenMiddleware,
   verifyRoleMiddleware,
-  propertyController.getPropertiesByTenant
+  propertyQueryController.getPropertiesByTenant
 );
 
 router.get(
   "/id/:id",
   verifyTokenMiddleware,
   verifyRoleMiddleware,
-  propertyController.getPropertyById
+  propertyQueryController.getPropertyById
 );
 router.put(
   "/id/:id",
   verifyTokenMiddleware,
   verifyRoleMiddleware,
   upload.fields([{ name: "propertyImages", maxCount: 10 }]),
-  propertyController.updateProperty
+  propertyManageController.updateProperty
 );
 router.delete(
   "/id/:propertyId",
   verifyTokenMiddleware,
   verifyRoleMiddleware,
-  propertyController.deleteProperty
+  propertyManageController.deleteProperty
 );
 
-router.get("/:slug", propertyController.getProperty);
+router.get("/:slug", propertyQueryController.getProperty);
 
 export default router;

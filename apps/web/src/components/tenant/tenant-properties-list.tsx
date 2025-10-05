@@ -32,9 +32,6 @@ export function TenantPropertiesList({ tenantId }: TenantPropertiesListProps) {
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   const handleDeleteProperty = async (propertyId: string) => {
-    if (!confirm("Are you sure you want to delete this property?")) {
-      return;
-    }
     await deleteProperty(propertyId);
   };
 
