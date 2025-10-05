@@ -4,7 +4,7 @@ import React from "react";
 import { usePropertyCreation } from "../property-creation-context";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { FileText } from "lucide-react";
-import BasicInfoFields from "@/components/tenant/basic-info-fields";
+import BasicInfoCard from "@/components/tenant/basic-info-fields";
 
 export function BasicInfoStep() {
   const { formData, updateFormData } = usePropertyCreation();
@@ -14,6 +14,13 @@ export function BasicInfoStep() {
   ) => {
     const { name, value } = e.target as HTMLInputElement & HTMLTextAreaElement;
     updateFormData({ [name]: value });
+  };
+
+  const handlePartialUpdate = (next: {
+    name?: string;
+    description?: string;
+  }) => {
+    updateFormData(next);
   };
 
   return (
@@ -28,10 +35,11 @@ export function BasicInfoStep() {
         </p>
       </CardHeader>
       <CardContent className="space-y-6">
-        <BasicInfoFields
+        <BasicInfoCard
           nameValue={formData.name ?? ""}
           descriptionValue={formData.description ?? ""}
           onChange={handleChange}
+          onUpdate={handlePartialUpdate}
         />
       </CardContent>
     </Card>

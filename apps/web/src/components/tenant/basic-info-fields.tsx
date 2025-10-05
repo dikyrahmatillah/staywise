@@ -8,15 +8,17 @@ import { Textarea } from "@/components/ui/textarea";
 type Props = {
   nameValue: string;
   descriptionValue: string;
-  onChange: (
+  onChange?: (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => void;
+  onUpdate?: (next: { name?: string; description?: string }) => void;
 };
 
 export function BasicInfoFields({
   nameValue,
   descriptionValue,
   onChange,
+  onUpdate,
 }: Props) {
   const nameProgress = useMemo(() => {
     const length = nameValue?.length || 0;
@@ -42,7 +44,13 @@ export function BasicInfoFields({
             id="name"
             name="name"
             value={nameValue}
-            onChange={onChange}
+            onChange={(e) => {
+              if (onChange) onChange(e);
+              if (onUpdate) {
+                const target = e.target as HTMLInputElement;
+                onUpdate({ name: target.value });
+              }
+            }}
             placeholder="e.g., Luxury Beachfront Villa with Ocean Views"
             className="h-12 text-base border-2 border-slate-200 focus:ring-2 focus-visible:border-primary/50 focus-visible:ring-primary/10 transition-all duration-200"
             maxLength={100}
@@ -94,7 +102,13 @@ export function BasicInfoFields({
             id="description"
             name="description"
             value={descriptionValue}
-            onChange={onChange}
+            onChange={(e) => {
+              if (onChange) onChange(e);
+              if (onUpdate) {
+                const target = e.target as HTMLTextAreaElement;
+                onUpdate({ description: target.value });
+              }
+            }}
             placeholder="Tell guests about your property's unique features, location highlights, amenities, and what makes it special..."
             rows={5}
             maxLength={500}
