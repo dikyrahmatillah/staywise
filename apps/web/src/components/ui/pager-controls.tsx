@@ -2,9 +2,11 @@
 
 import React from "react";
 
+import { TOTAL_STEPS } from "@/components/tenant/property-creation/wizard-config";
+
 type Props = {
   current: number;
-  maxIndex: number;
+  maxIndex?: number;
   onPrev: () => void;
   onNext: () => void;
   className?: string;
@@ -18,7 +20,7 @@ type Props = {
 
 export default function PagerControls({
   current,
-  maxIndex,
+  maxIndex = Math.max(TOTAL_STEPS - 1, 0),
   onPrev,
   onNext,
   className = "",

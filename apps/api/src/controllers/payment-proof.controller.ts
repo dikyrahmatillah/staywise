@@ -2,6 +2,13 @@ import { Request, Response, NextFunction } from "express";
 import { prisma } from "@/configs/prisma.config.js";
 import { uploadToCloudinary } from "@/middlewares/upload-payment-proof.middleware.js";
 import { AppError } from "@/errors/app.error.js";
+import { EmailService } from "@/services/email.service.js";
+import {
+  formatBookingForEmail,
+  validateBookingEmailData,
+} from "@/services/booking/helpers/email-data.helper.js";
+
+const emailService = new EmailService();
 
 export class PaymentProofController {
   async uploadPaymentProof(
@@ -18,7 +25,6 @@ export class PaymentProofController {
         throw new AppError("Payment proof file is required", 400);
       }
 
-      // Find booking by orderId (booking.id or booking.orderCode)
       const booking = await prisma.booking.findFirst({
         where: {
           OR: [{ id: orderId }, { orderCode: orderId }],
@@ -30,7 +36,6 @@ export class PaymentProofController {
         throw new AppError("Booking not found", 404);
       }
 
-      // Check if booking is in correct status
       if (booking.status !== "WAITING_PAYMENT") {
         throw new AppError(
           "Payment proof can be uploaded only for bookings waiting for payment",
@@ -38,7 +43,6 @@ export class PaymentProofController {
         );
       }
 
-      // Check if booking has expired
       if (booking.expiresAt && new Date() > booking.expiresAt) {
         await prisma.booking.update({
           where: { id: booking.id },
@@ -47,7 +51,6 @@ export class PaymentProofController {
         throw new AppError("Booking has expired and been cancelled", 400);
       }
 
-      // Check if payment proof already exists
       const existingProof = await prisma.paymentProof.findUnique({
         where: { orderId: booking.id },
       });
@@ -59,11 +62,9 @@ export class PaymentProofController {
         );
       }
 
-      // Upload to Cloudinary
       const filename = `payment-proof-${booking.orderCode}-${Date.now()}`;
       const uploadResult = await uploadToCloudinary(file.buffer, filename);
 
-      // Create or update payment proof record
       const paymentProof = await prisma.paymentProof.upsert({
         where: { orderId: booking.id },
         create: {
@@ -79,7 +80,6 @@ export class PaymentProofController {
         },
       });
 
-      // Update booking status to WAITING_CONFIRMATION
       const updatedBooking = await prisma.booking.update({
         where: { id: booking.id },
         data: {
@@ -111,7 +111,6 @@ export class PaymentProofController {
       const userId = (request as any).user?.id;
       const userRole = (request as any).user?.role;
 
-      // Find booking by orderId
       const booking = await prisma.booking.findFirst({
         where: {
           OR: [{ id: orderId }, { orderCode: orderId }],
@@ -125,16 +124,14 @@ export class PaymentProofController {
         throw new AppError("Booking not found", 404);
       }
 
-      // Check access permissions
       const hasAccess =
-        booking.userId === userId || // Guest owns booking
-        (userRole === "TENANT" && booking.Property.tenantId === userId); // Tenant owns property
+        booking.userId === userId ||
+        (userRole === "TENANT" && booking.Property.tenantId === userId);
 
       if (!hasAccess) {
         throw new AppError("Access denied", 403);
       }
 
-      // Find payment proof using booking.id as orderId
       const paymentProof = await prisma.paymentProof.findUnique({
         where: { orderId: booking.id },
         include: {
@@ -164,7 +161,6 @@ export class PaymentProofController {
       const { orderId } = request.params;
       const userId = (request as any).user?.id;
 
-      // Find booking by orderId
       const booking = await prisma.booking.findFirst({
         where: {
           OR: [{ id: orderId }, { orderCode: orderId }],
@@ -176,7 +172,6 @@ export class PaymentProofController {
         throw new AppError("Booking not found", 404);
       }
 
-      // Find payment proof
       const paymentProof = await prisma.paymentProof.findUnique({
         where: { orderId: booking.id },
       });
@@ -185,7 +180,6 @@ export class PaymentProofController {
         throw new AppError("Payment proof not found", 404);
       }
 
-      // Only allow deletion if proof was rejected or booking is still waiting for payment
       if (booking.status !== "WAITING_PAYMENT" && !paymentProof.rejectedAt) {
         throw new AppError(
           "Cannot delete payment proof for confirmed bookings",
@@ -193,18 +187,16 @@ export class PaymentProofController {
         );
       }
 
-      // Delete payment proof
       await prisma.paymentProof.delete({
         where: { id: paymentProof.id },
       });
 
-      // Reset booking status to WAITING_PAYMENT if it was WAITING_CONFIRMATION
       if (booking.status === "WAITING_CONFIRMATION") {
         await prisma.booking.update({
           where: { id: booking.id },
           data: {
             status: "WAITING_PAYMENT",
-            expiresAt: new Date(Date.now() + 60 * 60 * 1000), // Reset 1-hour timer
+            expiresAt: new Date(Date.now() + 60 * 60 * 1000),
           },
         });
       }
@@ -218,7 +210,7 @@ export class PaymentProofController {
     }
   }
 
-  // Simple approve method for tenants
+  // ✅ UPDATED: Approve with email notification
   async approvePaymentProof(
     request: Request,
     response: Response,
@@ -233,7 +225,7 @@ export class PaymentProofController {
         throw new AppError("Only tenants can approve payment proofs", 403);
       }
 
-      // Find booking and verify tenant ownership
+      // Fetch booking with all necessary relations for email
       const booking = await prisma.booking.findFirst({
         where: {
           OR: [{ id: orderId }, { orderCode: orderId }],
@@ -241,7 +233,14 @@ export class PaymentProofController {
         },
         include: {
           Room: { select: { name: true } },
-          Property: { select: { name: true } },
+          Property: { select: { name: true, address: true, city: true } },
+          User: {
+            select: {
+              firstName: true,
+              lastName: true,
+              email: true,
+            },
+          },
         },
       });
 
@@ -253,19 +252,11 @@ export class PaymentProofController {
         throw new AppError("Booking is not waiting for confirmation", 400);
       }
 
-      // 🚨 CHECK FOR OVERLAPPING BOOKINGS
+      // Check for overlapping bookings
       console.log("🔍 Checking for overlapping bookings...");
-      console.log("Current booking:", {
-        id: booking.id,
-        orderCode: booking.orderCode,
-        roomId: booking.roomId,
-        checkIn: booking.checkInDate,
-        checkOut: booking.checkOutDate,
-      });
-
       const overlappingBookings = await prisma.booking.findMany({
         where: {
-          id: { not: booking.id }, // Exclude current booking
+          id: { not: booking.id },
           roomId: booking.roomId,
           status: {
             in: [
@@ -276,21 +267,18 @@ export class PaymentProofController {
             ],
           },
           OR: [
-            // Case 1: Existing booking starts during this period
             {
               AND: [
                 { checkInDate: { gte: booking.checkInDate } },
                 { checkInDate: { lt: booking.checkOutDate } },
               ],
             },
-            // Case 2: Existing booking ends during this period
             {
               AND: [
                 { checkOutDate: { gt: booking.checkInDate } },
                 { checkOutDate: { lte: booking.checkOutDate } },
               ],
             },
-            // Case 3: Existing booking completely contains this period
             {
               AND: [
                 { checkInDate: { lte: booking.checkInDate } },
@@ -315,15 +303,8 @@ export class PaymentProofController {
         },
       });
 
-      console.log("Found overlapping bookings:", overlappingBookings.length);
-
       if (overlappingBookings.length > 0) {
-        console.log(
-          "❌ BLOCKING: Overlapping bookings detected!",
-          overlappingBookings
-        );
-
-        // Format conflict details for error message
+        console.log("❌ BLOCKING: Overlapping bookings detected!");
         const conflicts = overlappingBookings
           .map((b) => {
             const guestName =
@@ -337,13 +318,11 @@ export class PaymentProofController {
 
         throw new AppError(
           `Cannot approve: Room "${booking.Room.name}" already has ${overlappingBookings.length} confirmed booking(s) for these dates. Conflicts: ${conflicts}`,
-          409 // 409 Conflict status code
+          409
         );
       }
 
-      console.log(
-        "✅ No overlapping bookings found. Proceeding with approval..."
-      );
+      console.log("✅ No overlapping bookings. Approving payment...");
 
       // Update payment proof and booking status
       await prisma.$transaction([
@@ -360,10 +339,35 @@ export class PaymentProofController {
         }),
       ]);
 
-      console.log(
-        "✅ Payment approved successfully for booking:",
-        booking.orderCode
-      );
+      // 📧 SEND PAYMENT CONFIRMATION EMAIL
+      try {
+        console.log("📧 Sending payment confirmation email...");
+
+        // Validate booking has required data
+        const validation = validateBookingEmailData(booking);
+        if (!validation.valid) {
+          console.error(
+            "⚠️ Cannot send email: Missing required data:",
+            validation.missing
+          );
+        } else {
+          // Format booking data for email
+          const emailData = formatBookingForEmail(booking);
+
+          // Send email
+          await emailService.sendPaymentConfirmedEmail(
+            booking.User.email,
+            emailData
+          );
+
+          console.log(
+            `✅ Payment confirmation email sent to ${booking.User.email}`
+          );
+        }
+      } catch (emailError) {
+        // Log error but don't fail the approval
+        console.error("❌ Failed to send confirmation email:", emailError);
+      }
 
       return response.json({
         success: true,
@@ -375,7 +379,6 @@ export class PaymentProofController {
     }
   }
 
-  // Simple reject method for tenants
   async rejectPaymentProof(
     request: Request,
     response: Response,
@@ -390,7 +393,6 @@ export class PaymentProofController {
         throw new AppError("Only tenants can reject payment proofs", 403);
       }
 
-      // Find booking and verify tenant ownership
       const booking = await prisma.booking.findFirst({
         where: {
           OR: [{ id: orderId }, { orderCode: orderId }],
@@ -406,7 +408,6 @@ export class PaymentProofController {
         throw new AppError("Booking is not waiting for confirmation", 400);
       }
 
-      // Update payment proof and booking status
       await prisma.$transaction([
         prisma.paymentProof.update({
           where: { orderId: booking.id },
@@ -419,7 +420,7 @@ export class PaymentProofController {
           where: { id: booking.id },
           data: {
             status: "WAITING_PAYMENT",
-            expiresAt: new Date(Date.now() + 60 * 60 * 1000), // Reset 1-hour timer
+            expiresAt: new Date(Date.now() + 60 * 60 * 1000),
           },
         }),
       ]);

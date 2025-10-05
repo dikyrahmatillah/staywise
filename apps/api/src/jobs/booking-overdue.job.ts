@@ -3,16 +3,20 @@ import { AppError } from "@/errors/app.error.js";
 import { BookingStatusUpdate } from "@/types/booking.types.js";
 
 export class BookingOverdueJob {
+  // 🧪 TESTING: 2 minutes grace period (PROD: uses today's date)
+  private readonly OVERDUE_GRACE_PERIOD_MINUTES = 2;
+
   async execute(): Promise<BookingStatusUpdate> {
     const now = new Date();
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const overdueDeadline = new Date(
+      now.getTime() - this.OVERDUE_GRACE_PERIOD_MINUTES * 60 * 1000
+    );
 
     try {
       const overdueBookings = await prisma.booking.findMany({
         where: {
           status: { in: ["WAITING_CONFIRMATION", "PROCESSING"] },
-          checkInDate: { lt: today },
+          checkInDate: { lt: overdueDeadline },
         },
         include: {
           Property: { select: { name: true } },
@@ -22,24 +26,30 @@ export class BookingOverdueJob {
       });
 
       if (overdueBookings.length === 0) {
-        console.log(`[${now.toISOString()}] No overdue bookings to cancel`);
+        console.log(
+          `[${now.toISOString()}] 🧪 [TEST] No overdue bookings to cancel`
+        );
         return { canceledCount: 0, bookings: [] };
       }
 
       const updateResult = await prisma.booking.updateMany({
         where: {
           status: { in: ["WAITING_CONFIRMATION", "PROCESSING"] },
-          checkInDate: { lt: today },
+          checkInDate: { lt: overdueDeadline },
         },
         data: { status: "CANCELED" },
       });
 
       console.log(
-        `[${now.toISOString()}] Canceled ${updateResult.count} overdue bookings`
+        `[${now.toISOString()}] 🧪 [TEST] Canceled ${
+          updateResult.count
+        } overdue bookings (checkin > 2 min ago)`
       );
 
       overdueBookings.forEach((booking) => {
-        console.log(`  - Booking ${booking.orderCode} canceled (overdue)`);
+        console.log(
+          `  - Booking ${booking.orderCode} canceled (overdue, checkin: ${booking.checkInDate})`
+        );
       });
 
       return {

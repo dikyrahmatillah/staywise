@@ -1,7 +1,4 @@
-import { ReactNode } from "react";
-import type { WizardStep } from "./wizard-config";
 import { Progress } from "@/components/ui/progress";
-import { cn } from "@/lib/utils";
 import { TOTAL_STEPS } from "./wizard-config";
 
 export function WizardHeader() {
@@ -45,53 +42,6 @@ export function WizardProgress({ currentStep }: WizardProgressProps) {
   );
 }
 
-interface WizardStepHeaderProps {
-  step: WizardStep;
-}
-export function WizardStepHeader({ step }: WizardStepHeaderProps) {
-  const Icon = step.icon;
+// Wizard step header removed — markup has been inlined where used.
 
-  return (
-    <div className="mb-3 sm:mb-4 flex flex-col gap-4">
-      <div className="flex items-start gap-3 sm:gap-4">
-        <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 text-primary shadow-lg border border-primary/10">
-          <Icon className="h-6 w-6 sm:h-7 sm:w-7" />
-        </div>
-        <div className="space-y-2 flex-1">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <h2 className="text-lg sm:text-xl font-bold tracking-tight text-gray-900">
-              {step.title}
-            </h2>
-          </div>
-          <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-            {step.description}
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-interface WizardStepContentProps {
-  children: ReactNode;
-  isTransitioning: boolean;
-  direction: "forward" | "backward";
-}
-export function WizardStepContent({
-  children,
-  isTransitioning,
-}: WizardStepContentProps) {
-  return (
-    <div
-      className={cn(
-        "bg-white/80 supports-[backdrop-filter]:bg-white/60 backdrop-blur-xl rounded-2xl shadow-lg border border-white/30 min-h-[500px] sm:min-h-[600px] p-4 sm:p-6 lg:p-8 ring-1 ring-black/5 transition-opacity duration-200",
-        {
-          "opacity-0": isTransitioning,
-          "opacity-100": !isTransitioning,
-        }
-      )}
-    >
-      {children}
-    </div>
-  );
-}
+// Wizard step content wrapper removed — container markup has been inlined where used.

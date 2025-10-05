@@ -3,12 +3,13 @@ import { AppError } from "@/errors/app.error.js";
 import { BookingStatusUpdate } from "@/types/booking.types.js";
 
 export class BookingCompletionJob {
-  private readonly COMPLETION_GRACE_PERIOD_HOURS = 24;
+  // 🧪 TESTING: 2 minutes grace period (PROD: 24 hours)
+  private readonly COMPLETION_GRACE_PERIOD_MINUTES = 2;
 
   async execute(): Promise<BookingStatusUpdate> {
     const now = new Date();
     const completionDeadline = new Date(
-      now.getTime() - this.COMPLETION_GRACE_PERIOD_HOURS * 60 * 60 * 1000
+      now.getTime() - this.COMPLETION_GRACE_PERIOD_MINUTES * 60 * 1000
     );
 
     try {
@@ -25,7 +26,7 @@ export class BookingCompletionJob {
       });
 
       if (bookingsToComplete.length === 0) {
-        console.log(`[${now.toISOString()}] No bookings to complete`);
+        console.log(`[${now.toISOString()}] 🧪 [TEST] No bookings to complete`);
         return { completedCount: 0, bookings: [] };
       }
 
@@ -38,11 +39,15 @@ export class BookingCompletionJob {
       });
 
       console.log(
-        `[${now.toISOString()}] Completed ${updateResult.count} bookings`
+        `[${now.toISOString()}] 🧪 [TEST] Completed ${
+          updateResult.count
+        } bookings (checkout > 2 min ago)`
       );
 
       bookingsToComplete.forEach((booking) => {
-        console.log(`  - Booking ${booking.orderCode} completed`);
+        console.log(
+          `  - Booking ${booking.orderCode} completed (checkout: ${booking.checkOutDate})`
+        );
       });
 
       return {
