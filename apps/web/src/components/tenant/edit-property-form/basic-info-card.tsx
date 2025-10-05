@@ -13,9 +13,10 @@ type Props = {
   onChange: (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => void;
+  onUpdate?: (next: { name?: string; description?: string }) => void;
 };
 
-export function BasicInfoCard({ values, onChange }: Props) {
+export function BasicInfoCard({ values, onChange, onUpdate }: Props) {
   return (
     <Card>
       <CardHeader className="mb-6">
@@ -32,6 +33,7 @@ export function BasicInfoCard({ values, onChange }: Props) {
           nameValue={values.name}
           descriptionValue={values.description}
           onChange={onChange}
+          onUpdate={onUpdate}
         />
       </CardContent>
     </Card>

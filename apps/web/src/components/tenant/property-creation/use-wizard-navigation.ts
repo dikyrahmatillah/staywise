@@ -43,7 +43,6 @@ export function useWizardNavigation() {
       transitionTimeout.current = setTimeout(() => {
         setCurrentStep(nextStep);
 
-        // Small delay to ensure step content updates before removing transition state
         requestAnimationFrame(() => {
           setIsTransitioning(false);
           transitionTimeout.current = null;
