@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useCallback, useState } from "react";
+import { useCallback, useState, ChangeEvent } from "react";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -26,6 +27,9 @@ interface Props {
 export default function CompleteProfileForm({ token }: Props) {
   const router = useRouter();
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] =
+    useState(false);
 
   const {
     register,
@@ -36,24 +40,21 @@ export default function CompleteProfileForm({ token }: Props) {
     defaultValues: { token },
   });
 
-  const onSelectAvatar = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (!file) {
-        setAvatarFile(null);
-        return;
-      }
-      const error = validateAvatar(file);
-      if (error) {
-        toast.error(error);
-        e.target.value = "";
-        setAvatarFile(null);
-        return;
-      }
-      setAvatarFile(file);
-    },
-    []
-  );
+  const onSelectAvatar = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) {
+      setAvatarFile(null);
+      return;
+    }
+    const error = validateAvatar(file);
+    if (error) {
+      toast.error(error);
+      e.target.value = "";
+      setAvatarFile(null);
+      return;
+    }
+    setAvatarFile(file);
+  }, []);
 
   const onSubmit = useCallback(
     async (data: CompleteRegistrationClientInput) => {
@@ -110,26 +111,58 @@ export default function CompleteProfileForm({ token }: Props) {
       </div>
       <div className="space-y-2">
         <Label htmlFor="password">Password</Label>
-        <Input
-          id="password"
-          type="password"
-          disabled={isSubmitting}
-          required
-          {...register("password")}
-        />
+        <div className="relative">
+          <Input
+            id="password"
+            type={isPasswordVisible ? "text" : "password"}
+            disabled={isSubmitting}
+            required
+            {...register("password")}
+          />
+          <button
+            type="button"
+            aria-label={isPasswordVisible ? "Hide password" : "Show password"}
+            onClick={() => setIsPasswordVisible((v) => !v)}
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground cursor-pointer"
+            disabled={isSubmitting}
+          >
+            {isPasswordVisible ? (
+              <FiEyeOff className="w-4 h-4" />
+            ) : (
+              <FiEye className="w-4 h-4" />
+            )}
+          </button>
+        </div>
         {errors.password && (
           <p className="text-xs text-red-500">{errors.password.message}</p>
         )}
       </div>
       <div className="space-y-2">
         <Label htmlFor="confirmPassword">Confirm Password</Label>
-        <Input
-          id="confirmPassword"
-          type="password"
-          disabled={isSubmitting}
-          required
-          {...register("confirmPassword")}
-        />
+        <div className="relative">
+          <Input
+            id="confirmPassword"
+            type={isConfirmPasswordVisible ? "text" : "password"}
+            disabled={isSubmitting}
+            required
+            {...register("confirmPassword")}
+          />
+          <button
+            type="button"
+            aria-label={
+              isConfirmPasswordVisible ? "Hide password" : "Show password"
+            }
+            onClick={() => setIsConfirmPasswordVisible((v) => !v)}
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground cursor-pointer"
+            disabled={isSubmitting}
+          >
+            {isConfirmPasswordVisible ? (
+              <FiEyeOff className="w-4 h-4" />
+            ) : (
+              <FiEye className="w-4 h-4" />
+            )}
+          </button>
+        </div>
         {errors.confirmPassword && (
           <p className="text-xs text-red-500">
             {errors.confirmPassword.message}
