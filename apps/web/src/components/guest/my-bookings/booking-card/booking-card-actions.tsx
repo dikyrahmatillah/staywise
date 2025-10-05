@@ -8,7 +8,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { PaymentProofUpload } from "@/components/guest/booking-transaction/payment-proof-upload";
+import { PaymentProofUpload } from "@/components/guest/booking-transaction/payment-proof-upload/payment-proof-upload";
 import { Upload, CreditCard, Eye, X, FileImage, Star } from "lucide-react";
 import { useBookingCardContext } from "./booking-card-context";
 
