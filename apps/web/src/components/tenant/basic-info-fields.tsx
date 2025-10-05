@@ -6,8 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 type Props = {
-  nameValue?: string;
-  descriptionValue?: string;
+  nameValue: string;
+  descriptionValue: string;
   onChange: (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => void;
@@ -30,12 +30,10 @@ export function BasicInfoFields({
 
   return (
     <div className="space-y-6">
-      <div className="space-y-4">
-        <div className="flex items-center gap-3">
+      <div className="space-y-3">
+        <div className="flex items-center">
           <div>
-            <Label htmlFor="name" className="font-semibold text-foreground">
-              Property Name
-            </Label>
+            <Label htmlFor="name">Property Name</Label>
           </div>
         </div>
 
@@ -43,7 +41,7 @@ export function BasicInfoFields({
           <Input
             id="name"
             name="name"
-            value={nameValue ?? ""}
+            value={nameValue}
             onChange={onChange}
             placeholder="e.g., Luxury Beachfront Villa with Ocean Views"
             className="h-12 text-base border-2 border-slate-200 focus:ring-2 focus-visible:border-primary/50 focus-visible:ring-primary/10 transition-all duration-200"
@@ -84,15 +82,10 @@ export function BasicInfoFields({
         </div>
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-3">
         <div className="flex items-center">
           <div>
-            <Label
-              htmlFor="description"
-              className="font-semibold text-foreground"
-            >
-              Property Description
-            </Label>
+            <Label htmlFor="description">Property Description</Label>
           </div>
         </div>
 
@@ -100,7 +93,7 @@ export function BasicInfoFields({
           <Textarea
             id="description"
             name="description"
-            value={descriptionValue ?? ""}
+            value={descriptionValue}
             onChange={onChange}
             placeholder="Tell guests about your property's unique features, location highlights, amenities, and what makes it special..."
             rows={5}
