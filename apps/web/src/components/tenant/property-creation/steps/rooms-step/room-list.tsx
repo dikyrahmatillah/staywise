@@ -72,8 +72,8 @@ export function RoomList({
                           />
                         </div>
                       ) : (
-                        <div className="p-2 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
-                          <Bed className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                        <div className="p-2 bg-primary/10 dark:bg-primary/20 rounded-lg">
+                          <Bed className="w-4 h-4 text-primary dark:text-primary" />
                         </div>
                       )}
                       <div>
