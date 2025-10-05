@@ -9,16 +9,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import DeleteConfirmDialog from "@/components/ui/delete-confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { AlertTriangle, Calendar, Clock, CreditCard } from "lucide-react";
@@ -200,41 +191,37 @@ export const BookingCancellationDialog = ({
       </Dialog>
 
       {/* Confirmation AlertDialog */}
-      <AlertDialog open={showConfirmAlert} onOpenChange={setShowConfirmAlert}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-destructive" />
-              Confirm Cancellation
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you absolutely sure you want to cancel this booking for{" "}
-              <span className="font-semibold">{booking.Property.name}</span>?
-              <br />
-              <br />
-              Check-in: {formatDate(booking.checkInDate)}
-              <br />
-              Total Amount: {formatCurrency(booking.totalAmount)}
-              <br />
-              <br />
-              This action cannot be undone and your booking will be permanently
-              cancelled.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isProcessing}>
-              No, Keep Booking
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleConfirmCancel}
-              disabled={isProcessing}
-              className="bg-destructive hover:bg-destructive/90"
-            >
-              {isProcessing ? "Cancelling..." : "Yes, Cancel Booking"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeleteConfirmDialog
+        open={showConfirmAlert}
+        onOpenChange={setShowConfirmAlert}
+        onConfirm={handleConfirmCancel}
+        title={
+          <span className="flex items-center gap-2">
+            <AlertTriangle className="h-5 w-5 text-destructive" />
+            Confirm Cancellation
+          </span>
+        }
+        description={
+          <>
+            Are you absolutely sure you want to cancel this booking for{" "}
+            <span className="font-semibold">{booking.Property.name}</span>?
+            <br />
+            <br />
+            Check-in: {formatDate(booking.checkInDate)}
+            <br />
+            Total Amount: {formatCurrency(booking.totalAmount)}
+            <br />
+            <br />
+            This action cannot be undone and your booking will be permanently
+            cancelled.
+          </>
+        }
+        cancelLabel="No, Keep Booking"
+        confirmLabel="Yes, Cancel Booking"
+        isProcessing={isProcessing}
+        processingLabel="Cancelling..."
+        confirmClassName="bg-destructive hover:bg-destructive/90"
+      />
     </>
   );
 };

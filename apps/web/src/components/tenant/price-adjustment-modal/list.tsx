@@ -3,16 +3,7 @@
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import DeleteConfirmDialog from "@/components/ui/delete-confirm-dialog";
 import { Badge } from "@/components/ui/badge";
 import { DollarSign, Edit, Trash2 } from "lucide-react";
 import { format } from "date-fns";
@@ -135,31 +126,19 @@ export function PriceAdjustmentList({
         </div>
       )}
 
-      <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Price Adjustment</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete this price adjustment? This action
-              cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={async () => {
-                if (deleteId) {
-                  await onDelete(deleteId);
-                  setDeleteId(null);
-                }
-              }}
-              className="bg-red-600 hover:bg-red-700"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeleteConfirmDialog
+        open={!!deleteId}
+        onOpenChange={() => setDeleteId(null)}
+        onConfirm={async () => {
+          if (deleteId) {
+            await onDelete(deleteId);
+            setDeleteId(null);
+          }
+        }}
+        title="Delete Price Adjustment"
+        description="Are you sure you want to delete this price adjustment? This action cannot be undone."
+        confirmLabel="Delete"
+      />
     </div>
   );
 }
