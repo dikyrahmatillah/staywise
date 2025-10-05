@@ -3,6 +3,10 @@ import crypto from "crypto";
 import { prisma } from "@/configs/prisma.config.js";
 import { OrderStatus } from "@/generated/prisma/index.js";
 import { EmailService } from "@/services/email.service.js";
+import {
+  formatBookingForEmail,
+  validateBookingEmailData,
+} from "@/services/booking/helpers/email-data.helper.js";
 
 const emailService = new EmailService();
 
@@ -10,12 +14,12 @@ export class WebhookController {
   async handleMidtransWebhook(req: Request, res: Response) {
     try {
       const notification = req.body;
-      console.log("Midtrans webhook received:", notification);
+      console.log("📩 Midtrans webhook received:", notification);
 
       // Verify signature for security
       const isValidSignature = this.verifyMidtransSignature(notification);
       if (!isValidSignature) {
-        console.error("Invalid Midtrans signature");
+        console.error("❌ Invalid Midtrans signature");
         return res.status(401).json({ message: "Invalid signature" });
       }
 
@@ -30,16 +34,31 @@ export class WebhookController {
           Order: {
             include: {
               User: {
-                select: { firstName: true, lastName: true, email: true },
+                select: {
+                  firstName: true,
+                  lastName: true,
+                  email: true,
+                },
               },
-              Property: { select: { name: true, address: true, city: true } },
+              Property: {
+                select: {
+                  name: true,
+                  address: true,
+                  city: true,
+                },
+              },
+              Room: {
+                select: {
+                  name: true,
+                },
+              },
             },
           },
         },
       });
 
       if (!gatewayPayment) {
-        console.error(`No payment found for order_id: ${order_id}`);
+        console.error(`❌ No payment found for order_id: ${order_id}`);
         return res.status(404).json({ message: "Order not found" });
       }
 
@@ -52,20 +71,24 @@ export class WebhookController {
       switch (transaction_status) {
         case "capture":
         case "settlement":
-          newStatus = "COMPLETED";
+          newStatus = "PROCESSING"; // Changed from COMPLETED to PROCESSING
           isSuccess = true;
+          console.log(`✅ Payment successful for order: ${order_id}`);
           break;
         case "pending":
           newStatus = "PROCESSING";
+          console.log(`⏳ Payment pending for order: ${order_id}`);
           break;
         case "deny":
         case "cancel":
         case "expire":
         case "failure":
           newStatus = "CANCELED";
+          console.log(`❌ Payment ${transaction_status} for order: ${order_id}`);
           break;
         default:
-          newStatus = booking.status; // Keep current status
+          newStatus = booking.status;
+          console.log(`⚠️ Unknown transaction status: ${transaction_status}`);
       }
 
       // Update booking status
@@ -88,7 +111,7 @@ export class WebhookController {
         },
       });
 
-      // Send confirmation email only for successful payments
+      // 📧 SEND CONFIRMATION EMAIL ONLY FOR SUCCESSFUL PAYMENTS
       if (isSuccess && booking.User) {
         await this.sendPaymentConfirmation(booking);
       }
@@ -99,7 +122,7 @@ export class WebhookController {
         status: newStatus,
       });
     } catch (error) {
-      console.error("Webhook processing error:", error);
+      console.error("❌ Webhook processing error:", error);
       res.status(500).json({ message: "Internal server error" });
     }
   }
@@ -111,7 +134,7 @@ export class WebhookController {
       const serverKey = process.env.MIDTRANS_SERVER_KEY;
 
       if (!serverKey) {
-        console.error("MIDTRANS_SERVER_KEY not configured");
+        console.error("❌ MIDTRANS_SERVER_KEY not configured");
         return false;
       }
 
@@ -122,40 +145,40 @@ export class WebhookController {
 
       return signatureKey === signature_key;
     } catch (error) {
-      console.error("Signature verification error:", error);
+      console.error("❌ Signature verification error:", error);
       return false;
     }
   }
 
   private async sendPaymentConfirmation(booking: any) {
     try {
-      const customerName =
-        `${booking.User.firstName || ""} ${
-          booking.User.lastName || ""
-        }`.trim() || "Customer";
+      console.log("📧 Preparing to send payment confirmation email...");
 
-      await emailService.sendPaymentConfirmedEmail(booking.User.email, {
-        customerName,
-        brandName: "StayWise",
-        bookingCode: booking.orderCode,
-        propertyName: booking.Property.name,
-        propertyAddress: `${booking.Property.address}, ${booking.Property.city}`,
-        guestCount: 1,
-        checkInDate: booking.checkInDate.toISOString().split("T")[0],
-        checkInTime: "14:00",
-        checkOutDate: booking.checkOutDate.toISOString().split("T")[0],
-        checkOutTime: "11:00",
-        paymentMethod: "Online Payment",
-        amountPaid: booking.totalAmount.toString(),
-        currency: "IDR",
-        manageBookingUrl: `${process.env.WEB_APP_URL}/dashboard/bookings/${booking.orderCode}`,
-        supportEmail: "support@staywise.com",
-        year: new Date().getFullYear().toString(),
-      });
+      // Validate booking has required data
+      const validation = validateBookingEmailData(booking);
+      if (!validation.valid) {
+        console.error(
+          "⚠️ Cannot send email: Missing required data:",
+          validation.missing
+        );
+        return;
+      }
 
-      console.log(`Payment confirmation email sent to ${booking.User.email}`);
+      // Format booking data for email
+      const emailData = formatBookingForEmail(booking);
+
+      // Send email
+      await emailService.sendPaymentConfirmedEmail(
+        booking.User.email,
+        emailData
+      );
+
+      console.log(
+        `✅ Payment confirmation email sent to ${booking.User.email} for booking ${booking.orderCode}`
+      );
     } catch (emailError) {
-      console.error("Failed to send confirmation email:", emailError);
+      console.error("❌ Failed to send confirmation email:", emailError);
+      // Don't throw - we don't want email failures to affect payment processing
     }
   }
 }
