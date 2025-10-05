@@ -10,7 +10,6 @@ export class PropertySearchService {
   private normalizeDates(checkIn?: string, checkOut?: string) {
     const defaultCheckIn = startOfDay(new Date());
     const defaultCheckOut = addDays(defaultCheckIn, 1);
-
     const checkInDate = checkIn
       ? startOfDay(new Date(checkIn))
       : defaultCheckIn;
@@ -20,9 +19,8 @@ export class PropertySearchService {
       ? checkInDate
       : defaultCheckOut;
 
-    if (isSameDay(checkInDate, checkOutDate)) {
+    if (isSameDay(checkInDate, checkOutDate))
       checkOutDate = addDays(checkOutDate, 1);
-    }
 
     return { checkInDate, checkOutDate };
   }
@@ -47,42 +45,44 @@ export class PropertySearchService {
         [field]: { contains: destination, mode: "insensitive" },
       }));
     }
-
     if (nameFilter) where.name = { contains: nameFilter, mode: "insensitive" };
-
     if (category)
       where.PropertyCategory = {
         is: { name: { contains: category, mode: "insensitive" } },
       };
-
     if (typeof guest === "number") where.maxGuests = { gte: guest };
     if (typeof pets === "number" && pets > 0)
       where.Facilities = { some: { facility: "PET_FRIENDLY" } };
-
     if (checkIn) {
       const { checkInDate, checkOutDate } = this.normalizeDates(
         checkIn,
         checkOut
       );
       if (isValid(checkInDate) && isValid(checkOutDate)) {
-        where.Bookings = {
-          none: {
-            AND: [
-              { checkInDate: { lt: checkOutDate } },
-              { checkOutDate: { gt: checkInDate } },
-            ],
-          },
-        };
         where.Rooms = {
           some: {
-            RoomAvailabilities: {
-              none: {
-                AND: [
-                  { date: { gte: checkInDate, lt: checkOutDate } },
-                  { isAvailable: false },
-                ],
+            AND: [
+              {
+                Bookings: {
+                  none: {
+                    AND: [
+                      { checkInDate: { lt: checkOutDate } },
+                      { checkOutDate: { gt: checkInDate } },
+                    ],
+                  },
+                },
               },
-            },
+              {
+                RoomAvailabilities: {
+                  none: {
+                    AND: [
+                      { date: { gte: checkInDate, lt: checkOutDate } },
+                      { isAvailable: false },
+                    ],
+                  },
+                },
+              },
+            ],
           },
         };
       }
@@ -176,6 +176,7 @@ export class PropertySearchService {
       params.sortBy === "name"
         ? { name: params.sortOrder || "asc" }
         : { createdAt: "desc" };
+
     const { checkInDate, checkOutDate } = this.normalizeDates(
       checkIn,
       checkOut
