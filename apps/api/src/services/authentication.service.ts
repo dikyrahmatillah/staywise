@@ -101,16 +101,18 @@ export class AuthenticationService {
     });
     if (emailTaken) throw new AppError("Email already in use", 409);
 
-    await prisma.$transaction([
-      prisma.user.update({
+    await prisma.$transaction(async (tx) => {
+      const updated = await tx.authToken.updateMany({
+        where: { id: ver.id, usedAt: null, status: "ACTIVE" },
+        data: { usedAt: new Date(), status: "USED" },
+      });
+      if (updated.count !== 1) throw new AppError("Token already used", 400);
+
+      await tx.user.update({
         where: { id: user.id },
         data: { email: payload.newEmail },
-      }),
-      prisma.authToken.update({
-        where: { id: ver.id },
-        data: { usedAt: new Date(), status: "USED" },
-      }),
-    ]);
+      });
+    });
 
     return { ok: true };
   }
