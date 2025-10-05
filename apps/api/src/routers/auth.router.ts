@@ -1,38 +1,45 @@
 import { Router } from "express";
-import { authController } from "../controllers/auth.controller.js";
+import { registrationController } from "../controllers/registration.controller.js";
+import { authenticationController } from "../controllers/authentication.controller.js";
 import { upload } from "@/middlewares/upload.middleware.js";
 import { verifyTokenMiddleware } from "@/middlewares/verifyToken.middleware.js";
 
 const router = Router();
-router.post("/signup", authController.startRegistration);
+router.post("/signup", registrationController.startRegistration);
 router.post(
   "/signup/complete",
   upload.single("image"),
-  authController.completeRegistration
+  registrationController.completeRegistration
 );
-router.post("/signin", authController.userLogin);
-router.post("/forgot-password", authController.requestPasswordReset);
-router.post("/reset-password", authController.resetPassword);
-router.get("/profile", verifyTokenMiddleware, authController.getProfile);
-router.get("/user", authController.getUserByEmail);
-router.post("/oauth", authController.oauthUpsertUser);
+router.post("/signin", authenticationController.login);
+router.post("/forgot-password", authenticationController.requestPasswordReset);
+router.post("/reset-password", authenticationController.resetPassword);
+router.put(
+  "/change-password",
+  verifyTokenMiddleware,
+  authenticationController.changePassword
+);
+router.get(
+  "/profile",
+  verifyTokenMiddleware,
+  authenticationController.getProfile
+);
+router.get("/user", authenticationController.getUserByEmail);
 router.put(
   "/profile",
   verifyTokenMiddleware,
   upload.single("image"),
-  authController.editProfile
+  authenticationController.updateProfile
 );
-router.put(
-  "/change-password",
-  verifyTokenMiddleware,
-  authController.changePassword
-);
-
 router.post(
   "/change-email",
   verifyTokenMiddleware,
-  authController.requestChangeEmail
+  authenticationController.requestChangeEmail
 );
-router.post("/change-email/confirm", authController.confirmChangeEmail);
+router.post(
+  "/change-email/confirm",
+  authenticationController.confirmChangeEmail
+);
+router.post("/oauth", registrationController.upsertUser);
 
 export default router;

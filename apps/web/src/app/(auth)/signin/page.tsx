@@ -24,7 +24,7 @@ function GuestSignContent() {
         <AuthHeader
           title="Sign in"
           caption="Don't have an account?"
-          link={`/signup${
+          link={`/guest-signup${
             callbackUrl !== "/dashboard"
               ? `?callbackUrl=${encodeURIComponent(callbackUrl)}`
               : ""
@@ -33,7 +33,7 @@ function GuestSignContent() {
         />
         <SignInForm
           title="Sign in"
-          signupref={`/signup${
+          signupref={`/guest-signup${
             callbackUrl !== "/dashboard"
               ? `?callbackUrl=${encodeURIComponent(callbackUrl)}`
               : ""
