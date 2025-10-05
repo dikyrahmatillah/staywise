@@ -3,12 +3,13 @@ import { AppError } from "@/errors/app.error.js";
 import { BookingStatusUpdate } from "@/types/booking.types.js";
 
 export class BookingConfirmationJob {
-  private readonly CONFIRMATION_TIMEOUT_HOURS = 24;
+  // 🧪 TESTING: 2 minutes timeout (PROD: 24 hours)
+  private readonly CONFIRMATION_TIMEOUT_MINUTES = 2;
 
   async execute(): Promise<BookingStatusUpdate> {
     const now = new Date();
     const confirmationDeadline = new Date(
-      now.getTime() - this.CONFIRMATION_TIMEOUT_HOURS * 60 * 60 * 1000
+      now.getTime() - this.CONFIRMATION_TIMEOUT_MINUTES * 60 * 1000
     );
 
     try {
@@ -25,7 +26,9 @@ export class BookingConfirmationJob {
       });
 
       if (pendingBookings.length === 0) {
-        console.log(`[${now.toISOString()}] No bookings to auto-confirm`);
+        console.log(
+          `[${now.toISOString()}] 🧪 [TEST] No bookings to auto-confirm`
+        );
         return { confirmedCount: 0, bookings: [] };
       }
 
@@ -38,11 +41,15 @@ export class BookingConfirmationJob {
       });
 
       console.log(
-        `[${now.toISOString()}] Auto-confirmed ${updateResult.count} bookings`
+        `[${now.toISOString()}] 🧪 [TEST] Auto-confirmed ${
+          updateResult.count
+        } bookings (updated > 2 min ago)`
       );
 
       pendingBookings.forEach((booking) => {
-        console.log(`  - Booking ${booking.orderCode} auto-confirmed`);
+        console.log(
+          `  - Booking ${booking.orderCode} auto-confirmed (updated: ${booking.updatedAt})`
+        );
       });
 
       return {
