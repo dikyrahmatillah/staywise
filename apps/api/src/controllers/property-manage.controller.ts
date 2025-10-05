@@ -100,11 +100,8 @@ export class PropertyManageController {
   }
 
   extractCategoryFields(request: Request, updateData: any) {
-    if (request.body.propertyCategoryId) {
-      updateData.propertyCategoryId = request.body.propertyCategoryId;
-    } else if (request.body.customCategoryId) {
-      updateData.customCategoryId = request.body.customCategoryId;
-    }
+    updateData.propertyCategoryId = request.body.propertyCategoryId || null;
+    updateData.customCategoryId = request.body.customCategoryId || null;
   }
 
   extractFacilities(request: Request, updateData: any) {
