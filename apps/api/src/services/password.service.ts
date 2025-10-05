@@ -37,16 +37,18 @@ export class PasswordResetService {
     if (!user) throw new AppError("User not found", 404);
 
     const hashedPassword = await bcrypt.hash(data.password, 10);
-    await prisma.$transaction([
-      prisma.user.update({
+    await prisma.$transaction(async (tx) => {
+      const updated = await tx.authToken.updateMany({
+        where: { id: tokenRecord.id, usedAt: null, status: "ACTIVE" },
+        data: { usedAt: new Date(), status: "USED" },
+      });
+      if (updated.count !== 1) throw new AppError("Token already used", 400);
+
+      await tx.user.update({
         where: { id: user.id },
         data: { password: hashedPassword },
-      }),
-      prisma.authToken.update({
-        where: { id: tokenRecord.id },
-        data: { usedAt: new Date(), status: "USED" },
-      }),
-    ]);
+      });
+    });
 
     return { ok: true };
   }
