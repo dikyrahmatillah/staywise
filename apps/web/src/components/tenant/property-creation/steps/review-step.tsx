@@ -23,6 +23,15 @@ import {
 export function ReviewStep() {
   const { formData, setCurrentStep } = usePropertyCreation();
 
+  function formatPriceForDisplay(value: number | undefined | null) {
+    if (value === undefined || value === null || Number.isNaN(value))
+      return "0";
+    return new Intl.NumberFormat("id-ID", {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    }).format(value);
+  }
+
   const defaultName = formData.propertyCategoryName ?? null;
   const customName = formData.customCategoryName ?? null;
 
@@ -79,49 +88,11 @@ export function ReviewStep() {
 
   return (
     <div className="space-y-6">
-      {/* Completion Status */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            {allCompleted ? (
-              <CheckCircle className="w-5 h-5 text-green-500" />
-            ) : (
-              <AlertCircle className="w-5 h-5 text-orange-500" />
-            )}
-            Completion Status
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {completionChecks.map((check, index) => (
-              <div key={index} className="flex items-start gap-3">
-                {check.completed ? (
-                  <CheckCircle className="w-5 h-5 text-green-500 mt-0.5" />
-                ) : (
-                  <AlertCircle className="w-5 h-5 text-orange-500 mt-0.5" />
-                )}
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium">{check.label}</span>
-                    <Badge variant={check.completed ? "default" : "secondary"}>
-                      {check.completed ? "Complete" : "Incomplete"}
-                    </Badge>
-                  </div>
-                  <p className="text-sm text-gray-600 mt-1">{check.details}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Property Summary */}
       <Card>
         <CardHeader>
           <CardTitle>Property Summary</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Basic Info */}
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <Building2 className="w-5 h-5 text-gray-500" />
@@ -154,7 +125,6 @@ export function ReviewStep() {
 
           <Separator />
 
-          {/* Location */}
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <MapPin className="w-5 h-5 text-gray-500" />
@@ -193,7 +163,6 @@ export function ReviewStep() {
 
           <Separator />
 
-          {/* Category */}
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <Building2 className="w-5 h-5 text-gray-500" />
@@ -228,7 +197,6 @@ export function ReviewStep() {
 
           <Separator />
 
-          {/* Rooms */}
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <Bed className="w-5 h-5 text-gray-500" />
@@ -264,7 +232,9 @@ export function ReviewStep() {
                         <p className="font-medium">{room.name}</p>
                         <div className="flex items-center gap-2">
                           <DollarSign className="w-4 h-4" />
-                          <span>${room.basePrice}/night</span>
+                          <span>
+                            Rp {formatPriceForDisplay(room.basePrice)}/night
+                          </span>
                         </div>
                       </div>
                       <div className="text-sm text-gray-600 mt-1">
