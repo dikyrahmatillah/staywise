@@ -16,6 +16,14 @@ interface RoomsSectionProps {
   onEdit: () => void;
 }
 
+function formatPriceForDisplay(value: number | undefined | null) {
+  if (value === undefined || value === null || Number.isNaN(value)) return "0";
+  return new Intl.NumberFormat("id-ID", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  }).format(value);
+}
+
 export const RoomsSection = ({ rooms, onEdit }: RoomsSectionProps) => (
   <div className="space-y-3">
     <div className="flex items-center gap-2">
@@ -41,7 +49,7 @@ export const RoomsSection = ({ rooms, onEdit }: RoomsSectionProps) => (
               <p className="font-medium">{room.name}</p>
               <div className="flex items-center gap-2">
                 <DollarSign className="w-4 h-4" />
-                <span>${room.basePrice}/night</span>
+                <span>{formatPriceForDisplay(room.basePrice)}/night</span>
               </div>
             </div>
             <div className="text-sm text-gray-600 mt-1">

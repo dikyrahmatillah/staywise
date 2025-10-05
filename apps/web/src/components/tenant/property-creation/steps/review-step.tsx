@@ -44,59 +44,50 @@ const getMaxGuestsFromRooms = (
   return Math.max(...capacities, 1);
 };
 
-// const getCompletionChecks = (formData: FormData): CompletionCheck[] => {
-//   function formatPriceForDisplay(value: number | undefined | null) {
-//     if (value === undefined || value === null || Number.isNaN(value))
-//       return "0";
-//     return new Intl.NumberFormat("id-ID", {
-//       minimumFractionDigits: 0,
-//       maximumFractionDigits: 2,
-//     }).format(value);
-//   }
+const getCompletionChecks = (formData: FormData): CompletionCheck[] => {
+  const defaultName = formData.propertyCategoryName ?? null;
+  const customName = formData.customCategoryName ?? null;
 
-//   const defaultName = formData.propertyCategoryName ?? null;
-//   const customName = formData.customCategoryName ?? null;
-
-//   return [
-//     {
-//       label: "Basic Information",
-//       completed: !!(formData.name && formData.description),
-//       details: `Name: ${formData.name || "Not set"}, Description: ${
-//         formData.description ? "Added" : "Not set"
-//       }`,
-//     },
-//     {
-//       label: "Location",
-//       completed: !!(formData.country && formData.city && formData.address),
-//       details: `${formData.address || "Address not set"}, ${
-//         formData.city || "City not set"
-//       }, ${formData.country || "Country not set"}`,
-//     },
-//     {
-//       label: "Category",
-//       completed: !!(formData.propertyCategoryId || formData.customCategoryId),
-//       details: formData.propertyCategoryId
-//         ? `Default category selected${
-//             defaultName ? `: ${formData.propertyCategoryName}` : ""
-//           }`
-//         : formData.customCategoryId
-//         ? `Custom category selected${
-//             customName ? `: ${formData.customCategoryName}` : ""
-//           }`
-//         : "Not selected",
-//     },
-//     {
-//       label: "Rooms",
-//       completed: !!(formData.rooms && formData.rooms.length > 0),
-//       details: `${formData.rooms?.length || 0} room(s) added`,
-//     },
-//     {
-//       label: "Photos",
-//       completed: !!(formData.pictures && formData.pictures.length > 0),
-//       details: `${formData.pictures?.length || 0} photo(s) added`,
-//     },
-//   ];
-// };
+  return [
+    {
+      label: "Basic Information",
+      completed: !!(formData.name && formData.description),
+      details: `Name: ${formData.name || "Not set"}, Description: ${
+        formData.description ? "Added" : "Not set"
+      }`,
+    },
+    {
+      label: "Location",
+      completed: !!(formData.country && formData.city && formData.address),
+      details: `${formData.address || "Address not set"}, ${
+        formData.city || "City not set"
+      }, ${formData.country || "Country not set"}`,
+    },
+    {
+      label: "Category",
+      completed: !!(formData.propertyCategoryId || formData.customCategoryId),
+      details: formData.propertyCategoryId
+        ? `Default category selected${
+            defaultName ? `: ${formData.propertyCategoryName}` : ""
+          }`
+        : formData.customCategoryId
+        ? `Custom category selected${
+            customName ? `: ${formData.customCategoryName}` : ""
+          }`
+        : "Not selected",
+    },
+    {
+      label: "Rooms",
+      completed: !!(formData.rooms && formData.rooms.length > 0),
+      details: `${formData.rooms?.length || 0} room(s) added`,
+    },
+    {
+      label: "Photos",
+      completed: !!(formData.pictures && formData.pictures.length > 0),
+      details: `${formData.pictures?.length || 0} photo(s) added`,
+    },
+  ];
+};
 
 const areAllChecksCompleted = (
   completionChecks: CompletionCheck[]
