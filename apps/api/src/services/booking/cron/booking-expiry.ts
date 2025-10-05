@@ -56,9 +56,9 @@ export class BookingExpiryService {
       } catch (error) {
         console.error("Expiry check failed:", error);
       }
-    }, 10 * 60 * 1000);
+    }, 1 * 60 * 1000);
 
-    console.log("Simple expiry check started (every 10 minutes)");
+    console.log("Simple expiry check started (every 1 minutes)");
   }
 }
 
