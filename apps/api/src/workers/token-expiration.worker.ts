@@ -37,10 +37,15 @@ export const tokenExpirationWorker = new Worker<TokenExpireJobData>(
     if (tokenRecord.usedAt || tokenRecord.status !== "ACTIVE") return;
     if (tokenRecord.expiresAt.getTime() > Date.now()) return;
 
-    await prisma.authToken.update({
-      where: { token },
+    const updated = await prisma.authToken.updateMany({
+      where: { token, usedAt: null, status: "ACTIVE" },
       data: { status: "EXPIRED" },
     });
+    if (updated.count !== 1) {
+      logger.info(
+        `Token expire skipped for ${token}, already used or inactive`
+      );
+    }
   },
   { connection: bullConnection }
 );
