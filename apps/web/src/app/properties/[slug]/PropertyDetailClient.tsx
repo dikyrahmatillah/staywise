@@ -8,7 +8,7 @@ import { StatsHeader } from "./components/StatsHeader";
 import { getGuestRange } from "@/components/tenant/property-utils";
 import { AmenitiesSection } from "./components/AmenitiesSection";
 import { Reviews } from "./components/Reviews";
-import { BookingSidebar } from "./components/BookingSidebar";
+import { BookingSidebar } from "./components/booking-sidebar/booking-sidebar";
 import { RoomsSection } from "./components/RoomsSection";
 import { LocationSection } from "./components/LocationSection";
 import type { Room } from "@/types/property-detail";
