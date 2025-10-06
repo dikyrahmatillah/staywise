@@ -22,7 +22,7 @@ export function Reviews({
 
   return (
     <section id="reviews">
-      <h3 className="text-xl font-semibold mb-6">Reviews</h3>
+      <h3 className="font-display text-xl font-semibold mb-6">Reviews</h3>
       <div className="space-y-6">
         {visibleReviews.map((review) => (
           <div key={review.id} className="border-b pb-6 last:border-b-0">

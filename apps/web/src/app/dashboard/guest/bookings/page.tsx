@@ -65,7 +65,7 @@ export default function GuestBookingPage() {
     <div className="p-6 border-l space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="space-y-1">
-          <h1 className="text-3xl font-bold font-sans tracking-tight">
+          <h1 className="font-display text-3xl font-bold tracking-tight">
             My Bookings
           </h1>
           <p className="text-muted-foreground font-sans ">

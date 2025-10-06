@@ -157,8 +157,8 @@ export function Header() {
 
           <div className="flex items-center justify-center flex-shrink-0">
             <Link href="/" className="flex items-center space-x-1 sm:space-x-2">
-              <HiHome className="h-6 w-6 sm:h-8 sm:w-8 font-sans text-rose-500" />
-              <span className="font-bold text-lg sm:text-xl text-rose-500 hidden sm:inline-block">
+              <HiHome className="h-6 w-6 sm:h-8 sm:w-8 text-rose-500" />
+              <span className="font-display font-bold text-lg sm:text-xl text-rose-500 hidden sm:inline-block">
                 StayWise
               </span>
             </Link>

@@ -52,7 +52,7 @@ function PropertiesPageInner() {
   return (
     <div className="min-h-screen bg-background">
       <div className="relative">
-        <div className="container mx-auto px-4 pb-16 pt-10">
+        <div className="container mx-auto px-4 pb-16 pt-8">
           <div className="sm:mt-10 space-y-10">
             <FiltersBar params={params} onChange={updateSearchParams} />
 

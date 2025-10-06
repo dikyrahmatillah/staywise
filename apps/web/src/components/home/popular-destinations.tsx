@@ -79,7 +79,7 @@ export default function PopularDestinations() {
         <div className="relative">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-xl font-bold sm:text-3xl text-slate-900">
+              <h2 className="font-display text-xl font-bold sm:text-3xl text-slate-900">
                 Popular Destinations
               </h2>
               <p className="text-sm md:text-base text-slate-600">

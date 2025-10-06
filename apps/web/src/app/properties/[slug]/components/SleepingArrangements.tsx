@@ -10,7 +10,9 @@ export function SleepingArrangements({
 }) {
   return (
     <section id="sleeping">
-      <h3 className="text-xl font-semibold mb-4">Sleeping Arrangements</h3>
+      <h3 className="font-display text-xl font-semibold mb-4">
+        Sleeping Arrangements
+      </h3>
       <div className="space-y-4">
         {data.map((arrangement, index) => (
           <div
