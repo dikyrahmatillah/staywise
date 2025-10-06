@@ -4,6 +4,7 @@ import type { OrderStatus } from "@repo/types";
 
 export interface BookingDetails {
   propertyId: string;
+  propertyName: string;
   roomId: string;
   checkIn: Date;
   checkOut: Date;

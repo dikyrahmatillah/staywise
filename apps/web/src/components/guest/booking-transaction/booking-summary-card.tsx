@@ -1,9 +1,9 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
+import { Loader2, Star } from "lucide-react";
 import { formatCurrency } from "@/lib/booking-formatters";
 import { toast } from "sonner";
 import { useBookingContext } from "./context/booking-context";
@@ -12,6 +12,14 @@ import { useMidtrans } from "./hooks/use-midtrans";
 
 export function BookingSummaryCard() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  
+  const propertyName = searchParams.get("propertyName") || "Property";
+  const propertyCity = searchParams.get("propertyCity") || "";
+  const roomName = searchParams.get("roomName") || "Room";
+  const propertyRating = parseFloat(searchParams.get("propertyRating") || "0");
+  const reviewCount = parseInt(searchParams.get("reviewCount") || "0");
+
   const {
     currentStep,
     selectedPaymentMethod,
@@ -63,20 +71,27 @@ export function BookingSummaryCard() {
     <Card className="p-6">
       <div className="flex gap-4 mb-6">
         <div className="flex-1">
-          <h3 className="font-semibold text-lg">Luxury Villa in Bali</h3>
+          <h3 className="font-semibold text-lg">{propertyName}</h3>
+          {propertyCity && (
+            <p className="text-sm text-muted-foreground mb-2">{propertyCity}</p>
+          )}
           <div className="flex items-center gap-1 text-sm text-muted-foreground">
-            <span>★ 4.83 (92)</span>
-            <span>•</span>
-            <span>Superhost</span>
+            {reviewCount > 0 ? (
+              <>
+                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                <span>{propertyRating.toFixed(2)}</span>
+                <span>({reviewCount})</span>
+              </>
+            ) : (
+              <span>No reviews yet</span>
+            )}
           </div>
         </div>
       </div>
 
       <div className="space-y-4 mb-6">
-        <div className="text-sm font-medium">Free cancellation</div>
-        <div className="text-sm text-muted-foreground">
-          Cancel before October 10 for a full refund. Cancellation policy
-        </div>
+        <div className="text-sm font-medium">Selected Room</div>
+        <div className="text-sm text-muted-foreground">{roomName}</div>
       </div>
 
       <div className="space-y-4 border-t pt-4">
@@ -128,8 +143,8 @@ export function BookingSummaryCard() {
         <div className="space-y-2">
           <div className="flex justify-between">
             <span>
-              {nights} night{nights > 1 ? "s" : ""} x Rp
-              {bookingDetails.pricePerNight.toLocaleString()}
+              {nights} night{nights > 1 ? "s" : ""} x{" "}
+              {formatCurrency(bookingDetails.pricePerNight)}
             </span>
             <span>{formatCurrency(totalPrice)}</span>
           </div>
