@@ -1,5 +1,3 @@
-// components/TransactionsPageView.tsx
-
 import { TransactionsFilters } from "@/components/tenant/transaction/components/transaction-filters";
 import { TransactionsList } from "@/components/tenant/transaction/components/transaction-list";
 import { EmptyState } from "@/components/tenant/transaction/components/empty-state";

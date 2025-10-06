@@ -1,5 +1,3 @@
-// apps/web/src/components/tenant/transaction/booking-table-row.tsx
-
 "use client";
 
 import { useState } from "react";
