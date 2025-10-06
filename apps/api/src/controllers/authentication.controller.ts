@@ -171,6 +171,30 @@ export class AuthenticationController {
       next(error);
     }
   };
+
+  validateToken = async (
+    request: Request,
+    response: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const token = String(request.query.token || "");
+      const type = String(request.query.type || "");
+      if (!token || !type) {
+        response.status(400).json({ message: "Token and type are required" });
+        return;
+      }
+
+      await this.authenticationService.validateToken(
+        token,
+        type as "EMAIL_VERIFICATION" | "PASSWORD_RESET" | "EMAIL_CHANGE"
+      );
+
+      response.status(200).json({ message: "Token is valid" });
+    } catch (error) {
+      next(error);
+    }
+  };
 }
 
 export const authenticationController = new AuthenticationController();

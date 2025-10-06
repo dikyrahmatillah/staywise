@@ -14,6 +14,7 @@ router.post(
 router.post("/signin", authenticationController.login);
 router.post("/forgot-password", authenticationController.requestPasswordReset);
 router.post("/reset-password", authenticationController.resetPassword);
+router.get("/validate-token", authenticationController.validateToken);
 router.put(
   "/change-password",
   verifyTokenMiddleware,

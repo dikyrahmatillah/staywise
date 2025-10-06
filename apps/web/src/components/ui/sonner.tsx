@@ -6,29 +6,22 @@ import { Toaster as Sonner, ToasterProps } from "sonner";
 const Toaster = (props: ToasterProps) => {
   const { resolvedTheme = "light" } = useTheme();
 
-  const position = props.position ?? ("top-right" as ToasterProps["position"]);
-
   return (
     <Sonner
       theme={resolvedTheme as ToasterProps["theme"]}
-      position={position}
-      className="toaster group"
+      className="toaster"
       toastOptions={{
+        unstyled: true,
         classNames: {
           toast:
-            "group toast group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg group-[.toaster]:rounded-lg group-[.toaster]:p-4",
-          description: "group-[.toast]:text-muted-foreground",
-          actionButton:
-            "group-[.toast]:bg-primary group-[.toast]:text-primary-foreground",
-          cancelButton:
-            "group-[.toast]:bg-muted group-[.toast]:text-muted-foreground",
-          success:
-            "group-[.toaster]:border-l-4 group-[.toaster]:border-l-green-500 group-[.toast]:text-green-600",
-          error:
-            "group-[.toaster]:border-l-4 group-[.toaster]:border-l-red-500 group-[.toast]:text-red-600",
-          warning:
-            "group-[.toaster]:border-l-4 group-[.toaster]:border-l-orange-500 group-[.toast]:text-orange-600",
-          info: "group-[.toaster]:border-l-4 group-[.toaster]:border-l-blue-500 group-[.toast]:text-blue-600",
+            "toast bg-background text-foreground border-border shadow-lg rounded-lg p-4",
+          description: "text-muted-foreground",
+          actionButton: "bg-primary text-primary-foreground",
+          cancelButton: "bg-muted text-muted-foreground",
+          success: "border-l-4 border-l-green-500 text-green-600",
+          error: "border-l-4 border-l-red-500 text-red-600",
+          warning: "border-l-4 border-l-orange-500 text-orange-600",
+          info: "border-l-4 border-l-blue-500 text-blue-600",
         },
       }}
       {...props}
