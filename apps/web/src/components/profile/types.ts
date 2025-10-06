@@ -45,7 +45,6 @@ export interface FormFieldProps {
   disabled?: boolean;
   error?: string;
   required?: boolean;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   register: UseFormRegister<any>;
 }
 
@@ -57,6 +56,5 @@ export interface PasswordInputProps {
   onToggleShow: () => void;
   disabled?: boolean;
   error?: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   register: UseFormRegister<any>;
 }

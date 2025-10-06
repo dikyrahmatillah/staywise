@@ -59,15 +59,12 @@ export function useCategorySelection(options: CategorySelectionOptions = {}) {
   );
 
   const handleDefaultCategorySelect = (categoryId: string) => {
-    const next = selectedDefault === categoryId ? "" : categoryId;
-    setSelectedDefault(next);
+    setSelectedDefault(categoryId);
 
-    const name = next
-      ? defaultCategories.find((c) => c.id === next)?.name
-      : undefined;
+    const name = defaultCategories.find((c) => c.id === categoryId)?.name;
 
     onSelectionChange?.({
-      propertyCategoryId: next,
+      propertyCategoryId: categoryId,
       propertyCategoryName: name,
       customCategoryId: selectedCustom,
       customCategoryName: selectedCustom

@@ -45,7 +45,7 @@ export const PropertyCreationProvider = ({
       case 2:
         return !!(formData.country && formData.city && formData.address);
       case 3:
-        return !!(formData.propertyCategoryId || formData.customCategoryId);
+        return !!formData.propertyCategoryId;
       case 4:
         return !!(formData.rooms && formData.rooms.length > 0);
       case 5:
@@ -63,8 +63,7 @@ export const PropertyCreationProvider = ({
         if (!formData.name || !formData.description) return false;
         if (!formData.country || !formData.city || !formData.address)
           return false;
-        if (!(formData.propertyCategoryId || formData.customCategoryId))
-          return false;
+        if (!formData.propertyCategoryId) return false;
         if (!(formData.rooms && formData.rooms.length > 0)) return false;
         if (!formData.pictures || formData.pictures.length === 0) return false;
         return formData.pictures.some((picture: PictureFormData) => {
@@ -85,8 +84,8 @@ export const PropertyCreationProvider = ({
       return;
     }
 
-    if (!formData.propertyCategoryId && !formData.customCategoryId) {
-      toast.error("Please select a category before continuing");
+    if (!formData.propertyCategoryId) {
+      toast.error("Please select a default category before continuing");
       return;
     }
 
