@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { prisma } from "@/configs/prisma.config.js";
 import { randomUUID } from "crypto";
 

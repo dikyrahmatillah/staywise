@@ -3,7 +3,7 @@ import { ResetPasswordWithTokenInput } from "@repo/schemas";
 import { AppError } from "../errors/app.error.js";
 import { EmailService } from "./email.service.js";
 import { TokenService } from "./token.service.js";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 
 export class PasswordResetService {
   private emailService = new EmailService();

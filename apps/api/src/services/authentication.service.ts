@@ -8,7 +8,7 @@ import { AppError } from "../errors/app.error.js";
 import { generateToken, verifyToken } from "../utils/jwt.js";
 import { EmailService } from "./email.service.js";
 import { TokenService } from "./token.service.js";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 
 export class AuthenticationService {
   private emailService = new EmailService();

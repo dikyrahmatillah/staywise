@@ -13,6 +13,7 @@
         "@repo/schemas": "*",
         "@sindresorhus/slugify": "^2.2.1",
         "@upstash/redis": "^0.0.0-ci.c21ca079c33c67efb29ee43e778ab181aeed6386-20250530111221",
+        "bcryptjs": "^3.0.2",
         "bullmq": "^5.7.10",
         "cloudinary": "^2.7.0",
         "cors": "^2.8.5",
