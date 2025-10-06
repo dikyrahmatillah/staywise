@@ -1,5 +1,3 @@
-// apps/web/src/app/booking/components/payment-method-step.tsx
-
 "use client";
 
 import { Card } from "@/components/ui/card";
