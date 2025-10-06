@@ -44,26 +44,26 @@ export function RoomList({
 
   return (
     <Card>
-      <CardHeader className="mb-6">
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <Bed className="w-5 h-5 text-primary" />
+      <CardHeader className="mb-4 sm:mb-6 px-4 sm:px-6">
+        <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+          <Bed className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
           Added Rooms ({rooms.length})
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid gap-4">
+        <div className="flex flex-col gap-4">
           {rooms.map((room, index) => {
             const previewSrc = roomPreviews[index] || room.imagePreview;
             return (
               <div
                 key={index}
-                className="group relative overflow-hidden rounded-xl border bg-white dark:bg-gray-900 p-6 transition-all hover:shadow-md hover:border-blue-200 dark:hover:border-blue-800"
+                className="group relative overflow-hidden rounded-xl border bg-white dark:bg-gray-900 p-4 sm:p-6 transition-all hover:shadow-md hover:border-blue-200 dark:hover:border-blue-800"
               >
-                <div className="flex items-start gap-2 justify-between">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-2 justify-between">
                   <div className="flex-1 space-y-3">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-start sm:items-center gap-3">
                       {previewSrc ? (
-                        <div className="w-20 h-14 rounded-lg overflow-hidden bg-gray-50 dark:bg-gray-800">
+                        <div className="w-20 h-20 sm:w-20 sm:h-14 rounded-lg overflow-hidden bg-gray-50 dark:bg-gray-800 flex-shrink-0">
                           <Image
                             src={previewSrc}
                             alt={room.name || "room image"}
@@ -73,15 +73,15 @@ export function RoomList({
                           />
                         </div>
                       ) : (
-                        <div className="p-2 bg-primary/10 dark:bg-primary/20 rounded-lg">
+                        <div className="p-2 sm:p-2.5 bg-primary/10 dark:bg-primary/20 rounded-lg">
                           <Bed className="w-4 h-4 text-primary dark:text-primary" />
                         </div>
                       )}
-                      <div>
-                        <h3 className="font-semibold text-gray-900 dark:text-gray-100">
+                      <div className="min-w-0">
+                        <h3 className="font-semibold text-sm sm:text-base text-gray-900 dark:text-gray-100 truncate max-w-[200px] sm:max-w-none">
                           {room.name}
                         </h3>
-                        <div className="flex items-center gap-4 mt-1">
+                        <div className="flex items-center gap-3 mt-1 flex-wrap">
                           <Badge variant="secondary" className="text-xs">
                             <DollarSign className="w-3 h-3 mr-1" />
                             {formatRupiah(room.basePrice)} / night
@@ -98,19 +98,19 @@ export function RoomList({
                     </div>
 
                     {room.description && (
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                         {room.description}
                       </p>
                     )}
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-col sm:flex-row items-center sm:items-start gap-2 mt-2 sm:mt-0 sm:ml-4 flex-shrink-0 w-full sm:w-auto">
                     <Button
                       type="button"
                       variant="outline"
                       size="sm"
                       onClick={() => onEdit(index)}
-                      className="h-8"
+                      className="h-8 w-full sm:w-auto"
                     >
                       Edit
                     </Button>
@@ -120,7 +120,7 @@ export function RoomList({
                       variant="destructive"
                       size="sm"
                       onClick={() => onRemove(index)}
-                      className="h-8"
+                      className="h-8 w-full sm:w-auto"
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>

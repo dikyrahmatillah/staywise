@@ -159,7 +159,7 @@ export function FacilitiesEditor({
                 return (
                   <div key={facility} className="space-y-2">
                     <div
-                      className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                      className={`flex text-sm sm:text-none items-center gap-3 p-2 sm:p-3 rounded-lg border cursor-pointer transition-colors ${
                         isSelected
                           ? "bg-primary/10 border-primary"
                           : "bg-background border-border hover:bg-muted"

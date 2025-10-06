@@ -73,7 +73,7 @@ export function CategorySelectorCustomSection({
           </p>
         </div>
       ) : (
-        <ScrollArea className="max-h-60 pr-3">
+        <ScrollArea className="h-60 pr-3">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {sortedCategories.map((cat) => (
               <div

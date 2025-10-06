@@ -22,10 +22,9 @@ type PictureItem =
 export function PhotosStep() {
   const { formData, updateFormData } = usePropertyCreation();
 
-  // No local newPhoto state: all selected files are added immediately to formData.pictures
+  const MAX_PHOTOS = 12;
 
   const pictures = formData.pictures || [];
-  // Show server/existing images first, then newly added file objects at the bottom
   const existingPicturesFirst: PictureItem[] = pictures
     .slice()
     .filter(
@@ -44,9 +43,12 @@ export function PhotosStep() {
 
   const handleFilesSelected = (files: File[]) => {
     const valid: { file: File; note?: string; description?: string }[] = [];
-    const max = 12;
 
-    files.slice(0, max).forEach((file) => {
+    const remaining = Math.max(0, MAX_PHOTOS - pictures.length);
+    if (remaining <= 0) return;
+
+    const toAdd = Array.from(files).slice(0, remaining);
+    toAdd.forEach((file) => {
       valid.push({ file, note: "", description: "" });
     });
 
@@ -168,12 +170,13 @@ export function PhotosStep() {
                         type="button"
                         variant="destructive"
                         size="sm"
-                        className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-lg hover:shadow-xl w-8 h-8 rounded-full p-0"
+                        className="absolute top-3 right-3 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 focus-visible:opacity-100 transition-all duration-200 shadow-lg hover:shadow-xl w-8 h-8 rounded-full p-0 z-10"
                         onClick={() =>
                           handleRemovePhoto(
                             originalIndex !== -1 ? originalIndex : idx
                           )
                         }
+                        aria-label="Remove photo"
                       >
                         <Trash2 className="w-3 h-3" />
                       </Button>
