@@ -26,7 +26,7 @@ export function LocationSearchInput({
         placeholder="Search for a location..."
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className={`${inputClassName} truncate overflow-hidden whitespace-nowrap pr-12`}
+        className={`${inputClassName} truncate overflow-hidden whitespace-nowrap pr-12 text-sm`}
         title={value}
         autoComplete="off"
       />

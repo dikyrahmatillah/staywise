@@ -33,13 +33,13 @@ export const CategorySection = ({
     </div>
     <div className="ml-7">
       {propertyCategoryId && (
-        <p>
+        <p className="text-sm">
           Default category selected
           {propertyCategoryName ? `: ${propertyCategoryName}` : ""}
         </p>
       )}
       {customCategoryId && (
-        <p>
+        <p className="text-sm">
           Custom category selected
           {customCategoryName ? `: ${customCategoryName}` : ""}
         </p>

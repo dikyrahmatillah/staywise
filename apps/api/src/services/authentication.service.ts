@@ -153,4 +153,12 @@ export class AuthenticationService {
 
     return updatedUser;
   }
+
+  async validateToken(
+    token: string,
+    type: "EMAIL_VERIFICATION" | "PASSWORD_RESET" | "EMAIL_CHANGE"
+  ) {
+    await this.tokenService.verifyEmailToken(token, type);
+    return { valid: true };
+  }
 }

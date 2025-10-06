@@ -33,20 +33,19 @@ export const LocationSection = ({
         Edit
       </Button>
     </div>
-    <div className="ml-7 space-y-2">
+    <div className="ml-7 space-y-2 text-sm">
       <p>
-        <span className="font-medium">Country:</span> {country || "Not set"}
+        <span>Country:</span> {country || "Not set"}
       </p>
       <p>
-        <span className="font-medium">City:</span> {city || "Not set"}
+        <span>City:</span> {city || "Not set"}
       </p>
       <p>
-        <span className="font-medium">Address:</span> {address || "Not set"}
+        <span>Address:</span> {address || "Not set"}
       </p>
       {latitude && longitude && (
         <p>
-          <span className="font-medium">Coordinates:</span> {latitude},{" "}
-          {longitude}
+          <span>Coordinates:</span> {latitude}, {longitude}
         </p>
       )}
     </div>

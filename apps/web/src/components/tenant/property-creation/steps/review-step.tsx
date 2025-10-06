@@ -12,6 +12,7 @@ import {
   FacilitiesSection,
   PhotosSection,
 } from "./review-step/index";
+import { FileText } from "lucide-react";
 
 interface FormData {
   name?: string;
@@ -33,16 +34,6 @@ interface CompletionCheck {
   completed: boolean;
   details: string;
 }
-
-const getMaxGuestsFromRooms = (
-  rooms?: Array<{ capacity?: number }>
-): number => {
-  if (!rooms || rooms.length === 0) return 1;
-  const capacities = rooms.map((room) =>
-    typeof room.capacity === "number" ? room.capacity : 1
-  );
-  return Math.max(...capacities, 1);
-};
 
 const getCompletionChecks = (formData: FormData): CompletionCheck[] => {
   const defaultName = formData.propertyCategoryName ?? null;
@@ -95,21 +86,22 @@ export function ReviewStep() {
 
   const completionChecks = getCompletionChecks(formData);
   const allCompleted = areAllChecksCompleted(completionChecks);
-  const maxGuests = getMaxGuestsFromRooms(formData.rooms);
 
   return (
     <div className="space-y-6">
       <CompletionStatus allCompleted={allCompleted} />
 
       <Card>
-        <CardHeader>
-          <CardTitle>Property Summary</CardTitle>
+        <CardHeader className="mb-6">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <FileText className="w-5 h-5 text-gray-500" />
+            Property Summary
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           <BasicInfoSection
             name={formData.name}
             description={formData.description}
-            maxGuests={maxGuests}
             onEdit={() => setCurrentStep(1)}
           />
 

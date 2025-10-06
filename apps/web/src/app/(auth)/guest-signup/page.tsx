@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FcGoogle } from "react-icons/fc";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { EmailSchema } from "@repo/schemas";
 import { extractErrorMessage } from "@/lib/auth-error.utils";
 import { signIn } from "next-auth/react";
@@ -16,8 +16,20 @@ import api from "@/lib/axios";
 export default function GuestSignUpPage() {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const searchParams = useSearchParams();
 
   const router = useRouter();
+
+  useEffect(() => {
+    const error = searchParams.get("error");
+    if (error === "missing-token") {
+      toast.error("Missing verification token. Please sign up again.");
+    } else if (error === "invalid-or-expired-token") {
+      toast.error(
+        "Your verification link has expired or is invalid. Please sign up again."
+      );
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

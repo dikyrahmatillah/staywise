@@ -48,7 +48,7 @@ export function RoomForm({
         <RoomBasicInfo formData={formData} onFieldChange={onFieldChange} />
 
         <div className="space-y-4">
-          <Label className="text-sm font-medium">
+          <Label className="text-sm">
             Room Image <span className="text-gray-400">(Optional)</span>
           </Label>
 
