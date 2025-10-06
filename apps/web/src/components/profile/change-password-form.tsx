@@ -12,7 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { changePasswordSchema, ChangePasswordInput } from "@repo/schemas";
+import { changePasswordSchema, ChangePasswordInput } from "@/schemas";
 import api from "@/lib/axios";
 import { Loader2, Lock, ShieldCheck, ShieldEllipsis } from "lucide-react";
 import { useSession } from "next-auth/react";

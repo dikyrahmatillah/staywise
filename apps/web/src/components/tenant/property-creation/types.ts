@@ -1,4 +1,4 @@
-import type { CreatePropertyInput } from "@repo/schemas";
+import type { CreatePropertyInput } from "@/schemas";
 
 export type PictureFormData =
   | string

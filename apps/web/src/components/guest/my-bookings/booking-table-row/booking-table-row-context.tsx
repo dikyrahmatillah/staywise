@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext } from "react";
-import type { BookingTransaction } from "@repo/types";
+import type { BookingTransaction } from "@/types";
 import type { Review } from "@/types/review";
 
 interface BookingTableRowContextValue {

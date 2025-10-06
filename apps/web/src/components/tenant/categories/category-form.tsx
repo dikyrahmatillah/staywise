@@ -10,7 +10,7 @@ import type {
   CustomCategoryResponse,
   CreateCustomCategoryInput,
   UpdateCustomCategoryInput,
-} from "@repo/schemas";
+} from "@/schemas";
 
 interface CategoryFormProps {
   category?: CustomCategoryResponse;

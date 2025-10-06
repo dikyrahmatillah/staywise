@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { Property } from "./types";
-import type { CreateFacilityInput, AmenityType } from "@repo/schemas";
+import type { CreateFacilityInput, AmenityType } from "@/schemas";
 import FacilitiesEditor from "@/components/tenant/facilities-editor";
 
 type Props = {

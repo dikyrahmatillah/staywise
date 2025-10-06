@@ -21,7 +21,7 @@ import {
   type TooltipProps,
 } from "recharts";
 import { useBookings } from "@/hooks/useBookings";
-import type { BookingTransaction } from "@repo/types";
+import type { BookingTransaction } from "@/types";
 
 type ViewMode = "month" | "week";
 

@@ -1,4 +1,4 @@
-import type { BookingTransaction } from "@repo/types";
+import type { BookingTransaction } from "@/types";
 
 export interface TenantBookingTableRowProps {
   booking: BookingTransaction;

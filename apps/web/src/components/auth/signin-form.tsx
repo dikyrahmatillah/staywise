@@ -10,7 +10,7 @@ import { FiEye, FiEyeOff } from "react-icons/fi";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { LoginInput, LoginSchema } from "@repo/schemas";
+import { LoginInput, LoginSchema } from "@/schemas";
 import { useRouter } from "next/navigation";
 import { signIn, getSession } from "next-auth/react";
 import { extractErrorMessage } from "@/lib/auth-error.utils";

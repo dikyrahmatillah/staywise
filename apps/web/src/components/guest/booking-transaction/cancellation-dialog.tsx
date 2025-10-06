@@ -13,7 +13,7 @@ import DeleteConfirmDialog from "@/components/ui/delete-confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { AlertTriangle, Calendar, Clock, CreditCard } from "lucide-react";
-import type { BookingTransaction } from "@repo/types";
+import type { BookingTransaction } from "@/types";
 import { formatCurrency } from "@/lib/booking-formatters";
 
 interface BookingCancellationDialogProps {

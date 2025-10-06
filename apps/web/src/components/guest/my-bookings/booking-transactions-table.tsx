@@ -6,7 +6,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import type { BookingTransaction } from "@repo/types";
+import type { BookingTransaction } from "@/types";
 import { BookingTableRow } from "./booking-table-row";
 import { BookingCard } from "./booking-card";
 

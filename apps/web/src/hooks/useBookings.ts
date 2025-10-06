@@ -5,7 +5,7 @@ import { useCallback, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import type { BookingTransaction } from "@repo/types";
+import type { BookingTransaction } from "@/types";
 import { useApiQuery } from "./useApiQuery";
 import api from "@/lib/axios"; // Use your centralized axios instance
 import { getErrorMessage } from "@/lib/errors";

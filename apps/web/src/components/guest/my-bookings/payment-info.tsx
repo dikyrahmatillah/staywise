@@ -1,5 +1,5 @@
 import { formatCurrency, formatPaymentMethod } from "@/lib/booking-formatters"
-import type { BookingPaymentMethod } from "@repo/types"
+import type { BookingPaymentMethod } from "@/types"
 
 interface PaymentInfoProps {
   totalAmount: number

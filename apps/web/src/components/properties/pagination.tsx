@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import type { GetPropertiesQuery } from "@repo/schemas";
+import type { GetPropertiesQuery } from "@/schemas";
 import PagerControls from "@/components/ui/pager-controls";
 
 interface PaginationProps {

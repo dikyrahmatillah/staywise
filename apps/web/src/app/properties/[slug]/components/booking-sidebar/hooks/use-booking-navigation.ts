@@ -4,7 +4,7 @@ import { useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
-import { bookingValidationUtils } from "@repo/schemas";
+import { bookingValidationUtils } from "@/schemas";
 import { useBookingSidebar } from "../context/booking-sidebar-context";
 import { useBookingValidation } from "./use-booking-validation";
 import { useDateAvailability } from "./use-date-availability";

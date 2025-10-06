@@ -3,8 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import type { Room, BedType } from "@/types/room";
-import type { CreateRoomInput, UpdateRoomInput } from "@repo/schemas";
-import { updateRoomSchema } from "@repo/schemas";
+import type { CreateRoomInput, UpdateRoomInput } from "@/schemas";
+import { updateRoomSchema } from "@/schemas";
 import { toast } from "sonner";
 import type { RoomFormErrors, RoomFormState } from "./types";
 import {

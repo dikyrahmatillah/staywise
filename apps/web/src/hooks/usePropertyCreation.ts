@@ -3,7 +3,7 @@
 import { useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
-import { CreatePropertyInput } from "@repo/schemas";
+import { CreatePropertyInput } from "@/schemas";
 import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/axios";

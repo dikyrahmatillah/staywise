@@ -14,7 +14,7 @@ import {
   CreateCustomCategoryInput,
   UpdateCustomCategoryInput,
   CustomCategoryResponse,
-} from "@repo/schemas";
+} from "@/schemas";
 import { DefaultCategoriesSection } from "./default-categories-section";
 import { CustomCategoriesSection } from "./custom-categories-section";
 import { DeleteCategoryDialog } from "./delete-category-dialog";

@@ -1,6 +1,6 @@
 // apps/web/src/app/booking/types/booking-types.ts
 
-import type { OrderStatus } from "@repo/types";
+import type { OrderStatus } from "@/types";
 
 export interface BookingDetails {
   propertyId: string;

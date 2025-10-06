@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { useSession } from "next-auth/react";
 import useApiQuery from "@/hooks/useApiQuery";
 import { toast } from "sonner";
-import type { PropertyResponse, RoomResponse } from "@repo/schemas";
+import type { PropertyResponse, RoomResponse } from "@/schemas";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/axios";
 import { getErrorMessage } from "@/lib/errors";

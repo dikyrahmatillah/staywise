@@ -3,7 +3,7 @@ import type {
   PropertyResponse,
   RoomResponse,
   CreatePropertyPictureInput,
-} from "@repo/schemas";
+} from "@/schemas";
 
 export type Amenities = AmenityType;
 export type Property = PropertyResponse & {

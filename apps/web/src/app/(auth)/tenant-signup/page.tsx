@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { FcGoogle } from "react-icons/fc";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { EmailSchema } from "@repo/schemas";
+import { EmailSchema } from "@/schemas";
 import { extractErrorMessage } from "@/lib/auth-error.utils";
 import { signIn } from "next-auth/react";
 import AuthHeader from "@/components/auth/auth-header";

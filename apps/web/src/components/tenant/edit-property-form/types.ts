@@ -1,4 +1,4 @@
-import type { PropertyResponse } from "@repo/schemas";
+import type { PropertyResponse } from "@/schemas";
 
 export type Property = PropertyResponse & {
   Pictures?: Array<{ id: string; imageUrl: string; note?: string | null }>;

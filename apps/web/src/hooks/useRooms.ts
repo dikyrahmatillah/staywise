@@ -3,7 +3,7 @@
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import type { Room, RoomsApiResponse, RoomApiResponse } from "@/types/room";
-import { CreateRoomInput, UpdateRoomInput } from "@repo/schemas";
+import { CreateRoomInput, UpdateRoomInput } from "@/schemas";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import useApiQuery from "@/hooks/useApiQuery";
 import { getErrorMessage } from "@/lib/errors";

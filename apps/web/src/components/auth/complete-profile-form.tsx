@@ -13,7 +13,7 @@ import api from "@/lib/axios";
 import {
   CompleteRegistrationClientSchema,
   CompleteRegistrationClientInput,
-} from "@repo/schemas";
+} from "@/schemas";
 import {
   validateAvatar,
   buildCompleteProfileFormData,

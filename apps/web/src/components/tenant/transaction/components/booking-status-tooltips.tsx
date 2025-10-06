@@ -1,5 +1,5 @@
 // apps/web/src/components/tenant/transaction/tenant-status-tooltips.tsx
-import type { OrderStatus } from "@repo/types";
+import type { OrderStatus } from "@/types";
 
 export interface StatusTooltipContent {
   description: string;

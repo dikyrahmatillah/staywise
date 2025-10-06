@@ -13,7 +13,7 @@ import {
   UpdateCustomCategoryInput,
   CustomCategoryListResponse,
   PropertyCategoryListResponse,
-} from "@repo/schemas";
+} from "@/schemas";
 
 export function useCustomCategories() {
   const { status } = useSession();

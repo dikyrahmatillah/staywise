@@ -1,6 +1,6 @@
 import type {
   PropertyCategoryResponse as PropertyCategory,
   PropertyResponse as Property,
-} from "@repo/schemas";
+} from "@/schemas";
 
 export type { PropertyCategory, Property };
