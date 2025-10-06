@@ -1,5 +1,5 @@
-import type { GetPropertiesParams } from "@repo/schemas";
-import { prisma } from "@/configs/prisma.config.js";
+import type { GetPropertiesParams } from "../schemas/index.js";
+import { prisma } from "../configs/prisma.config.js";
 import { PropertyRepository } from "../repositories/property.repository.js";
 import { PriceCalculationService } from "./price-calculation.service.js";
 import { isValid, isSameDay, addDays, startOfDay } from "date-fns";

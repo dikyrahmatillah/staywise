@@ -1,7 +1,3 @@
-// packages/types/src/ui.ts
-
-import type { OrderStatus } from "./prisma";
-
 // Badge component variants
 export type BadgeVariant = "default" | "secondary" | "destructive" | "outline";
 

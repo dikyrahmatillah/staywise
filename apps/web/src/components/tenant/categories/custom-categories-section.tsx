@@ -12,7 +12,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, AlertTriangle, Edit, Trash2 } from "lucide-react";
-import type { CustomCategoryResponse } from "@repo/schemas";
+import type { CustomCategoryResponse } from "@/schemas";
 interface CustomCategoriesSectionProps {
   categories: CustomCategoryResponse[];
   loading: boolean;

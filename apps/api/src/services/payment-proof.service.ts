@@ -1,8 +1,9 @@
-import { prisma } from "@/configs/prisma.config.js";
-import { AppError } from "@/errors/app.error.js";
-import { cloudinary } from "@/configs/cloudinary.config.js";
-import { uploadToCloudinary } from "@/middlewares/upload-payment-proof.middleware.js";
-import type { PaymentProofStatus, OrderStatus } from "@repo/types";
+import { prisma } from "../configs/prisma.config.js";
+import { AppError } from "../errors/app.error.js";
+import { cloudinary } from "../configs/cloudinary.config.js";
+import { uploadToCloudinary } from "../middlewares/upload-payment-proof.middleware.js";
+import type { OrderStatus } from "@prisma/client";
+type PaymentProofStatus = "accepted" | "rejected";
 
 export class PaymentProofService {
   async uploadPaymentProof(

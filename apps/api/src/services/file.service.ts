@@ -1,4 +1,4 @@
-import { cloudinary } from "@/configs/cloudinary.config.js";
+import { cloudinary } from "../configs/cloudinary.config.js";
 import fs from "node:fs/promises";
 
 export class FileService {

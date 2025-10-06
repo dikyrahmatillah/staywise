@@ -13,7 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { UpdateUserSchema, UpdateUserInput } from "@repo/schemas";
+import { UpdateUserSchema, UpdateUserInput } from "@/schemas";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { Loader2, Sparkles } from "lucide-react";
 import { useSession } from "next-auth/react";

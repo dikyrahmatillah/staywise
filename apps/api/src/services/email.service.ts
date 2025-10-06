@@ -1,4 +1,4 @@
-import { resend } from "@/configs/resend.config.js";
+import { resend } from "../configs/resend.config.js";
 import fs from "node:fs/promises";
 import Handlebars from "handlebars";
 

@@ -1,10 +1,10 @@
 // apps/api/src/services/booking/core/booking-management.service.ts
 // Key changes: Ensure createdAt is included in all booking queries
 
-import { prisma } from "@/configs/prisma.config.js";
-import { AppError } from "@/errors/app.error.js";
-import type { BookingFilters } from "@repo/types";
-import type { OrderStatus } from "@/generated/prisma/index.js";
+import { prisma } from "../../../configs/prisma.config.js";
+import { AppError } from "../../../errors/app.error.js";
+import type { BookingFilters } from "../../../types/booking.js";
+import type { OrderStatus } from "@prisma/client";
 
 export class BookingManagementService {
   // Common select object to ensure consistency
@@ -30,23 +30,23 @@ export class BookingManagementService {
     createdAt: true, // ✅ Ensure createdAt is always included
     updatedAt: true,
     Property: {
-      select: { 
-        name: true, 
+      select: {
+        name: true,
         city: true,
         id: true, // ✅ Include property ID for linking
       },
     },
-    Room: { 
-      select: { 
-        name: true 
-      } 
+    Room: {
+      select: {
+        name: true,
+      },
     },
-    User: { 
-      select: { 
-        firstName: true, 
-        lastName: true, 
-        email: true 
-      } 
+    User: {
+      select: {
+        firstName: true,
+        lastName: true,
+        email: true,
+      },
     },
     paymentProof: true,
     gatewayPayment: true,
@@ -158,7 +158,7 @@ export class BookingManagementService {
 
   // ... rest of the methods remain the same but use this.bookingSelect
   // for consistency wherever booking data is returned
-  
+
   async cancelBooking(id: string) {
     const booking = await prisma.booking.findUnique({
       where: { id },
@@ -232,7 +232,9 @@ export class BookingManagementService {
       const dates = this.generateDateRange(checkInDate, checkOutDate);
 
       if (dates.length === 0) {
-        console.warn(`⚠️ No dates generated for blocking! Check date range logic.`);
+        console.warn(
+          `⚠️ No dates generated for blocking! Check date range logic.`
+        );
         return;
       }
 
@@ -320,7 +322,10 @@ export class BookingManagementService {
         bookingId
       );
     } catch (error) {
-      console.error("❌ Error blocking room dates after payment approval:", error);
+      console.error(
+        "❌ Error blocking room dates after payment approval:",
+        error
+      );
     }
 
     return result;

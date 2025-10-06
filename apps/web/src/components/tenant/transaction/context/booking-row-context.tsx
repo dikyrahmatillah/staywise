@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, type ReactNode } from "react";
-import type { BookingTransaction } from "@repo/types";
+import type { BookingTransaction } from "@/types";
 
 interface BookingRowContextValue {
   booking: BookingTransaction;

@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
-import { createPriceAdjustmentSchema } from "@repo/schemas";
-import { roomPricingService } from "@/services/room-pricing.service.js";
+import { createPriceAdjustmentSchema } from "../schemas/index.js";
+import { roomPricingService } from "../services/room-pricing.service.js";
 
 export class RoomPricingController {
   createPriceAdjustment = async (

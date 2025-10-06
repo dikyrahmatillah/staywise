@@ -1,4 +1,4 @@
-import type { RoomResponse, PropertyResponse } from "@repo/schemas";
+import type { RoomResponse, PropertyResponse } from "@/schemas";
 import { formatRupiah } from "@/lib/formatters";
 
 export function getTotalRooms(property: PropertyResponse) {

@@ -1,4 +1,4 @@
-import type { BookingTransaction } from "@repo/types";
+import type { BookingTransaction } from "@/types";
 import type { Review } from "@/types/review";
 
 export type ActionType =

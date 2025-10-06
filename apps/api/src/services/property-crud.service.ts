@@ -1,5 +1,8 @@
-import type { CreatePropertyInput, UpdatePropertyInput } from "@repo/schemas";
-import { prisma } from "@/configs/prisma.config.js";
+import type {
+  CreatePropertyInput,
+  UpdatePropertyInput,
+} from "../schemas/index.js";
+import { prisma } from "../configs/prisma.config.js";
 import { nanoid } from "nanoid";
 import slugify from "@sindresorhus/slugify";
 import { PropertyRepository } from "../repositories/property.repository.js";

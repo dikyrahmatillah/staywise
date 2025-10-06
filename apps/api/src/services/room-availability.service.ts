@@ -1,10 +1,10 @@
-import { prisma } from "@/configs/prisma.config.js";
-import { AppError } from "@/errors/app.error.js";
+import { prisma } from "../configs/prisma.config.js";
+import { AppError } from "../errors/app.error.js";
 import {
   BlockRoomDatesInput,
   UnblockRoomDatesInput,
   GetRoomAvailabilityInput,
-} from "@repo/schemas";
+} from "../schemas/index.js";
 
 export class RoomAvailabilityService {
   async getRoomAvailability(roomId: string, params: GetRoomAvailabilityInput) {

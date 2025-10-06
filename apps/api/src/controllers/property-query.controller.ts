@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
-import { getPropertiesQuerySchema } from "@repo/schemas";
-import { PropertyCrudService } from "@/services/property-crud.service.js";
-import { PropertySearchService } from "@/services/property-search.service.js";
+import { getPropertiesQuerySchema } from "../schemas/index.js";
+import { PropertyCrudService } from "../services/property-crud.service.js";
+import { PropertySearchService } from "../services/property-search.service.js";
 
 export class PropertyQueryController {
   propertyCrud = new PropertyCrudService();

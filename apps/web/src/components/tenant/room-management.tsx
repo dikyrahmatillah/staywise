@@ -15,7 +15,7 @@ import {
   InvalidPropertyState,
 } from "./room-management-states";
 import type { Room } from "@/types/room";
-import { CreateRoomInput, UpdateRoomInput } from "@repo/schemas";
+import { CreateRoomInput, UpdateRoomInput } from "@/schemas";
 
 export function RoomManagement() {
   const params = useParams();

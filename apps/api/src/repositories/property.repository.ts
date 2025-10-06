@@ -1,5 +1,5 @@
-import type { Prisma } from "@/generated/prisma/index.js";
-import { prisma } from "@/configs/prisma.config.js";
+import type { Prisma } from "@prisma/client";
+import { prisma } from "../configs/prisma.config.js";
 
 export class PropertyRepository {
   private readonly includeBasic = {

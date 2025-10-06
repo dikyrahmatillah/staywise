@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Filter } from "lucide-react";
 import { FiltersForm } from "./filters-form";
-import type { GetPropertiesQuery } from "@repo/schemas";
+import type { GetPropertiesQuery } from "@/schemas";
 
 export interface FiltersBarProps {
   params: GetPropertiesQuery;

@@ -3,8 +3,8 @@ import {
   createCustomCategoryInputSchema,
   updateCustomCategoryInputSchema,
   getCategoriesQuerySchema,
-} from "@repo/schemas";
-import { CategoryService } from "@/services/category.service.js";
+} from "../schemas/index.js";
+import { CategoryService } from "../services/category.service.js";
 
 export class CategoryController {
   private categoryService = new CategoryService();

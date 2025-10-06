@@ -1,6 +1,6 @@
 // apps/web/src/components/tenant/transaction/utils/booking-helpers.ts
 
-import type { BookingTransaction } from "@repo/types";
+import type { BookingTransaction } from "@/types";
 
 /**
  * Format date range for display

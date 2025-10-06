@@ -1,8 +1,8 @@
 import { CronManagerService } from "./booking-cron-manager.js";
-import { BookingExpirationJob } from "@/jobs/booking-expiration.job.js";
-import { BookingConfirmationJob } from "@/jobs/booking-confirmation.job.js";
-import { BookingCompletionJob } from "@/jobs/booking-completion.job.js";
-import { BookingOverdueJob } from "@/jobs/booking-overdue.job.js";
+import { BookingExpirationJob } from "../../../jobs/booking-expiration.job.js";
+import { BookingConfirmationJob } from "../../../jobs/booking-confirmation.job.js";
+import { BookingCompletionJob } from "../../../jobs/booking-completion.job.js";
+import { BookingOverdueJob } from "../../../jobs/booking-overdue.job.js";
 
 export class BookingCronService {
   private cronManager: CronManagerService;

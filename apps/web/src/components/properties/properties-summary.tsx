@@ -6,7 +6,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { GetPropertiesQuery } from "@repo/schemas";
+import type { GetPropertiesQuery } from "@/schemas";
 
 interface PropertiesSummaryProps {
   total: number;

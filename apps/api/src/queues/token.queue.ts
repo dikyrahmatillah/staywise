@@ -1,5 +1,5 @@
 import { Queue } from "bullmq";
-import { bullConnection } from "@/configs/redis.config.js";
+import { bullConnection } from "../configs/redis.config.js";
 
 export type TokenExpireJobData = {
   token: string;

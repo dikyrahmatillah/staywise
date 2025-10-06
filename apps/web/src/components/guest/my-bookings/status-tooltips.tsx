@@ -1,4 +1,4 @@
-import type { OrderStatus } from "@repo/types";
+import type { OrderStatus } from "@/types";
 
 export interface StatusTooltipContent {
   description: string;

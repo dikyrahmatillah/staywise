@@ -1,11 +1,11 @@
-import type { Prisma } from "@/generated/prisma/index.js";
-import { prisma } from "@/configs/prisma.config.js";
-import { AppError } from "@/errors/app.error.js";
+import type { Prisma } from "@prisma/client";
+import { prisma } from "../configs/prisma.config.js";
+import { AppError } from "../errors/app.error.js";
 import type {
   CreateCustomCategoryInput,
   UpdateCustomCategoryInput,
   GetCategoriesQuery,
-} from "@repo/schemas";
+} from "../schemas/index.js";
 
 function paginate(query: GetCategoriesQuery) {
   const { page = 1, limit = 10, search } = query;

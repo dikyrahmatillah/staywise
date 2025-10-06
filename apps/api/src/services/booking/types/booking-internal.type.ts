@@ -1,7 +1,10 @@
 // Internal API-only types that don't need to be shared
 
-import type { CreateBookingInput, BookingValidationData } from "@repo/types";
-import type { BookingPaymentMethod } from "@/generated/prisma/index.js";
+import type {
+  CreateBookingInput,
+  BookingValidationData,
+} from "../../../types/booking.js";
+import type { BookingPaymentMethod } from "@prisma/client";
 
 // Internal booking creation data with additional processing fields
 export interface BookingCreationData

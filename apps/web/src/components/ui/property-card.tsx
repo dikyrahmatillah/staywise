@@ -20,7 +20,7 @@ import {
   Trash2,
   ImageIcon,
 } from "lucide-react";
-import type { PropertyResponse } from "@repo/schemas";
+import type { PropertyResponse } from "@/schemas";
 import {
   formatPriceDisplay,
   formatGuestDisplay,

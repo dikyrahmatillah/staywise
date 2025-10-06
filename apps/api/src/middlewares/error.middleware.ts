@@ -1,8 +1,8 @@
-import logger from "@/utils/logger.js";
+import logger from "../utils/logger.js";
 import { Request, Response, NextFunction } from "express";
 import z, { ZodError } from "zod";
-import { Prisma } from "@/generated/prisma/index.js";
-import { AppError } from "@/errors/app.error.js";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import { AppError } from "../errors/app.error.js";
 
 export function errorMiddleware(
   error: Error,
@@ -21,7 +21,7 @@ export function errorMiddleware(
   if (error instanceof AppError)
     return response.status(error.statusCode).json({ message: error.message });
 
-  if (error instanceof Prisma.PrismaClientKnownRequestError) {
+  if (error instanceof PrismaClientKnownRequestError) {
     if (error.code === "P2002") {
       return response.status(400).json({
         message: "Duplicate value violates unique constraint.",

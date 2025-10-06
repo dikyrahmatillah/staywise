@@ -1,7 +1,7 @@
 "use client";
 
 import { TableCell, TableRow } from "@/components/ui/table";
-import type { BookingTransaction } from "@repo/types";
+import type { BookingTransaction } from "@/types";
 import { PropertyBookingInfo } from "@/components/guest/my-bookings/property-booking-info";
 import { DateTimeInfo } from "@/components/guest/my-bookings/date-time-info";
 import { BookingCancellationDialog } from "@/components/guest/booking-transaction/cancellation-dialog";

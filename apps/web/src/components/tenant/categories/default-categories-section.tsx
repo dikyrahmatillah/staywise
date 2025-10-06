@@ -11,7 +11,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Loader2, AlertTriangle, Tag } from "lucide-react";
 import React from "react";
-import type { DefaultPropertyCategory } from "@repo/schemas";
+import type { DefaultPropertyCategory } from "@/schemas";
 
 interface DefaultCategoriesSectionProps {
   categories: DefaultPropertyCategory[];

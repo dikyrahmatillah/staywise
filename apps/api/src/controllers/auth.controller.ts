@@ -6,19 +6,21 @@ import {
   ForgotPasswordSchema,
   ResetPasswordWithTokenSchema,
   changePasswordSchema,
-} from "@repo/schemas";
+} from "../schemas/index.js";
 import { NextFunction, Request, Response } from "express";
-import { AuthService } from "@/services/auth.service.js";
-import { FileService } from "@/services/file.service.js";
-import { PasswordResetService } from "@/services/password.service.js";
+import { RegistrationService } from "../services/registration.service.js";
+import { AuthenticationService } from "../services/authentication.service.js";
+import { FileService } from "../services/file.service.js";
+import { PasswordResetService } from "../services/password.service.js";
 import {
   changeEmailRequestSchema,
   changeEmailSchema,
   OAuthUserSchema,
-} from "@repo/schemas";
+} from "../schemas/index.js";
 
 export class AuthController {
-  private authService = new AuthService();
+  private authService = new AuthenticationService();
+  private registrationService = new RegistrationService();
   private fileService = new FileService();
   private passwordResetService = new PasswordResetService();
 
@@ -29,7 +31,7 @@ export class AuthController {
   ) => {
     try {
       const data = RegistrationStartSchema.parse(request.body);
-      await this.authService.startRegistration(data);
+      await this.registrationService.startRegistration(data);
       response.status(200).json({ message: "Verification email sent" });
     } catch (error) {
       next(error);
@@ -51,7 +53,7 @@ export class AuthController {
         image: profilePicture,
       });
 
-      await this.authService.completeRegistration(data);
+      await this.registrationService.completeRegistration(data);
       response.status(200).json({ message: "Registration completed" });
     } catch (error) {
       next(error);
@@ -110,7 +112,7 @@ export class AuthController {
   ) => {
     try {
       const userId = request.user.id;
-      const userProfile = await this.authService.userProfile(userId);
+      const userProfile = await this.authService.getUserProfile(userId);
       response.status(200).json({
         message: "User profile fetched successfully",
         data: userProfile,
@@ -131,7 +133,7 @@ export class AuthController {
         response.status(400).json({ message: "Email is required" });
         return;
       }
-      const user = await this.authService.userByEmail(email);
+      const user = await this.authService.getUserByEmail(email);
       response
         .status(200)
         .json({ message: "User fetched successfully", data: user });
@@ -218,7 +220,7 @@ export class AuthController {
   ) => {
     try {
       const data = OAuthUserSchema.parse(request.body);
-      const result = await this.authService.oauthUpsertUser(data);
+      const result = await this.registrationService.upsertOAuthUser(data);
       response.status(200).json({
         message: "OAuth login successful",
         data: result,

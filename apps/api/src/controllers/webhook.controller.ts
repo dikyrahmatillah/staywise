@@ -1,12 +1,12 @@
 import { Request, Response } from "express";
 import crypto from "crypto";
-import { prisma } from "@/configs/prisma.config.js";
-import { OrderStatus } from "@/generated/prisma/index.js";
-import { EmailService } from "@/services/email.service.js";
+import { prisma } from "../configs/prisma.config.js";
+import { OrderStatus } from "@prisma/client";
+import { EmailService } from "../services/email.service.js";
 import {
   formatBookingForEmail,
   validateBookingEmailData,
-} from "@/services/booking/helpers/email-data.helper.js";
+} from "../services/booking/helpers/email-data.helper.js";
 
 const emailService = new EmailService();
 
@@ -84,7 +84,9 @@ export class WebhookController {
         case "expire":
         case "failure":
           newStatus = "CANCELED";
-          console.log(`❌ Payment ${transaction_status} for order: ${order_id}`);
+          console.log(
+            `❌ Payment ${transaction_status} for order: ${order_id}`
+          );
           break;
         default:
           newStatus = booking.status;

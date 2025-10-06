@@ -1,4 +1,4 @@
-import { CompleteRegistrationClientInput } from "@repo/schemas";
+import { CompleteRegistrationClientInput } from "@/schemas";
 
 export const ALLOWED_IMAGE_TYPES = [
   "image/jpeg",

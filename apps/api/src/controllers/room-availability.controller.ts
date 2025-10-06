@@ -3,8 +3,8 @@ import {
   blockRoomDatesSchema,
   unblockRoomDatesSchema,
   getRoomAvailabilitySchema,
-} from "@repo/schemas";
-import { roomAvailabilityService } from "@/services/room-availability.service.js";
+} from "../schemas/index.js";
+import { roomAvailabilityService } from "../services/room-availability.service.js";
 
 export class RoomAvailabilityController {
   getRoomAvailability = async (

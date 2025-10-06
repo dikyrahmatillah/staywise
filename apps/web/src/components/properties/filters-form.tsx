@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useDefaultCategories } from "@/hooks/useCategories";
-import type { GetPropertiesQuery } from "@repo/schemas";
+import type { GetPropertiesQuery } from "@/schemas";
 import type { FC } from "react";
 
 export interface FiltersFormProps {

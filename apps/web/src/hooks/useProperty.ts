@@ -5,7 +5,7 @@ import { api } from "@/lib/axios";
 import useApiQuery from "@/hooks/useApiQuery";
 import { getErrorMessage } from "@/lib/errors";
 
-import type { Property as PropertyType } from "@repo/schemas";
+import type { Property as PropertyType } from "@/schemas";
 
 export function useProperty(propertyId: string) {
   const { status } = useSession();

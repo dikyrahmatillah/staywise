@@ -1,6 +1,6 @@
-import { prisma } from "@/configs/prisma.config.js";
-import { AppError } from "@/errors/app.error.js";
-import { BookingStatusUpdate } from "@/types/booking.types.js";
+import { prisma } from "../configs/prisma.config.js";
+import { AppError } from "../errors/app.error.js";
+import { BookingStatusUpdate } from "../types/booking.types.js";
 
 export class BookingCompletionJob {
   // 🧪 TESTING: 2 minutes grace period (PROD: 24 hours)

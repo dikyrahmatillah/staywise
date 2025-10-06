@@ -5,7 +5,7 @@ import type {
   GatewayPayment,
   BookingPaymentMethod,
   OrderStatus,
-} from "./prisma";
+} from "@/types/prisma.js";
 
 // Main booking transaction interface for frontend
 export interface BookingTransaction {

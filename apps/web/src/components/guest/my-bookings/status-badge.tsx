@@ -5,7 +5,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import type { OrderStatus, StatusConfig, BadgeVariant } from "@repo/types";
+import type { OrderStatus, StatusConfig, BadgeVariant } from "@/types";
 import { statusTooltips, type StatusTooltipContent } from "@/components/guest/my-bookings/status-tooltips";
 
 const statusConfigs: Record<

@@ -1,14 +1,14 @@
 // apps/api/src/routes/booking.router.ts
 import { Router } from "express";
-import { bookingController } from "@/controllers/booking.controller.js";
-import { paymentProofController } from "@/controllers/payment-proof.controller.js";
-import { verifyTokenMiddleware } from "@/middlewares/verifyToken.middleware.js";
+import { bookingController } from "../controllers/booking.controller.js";
+import { paymentProofController } from "../controllers/payment-proof.controller.js";
+import { verifyTokenMiddleware } from "../middlewares/verifyToken.middleware.js";
 import {
   uploadPaymentProof,
   handleMulterError,
-} from "@/middlewares/upload-payment-proof.middleware.js";
-import { validateParams } from "@/middlewares/validate.middleware.js";
-import { PaymentProofParamsSchema } from "@repo/schemas";
+} from "../middlewares/upload-payment-proof.middleware.js";
+import { validateParams } from "../middlewares/validate.middleware.js";
+import { PaymentProofParamsSchema } from "../schemas/index.js";
 
 const router = Router();
 

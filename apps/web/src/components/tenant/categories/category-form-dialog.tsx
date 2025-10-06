@@ -11,7 +11,7 @@ import type {
   CustomCategoryResponse,
   CreateCustomCategoryInput,
   UpdateCustomCategoryInput,
-} from "@repo/schemas";
+} from "@/schemas";
 
 interface CategoryFormDialogProps {
   title?: string;

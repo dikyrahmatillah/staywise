@@ -4,7 +4,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { BookingCancellationDialog } from "@/components/guest/booking-transaction/cancellation-dialog";
 import { ReviewDialog } from "@/components/guest/reviews/review-dialog";
-import type { BookingTransaction } from "@repo/types";
+import type { BookingTransaction } from "@/types";
 import { useCanReview, useBookingReview } from "@/hooks/useReview";
 import { BookingCardProvider } from "./booking-card-context";
 import { BookingCardHeader } from "./booking-card-header";

@@ -9,7 +9,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Loader2 } from "lucide-react";
-import type { CustomCategoryResponse } from "@repo/schemas";
+import type { CustomCategoryResponse } from "@/schemas";
 
 interface DeleteCategoryDialogProps {
   category: CustomCategoryResponse;

@@ -1,6 +1,6 @@
 // apps/web/src/app/properties/[slug]/components/booking-sidebar/utils/price-calculators.ts
 
-import { bookingValidationUtils } from "@repo/schemas";
+import { bookingValidationUtils } from "@/schemas";
 
 /**
  * Calculate number of nights between check-in and check-out

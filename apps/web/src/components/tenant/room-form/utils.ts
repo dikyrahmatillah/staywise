@@ -1,5 +1,5 @@
 import type { Room } from "@/types/room";
-import type { CreateRoomInput, UpdateRoomInput } from "@repo/schemas";
+import type { CreateRoomInput, UpdateRoomInput } from "@/schemas";
 
 import { ALLOWED_IMAGE_TYPES, MAX_IMAGE_SIZE } from "./constants";
 import type { RoomFormState } from "./types";

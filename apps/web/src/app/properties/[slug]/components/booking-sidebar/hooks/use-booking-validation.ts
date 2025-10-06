@@ -8,7 +8,7 @@ import {
   validateBookingDataSafe,
   bookingValidationUtils,
   type BookingFormData,
-} from "@repo/schemas";
+} from "@/schemas";
 import { useBookingSidebar } from "../context/booking-sidebar-context";
 import { getEffectivePrice } from "../utils/price-calculators";
 

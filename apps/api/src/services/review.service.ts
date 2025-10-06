@@ -1,10 +1,10 @@
-import { prisma } from "@/configs/prisma.config.js";
-import { AppError } from "@/errors/app.error.js";
+import { prisma } from "../configs/prisma.config.js";
+import { AppError } from "../errors/app.error.js";
 import type {
   CreateReviewInput,
   UpdateReviewInput,
   GetReviewsQuery,
-} from "@repo/schemas";
+} from "../schemas/index.js";
 
 export class ReviewService {
   async createReview(userId: string, data: CreateReviewInput) {

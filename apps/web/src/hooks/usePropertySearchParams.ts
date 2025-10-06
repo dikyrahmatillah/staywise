@@ -1,7 +1,7 @@
 "use client";
 import { useMemo, useCallback } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import type { GetPropertiesQuery } from "@repo/schemas";
+import type { GetPropertiesQuery } from "@/schemas";
 
 export function usePropertySearchParams(): [
   GetPropertiesQuery,

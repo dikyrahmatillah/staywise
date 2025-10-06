@@ -1,8 +1,8 @@
 import { Router } from "express";
 import { registrationController } from "../controllers/registration.controller.js";
 import { authenticationController } from "../controllers/authentication.controller.js";
-import { upload } from "@/middlewares/upload.middleware.js";
-import { verifyTokenMiddleware } from "@/middlewares/verifyToken.middleware.js";
+import { upload } from "../middlewares/upload.middleware.js";
+import { verifyTokenMiddleware } from "../middlewares/verifyToken.middleware.js";
 
 const router = Router();
 router.post("/signup", registrationController.startRegistration);
