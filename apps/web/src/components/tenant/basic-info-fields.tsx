@@ -47,7 +47,7 @@ export function BasicInfoFields({
               }
             }}
             placeholder="e.g., Luxury Beachfront Villa with Ocean Views"
-            className="h-12 text-base border-2 border-slate-200 focus:ring-2 focus-visible:border-primary/50 focus-visible:ring-primary/10 transition-all duration-200"
+            className="h-12 text-sm border-2 border-slate-200 focus:ring-2 focus-visible:border-primary/50 focus-visible:ring-primary/10 transition-all duration-200"
             maxLength={100}
             required
           />
@@ -106,7 +106,7 @@ export function BasicInfoFields({
             }}
             placeholder="Tell guests about your property's unique features, location highlights, amenities, and what makes it special..."
             rows={5}
-            className="flex min-h-[120px] w-full rounded-lg border-2 border-slate-200 bg-background px-4 py-3 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:border-primary/50 focus-visible:ring-2 focus-visible:ring-primary/10 transition-all duration-200 resize-none"
+            className="flex min-h-[120px] w-full rounded-lg border-2 border-slate-200 bg-background px-4 py-3 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:border-primary/50 focus-visible:ring-2 focus-visible:ring-primary/10 transition-all duration-200 resize-none"
             required
           />
         </div>

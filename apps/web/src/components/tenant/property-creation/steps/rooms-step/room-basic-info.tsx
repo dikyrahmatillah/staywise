@@ -29,7 +29,7 @@ export function RoomBasicInfo({ formData, onFieldChange }: Props) {
           value={formData.name || ""}
           onChange={(e) => onFieldChange("name", e.target.value)}
           placeholder="e.g., Deluxe Ocean View"
-          className="h-11"
+          className="h-11 text-sm"
         />
       </div>
 
@@ -43,7 +43,7 @@ export function RoomBasicInfo({ formData, onFieldChange }: Props) {
           onChange={(e) => onFieldChange("description", e.target.value)}
           placeholder="Describe this room's features, amenities, and what makes it special..."
           rows={4}
-          className="resize-none"
+          className="resize-none text-sm"
         />
       </div>
 
@@ -65,7 +65,7 @@ export function RoomBasicInfo({ formData, onFieldChange }: Props) {
                   onFieldChange("basePrice", parseFloat(e.target.value) || 0)
                 }
                 placeholder="0.00"
-                className="pl-10 h-11"
+                className="pl-10 h-11 placeholder:text-sm text-sm"
               />
             </div>
           </div>
@@ -82,7 +82,7 @@ export function RoomBasicInfo({ formData, onFieldChange }: Props) {
               onChange={(e) =>
                 onFieldChange("capacity", parseInt(e.target.value || "1"))
               }
-              className="h-11 max-w-[90px]"
+              className="h-11 max-w-[90px] text-sm"
             />
           </div>
 
@@ -98,7 +98,7 @@ export function RoomBasicInfo({ formData, onFieldChange }: Props) {
               onChange={(e) =>
                 onFieldChange("bedCount", parseInt(e.target.value || "1"))
               }
-              className="h-11 max-w-[90px]"
+              className="h-11 max-w-[90px] text-sm"
             />
           </div>
 
@@ -110,8 +110,11 @@ export function RoomBasicInfo({ formData, onFieldChange }: Props) {
               value={formData.bedType || "KING"}
               onValueChange={(value) => onFieldChange("bedType", value)}
             >
-              <SelectTrigger className="h-11 w-full">
-                <SelectValue placeholder="Select bed type" />
+              <SelectTrigger className="h-11 w-full text-sm">
+                <SelectValue
+                  placeholder="Select bed type"
+                  className="text-sm placeholder:text-sm"
+                />
               </SelectTrigger>
               <SelectContent>
                 {BED_TYPES.map((type) => (

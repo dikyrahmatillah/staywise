@@ -86,7 +86,7 @@ export function LocationFormBody({
             onChange={onChange}
             onBlur={() => setTouched?.({ ...(touched || {}), country: true })}
             placeholder="e.g., Indonesia"
-            className="placeholder:text-muted-foreground"
+            className="placeholder:text-muted-foreground text-sm"
           />
           {touched?.country && !values.country ? (
             <p className="text-xs text-destructive">
@@ -108,6 +108,7 @@ export function LocationFormBody({
             onChange={onChange}
             onBlur={() => setTouched?.({ ...(touched || {}), city: true })}
             placeholder="e.g., Jakarta"
+            className="text-sm"
           />
           {touched?.city && !values.city ? (
             <p className="text-xs text-destructive">Please provide a city.</p>
@@ -128,6 +129,7 @@ export function LocationFormBody({
           onChange={onChange}
           placeholder="Enter the complete address of your property"
           rows={4}
+          className="text-sm"
         />
       </section>
     </>
