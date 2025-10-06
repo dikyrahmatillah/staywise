@@ -36,7 +36,9 @@ export interface AvatarUploadProps {
   onAvatarChange: (file: File | null, preview: string | null) => void;
 }
 
-export interface FormFieldProps {
+export interface FormFieldProps<
+  T extends Record<string, unknown> = Record<string, unknown>
+> {
   id: string;
   label: string;
   type?: string;
@@ -45,10 +47,12 @@ export interface FormFieldProps {
   disabled?: boolean;
   error?: string;
   required?: boolean;
-  register: UseFormRegister<any>;
+  register: UseFormRegister<T>;
 }
 
-export interface PasswordInputProps {
+export interface PasswordInputProps<
+  T extends Record<string, unknown> = Record<string, unknown>
+> {
   id: string;
   label: string;
   icon: React.ComponentType<{ className?: string }>;
@@ -56,5 +60,5 @@ export interface PasswordInputProps {
   onToggleShow: () => void;
   disabled?: boolean;
   error?: string;
-  register: UseFormRegister<any>;
+  register: UseFormRegister<T>;
 }

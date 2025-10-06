@@ -94,6 +94,7 @@ export const PropertyCreationProvider = ({
     const result = await createProperty(formDataToSend);
     if (result) {
       router.push("/dashboard/tenant/properties");
+      router.refresh();
     }
   };
 
