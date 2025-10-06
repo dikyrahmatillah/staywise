@@ -4,11 +4,14 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
 import { Breadcrumb } from "../../../components/guest/breadcrumb";
+import { constructMetadata } from "@/lib/metadata";
 
-export const metadata: Metadata = {
-  title: "StayWise Guest",
-  description: "Your one-stop solution for finding the perfect rental property",
-};
+export const metadata: Metadata = constructMetadata({
+  title: "Guest Dashboard",
+  description:
+    "Manage your bookings, view upcoming stays, and access your travel history on StayWise.",
+  noIndex: true,
+});
 
 interface GuestLayoutProps {
   children: React.ReactNode;

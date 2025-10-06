@@ -4,11 +4,14 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
 import { Breadcrumb } from "../../../components/tenant/breadcrumb";
+import { constructMetadata } from "@/lib/metadata";
 
-export const metadata: Metadata = {
-  title: "StayWise Tenant Dashboard",
-  description: "Manage your property listings and bookings",
-};
+export const metadata: Metadata = constructMetadata({
+  title: "Tenant Dashboard",
+  description:
+    "Manage your property listings, bookings, and revenue. Track performance and guest reviews on StayWise.",
+  noIndex: true, // Don't index dashboard pages
+});
 
 interface TenantLayoutProps {
   children: React.ReactNode;
