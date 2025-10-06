@@ -18,7 +18,6 @@ import { buildPropertyFormData } from "@/lib/property/build-property-form-data";
 export function useEditProperty(propertyId: string) {
   const { data: session } = useSession();
   useAuthToken(session);
-
   const [property, setProperty] = useState<Property | null>(null);
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [selectedImagePreviews, setSelectedImagePreviews] = useState<string[]>(
@@ -55,9 +54,7 @@ export function useEditProperty(propertyId: string) {
 
   const refreshProperty = async () => {
     const result = await refetch();
-    if (result.data) {
-      setProperty(result.data);
-    }
+    if (result.data) setProperty(result.data);
   };
 
   const setPropertyCategory = (next: {
@@ -151,7 +148,6 @@ export function useEditProperty(propertyId: string) {
   };
 
   const queryClient = useQueryClient();
-
   const updateMutation = useMutation<{ data: Property }, unknown, FormData>({
     mutationFn: async (data: FormData) => {
       const res = await api.put<{ data: Property }>(
@@ -167,8 +163,7 @@ export function useEditProperty(propertyId: string) {
       queryClient.invalidateQueries({ queryKey: ["properties"] });
     },
     onError: (err: unknown) => {
-      const msg = getErrorMessage(err, "Failed to update property");
-      toast.error(msg);
+      toast.error(getErrorMessage(err, "Failed to update property"));
     },
   });
 

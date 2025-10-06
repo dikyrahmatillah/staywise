@@ -112,8 +112,20 @@ export class PropertyCrudService {
     const updatedProperty = await prisma.$transaction(async (tx) => {
       const updateData: any = this.buildBasicUpdateData(data);
 
-      updateData.propertyCategoryId = data.propertyCategoryId || null;
-      updateData.customCategoryId = data.customCategoryId || null;
+      // Handle category updates - allow explicit null to remove categories
+      // propertyCategoryId: only update when provided and not empty string
+      if ("propertyCategoryId" in data) {
+        const val = (data as any).propertyCategoryId;
+        if (val !== "") {
+          updateData.propertyCategoryId = val;
+        }
+        // if empty string -> do not change
+      }
+
+      // customCategoryId: allow explicit null to remove
+      if ("customCategoryId" in data) {
+        updateData.customCategoryId = data.customCategoryId || null;
+      }
 
       const updated = await this.repository.update(propertyId, updateData);
 
