@@ -2,6 +2,7 @@
     "name": "api",
     "type": "module",
     "scripts": {
+        "postinstall": "prisma generate",
         "build": "prisma generate && tsc && tsc-alias",
         "dev": "cross-env NODE_ENV=development tsx --watch src/index.ts",
         "start": "npm run build && cross-env NODE_ENV=production node dist/src/index.js",
@@ -15,6 +16,7 @@
         "bullmq": "^5.7.10",
         "cloudinary": "^2.7.0",
         "cors": "^2.8.5",
+        "date-fns": "^4.1.0",
         "dotenv": "^17.2.1",
         "express": "^5.1.0",
         "handlebars": "^4.7.8",
