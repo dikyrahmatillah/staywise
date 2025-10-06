@@ -8,7 +8,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { PaymentProofUpload } from "@/components/guest/booking-transaction/payment-proof-upload/payment-proof-upload";
+import { BookingPaymentProofUpload } from "@/components/guest/booking-transaction/booking-payment-proof-upload";
 import { Upload, CreditCard, Eye, X, FileImage, Star } from "lucide-react";
 import { useBookingTableRowContext } from "./booking-table-row-context";
 
@@ -65,9 +65,10 @@ export const BookingTableRowActions = ({
               <DialogHeader>
                 <DialogTitle>Upload Payment Proof</DialogTitle>
               </DialogHeader>
-              <PaymentProofUpload
+              <BookingPaymentProofUpload
                 bookingId={booking.id}
                 orderCode={booking.orderCode}
+                totalAmount={booking.totalAmount}
                 expiresAt={booking.expiresAt}
                 onExpire={onPaymentProofExpire}
                 onUploadComplete={() => {
@@ -145,13 +146,16 @@ export const BookingTableRowActions = ({
           <DialogHeader>
             <DialogTitle>Payment Proof - {booking.orderCode}</DialogTitle>
           </DialogHeader>
-          <PaymentProofUpload
+          <BookingPaymentProofUpload
             bookingId={booking.id}
             orderCode={booking.orderCode}
+            totalAmount={booking.totalAmount}
+            existingProofUrl={booking.paymentProof?.imageUrl}
             onUploadComplete={() => {
               paymentProofViewDialog.setOpen(false);
               onBookingUpdate?.();
             }}
+            showUploadButton={false}
           />
         </DialogContent>
       </Dialog>

@@ -8,7 +8,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { PaymentProofUpload } from "@/components/guest/booking-transaction/payment-proof-upload/payment-proof-upload";
+import { BookingPaymentProofUpload } from "@/components/guest/booking-transaction/booking-payment-proof-upload";
 import { Upload, CreditCard, Eye, X, FileImage, Star } from "lucide-react";
 import { useBookingCardContext } from "./booking-card-context";
 
@@ -40,6 +40,12 @@ export const BookingCardActions = ({
   const { booking, review, canReview, onViewDetails, onBookingUpdate } =
     useBookingCardContext();
 
+  // Handler for payment proof expiration
+  const handlePaymentProofExpire = async () => {
+    // This will be called by the timer in BookingPaymentProofUpload
+    onBookingUpdate?.();
+  };
+
   // WAITING_PAYMENT actions
   if (booking.status === "WAITING_PAYMENT") {
     if (booking.paymentMethod === "MANUAL_TRANSFER") {
@@ -59,10 +65,12 @@ export const BookingCardActions = ({
               <DialogHeader>
                 <DialogTitle>Upload Payment Proof</DialogTitle>
               </DialogHeader>
-              <PaymentProofUpload
+              <BookingPaymentProofUpload
                 bookingId={booking.id}
                 orderCode={booking.orderCode}
+                totalAmount={booking.totalAmount}
                 expiresAt={booking.expiresAt}
+                onExpire={handlePaymentProofExpire}
                 onUploadComplete={() => {
                   paymentProofDialog.setOpen(false);
                   onBookingUpdate?.();
@@ -122,16 +130,19 @@ export const BookingCardActions = ({
           </Button>
         </DialogTrigger>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          {/* <DialogHeader>
+          <DialogHeader>
             <DialogTitle>Payment Proof - {booking.orderCode}</DialogTitle>
-          </DialogHeader> */}
-          <PaymentProofUpload
+          </DialogHeader>
+          <BookingPaymentProofUpload
             bookingId={booking.id}
             orderCode={booking.orderCode}
+            totalAmount={booking.totalAmount}
+            existingProofUrl={booking.paymentProof?.imageUrl}
             onUploadComplete={() => {
               paymentProofViewDialog.setOpen(false);
               onBookingUpdate?.();
             }}
+            showUploadButton={false}
           />
         </DialogContent>
       </Dialog>

@@ -1,4 +1,3 @@
-// apps/web/src/components/guest/my-bookings/booking-transactions-table.tsx
 import {
   Table,
   TableBody,
