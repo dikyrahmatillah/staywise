@@ -70,7 +70,7 @@ function PropertiesPageInner() {
                 <div className="flex flex-col items-center justify-center gap-3 text-sm font-medium text-muted-foreground">
                   <Ellipsis size={12} className="inline-block" />
                   <div className="mt-2 text-sm text-muted-foreground">
-                    Fetching curated stays for you...
+                    Searching for properties...
                   </div>
                 </div>
               </div>

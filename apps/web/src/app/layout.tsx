@@ -6,6 +6,8 @@ import { Footer } from "@/components/footer";
 import QueryProvider from "@/components/providers/query-provider";
 import AuthProvider from "@/components/providers/auth-provider";
 import { Toaster } from "@/components/ui/sonner";
+import { defaultMetadata } from "@/lib/metadata";
+import { OrganizationJsonLd, WebsiteJsonLd } from "@/components/json-ld";
 
 const figtree = Figtree({
   variable: "--font-figtree",
@@ -17,10 +19,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "StayWise",
-  description: "Your one-stop solution for finding the perfect rental property",
-};
+export const metadata: Metadata = defaultMetadata;
 
 export default function RootLayout({
   children,
@@ -32,6 +31,8 @@ export default function RootLayout({
       <body className={`${figtree.variable} ${geistMono.variable} antialiased`}>
         <AuthProvider>
           <QueryProvider>
+            <OrganizationJsonLd />
+            <WebsiteJsonLd />
             <Toaster />
             <Header />
             <main className="min-h-[calc(100vh-12rem)]">{children}</main>
