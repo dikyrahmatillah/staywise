@@ -83,7 +83,7 @@ export const BookingCancellationDialog = ({
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2 font-sans">
               <AlertTriangle className="h-5 w-5 text-destructive" />
               Cancel Booking
             </DialogTitle>
@@ -94,7 +94,7 @@ export const BookingCancellationDialog = ({
             <Card className="p-4 border-destructive bg-destructive/10">
               <div className="flex items-center gap-2 text-destructive">
                 <AlertTriangle className="h-4 w-4" />
-                <span className="font-medium">Cancellation Warning</span>
+                <span className="font-medium font-sans">Cancellation Warning</span>
               </div>
               <p className="text-destructive text-sm mt-1">
                 This action cannot be undone. Please review your booking details
@@ -106,13 +106,13 @@ export const BookingCancellationDialog = ({
             <div className="space-y-3 p-4 bg-muted/50 rounded-lg">
               <div className="flex items-center gap-2 text-sm">
                 <Calendar className="h-4 w-4" />
-                <span className="font-medium">Booking Details</span>
+                <span className="font-medium font-sans">Booking Details</span>
               </div>
 
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Property:</span>
-                  <span className="font-medium">{booking.Property.name}</span>
+                  <span className="text-muted-foreground font-sans">Property:</span>
+                  <span className="font-medium font-sans">{booking.Property.name}</span>
                 </div>
 
                 <div className="flex justify-between">
@@ -121,24 +121,24 @@ export const BookingCancellationDialog = ({
                 </div>
 
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Check-in:</span>
+                  <span className="text-muted-foreground font-sans">Check-in:</span>
                   <span>{formatDate(booking.checkInDate)}</span>
                 </div>
 
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Check-out:</span>
+                  <span className="text-muted-foreground font-sans">Check-out:</span>
                   <span>{formatDate(booking.checkOutDate)}</span>
                 </div>
 
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Nights:</span>
+                  <span className="text-muted-foreground font-sans">Nights:</span>
                   <span>
                     {booking.nights} night{booking.nights > 1 ? "s" : ""}
                   </span>
                 </div>
 
-                <div className="flex justify-between font-medium">
-                  <span className="text-muted-foreground">Total Amount:</span>
+                <div className="flex justify-between font-medium font-sans">
+                  <span className="text-muted-foreground font-sans">Total Amount:</span>
                   <span>{formatCurrency(booking.totalAmount)}</span>
                 </div>
               </div>
@@ -149,7 +149,7 @@ export const BookingCancellationDialog = ({
               <Card className="p-3 border-blue-200 bg-blue-50">
                 <div className="flex items-center gap-2 text-blue-800 text-sm">
                   <Clock className="h-4 w-4" />
-                  <span className="font-medium">Payment Timer</span>
+                  <span className="font-medium font-sans">Payment Timer</span>
                 </div>
                 <div className="text-blue-700 text-sm mt-1">
                   {booking.expiresAt ? getTimeRemaining() : "No time limit"}
@@ -161,7 +161,7 @@ export const BookingCancellationDialog = ({
             <Card className="p-3 border-yellow-200 bg-yellow-50">
               <div className="flex items-center gap-2 text-yellow-800 text-sm">
                 <CreditCard className="h-4 w-4" />
-                <span className="font-medium">Cancellation Policy</span>
+                <span className="font-medium font-sans">Cancellation Policy</span>
               </div>
               <div className="text-yellow-700 text-sm mt-1">
                 {booking.status === "WAITING_PAYMENT"
@@ -196,7 +196,7 @@ export const BookingCancellationDialog = ({
         onOpenChange={setShowConfirmAlert}
         onConfirm={handleConfirmCancel}
         title={
-          <span className="flex items-center gap-2">
+          <span className="flex items-center gap-2 font-sans">
             <AlertTriangle className="h-5 w-5 text-destructive" />
             Confirm Cancellation
           </span>
@@ -204,7 +204,7 @@ export const BookingCancellationDialog = ({
         description={
           <>
             Are you absolutely sure you want to cancel this booking for{" "}
-            <span className="font-semibold">{booking.Property.name}</span>?
+            <span className="font-semibold font-sans">{booking.Property.name}</span>?
             <br />
             <br />
             Check-in: {formatDate(booking.checkInDate)}

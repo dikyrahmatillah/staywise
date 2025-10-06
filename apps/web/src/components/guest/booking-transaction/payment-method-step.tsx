@@ -17,17 +17,17 @@ export function PaymentMethodStep() {
     <Card className="p-6">
       <div className="flex items-start gap-4">
         <div
-          className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
+          className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold font-sans ${
             currentStep >= 2
-              ? "bg-foreground text-background"
-              : "border-2 border-muted-foreground text-muted-foreground"
+              ? "bg-foreground text-background font-sans"
+              : "border-2 border-muted-foreground text-muted-foreground font-sans"
           }`}
         >
           2
         </div>
         <div className="flex-1">
           <h3
-            className={`text-lg font-semibold mb-2 ${
+            className={`text-lg font-semibold font-sans mb-2 ${
               currentStep < 2 ? "text-muted-foreground" : ""
             }`}
           >
@@ -39,7 +39,7 @@ export function PaymentMethodStep() {
               <div
                 className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${
                   selectedPaymentMethod === "bank"
-                    ? "border-foreground bg-muted/50"
+                    ? "border-primary bg-muted/50"
                     : "border-muted-foreground hover:border-foreground/50"
                 }`}
                 onClick={() => handleMethodSelect("bank")}
@@ -47,8 +47,8 @@ export function PaymentMethodStep() {
                 <div className="flex items-center gap-3">
                   <Building2 className="h-5 w-5" />
                   <div>
-                    <div className="font-medium">Manual Transfer via Bank</div>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="font-medium font-sans">Manual Transfer via Bank</div>
+                    <div className="text-sm text-muted-foreground font-sans">
                       Upload payment proof after transfer
                     </div>
                   </div>
@@ -58,7 +58,7 @@ export function PaymentMethodStep() {
               <div
                 className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${
                   selectedPaymentMethod === "midtrans"
-                    ? "border-foreground bg-muted/50"
+                    ? "border-primary bg-muted/50"
                     : "border-muted-foreground hover:border-foreground/50"
                 }`}
                 onClick={() => handleMethodSelect("midtrans")}
@@ -66,13 +66,13 @@ export function PaymentMethodStep() {
                 <div className="flex items-center gap-3">
                   <CreditCard className="h-5 w-5" />
                   <div>
-                    <div className="font-medium">
+                    <div className="font-medium font-sans">
                       Payment Gateway (Midtrans)
                     </div>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-sm text-muted-foreground font-sans">
                       Pay instantly with credit card or e-wallet
                     </div>
-                  </div>
+                  </div>  
                 </div>
               </div>
             </div>

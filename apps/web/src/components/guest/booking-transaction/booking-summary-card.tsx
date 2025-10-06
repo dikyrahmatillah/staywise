@@ -13,7 +13,7 @@ import { useMidtrans } from "./hooks/use-midtrans";
 export function BookingSummaryCard() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  
+
   const propertyName = searchParams.get("propertyName") || "Property";
   const propertyCity = searchParams.get("propertyCity") || "";
   const roomName = searchParams.get("roomName") || "Room";
@@ -73,9 +73,11 @@ export function BookingSummaryCard() {
         <div className="flex-1">
           <h3 className="font-semibold text-lg">{propertyName}</h3>
           {propertyCity && (
-            <p className="text-sm text-muted-foreground mb-2">{propertyCity}</p>
+            <p className="text-sm font-sans text-muted-foreground mb-2">
+              {propertyCity}
+            </p>
           )}
-          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+          <div className="flex items-center gap-1 text-sm font-sans text-muted-foreground">
             {reviewCount > 0 ? (
               <>
                 <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
@@ -89,24 +91,26 @@ export function BookingSummaryCard() {
         </div>
       </div>
 
-      <div className="space-y-4 mb-6">
-        <div className="text-sm font-medium">Selected Room</div>
-        <div className="text-sm text-muted-foreground">{roomName}</div>
+      <div className="mb-6">
+        <div className="text-sm font-sans font-medium">Selected Room</div>
+        <div className="text-sm font-sans text-muted-foreground">
+          {roomName}
+        </div>
       </div>
 
-      <div className="space-y-4 border-t pt-4">
+      <div className="border-t pt-4">
         <div className="flex justify-between items-center">
-          <span className="font-medium">Dates</span>
+          <span className="font-medium font-sans mb-1.4">Dates</span>
           <Button
             variant="ghost"
             size="sm"
-            className="text-sm underline p-0 h-auto"
+            className="text-sm font-sans underline p-0 h-auto"
             disabled={currentStep >= 3}
           >
             Edit
           </Button>
         </div>
-        <div className="text-sm">
+        <div className="text-sm font-sans">
           {bookingDetails.checkIn.toLocaleDateString("en-US", {
             month: "short",
             day: "numeric",
@@ -120,18 +124,18 @@ export function BookingSummaryCard() {
           })}
         </div>
 
-        <div className="flex justify-between items-center">
-          <span className="font-medium">Guests</span>
+        <div className="flex justify-between items-center pt-4">
+          <span className="font-medium font-sans mb-1.4">Guests</span>
           <Button
             variant="ghost"
             size="sm"
-            className="text-sm underline p-0 h-auto"
+            className="text-sm font-sans underline p-0 h-auto"
             disabled={currentStep >= 3}
           >
             Edit
           </Button>
         </div>
-        <div className="text-sm">
+        <div className="text-sm font-sans">
           {totalGuests} guest{totalGuests > 1 ? "s" : ""}
           {bookingDetails.pets > 0 &&
             `, ${bookingDetails.pets} pet${bookingDetails.pets > 1 ? "s" : ""}`}
@@ -139,8 +143,8 @@ export function BookingSummaryCard() {
       </div>
 
       <div className="border-t pt-4 mt-6">
-        <h4 className="font-medium mb-4">Price details</h4>
-        <div className="space-y-2">
+        <h4 className="font-medium font-sans mb-1.4">Price details</h4>
+        <div className="text-sm font-sans text-muted-foreground space-y-2">
           <div className="flex justify-between">
             <span>
               {nights} night{nights > 1 ? "s" : ""} x{" "}
@@ -150,7 +154,7 @@ export function BookingSummaryCard() {
           </div>
         </div>
         <div className="border-t pt-4 mt-4">
-          <div className="flex justify-between font-semibold">
+          <div className="flex justify-between font-semibold font-sans">
             <span>Total (IDR)</span>
             <span>{formatCurrency(totalPrice)}</span>
           </div>
@@ -190,7 +194,7 @@ export function BookingSummaryCard() {
       {currentStep >= 3 && createdBooking && (
         <div className="border-t pt-4 mt-6">
           <h4 className="font-medium mb-4">Booking Details</h4>
-          <div className="space-y-2 text-sm">
+          <div className="space-y-2 text-sm font-sans">
             <div className="flex justify-between">
               <span>Booking ID:</span>
               <span className="font-mono">{createdBooking.orderCode}</span>

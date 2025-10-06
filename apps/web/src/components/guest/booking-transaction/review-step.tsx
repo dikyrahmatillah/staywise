@@ -23,20 +23,20 @@ export function ReviewStep() {
         </div>
         <div className="flex-1">
           <h3
-            className={`text-lg font-semibold ${
-              currentStep < 3 ? "text-muted-foreground" : ""
+            className={`text-lg font-semibold font-sans ${
+              currentStep < 3 ? "text-muted-foreground font-sans" : ""
             }`}
           >
             Review your request
           </h3>
           {currentStep >= 3 && (
             <div className="mt-4">
-              <p className="text-green-600 font-medium">
+              <p className="text-green-600 font-medium font-sans">
                 {selectedPaymentMethod === "midtrans"
                   ? "Payment completed successfully!"
                   : "Booking created successfully!"}
               </p>
-              <p className="text-sm text-muted-foreground mt-1">
+              <p className="text-sm font-sans text-muted-foreground mt-2">
                 {createdBooking && (
                   <>
                     Booking ID: {createdBooking.orderCode}
