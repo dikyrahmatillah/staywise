@@ -30,12 +30,14 @@ export const PaymentProofViewer = ({
         <div className="space-y-4">
           {booking.paymentProof?.imageUrl && (
             <div className="space-y-2">
-              <Image
-                src={booking.paymentProof.imageUrl}
-                alt="Payment Proof"
-                fill
-                className="w-full max-h-96 object-contain rounded-lg border"
-              />
+              <div className="relative w-full h-96">
+                <Image
+                  src={booking.paymentProof.imageUrl}
+                  alt="Payment Proof"
+                  fill
+                  className="object-contain rounded-lg border"
+                />
+              </div>
               <div className="text-sm text-muted-foreground space-y-1">
                 <p>
                   Uploaded:{" "}

@@ -22,12 +22,12 @@ export function EnhancedStats() {
 
     // Calculate total earnings from completed bookings
     const totalEarning = bookings
-      .filter(booking => booking.status === 'COMPLETED')
+      .filter(booking => booking.status === 'PROCESSING')
       .reduce((sum, booking) => sum + Number(booking.totalAmount || 0), 0);
 
     // Calculate total guests from completed bookings (using qty field)
     const totalGuest = bookings
-      .filter(booking => booking.status === 'COMPLETED')
+      .filter(booking => booking.status === 'PROCESSING')
       .reduce((sum, booking) => sum + (booking.qty || 1), 0);
 
     // Total booking count
