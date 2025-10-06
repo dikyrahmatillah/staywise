@@ -1,21 +1,21 @@
 // apps/api/src/services/booking/booking.service.ts
 import { BookingCronService } from "./cron/booking-cron.service.js";
-import { BookingCoreService } from "@/services/booking/core/booking-core.js";
-import { BookingManagementService } from "@/services/booking/core/booking-management.service.js";
-import { BookingUtilsService } from "@/services/booking/core/booking-utils.service.js";
+import { BookingCoreService } from "./core/booking-core.js";
+import { BookingManagementService } from "./core/booking-management.service.js";
+import { BookingUtilsService } from "./core/booking-utils.service.js";
 import type {
   BookingFilters,
   AvailabilityCheckParams,
   BookingTotals,
-} from "@repo/types";
+} from "../../types/booking.js";
 import { faker } from "@faker-js/faker";
 import type { BookingValidationResult } from "@repo/schemas";
 import type {
   BookingPaymentMethod,
   OrderStatus,
-} from "@/generated/prisma/index.js";
-import { prisma } from "@/configs/prisma.config.js";
-import { snap } from "@/configs/midtrans.config.js";
+} from "../../generated/prisma/index.js";
+import { prisma } from "../../configs/prisma.config.js";
+import { snap } from "../../configs/midtrans.config.js";
 
 export class BookingService {
   private cronService: BookingCronService;

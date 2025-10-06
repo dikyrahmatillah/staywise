@@ -1,5 +1,5 @@
-import { prisma } from "@/configs/prisma.config.js";
-import { AppError } from "@/errors/app.error.js";
+import { prisma } from "../configs/prisma.config.js";
+import { AppError } from "../errors/app.error.js";
 
 export class MidtransService {
   private serverKey = process.env.MIDTRANS_SERVER_KEY;

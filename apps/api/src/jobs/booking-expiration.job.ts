@@ -1,6 +1,6 @@
-import { prisma } from "@/configs/prisma.config.js";
-import { AppError } from "@/errors/app.error.js";
-import { BookingStatusUpdate } from "@/types/booking.types.js";
+import { prisma } from "../configs/prisma.config.js";
+import { AppError } from "../errors/app.error.js";
+import { BookingStatusUpdate } from "../types/booking.types.js";
 
 export class BookingExpirationJob {
   // 🧪 TESTING: 2 minutes timeout (PROD: use expiresAt field)

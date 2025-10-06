@@ -1,8 +1,8 @@
-import logger from "@/utils/logger.js";
+import logger from "../utils/logger.js";
 import { Request, Response, NextFunction } from "express";
 import z, { ZodError } from "zod";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
-import { AppError } from "@/errors/app.error.js";
+import { AppError } from "../errors/app.error.js";
 
 export function errorMiddleware(
   error: Error,

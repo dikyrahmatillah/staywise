@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { createRoomSchema } from "@repo/schemas";
-import { roomCrudService } from "@/services/room-crud.service.js";
-import { FileService } from "@/services/file.service.js";
+import { roomCrudService } from "../services/room-crud.service.js";
+import { FileService } from "../services/file.service.js";
 
 export class RoomCrudController {
   private fileService = new FileService();

@@ -4,7 +4,7 @@ import {
   updateCustomCategoryInputSchema,
   getCategoriesQuerySchema,
 } from "@repo/schemas";
-import { CategoryService } from "@/services/category.service.js";
+import { CategoryService } from "../services/category.service.js";
 
 export class CategoryController {
   private categoryService = new CategoryService();

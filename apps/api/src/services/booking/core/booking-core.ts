@@ -1,18 +1,18 @@
-import { prisma } from "@/configs/prisma.config.js";
-import { AppError } from "@/errors/app.error.js";
+import { prisma } from "../../../configs/prisma.config.js";
+import { AppError } from "../../../errors/app.error.js";
 import {
   validateBookingDataSafe,
   bookingValidationUtils,
   type BookingFormData,
 } from "@repo/schemas";
-import { midtransService } from "@/services/midtrans.service.js";
+import { midtransService } from "../../midtrans.service.js";
 import { BookingUtilsService } from "./booking-utils.service.js";
 import type {
   CreateBookingInput,
   RoomAvailabilityResult,
   AvailabilityCheckParams,
-} from "@repo/types";
-import type { BookingCreationData } from "@/services/booking/types/booking-internal.type.js";
+} from "../../../types/booking.js";
+import type { BookingCreationData } from "../types/booking-internal.type.js";
 
 export class BookingCoreService {
   private utilsService: BookingUtilsService;

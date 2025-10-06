@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { updatePropertyInputSchema } from "@repo/schemas";
 import { FileService } from "../services/file.service.js";
-import { PropertyCrudService } from "@/services/property-crud.service.js";
+import { PropertyCrudService } from "../services/property-crud.service.js";
 
 export class PropertyManageController {
   propertyCrud = new PropertyCrudService();

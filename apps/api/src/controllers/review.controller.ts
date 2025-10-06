@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { reviewService } from "@/services/review.service.js";
+import { reviewService } from "../services/review.service.js";
 import {
   createReviewSchema,
   updateReviewSchema,
@@ -7,11 +7,7 @@ import {
 } from "@repo/schemas";
 
 export class ReviewController {
-  async createReview(
-    request: Request,
-    response: Response,
-    next: NextFunction
-  ) {
+  async createReview(request: Request, response: Response, next: NextFunction) {
     try {
       const userId = (request as any).user?.id;
       if (!userId) {
@@ -31,11 +27,7 @@ export class ReviewController {
     }
   }
 
-  async updateReview(
-    request: Request,
-    response: Response,
-    next: NextFunction
-  ) {
+  async updateReview(request: Request, response: Response, next: NextFunction) {
     try {
       const userId = (request as any).user?.id;
       if (!userId) {
@@ -56,11 +48,7 @@ export class ReviewController {
     }
   }
 
-  async deleteReview(
-    request: Request,
-    response: Response,
-    next: NextFunction
-  ) {
+  async deleteReview(request: Request, response: Response, next: NextFunction) {
     try {
       const userId = (request as any).user?.id;
       if (!userId) {

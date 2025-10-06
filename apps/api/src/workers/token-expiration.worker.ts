@@ -1,11 +1,11 @@
 import { Worker, QueueEvents, Job } from "bullmq";
-import { bullConnection } from "@/configs/redis.config.js";
+import { bullConnection } from "../configs/redis.config.js";
 import {
   TOKEN_EXPIRE_QUEUE,
   TokenExpireJobData,
-} from "@/queues/token.queue.js";
-import logger from "@/utils/logger.js";
-import { prisma } from "@/configs/prisma.config.js";
+} from "../queues/token.queue.js";
+import logger from "../utils/logger.js";
+import { prisma } from "../configs/prisma.config.js";
 
 const events = new QueueEvents(TOKEN_EXPIRE_QUEUE, {
   connection: bullConnection,

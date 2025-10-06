@@ -1,12 +1,12 @@
 import { Request, Response, NextFunction } from "express";
-import { prisma } from "@/configs/prisma.config.js";
-import { uploadToCloudinary } from "@/middlewares/upload-payment-proof.middleware.js";
-import { AppError } from "@/errors/app.error.js";
-import { EmailService } from "@/services/email.service.js";
+import { prisma } from "../configs/prisma.config.js";
+import { uploadToCloudinary } from "../middlewares/upload-payment-proof.middleware.js";
+import { AppError } from "../errors/app.error.js";
+import { EmailService } from "../services/email.service.js";
 import {
   formatBookingForEmail,
   validateBookingEmailData,
-} from "@/services/booking/helpers/email-data.helper.js";
+} from "../services/booking/helpers/email-data.helper.js";
 
 const emailService = new EmailService();
 

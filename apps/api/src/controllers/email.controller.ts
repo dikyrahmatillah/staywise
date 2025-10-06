@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { EmailService } from "@/services/email.service.js";
+import { EmailService } from "../services/email.service.js";
 
 const emailService = new EmailService();
 
@@ -8,7 +8,9 @@ export class EmailController {
     try {
       const { to } = req.query; // pass ?to=your@email.com
       if (!to || typeof to !== "string") {
-        return res.status(400).json({ error: "Missing or invalid 'to' email parameter" });
+        return res
+          .status(400)
+          .json({ error: "Missing or invalid 'to' email parameter" });
       }
 
       // Dummy booking data

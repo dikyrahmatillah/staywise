@@ -1,4 +1,4 @@
-import { prisma } from "@/configs/prisma.config.js";
+import { prisma } from "../../../configs/prisma.config.js";
 
 export class BookingExpiryService {
   static async cancelExpiredBookings() {

@@ -5,14 +5,14 @@ import {
   changePasswordSchema,
 } from "@repo/schemas";
 import { NextFunction, Request, Response } from "express";
-import { AuthenticationService } from "@/services/authentication.service.js";
-import { PasswordResetService } from "@/services/password.service.js";
+import { AuthenticationService } from "../services/authentication.service.js";
+import { PasswordResetService } from "../services/password.service.js";
 import {
   UpdateUserSchema,
   changeEmailRequestSchema,
   changeEmailSchema,
 } from "@repo/schemas";
-import { FileService } from "@/services/file.service.js";
+import { FileService } from "../services/file.service.js";
 
 export class AuthenticationController {
   private authenticationService = new AuthenticationService();
