@@ -51,10 +51,10 @@ export function BookingPaymentProofUpload({
     <div className="space-y-4">
       {/* Bank Transfer Details */}
       <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-        <p className="text-sm text-blue-800 font-medium mb-2">
+        <p className="text-sm font-sans text-blue-800 font-medium mb-2">
           Bank Transfer Details:
         </p>
-        <div className="text-sm text-blue-700 space-y-1">
+        <div className="text-sm font-sans text-blue-700 space-y-1">
           <p>Bank: BCA</p>
           <p>Account: 1234567890</p>
           <p>Name: StayWise Property</p>
@@ -78,11 +78,17 @@ export function BookingPaymentProofUpload({
           <Clock className="h-4 w-4" />
           <AlertDescription>
             {isUrgent ? (
-              <span className="font-semibold text-red-700">
+              <span className="font-semibold font-sans text-red-700">
                 ⚠️ Upload expires in: {timeFormatted}
               </span>
             ) : (
-              <span className={isWarning ? "text-amber-700" : "text-blue-700"}>
+              <span
+                className={
+                  isWarning
+                    ? "font-sans text-amber-700"
+                    : "font-sans text-blue-700"
+                }
+              >
                 ⏱️ Upload before: {timeFormatted}
               </span>
             )}
@@ -93,7 +99,7 @@ export function BookingPaymentProofUpload({
       {/* Expired State */}
       {isExpired && (
         <Alert variant="destructive">
-          <AlertDescription>
+          <AlertDescription className="font-sans">
             ❌ Upload time has expired. This booking has been cancelled.
           </AlertDescription>
         </Alert>
@@ -103,7 +109,9 @@ export function BookingPaymentProofUpload({
       {uploading ? (
         <div className="flex items-center justify-center py-8">
           <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-          <span className="ml-2 text-sm text-gray-600">Uploading...</span>
+          <span className="ml-2 text-sm font-sans text-gray-600">
+            Uploading...
+          </span>
         </div>
       ) : (
         <PaymentProofUpload
