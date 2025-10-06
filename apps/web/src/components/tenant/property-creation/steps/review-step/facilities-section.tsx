@@ -33,7 +33,7 @@ export const FacilitiesSection = ({
       {facilities && facilities.length > 0 ? (
         <div className="flex flex-wrap gap-2">
           {facilities.map((facility, index) => (
-            <Badge key={index} variant="secondary">
+            <Badge key={index} variant="secondary" className="px-3 py-1">
               {facility.facility
                 .replace(/_/g, " ")
                 .toLowerCase()

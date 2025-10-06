@@ -5,14 +5,12 @@ import { Building2 } from "lucide-react";
 interface BasicInfoSectionProps {
   name?: string;
   description?: string;
-  maxGuests: number;
   onEdit: () => void;
 }
 
 export const BasicInfoSection = ({
   name,
   description,
-  maxGuests,
   onEdit,
 }: BasicInfoSectionProps) => (
   <div className="space-y-3">
@@ -29,16 +27,12 @@ export const BasicInfoSection = ({
         Edit
       </Button>
     </div>
-    <div className="ml-7 space-y-2">
+    <div className="ml-7 space-y-2 text-sm">
       <p>
-        <span className="font-medium">Name:</span> {name || "Not set"}
+        <span>Name:</span> {name || "Not set"}
       </p>
       <p>
-        <span className="font-medium">Description:</span>{" "}
-        {description || "Not set"}
-      </p>
-      <p>
-        <span className="font-medium">Maximum Guests:</span> {maxGuests}
+        <span>Description:</span> {description || "Not set"}
       </p>
     </div>
   </div>
