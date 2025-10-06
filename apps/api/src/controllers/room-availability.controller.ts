@@ -3,7 +3,7 @@ import {
   blockRoomDatesSchema,
   unblockRoomDatesSchema,
   getRoomAvailabilitySchema,
-} from "@repo/schemas";
+} from "../schemas/index.js";
 import { roomAvailabilityService } from "../services/room-availability.service.js";
 
 export class RoomAvailabilityController {

@@ -2,11 +2,11 @@ import { prisma } from "../configs/prisma.config.js";
 import {
   RegistrationStartInput,
   CompleteRegistrationInput,
-} from "@repo/schemas";
+} from "../schemas/index.js";
 import { AppError } from "../errors/app.error.js";
 import { EmailService } from "./email.service.js";
 import { TokenService } from "./token.service.js";
-import { OAuthUserInput } from "@repo/schemas";
+import { OAuthUserInput } from "../schemas/index.js";
 import { generateToken } from "../utils/jwt.js";
 import bcrypt from "bcryptjs";
 

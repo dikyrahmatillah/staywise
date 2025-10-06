@@ -4,7 +4,7 @@ import {
   createReviewSchema,
   updateReviewSchema,
   getReviewsQuerySchema,
-} from "@repo/schemas";
+} from "../schemas/index.js";
 
 export class ReviewController {
   async createReview(request: Request, response: Response, next: NextFunction) {

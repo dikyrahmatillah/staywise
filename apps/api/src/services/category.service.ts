@@ -5,7 +5,7 @@ import type {
   CreateCustomCategoryInput,
   UpdateCustomCategoryInput,
   GetCategoriesQuery,
-} from "@repo/schemas";
+} from "../schemas/index.js";
 
 function paginate(query: GetCategoriesQuery) {
   const { page = 1, limit = 10, search } = query;

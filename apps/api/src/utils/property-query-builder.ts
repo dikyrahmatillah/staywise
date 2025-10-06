@@ -1,4 +1,4 @@
-import type { GetPropertiesParams } from "@repo/schemas";
+import type { GetPropertiesParams } from "../schemas/index.js";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "../configs/prisma.config.js";
 

@@ -4,7 +4,7 @@ import {
   validateBookingDataSafe,
   bookingValidationUtils,
   type BookingFormData,
-} from "@repo/schemas";
+} from "../../../schemas/index.js";
 import { midtransService } from "../../midtrans.service.js";
 import { BookingUtilsService } from "./booking-utils.service.js";
 import type {

@@ -6,7 +6,7 @@ import {
   ForgotPasswordSchema,
   ResetPasswordWithTokenSchema,
   changePasswordSchema,
-} from "@repo/schemas";
+} from "../schemas/index.js";
 import { NextFunction, Request, Response } from "express";
 import { RegistrationService } from "../services/registration.service.js";
 import { AuthenticationService } from "../services/authentication.service.js";
@@ -16,7 +16,7 @@ import {
   changeEmailRequestSchema,
   changeEmailSchema,
   OAuthUserSchema,
-} from "@repo/schemas";
+} from "../schemas/index.js";
 
 export class AuthController {
   private authService = new AuthenticationService();

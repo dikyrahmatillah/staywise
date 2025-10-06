@@ -3,8 +3,8 @@ import {
   bookingValidationUtils,
   type BookingFormData,
   type BookingValidationResult,
-} from "@repo/schemas";
-import type { BookingTotals } from "@repo/types";
+} from "../../../schemas/index.js";
+import type { BookingTotals } from "../../../types/booking.js";
 
 export class BookingUtilsService {
   /**
@@ -86,7 +86,7 @@ export class BookingUtilsService {
     maxGuests?: number | null
   ): { valid: boolean; message?: string } {
     const totalGuests = adults + children;
-    
+
     if (maxGuests && totalGuests > maxGuests) {
       return {
         valid: false,
@@ -101,7 +101,10 @@ export class BookingUtilsService {
    * Check if booking period is valid
    */
   isValidBookingPeriod(checkInDate: Date, checkOutDate: Date): boolean {
-    return bookingValidationUtils.isValidBookingPeriod(checkInDate, checkOutDate);
+    return bookingValidationUtils.isValidBookingPeriod(
+      checkInDate,
+      checkOutDate
+    );
   }
 
   /**
@@ -119,7 +122,7 @@ export class BookingUtilsService {
    */
   formatValidationErrors(errors: Record<string, string[] | string>): string[] {
     const formattedErrors: string[] = [];
-    
+
     for (const [field, messages] of Object.entries(errors)) {
       if (Array.isArray(messages)) {
         formattedErrors.push(...messages);
@@ -127,7 +130,7 @@ export class BookingUtilsService {
         formattedErrors.push(messages);
       }
     }
-    
+
     return formattedErrors;
   }
 

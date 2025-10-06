@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { getPropertiesQuerySchema } from "@repo/schemas";
+import { getPropertiesQuerySchema } from "../schemas/index.js";
 import { PropertyCrudService } from "../services/property-crud.service.js";
 import { PropertySearchService } from "../services/property-search.service.js";
 

@@ -4,7 +4,7 @@ import type {
   CreateReviewInput,
   UpdateReviewInput,
   GetReviewsQuery,
-} from "@repo/schemas";
+} from "../schemas/index.js";
 
 export class ReviewService {
   async createReview(userId: string, data: CreateReviewInput) {

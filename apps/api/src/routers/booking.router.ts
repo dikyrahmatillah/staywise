@@ -8,7 +8,7 @@ import {
   handleMulterError,
 } from "../middlewares/upload-payment-proof.middleware.js";
 import { validateParams } from "../middlewares/validate.middleware.js";
-import { PaymentProofParamsSchema } from "@repo/schemas";
+import { PaymentProofParamsSchema } from "../schemas/index.js";
 
 const router = Router();
 

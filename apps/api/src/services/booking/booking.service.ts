@@ -9,7 +9,7 @@ import type {
   BookingTotals,
 } from "../../types/booking.js";
 import { faker } from "@faker-js/faker";
-import type { BookingValidationResult } from "@repo/schemas";
+import type { BookingValidationResult } from "../../schemas/index.js";
 import type { BookingPaymentMethod, OrderStatus } from "@prisma/client";
 import { prisma } from "../../configs/prisma.config.js";
 import { snap } from "../../configs/midtrans.config.js";

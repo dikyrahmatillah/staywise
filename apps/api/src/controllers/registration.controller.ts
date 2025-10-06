@@ -2,7 +2,7 @@ import {
   RegistrationStartSchema,
   CompleteRegistrationSchema,
   OAuthUserSchema,
-} from "@repo/schemas";
+} from "../schemas/index.js";
 import { NextFunction, Request, Response } from "express";
 import { RegistrationService } from "../services/registration.service.js";
 import { FileService } from "../services/file.service.js";

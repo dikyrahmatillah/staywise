@@ -1,6 +1,6 @@
 import { prisma } from "../configs/prisma.config.js";
 import { AppError } from "../errors/app.error.js";
-import { CreatePriceAdjustmentInput } from "@repo/schemas";
+import { CreatePriceAdjustmentInput } from "../schemas/index.js";
 
 export class RoomPricingService {
   async createPriceAdjustment(

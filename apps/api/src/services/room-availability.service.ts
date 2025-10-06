@@ -4,7 +4,7 @@ import {
   BlockRoomDatesInput,
   UnblockRoomDatesInput,
   GetRoomAvailabilityInput,
-} from "@repo/schemas";
+} from "../schemas/index.js";
 
 export class RoomAvailabilityService {
   async getRoomAvailability(roomId: string, params: GetRoomAvailabilityInput) {

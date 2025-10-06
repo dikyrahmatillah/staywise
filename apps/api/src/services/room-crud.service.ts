@@ -1,6 +1,6 @@
 import { prisma } from "../configs/prisma.config.js";
 import { AppError } from "../errors/app.error.js";
-import { CreateRoomInput, UpdateRoomInput } from "@repo/schemas";
+import { CreateRoomInput, UpdateRoomInput } from "../schemas/index.js";
 
 export class RoomCrudService {
   private async ensurePropertyMaxGuests(propertyId: string) {

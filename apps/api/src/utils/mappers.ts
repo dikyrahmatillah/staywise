@@ -1,4 +1,4 @@
-import type { CreatePropertyInput } from "@repo/schemas";
+import type { CreatePropertyInput } from "../schemas/index.js";
 
 export type PictureInput = NonNullable<CreatePropertyInput["pictures"]>[number];
 export type FacilityInput = NonNullable<

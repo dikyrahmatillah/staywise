@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { createPropertyInputSchema } from "@repo/schemas";
+import { createPropertyInputSchema } from "../schemas/index.js";
 import { FileService } from "../services/file.service.js";
 import { PropertyCrudService } from "../services/property-crud.service.js";
 
