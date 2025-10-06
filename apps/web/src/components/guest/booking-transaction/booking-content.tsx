@@ -41,7 +41,9 @@ export function BookingContent() {
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
-            <h1 className="text-3xl font-semibold">Request to book</h1>
+            <h1 className="font-display text-3xl font-semibold">
+              Request to book
+            </h1>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

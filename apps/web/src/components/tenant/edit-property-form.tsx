@@ -62,7 +62,7 @@ export function EditPropertyForm({ propertyId }: EditPropertyFormProps) {
         <div className="bg-transparent rounded-xl p-0">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div className="space-y-1">
-              <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">
+              <h1 className="font-display text-2xl font-semibold text-slate-900 dark:text-slate-100">
                 Edit Property
               </h1>
               <p className="text-muted-foreground">

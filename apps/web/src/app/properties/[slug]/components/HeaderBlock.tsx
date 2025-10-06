@@ -74,7 +74,7 @@ export function HeaderBlock({ name }: { name: string }) {
 
       <div className="flex items-end justify-between gap-4">
         <div className="flex-1">
-          <h1 className="text-2xl sm:text-4xl font-bold tracking-tight  leading-tight">
+          <h1 className="font-display text-2xl sm:text-4xl font-bold tracking-tight  leading-tight">
             {name}
           </h1>
         </div>

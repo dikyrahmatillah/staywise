@@ -32,7 +32,7 @@ export default async function GuestDashboardPage() {
           </div>
 
           {/* Empty State Content */}
-          <h2 className="text-2xl font-semibold font-sans text-gray-900 mb-3">
+          <h2 className="font-display text-2xl font-semibold text-gray-900 mb-3">
             Welcome to StayWise!
           </h2>
           <p className="text-gray-600 font-sans mb-8">

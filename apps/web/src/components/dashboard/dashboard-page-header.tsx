@@ -16,7 +16,9 @@ export function DashboardPageHeader({
   return (
     <div className="grid gap-4 md:grid-cols-[1fr_auto] md:items-center">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+        <h1 className="font-display text-2xl font-semibold tracking-tight">
+          {title}
+        </h1>
         {description && (
           <p className="text-lg text-muted-foreground max-w-md">
             {description}
