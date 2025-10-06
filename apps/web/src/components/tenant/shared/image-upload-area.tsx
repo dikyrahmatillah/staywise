@@ -111,23 +111,29 @@ export function ImageUploadArea({
           if (e.dataTransfer?.files?.length)
             validateAndHandleFiles(e.dataTransfer.files);
         }}
-        className="relative border-2 border-dashed border-gray-300 rounded-xl p-12 text-center transition-all duration-200 hover:border-primary/40 bg-gradient-to-br from-gray-50/50 to-white cursor-pointer"
+        className="group relative border-2 border-dashed border-gray-300 rounded-xl p-6 sm:p-12 text-center sm:text-left transition-all duration-200 hover:border-primary/40 bg-gradient-to-br from-gray-50/50 to-white cursor-pointer"
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-purple-50/20 rounded-xl opacity-0 transition-opacity duration-300" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-purple-50/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
         <div className="relative z-10">
-          <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-6">
-            <Upload className="w-8 h-8 text-primary" />
+          <div className="sm:flex sm:items-center sm:gap-6">
+            <div className="mx-auto sm:mx-0 w-12 h-12 sm:w-16 sm:h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4 sm:mb-0">
+              <Upload className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
+            </div>
+
+            <div className="max-w-xl">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-1">
+                Upload Property Images
+              </h3>
+              <p className="text-xs sm:text-base text-gray-600 mb-1">
+                Drag and drop your images here, or click to browse
+              </p>
+              <p className="text-xs sm:text-sm text-gray-500 mb-4">
+                Maximum file size: {maxSizeMB}MB • Supported formats:{" "}
+                {allowedFormats.join(", ").toUpperCase()}
+              </p>
+            </div>
           </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            Upload Property Images
-          </h3>
-          <p className="text-gray-600 mb-2">
-            Drag and drop your images here, or click to browse
-          </p>
-          <p className="text-sm text-gray-500 mb-6">
-            Maximum file size: {maxSizeMB}MB • Supported formats:{" "}
-            {allowedFormats.join(", ").toUpperCase()}
-          </p>
+
           <input
             ref={fileInputRef}
             type="file"
