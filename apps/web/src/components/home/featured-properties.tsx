@@ -3,13 +3,12 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
-import { Users, Star, MapPin } from "lucide-react";
+import { Star } from "lucide-react";
 import PagerControls from "@/components/ui/pager-controls";
 import { useProperties } from "@/hooks/useProperties";
 import type { Property } from "@/types/property";
 import { useEffect, useState } from "react";
 import { formatCurrency } from "@/lib/booking-formatters";
-import { getGuestRange } from "@/components/tenant/property-utils";
 
 export default function FeaturedProperties() {
   const { data, isLoading, isError } = useProperties({ limit: 8 });
@@ -47,7 +46,7 @@ export default function FeaturedProperties() {
         <div className="relative">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-xl font-bold sm:text-3xl text-slate-900">
+              <h2 className="font-display text-xl font-bold sm:text-3xl text-slate-900">
                 Featured Properties
               </h2>
               <p className="text-sm md:text-base text-slate-600">
@@ -97,43 +96,23 @@ export default function FeaturedProperties() {
                         className="w-full h-full object-cover"
                       />
                     </div>
-                    <CardContent className="px-3 pb-3">
-                      <CardTitle className="text-lg mb-1 line-clamp-1">
+                    <CardContent className="px-3 py-3">
+                      <CardTitle className="text-md mb-1 line-clamp-1">
                         {property.name}
                       </CardTitle>
-                      <div className="flex items-center gap-2 text-sm text-slate-500 mb-1">
-                        <MapPin className="w-4 h-4 text-slate-400" />
-                        <span>{property.city}</span>
+                      <div className="flex items-center gap-2 text-xs text-slate-500 mb-3">
+                        <span>
+                          {property.city}, {property.country}
+                        </span>
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-slate-600 mb-1">
-                        <div className="flex items-center gap-1">
-                          <Users className="w-4 h-4" />
-                          <span>
-                            {(() => {
-                              type PropLike = {
-                                Rooms?: unknown[];
-                                maxGuests?: number;
-                              };
-                              const { min, max } = getGuestRange(
-                                property as PropLike
-                              );
-                              return min === max
-                                ? `${min} Guests`
-                                : `${min}-${max} Guests`;
-                            })()}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <span>{property.Rooms.length || 0} Rooms</span>
-                        </div>
-                      </div>
+
                       <p className="text-sm text-slate-600 mb-4 line-clamp-2">
                         {property.description}
                       </p>
 
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-lg font-bold">
+                          <p className="text-md font-bold">
                             {formatCurrency(property.priceFrom)}
                             <span className="text-sm font-normal text-slate-600">
                               /night

@@ -1,59 +1,13 @@
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { CheckCircle, AlertCircle } from "lucide-react";
-
-interface CompletionCheck {
-  label: string;
-  completed: boolean;
-  details: string;
-}
+import { Card, CardContent } from "@/components/ui/card";
+import { AlertCircle } from "lucide-react";
 
 interface CompletionStatusProps {
-  completionChecks: CompletionCheck[];
   allCompleted: boolean;
 }
 
-export const CompletionStatus = ({
-  completionChecks,
-  allCompleted,
-}: CompletionStatusProps) => {
+export const CompletionStatus = ({ allCompleted }: CompletionStatusProps) => {
   return (
     <>
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            {allCompleted ? (
-              <CheckCircle className="w-5 h-5 text-green-500" />
-            ) : (
-              <AlertCircle className="w-5 h-5 text-orange-500" />
-            )}
-            Completion Status
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {completionChecks.map((check, index) => (
-              <div key={index} className="flex items-start gap-3">
-                {check.completed ? (
-                  <CheckCircle className="w-5 h-5 text-green-500 mt-0.5" />
-                ) : (
-                  <AlertCircle className="w-5 h-5 text-orange-500 mt-0.5" />
-                )}
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium">{check.label}</span>
-                    <Badge variant={check.completed ? "default" : "secondary"}>
-                      {check.completed ? "Complete" : "Incomplete"}
-                    </Badge>
-                  </div>
-                  <p className="text-sm text-gray-600 mt-1">{check.details}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
       {!allCompleted && (
         <Card className="border-orange-200 bg-orange-50">
           <CardContent className="pt-6">

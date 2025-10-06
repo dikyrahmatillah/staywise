@@ -85,7 +85,7 @@ export function ExpandedSearch({
             aria-label="Search listings"
             className="group relative flex h-12 w-full min-w-[8rem] items-center justify-center overflow-hidden rounded-full border border-gray-300 bg-primary px-6 text-sm font-medium text-primary-foreground transition-all duration-300 hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:h-14 sm:w-auto sm:px-8"
           >
-            <span className="relative z-10 flex items-center gap-3 transition-all duration-300 ease-out group-hover:-translate-y-4 group-hover:opacity-0 text-base sm:text-">
+            <span className="font-display font-semibold relative z-10 flex items-center gap-3 transition-all duration-300 ease-out group-hover:-translate-y-4 group-hover:opacity-0 text-base sm:text-lg">
               Search
             </span>
             <span className="absolute inset-0 flex translate-y-6 items-center justify-center opacity-0 transition-all duration-300 ease-out group-hover:translate-y-0 group-hover:opacity-100">

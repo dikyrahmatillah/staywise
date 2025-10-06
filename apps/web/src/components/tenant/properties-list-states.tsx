@@ -27,7 +27,7 @@ export const LoadingState = () => {
           Loading Properties
         </h3>
         <p className="text-muted-foreground text-sm">
-          Fetching your property listings...
+          Searching your property listings...
         </p>
       </div>
     </div>

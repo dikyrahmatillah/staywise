@@ -118,7 +118,7 @@ export default function CategorySelector({
             Property Category
           </CardTitle>
           <p className="text-sm text-muted-foreground">
-            Pick the category that best matches your place. You can choose one
+            Pick the category that best matches your place. You must choose one
             of our presets or create your own label to suit unique spaces.
           </p>
         </CardHeader>

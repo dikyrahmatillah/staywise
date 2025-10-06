@@ -1,15 +1,30 @@
 import type { Metadata } from "next";
-import { Figtree, Geist_Mono } from "next/font/google";
+import {
+  Plus_Jakarta_Sans,
+  Playfair_Display,
+  Geist_Mono,
+} from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import QueryProvider from "@/components/providers/query-provider";
 import AuthProvider from "@/components/providers/auth-provider";
 import { Toaster } from "@/components/ui/sonner";
+import { defaultMetadata } from "@/lib/metadata";
+import { OrganizationJsonLd, WebsiteJsonLd } from "@/components/json-ld";
 
-const figtree = Figtree({
-  variable: "--font-figtree",
+const plusJakartaSans = Plus_Jakarta_Sans({
+  variable: "--font-plus-jakarta-sans",
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700", "800"],
+  display: "swap",
+});
+
+const playfairDisplay = Playfair_Display({
+  variable: "--font-playfair-display",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
@@ -17,10 +32,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "StayWise",
-  description: "Your one-stop solution for finding the perfect rental property",
-};
+export const metadata: Metadata = defaultMetadata;
 
 export default function RootLayout({
   children,
@@ -29,9 +41,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${figtree.variable} ${geistMono.variable} antialiased`}>
+      <body
+        className={`${plusJakartaSans.variable} ${playfairDisplay.variable} ${geistMono.variable} antialiased`}
+      >
         <AuthProvider>
           <QueryProvider>
+            <OrganizationJsonLd />
+            <WebsiteJsonLd />
             <Toaster />
             <Header />
             <main className="min-h-[calc(100vh-12rem)]">{children}</main>

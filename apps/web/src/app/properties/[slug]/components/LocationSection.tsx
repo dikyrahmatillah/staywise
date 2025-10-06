@@ -17,7 +17,9 @@ export function LocationSection({
     <section id="location" className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <h3 className="text-xl font-bold text-slate-800">Location</h3>
+          <h3 className="font-display text-xl font-bold text-slate-800">
+            Location
+          </h3>
         </div>
       </div>
 

@@ -66,8 +66,10 @@ export function Footer() {
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 mb-8">
           <div className="flex flex-col">
             <div className="flex items-center space-x-2 mb-4">
-              <HiHome className="h-6 w-6 font-sans text-rose-500" />
-              <span className="font-bold text-lg text-rose-500">StayWise</span>
+              <HiHome className="h-6 w-6 text-rose-500" />
+              <span className="font-display font-bold text-lg text-rose-500">
+                StayWise
+              </span>
             </div>
             <p className="text-sm text-gray-600 mb-4">
               Find your perfect stay, anywhere in the world.

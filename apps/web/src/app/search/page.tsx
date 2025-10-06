@@ -16,7 +16,7 @@ function SearchPageInner() {
 
   return (
     <div className="container mx-auto px-6 py-8">
-      <h1 className="font-sans text-3xl font-bold mb-8">Search Results</h1>
+      <h1 className="font-display text-3xl font-bold mb-8">Search Results</h1>
 
       <div className="font-sans bg-white rounded-lg border p-6 mb-8">
         <h2 className="font-sans text-xl font-semibold mb-4">

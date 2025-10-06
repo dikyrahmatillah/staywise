@@ -46,17 +46,17 @@ export function PropertyCard({ property }: PropertyCardProps) {
           )}
         </div>
         <CardContent className="p-4">
-          <CardHeader className="p-0 mb-3">
-            <CardTitle className="text-lg truncate min-w-0">
+          <CardHeader className="p-0 mb-2">
+            <CardTitle className="text-xl truncate min-w-0">
               {property.name}
             </CardTitle>
-            <div className="flex items-center gap-1 text-muted-foreground text-sm">
+            <div className="flex items-center gap-1 text-muted-foreground text-xs">
               <MapPin className="h-4 w-4" />
               <span>{property.city}</span>
             </div>
           </CardHeader>
 
-          <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
+          <div className="flex items-center gap-4 text-xs text-muted-foreground mb-4">
             <div className="flex items-center gap-1">
               <Users className="h-4 w-4" />
               <span>

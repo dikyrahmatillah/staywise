@@ -16,7 +16,10 @@ async function fetchUnavailableDates(roomId: string | undefined | null) {
   return res.data.data as { unavailableDates: string[] } | null;
 }
 
-export default function usePropertyDetails(slug?: string | null) {
+export default function usePropertyDetails(
+  slug?: string | null,
+  initialData?: DetailResponse | null
+) {
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
   const [unavailableDates, setUnavailableDates] = useState<Date[]>([]);
 
@@ -25,6 +28,7 @@ export default function usePropertyDetails(slug?: string | null) {
     queryFn: () => fetchPropertyDetails(String(slug)),
     enabled: Boolean(slug),
     errorMessage: "Failed to fetch property details",
+    ...(initialData && { initialData }),
   });
 
   useEffect(() => {

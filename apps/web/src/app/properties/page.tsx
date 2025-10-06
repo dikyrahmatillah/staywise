@@ -52,7 +52,7 @@ function PropertiesPageInner() {
   return (
     <div className="min-h-screen bg-background">
       <div className="relative">
-        <div className="container mx-auto px-4 pb-16 pt-10">
+        <div className="container mx-auto px-4 pb-16 pt-8">
           <div className="sm:mt-10 space-y-10">
             <FiltersBar params={params} onChange={updateSearchParams} />
 
@@ -70,7 +70,7 @@ function PropertiesPageInner() {
                 <div className="flex flex-col items-center justify-center gap-3 text-sm font-medium text-muted-foreground">
                   <Ellipsis size={12} className="inline-block" />
                   <div className="mt-2 text-sm text-muted-foreground">
-                    Fetching curated stays for you...
+                    Searching for properties...
                   </div>
                 </div>
               </div>

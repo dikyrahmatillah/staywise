@@ -28,7 +28,7 @@ export function RoomsSection({
 
   return (
     <div className="space-y-4">
-      <h3 className="text-xl font-semibold">Room options</h3>
+      <h3 className="font-display text-xl font-semibold">Room options</h3>
       <div className="grid gap-4 grid-cols-1">
         {rooms.map((room) => {
           const isSelected = selectedRoomId === room.id;
