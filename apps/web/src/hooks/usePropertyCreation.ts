@@ -40,6 +40,7 @@ export function usePropertyCreation() {
       toast.success("Property created successfully!");
       queryClient.invalidateQueries({ queryKey: ["properties"] });
       router.push("/dashboard/tenant/properties");
+      router.refresh();
     },
     onError: (err: unknown) => {
       console.error("Error creating property:", err);

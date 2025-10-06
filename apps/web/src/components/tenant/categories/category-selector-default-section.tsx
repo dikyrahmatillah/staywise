@@ -31,10 +31,11 @@ export function CategorySelectorDefaultSection({
         <div className="flex items-start gap-3">
           <div>
             <p className="text-sm font-medium text-foreground">
-              Recommended categories
+              Recommended categories *
             </p>
             <p className="text-xs text-muted-foreground">
               Curated suggestions to help you label your listing faster.
+              Selection is required.
             </p>
           </div>
         </div>
@@ -53,7 +54,9 @@ export function CategorySelectorDefaultSection({
               onClick={() => onSelect(cat.id)}
               className={
                 "group relative flex h-full flex-col items-start gap-3 rounded-2xl border bg-card/80 p-4 text-left transition-all duration-200 hover:border-primary/50 cursor-pointer" +
-                (selectedId === cat.id ? " border-primary bg-primary/5" : "")
+                (selectedId === cat.id
+                  ? " border-primary bg-primary/5"
+                  : " border-muted-foreground/20")
               }
             >
               <div className="flex-1 space-y-1">

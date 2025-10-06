@@ -130,7 +130,7 @@ export const updatePropertyInputSchema = z.object({
   pictures: z.array(createPropertyPictureSchema).optional(),
   facilities: z.array(createFacilitySchema).optional(),
   propertyCategoryId: z.uuid().optional(),
-  customCategoryId: z.uuid().optional(),
+  customCategoryId: z.uuid().optional().nullable(),
 });
 
 export type CreatePropertyInput = z.infer<typeof createPropertyInputSchema>;

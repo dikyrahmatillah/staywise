@@ -46,7 +46,6 @@ const getMaxGuestsFromRooms = (
 
 const getCompletionChecks = (formData: FormData): CompletionCheck[] => {
   const defaultName = formData.propertyCategoryName ?? null;
-  const customName = formData.customCategoryName ?? null;
 
   return [
     {
@@ -65,16 +64,12 @@ const getCompletionChecks = (formData: FormData): CompletionCheck[] => {
     },
     {
       label: "Category",
-      completed: !!(formData.propertyCategoryId || formData.customCategoryId),
+      completed: !!formData.propertyCategoryId,
       details: formData.propertyCategoryId
         ? `Default category selected${
             defaultName ? `: ${formData.propertyCategoryName}` : ""
           }`
-        : formData.customCategoryId
-        ? `Custom category selected${
-            customName ? `: ${formData.customCategoryName}` : ""
-          }`
-        : "Not selected",
+        : "Default category not selected",
     },
     {
       label: "Rooms",
@@ -104,10 +99,7 @@ export function ReviewStep() {
 
   return (
     <div className="space-y-6">
-      <CompletionStatus
-        completionChecks={completionChecks}
-        allCompleted={allCompleted}
-      />
+      <CompletionStatus allCompleted={allCompleted} />
 
       <Card>
         <CardHeader>

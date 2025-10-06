@@ -19,8 +19,10 @@ export function buildPropertyFormData(
   if (formData.latitude) fd.append("latitude", formData.latitude);
   if (formData.longitude) fd.append("longitude", formData.longitude);
 
-  fd.append("propertyCategoryId", property?.propertyCategoryId || "");
-  fd.append("customCategoryId", property?.customCategoryId || "");
+  if (property?.propertyCategoryId)
+    fd.append("propertyCategoryId", property.propertyCategoryId);
+
+  fd.append("customCategoryId", property?.customCategoryId ?? "");
 
   if (property?.Facilities) {
     fd.append(

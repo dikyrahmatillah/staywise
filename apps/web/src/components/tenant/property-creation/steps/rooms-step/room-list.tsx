@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Bed, Trash2, DollarSign, Users } from "lucide-react";
 import Image from "next/image";
 import { RoomFormData } from "./types";
+import formatRupiah from "@/lib/formatters";
 
 type RoomListProps = {
   rooms: RoomFormData[];
@@ -82,8 +83,8 @@ export function RoomList({
                         </h3>
                         <div className="flex items-center gap-4 mt-1">
                           <Badge variant="secondary" className="text-xs">
-                            <DollarSign className="w-3 h-3 mr-1" />$
-                            {room.basePrice}/night
+                            <DollarSign className="w-3 h-3 mr-1" />
+                            {formatRupiah(room.basePrice)} / night
                           </Badge>
                           <Badge variant="outline" className="text-xs">
                             <Users className="w-3 h-3 mr-1" />

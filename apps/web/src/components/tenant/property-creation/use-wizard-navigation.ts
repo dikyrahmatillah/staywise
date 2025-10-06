@@ -60,9 +60,7 @@ export function useWizardNavigation() {
         case 2:
           return Boolean(formData.country || formData.city || formData.address);
         case 3:
-          return Boolean(
-            formData.propertyCategoryId || formData.customCategoryId
-          );
+          return Boolean(formData.propertyCategoryId);
         case 4:
           return Boolean(formData.rooms && formData.rooms.length > 0);
         case 5:
