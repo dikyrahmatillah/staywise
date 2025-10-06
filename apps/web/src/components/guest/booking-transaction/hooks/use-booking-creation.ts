@@ -37,6 +37,7 @@ export function useBookingCreation() {
     const bookingData = {
       userId: session.user.id,
       propertyId: bookingDetails.propertyId,
+      propertyName: bookingDetails.propertyName,
       roomId: bookingDetails.roomId,
       checkInDate: bookingDetails.checkIn.toISOString().split("T")[0],
       checkOutDate: bookingDetails.checkOut.toISOString().split("T")[0],

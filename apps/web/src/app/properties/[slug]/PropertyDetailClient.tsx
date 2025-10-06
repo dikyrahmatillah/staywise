@@ -125,6 +125,10 @@ export function PropertyDetailClient({ slug }: { slug: string }) {
               propertyId={property.id}
               selectedRoom={selectedRoom}
               unavailableDates={unavailableDates}
+              propertyName={property.name}
+              propertyCity={property.city}
+              propertyRating={rating}
+              reviewCount={reviewCount}
             />
           </div>
         </div>

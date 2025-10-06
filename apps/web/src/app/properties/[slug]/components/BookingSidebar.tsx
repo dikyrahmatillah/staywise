@@ -38,6 +38,10 @@ interface BookingSidebarProps {
   propertyId?: string;
   unavailableDates?: Date[];
   selectedRoom?: Room | null;
+  propertyName?: string;
+  propertyCity?: string;
+  propertyRating?: number;
+  reviewCount?: number;
 }
 
 export function BookingSidebar({
@@ -46,6 +50,10 @@ export function BookingSidebar({
   propertyId,
   unavailableDates = [],
   selectedRoom,
+  propertyName,
+  propertyCity,
+  propertyRating,
+  reviewCount,
 }: BookingSidebarProps) {
   const router = useRouter();
   const { data: session, status } = useSession();
@@ -313,17 +321,22 @@ export function BookingSidebar({
       const loadingToast = toast.loading("Processing your booking...");
 
       const formatDateForBooking = (date: Date): string => {
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
-    };
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+      };
 
       const bookingParams = new URLSearchParams({
         propertyId: propertyId || "1",
         roomId: selectedRoom?.id || "",
-        checkIn: formatDateForBooking(checkInDate!), 
-      checkOut: formatDateForBooking(checkOutDate!),
+        roomName: selectedRoom?.name || "",
+        propertyName: propertyName || "",
+        propertyCity: propertyCity || "",
+        propertyRating: propertyRating?.toString() || "0",
+        reviewCount: reviewCount?.toString() || "0",
+        checkIn: formatDateForBooking(checkInDate!),
+        checkOut: formatDateForBooking(checkOutDate!),
         adults: adults.toString(),
         children: childrenCount.toString(),
         pets: pets.toString(),
