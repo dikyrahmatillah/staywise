@@ -5,4 +5,4 @@ export type {
   OrderStatus,
   UserRole,
   // Add other commonly used Prisma types as needed
-} from "../generated/prisma/index.js";
+} from "@prisma/client";

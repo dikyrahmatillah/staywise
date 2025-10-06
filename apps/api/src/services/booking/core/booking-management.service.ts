@@ -4,7 +4,7 @@
 import { prisma } from "../../../configs/prisma.config.js";
 import { AppError } from "../../../errors/app.error.js";
 import type { BookingFilters } from "../../../types/booking.js";
-import type { OrderStatus } from "../../../generated/prisma/index.js";
+import type { OrderStatus } from "@prisma/client";
 
 export class BookingManagementService {
   // Common select object to ensure consistency
