@@ -14,6 +14,13 @@ export class EmailService {
     });
   }
 
+  getDefaultFrom() {
+    const envFrom = process.env.RESEND_FROM;
+    if (envFrom && /.+@.+\..+/.test(envFrom)) return envFrom;
+    if (envFrom && /.+<.+@.+>/.test(envFrom)) return envFrom;
+    return "StayWise <mail@staywise.rent>";
+  }
+
   async sendPasswordResetEmail(email: string, resetToken: string) {
     const webUrl = process.env.WEB_APP_URL || "http://localhost:3000";
     const resetLink = `${webUrl}/reset-password?token=${encodeURIComponent(
@@ -28,7 +35,7 @@ export class EmailService {
     const html = compiledTemplate({ email, token: resetToken, resetLink });
 
     await resend.emails.send({
-      from: "StayWise <onboarding@resend.dev>",
+      from: this.getDefaultFrom(),
       to: email,
       subject: "Password Reset",
       html,
@@ -50,7 +57,7 @@ export class EmailService {
     const html = compiledTemplate({ verifyLink });
 
     await resend.emails.send({
-      from: "StayWise <onboarding@resend.dev>",
+      from: this.getDefaultFrom(),
       to: email,
       subject: "Verify your StayWise account",
       html,
@@ -75,7 +82,7 @@ export class EmailService {
       amountPaid: string;
       currency: string;
       manageBookingUrl: string;
-      supportEmail: string;
+      mail: string;
       year: string;
     }
   ) {
@@ -88,7 +95,7 @@ export class EmailService {
     const html = compiledTemplate(bookingData);
 
     await resend.emails.send({
-      from: "StayWise <onboarding@resend.dev>",
+      from: this.getDefaultFrom(),
       to: email,
       subject: "Payment Confirmed – Your Stay is Booked!",
       html,
@@ -114,7 +121,7 @@ Manage your booking here: ${bookingData.manageBookingUrl}`,
     const html = compiledTemplate({ verifyLink });
 
     await resend.emails.send({
-      from: "StayWise <onboarding@resend.dev>",
+      from: this.getDefaultFrom(),
       to: newEmail,
       subject: "Confirm your new email",
       html,
