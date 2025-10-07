@@ -12,6 +12,7 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
+    "skipLibCheck": true,
     "skipDefaultLibCheck": true
   },
   "include": ["src", "prisma", "generated"],
