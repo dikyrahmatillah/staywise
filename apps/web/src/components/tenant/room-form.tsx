@@ -20,9 +20,7 @@ import { ImageField } from "./room-form/image-field";
 interface RoomFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (
-    data: CreateRoomInput | UpdateRoomInput | FormData
-  ) => Promise<void>;
+  onSubmit: (data: CreateRoomInput | UpdateRoomInput) => Promise<void>;
   room?: Room;
   title: string;
   description: string;
@@ -36,6 +34,15 @@ export function RoomForm({
   title,
   description,
 }: RoomFormProps) {
+  // Wrapper to handle both FormData and plain objects
+  const handleSubmitWrapper = async (
+    data: CreateRoomInput | UpdateRoomInput | FormData
+  ) => {
+    // Cast FormData back to the expected type for the parent handler
+    // The actual API call in useRooms handles FormData properly
+    await onSubmit(data as CreateRoomInput | UpdateRoomInput);
+  };
+
   const {
     isSubmitting,
     formData,
@@ -50,7 +57,7 @@ export function RoomForm({
     pickImage,
     handleFileChange,
     truncateFileName,
-  } = useRoomForm({ open, onOpenChange, onSubmit, room });
+  } = useRoomForm({ open, onOpenChange, onSubmit: handleSubmitWrapper, room });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
