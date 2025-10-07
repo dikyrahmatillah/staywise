@@ -17,16 +17,16 @@ export function FacilitiesCard({
   onChange,
 }: Props) {
   const toCreateFacility = (
-    f: string | { facility?: string }
+    f: AmenityType | { facility?: AmenityType }
   ): CreateFacilityInput =>
     typeof f === "string"
       ? { facility: f as AmenityType }
-      : { facility: (f.facility as string) || "" };
+      : { facility: f.facility as AmenityType };
 
   const initial: CreateFacilityInput[] =
     controlledSelected ??
     (property?.Facilities || []).map(
-      (f: string | { facility?: string; note?: string | null }) =>
+      (f: AmenityType | { facility?: AmenityType; note?: string | null }) =>
         toCreateFacility(f)
     );
 
@@ -39,7 +39,7 @@ export function FacilitiesCard({
       return;
     }
     const mapped: CreateFacilityInput[] = (property?.Facilities || []).map(
-      (f: string | { facility?: string; note?: string | null }) =>
+      (f: AmenityType | { facility?: AmenityType; note?: string | null }) =>
         toCreateFacility(f)
     );
     setSelected(mapped);
@@ -54,12 +54,12 @@ export function FacilitiesCard({
     }
   };
 
-  const handleFacilityToggle = (facility: string) => {
+  const handleFacilityToggle = (facility: AmenityType) => {
     const isSelected = selectedFacilities.includes(facility);
     if (isSelected) {
       updateSelected(selected.filter((f) => f.facility !== facility));
     } else {
-      updateSelected([...selected, { facility: facility as AmenityType }]);
+      updateSelected([...selected, { facility: facility }]);
     }
   };
 
