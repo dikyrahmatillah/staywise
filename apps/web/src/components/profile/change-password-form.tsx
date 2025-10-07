@@ -12,7 +12,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { changePasswordSchema, ChangePasswordInput } from "@/schemas";
+import {
+  changePasswordClientSchema,
+  ChangePasswordClientInput,
+  ChangePasswordInput,
+} from "@/schemas";
 import api from "@/lib/axios";
 import { Loader2, Lock, ShieldCheck, ShieldEllipsis } from "lucide-react";
 import { useSession } from "next-auth/react";
@@ -35,17 +39,8 @@ export function ChangePasswordForm() {
     watch,
     formState: { errors, isSubmitting },
     reset,
-  } = useForm<ChangePasswordInput & { confirmPassword: string }>({
-    resolver: zodResolver(
-      changePasswordSchema
-        .extend({
-          confirmPassword: changePasswordSchema.shape.newPassword,
-        })
-        .refine((data) => data.newPassword === data.confirmPassword, {
-          message: "Passwords do not match",
-          path: ["confirmPassword"],
-        })
-    ),
+  } = useForm<ChangePasswordClientInput>({
+    resolver: zodResolver(changePasswordClientSchema),
   });
 
   const newPasswordValue = watch("newPassword");
@@ -115,7 +110,7 @@ export function ChangePasswordForm() {
           <PasswordChecklist insights={passwordInsights} />
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <PasswordInput
+            <PasswordInput<ChangePasswordClientInput>
               id="currentPassword"
               label="Current password"
               icon={Lock}
@@ -126,7 +121,7 @@ export function ChangePasswordForm() {
               register={register}
             />
 
-            <PasswordInput
+            <PasswordInput<ChangePasswordClientInput>
               id="newPassword"
               label="New password"
               icon={ShieldEllipsis}
@@ -137,7 +132,7 @@ export function ChangePasswordForm() {
               register={register}
             />
 
-            <PasswordInput
+            <PasswordInput<ChangePasswordClientInput>
               id="confirmPassword"
               label="Confirm new password"
               icon={ShieldCheck}

@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
 import type { PasswordInputProps } from "./types";
+import type { Path } from "react-hook-form";
 
-export function PasswordInput({
+export function PasswordInput<T extends Record<string, unknown>>({
   id,
   label,
   icon: Icon,
@@ -16,7 +17,7 @@ export function PasswordInput({
   disabled,
   error,
   register,
-}: PasswordInputProps) {
+}: PasswordInputProps<T>) {
   return (
     <div className="space-y-2">
       <Label htmlFor={id}>{label}</Label>
@@ -30,7 +31,7 @@ export function PasswordInput({
           disabled={disabled}
           className="pl-9 pr-12"
           aria-invalid={Boolean(error)}
-          {...register(id)}
+          {...register(id as Path<T>)}
         />
         <Button
           type="button"
