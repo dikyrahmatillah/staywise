@@ -28,13 +28,11 @@ export default function SignInForm({ callbackUrl = "/dashboard" }: Props) {
   });
 
   const router = useRouter();
-  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   async function onSubmit(data: LoginInput) {
     setIsLoading(true);
-    setError("");
 
     try {
       const result = await signIn("credentials", {
@@ -46,7 +44,6 @@ export default function SignInForm({ callbackUrl = "/dashboard" }: Props) {
       if (result?.error) {
         const message = "Sign in failed";
         toast.error(message);
-        setError(message);
         setIsLoading(false);
         return;
       }
@@ -76,7 +73,6 @@ export default function SignInForm({ callbackUrl = "/dashboard" }: Props) {
       toast.error(
         "An error occurred during sign in. Please try again. " + (message || "")
       );
-      setError(message || "An unknown error occurred");
     } finally {
       setIsLoading(false);
     }
@@ -161,6 +157,8 @@ export default function SignInForm({ callbackUrl = "/dashboard" }: Props) {
             {isLoading ? "Signing in..." : "Sign in"}
           </Button>
         </form>
+
+        {/* error handling is done via Sonner toasts */}
 
         <div className="flex items-center gap-4 my-6">
           <div className="flex-1 h-px bg-border"></div>
