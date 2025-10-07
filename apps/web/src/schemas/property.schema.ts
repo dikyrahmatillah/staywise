@@ -40,8 +40,14 @@ export const getPropertiesQuerySchema = z.object({
   pets: coerceOptionalInt(0),
   name: z.string().optional(),
   category: z.string().optional(),
-  sortBy: z.union([z.literal("name"), z.literal("price")]).optional(),
-  sortOrder: z.union([z.literal("asc"), z.literal("desc")]).optional(),
+  sortBy: z.preprocess(
+    (v) => (v === "" ? undefined : v),
+    z.union([z.literal("name"), z.literal("price")]).optional()
+  ),
+  sortOrder: z.preprocess(
+    (v) => (v === "" ? undefined : v),
+    z.union([z.literal("asc"), z.literal("desc")]).optional()
+  ),
 });
 
 export const roomSummarySchema = z.object({
@@ -86,8 +92,8 @@ export type GetPropertiesParams = {
   pets?: number;
   name?: string;
   category?: string;
-  sortBy?: "name" | "price";
-  sortOrder?: "asc" | "desc";
+  sortBy?: "name" | "price" | "";
+  sortOrder?: "asc" | "desc" | "";
 };
 export const createPropertyCategoryInput = z.union([
   z.object({ propertyCategoryId: z.uuid() }),
@@ -140,7 +146,13 @@ export type CreatePropertyPictureInput = z.infer<
   typeof createPropertyPictureSchema
 >;
 export type Property = z.infer<typeof createPropertyInputSchema>;
-export type GetPropertiesQuery = z.infer<typeof getPropertiesQuerySchema>;
+export type GetPropertiesQuery = Omit<
+  z.infer<typeof getPropertiesQuerySchema>,
+  "sortBy" | "sortOrder"
+> & {
+  sortBy?: "name" | "price" | "";
+  sortOrder?: "asc" | "desc" | "";
+};
 export type RoomResponse = z.infer<typeof roomSummarySchema>;
 export type PropertyCategoryResponse = z.infer<typeof propertyCategorySchema>;
 export type PropertyResponse = z.infer<typeof propertyResponseSchema>;
