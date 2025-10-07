@@ -14,7 +14,7 @@ const Toaster = (props: ToasterProps) => {
         unstyled: true,
         classNames: {
           toast:
-            "toast bg-background text-foreground border-border shadow-lg rounded-lg p-4",
+            "toast bg-background text-foreground border-border shadow-lg rounded-lg p-4 flex items-center gap-3",
           description: "text-muted-foreground",
           actionButton: "bg-primary text-primary-foreground",
           cancelButton: "bg-muted text-muted-foreground",
