@@ -1,52 +1,33 @@
-import type {
-  AmenityType,
-  PropertyResponse,
-  RoomResponse,
-  CreatePropertyPictureInput,
-} from "@/schemas";
+import type { AmenityType, PropertyDetailResponse } from "@/schemas";
 
 export type Amenities = AmenityType;
-export type Property = PropertyResponse & {
+
+export type Property = {
+  id: string;
+  name: string;
+  city: string;
+  address: string;
   facilities?: { id: string; propertyId: string; facility: Amenities }[];
 };
 
 export type Facility = { id: string; propertyId: string; facility: Amenities };
-export type Room = RoomResponse & {
+
+export type Room = {
+  id: string;
+  name: string;
+  basePrice: number;
   bedCount?: number;
   bedType?: string | null;
   maxGuests?: number;
   capacity?: number;
   imageUrl?: string | null;
+  beds?: number;
 };
 
-export type DetailResponse = {
-  id: string;
-  name: string;
-  city: string;
-  address: string;
-  description?: string | null;
-  maxGuests?: number;
-  Rooms: Room[];
-  Facilities: { id: string; propertyId: string; facility: Amenities }[];
-  Pictures: (CreatePropertyPictureInput & {
-    id: string;
-    propertyId: string;
-  })[];
-  Reviews: {
-    id: string;
-    rating: number;
-    comment: string;
-    createdAt: string;
-    User: {
-      firstName: string | null;
-      lastName: string | null;
-      image?: string | null;
-    };
-  }[];
-  reviewCount?: number;
-  averageRating?: number | null;
-  latitude?: number | string | null;
-  longitude?: number | string | null;
+export type DetailResponse = PropertyDetailResponse & {
+  PropertyCategory?: { name: string } | null;
+  CustomCategory?: { name: string } | null;
+  priceFrom?: number;
 };
 
 export interface SleepingArrangement {

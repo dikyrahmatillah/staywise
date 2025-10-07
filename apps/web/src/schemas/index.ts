@@ -1,6 +1,7 @@
 export * from "./user.schema";
 export * from "./search.schema";
 export * from "./property.schema";
+export * from "./property-detail.schema";
 export * from "./booking.schema";
 export * from "./category.schema";
 export * from "./room.schema";

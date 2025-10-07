@@ -48,6 +48,7 @@ export const roomSummarySchema = z.object({
   name: z.string().optional(),
   basePrice: z.number(),
   beds: z.number().optional(),
+  capacity: z.number().optional(),
 });
 
 export const propertyCategorySchema = z.object({
