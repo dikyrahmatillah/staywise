@@ -40,6 +40,8 @@ export type PropertyFormData = Omit<
   "pictures" | "facilities" | "rooms"
 > & {
   selectedCategory?: "existing" | "custom";
+  propertyCategoryName?: string;
+  customCategoryName?: string;
   facilities?: CreateFacilityInput[];
   pictures?: Array<PictureFormData>;
   rooms?: Array<RoomFormData>;
