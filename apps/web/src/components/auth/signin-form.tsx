@@ -54,18 +54,15 @@ export default function SignInForm({ callbackUrl = "/dashboard" }: Props) {
       if (result?.ok) {
         toast.success("Successfully signed in!");
 
-        // Wait briefly for the session to be established, then decide redirect
         let session = await getSession();
         const maxAttempts = 5;
         let attempt = 0;
         while ((!session || !session.user) && attempt < maxAttempts) {
-          // Wait 200ms and retry
           await new Promise((res) => setTimeout(res, 200));
           session = await getSession();
           attempt += 1;
         }
 
-        // If user is tenant, always go to dashboard; otherwise follow callbackUrl
         if (session?.user?.role === "TENANT") {
           router.push("/dashboard");
         } else {
@@ -164,12 +161,6 @@ export default function SignInForm({ callbackUrl = "/dashboard" }: Props) {
             {isLoading ? "Signing in..." : "Sign in"}
           </Button>
         </form>
-
-        {error && (
-          <p className="mt-3 text-sm text-red-600" role="alert">
-            {error}
-          </p>
-        )}
 
         <div className="flex items-center gap-4 my-6">
           <div className="flex-1 h-px bg-border"></div>
