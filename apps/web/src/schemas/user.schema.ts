@@ -5,11 +5,10 @@ export const CommonProfileSchema = z.object({
   firstName: z.string().min(1, "Firstname is required").max(150),
   lastName: z.string().min(1, "Invalid last name").max(150).optional(),
   name: z.string().min(1, "Invalid name").max(300).optional(),
-  phone: z
-    .string()
-    .min(8, "Invalid phone number")
-    .max(20, "Invalid phone number")
-    .optional(),
+  phone: z.preprocess((val) => {
+    if (typeof val === "string" && val.trim() === "") return undefined;
+    return val;
+  }, z.string().min(8, "Invalid phone number").max(20, "Invalid phone number").optional()),
   image: z.url("Invalid avatar").optional(),
 });
 
