@@ -1,4 +1,4 @@
-import type { CreatePropertyInput } from "@/schemas";
+import type { CreatePropertyInput, CreateFacilityInput } from "@/schemas";
 
 export type PictureFormData =
   | string
@@ -40,7 +40,7 @@ export type PropertyFormData = Omit<
   "pictures" | "facilities" | "rooms"
 > & {
   selectedCategory?: "existing" | "custom";
-  facilities?: Array<string | { facility: string }>;
+  facilities?: CreateFacilityInput[];
   pictures?: Array<PictureFormData>;
   rooms?: Array<RoomFormData>;
 };
