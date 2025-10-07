@@ -1,10 +1,10 @@
 import z from "zod";
-import { createFacilitySchema } from "./facility.schema.js";
+import { createFacilitySchema } from "./facility.schema";
 import {
   createRoomSchema,
   createRoomAvailabilitySchema,
   createPriceAdjustmentSchema,
-} from "./room.schema.js";
+} from "./room.schema";
 
 export const propertySchema = z.object({
   tenantId: z.uuid(),
