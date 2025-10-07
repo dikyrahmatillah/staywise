@@ -10,6 +10,7 @@ export function parseBookingDetailsFromParams(
 
   return {
     propertyId: searchParams.get("propertyId") || "1",
+    propertyName: searchParams.get("propertyName") || "",
     roomId: searchParams.get("roomId") || "1",
     checkIn: checkInParam ? new Date(checkInParam) : new Date("2024-10-11"),
     checkOut: checkOutParam ? new Date(checkOutParam) : new Date("2024-10-12"),
@@ -22,7 +23,10 @@ export function parseBookingDetailsFromParams(
   };
 }
 
-export function validatePaymentFile(file: File): { valid: boolean; error?: string } {
+export function validatePaymentFile(file: File): {
+  valid: boolean;
+  error?: string;
+} {
   const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
   const maxSize = 1 * 1024 * 1024; // 1MB
 

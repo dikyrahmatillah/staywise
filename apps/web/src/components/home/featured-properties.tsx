@@ -113,7 +113,7 @@ export default function FeaturedProperties() {
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-md font-bold">
-                            {formatCurrency(property.priceFrom)}
+                            {formatCurrency(property.priceFrom ?? 0)}
                             <span className="text-sm font-normal text-slate-600">
                               /night
                             </span>

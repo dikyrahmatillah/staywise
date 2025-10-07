@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import type { CreateFacilityInput } from "@/schemas";
+import type { CreateFacilityInput, AmenityType } from "@/schemas";
 import {
   Wifi,
   Wind,
@@ -32,7 +32,7 @@ import {
   Flame,
 } from "lucide-react";
 
-export const FACILITY_ICONS: Record<string, React.ReactElement> = {
+export const FACILITY_ICONS: Record<AmenityType, React.ReactElement> = {
   WIFI: <Wifi className="w-4 h-4" />,
   AIR_CONDITIONER: <Wind className="w-4 h-4" />,
   PARKING: <Car className="w-4 h-4" />,
@@ -60,7 +60,7 @@ export const FACILITY_ICONS: Record<string, React.ReactElement> = {
   BBQ: <Flame className="w-4 h-4" />,
 };
 
-export const FACILITY_LABELS: Record<string, string> = {
+export const FACILITY_LABELS: Record<AmenityType, string> = {
   WIFI: "WiFi",
   AIR_CONDITIONER: "Air Conditioner",
   PARKING: "Parking",
@@ -88,7 +88,7 @@ export const FACILITY_LABELS: Record<string, string> = {
   BBQ: "BBQ",
 };
 
-export const FACILITY_CATEGORIES: Record<string, string[]> = {
+export const FACILITY_CATEGORIES: Record<string, AmenityType[]> = {
   "Basic Amenities": [
     "WIFI",
     "AIR_CONDITIONER",
@@ -109,7 +109,7 @@ type FacilityItem = CreateFacilityInput;
 
 type Props = {
   selected: FacilityItem[];
-  onToggle: (facility: string) => void;
+  onToggle: (facility: AmenityType) => void;
   query: string;
   setQuery: (q: string) => void;
 };
@@ -126,7 +126,7 @@ export function FacilitiesEditor({
   const filteredCategories = useMemo(() => {
     if (!query.trim()) return FACILITY_CATEGORIES;
     const q = query.toLowerCase();
-    const result: Record<string, string[]> = {};
+    const result: Record<string, AmenityType[]> = {};
     Object.entries(FACILITY_CATEGORIES).forEach(([category, items]) => {
       const matches = items.filter((key) =>
         FACILITY_LABELS[key].toLowerCase().includes(q)

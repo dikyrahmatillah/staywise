@@ -135,7 +135,8 @@ export function useRoomForm({
           imageFile,
           formData.price
         );
-        await onSubmit(form);
+        // Type assertion: FormData is compatible with the union type
+        await onSubmit(form as CreateRoomInput | UpdateRoomInput | FormData);
       } else {
         await onSubmit(validatedData);
       }

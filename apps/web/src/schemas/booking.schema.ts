@@ -24,7 +24,7 @@ export const bookingValidationSchema = (maxGuests: number = 10) =>
     .object({
       checkInDate: z
         .date({
-          message: "Please select a valid check-in date"
+          message: "Please select a valid check-in date",
         })
         .refine((date) => !isDateInPast(date), {
           message: "Check-in date cannot be in the past",
@@ -32,7 +32,7 @@ export const bookingValidationSchema = (maxGuests: number = 10) =>
 
       checkOutDate: z
         .date({
-          message: "Please select a valid check-out date"
+          message: "Please select a valid check-out date",
         })
         .refine((date) => !isDateInPast(date), {
           message: "Check-out date cannot be in the past",
@@ -132,36 +132,54 @@ export const validateBookingData = (
 
 // Alternative validation function with better error handling for required fields
 export const validateBookingDataSafe = (
-  data: any,
+  data: unknown,
   maxGuests: number = 10
 ): BookingValidationResult => {
   const schema = bookingValidationSchema(maxGuests);
 
+  // Type guard to check if data is an object
+  if (!data || typeof data !== "object") {
+    return {
+      success: false,
+      errors: { general: "Invalid data provided" },
+    };
+  }
+
+  const dataRecord = data as Record<string, unknown>;
+
   // Pre-validate required fields
-  const requiredFields = ['checkInDate', 'checkOutDate', 'adults', 'children', 'pets', 'propertyId', 'pricePerNight'];
+  const requiredFields = [
+    "checkInDate",
+    "checkOutDate",
+    "adults",
+    "children",
+    "pets",
+    "propertyId",
+    "pricePerNight",
+  ];
   const missingFields: string[] = [];
-  
-  requiredFields.forEach(field => {
-    if (data[field] === undefined || data[field] === null) {
+
+  requiredFields.forEach((field) => {
+    if (dataRecord[field] === undefined || dataRecord[field] === null) {
       missingFields.push(field);
     }
   });
 
   if (missingFields.length > 0) {
     const errors: Record<string, string> = {};
-    missingFields.forEach(field => {
+    missingFields.forEach((field) => {
       switch (field) {
-        case 'checkInDate':
-          errors[field] = 'Check-in date is required';
+        case "checkInDate":
+          errors[field] = "Check-in date is required";
           break;
-        case 'checkOutDate':
-          errors[field] = 'Check-out date is required';
+        case "checkOutDate":
+          errors[field] = "Check-out date is required";
           break;
         default:
           errors[field] = `${field} is required`;
       }
     });
-    
+
     return {
       success: false,
       errors,
@@ -199,8 +217,10 @@ export const validateBookingDataSafe = (
 // Additional validation utilities
 export const bookingValidationUtils = {
   // Check if dates are available (you can extend this with actual availability data)
-  checkDateAvailability: (checkin: Date, checkout: Date): boolean => {
+  checkDateAvailability: (checkIn: Date, checkOut: Date): boolean => {
     // This is a placeholder - replace with actual availability check
+    // Validate that both dates are provided
+    if (!checkIn || !checkOut) return false;
     return true;
   },
 

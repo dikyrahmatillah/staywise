@@ -53,7 +53,7 @@ export interface FormFieldProps<
 export interface PasswordInputProps<
   T extends Record<string, unknown> = Record<string, unknown>
 > {
-  id: string;
+  id: keyof T & string;
   label: string;
   icon: React.ComponentType<{ className?: string }>;
   showPassword: boolean;

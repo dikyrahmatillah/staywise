@@ -19,11 +19,19 @@ export function formatPriceDisplay(property: PropertyResponse) {
   return min === max ? formattedMin : `${formattedMin} - ${formattedMax}`;
 }
 
-export function getGuestRange(property: PropertyResponse) {
+type PropertyLike = {
+  Rooms?: Array<unknown>;
+  maxGuests?: number;
+};
+
+export function getGuestRange(property: PropertyLike) {
   if (!property.Rooms || property.Rooms.length === 0) {
     return { min: property.maxGuests ?? 0, max: property.maxGuests ?? 0 };
   }
-  const guests = property.Rooms.map((room: RoomResponse) => room.capacity ?? 1);
+  const guests = property.Rooms.map((room) => {
+    const r = room as { capacity?: number };
+    return r.capacity ?? 1;
+  });
   return { min: Math.min(...guests), max: Math.max(...guests) };
 }
 

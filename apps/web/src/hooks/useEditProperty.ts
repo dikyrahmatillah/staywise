@@ -54,7 +54,7 @@ export function useEditProperty(propertyId: string) {
 
   const refreshProperty = async () => {
     const result = await refetch();
-    if (result.data) setProperty(result.data);
+    if (result.data) setProperty(result.data as unknown as Property);
   };
 
   const setPropertyCategory = (next: {
@@ -69,14 +69,27 @@ export function useEditProperty(propertyId: string) {
         next.propertyCategoryId === undefined || next.propertyCategoryId === ""
           ? undefined
           : next.propertyCategoryId;
-      const customCat =
-        next.customCategoryId === undefined || next.customCategoryId === ""
-          ? undefined
-          : next.customCategoryId;
+      let customCat: string | undefined;
+      let customCategoryObj: { id: string; name: string } | null | undefined;
+
+      if (next.customCategoryId === undefined) {
+        customCat = prev.customCategoryId;
+        customCategoryObj = prev.CustomCategory;
+      } else if (next.customCategoryId === "") {
+        customCat = "";
+        customCategoryObj = null;
+      } else {
+        customCat = next.customCategoryId;
+        customCategoryObj = next.customCategoryName
+          ? { id: next.customCategoryId, name: next.customCategoryName }
+          : prev.CustomCategory;
+      }
+
       return {
         ...prev,
         propertyCategoryId: propCat ?? prev.propertyCategoryId,
-        customCategoryId: customCat ?? prev.customCategoryId,
+        customCategoryId: customCat,
+        CustomCategory: customCategoryObj,
       } as Property;
     });
   };
@@ -95,7 +108,7 @@ export function useEditProperty(propertyId: string) {
 
   useEffect(() => {
     if (fetchedProperty) {
-      setProperty(fetchedProperty);
+      setProperty(fetchedProperty as unknown as Property);
       setFormData({
         name: fetchedProperty.name || "",
         description: fetchedProperty.description || "",

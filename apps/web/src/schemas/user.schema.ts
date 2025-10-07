@@ -60,6 +60,15 @@ export const changePasswordSchema = z.object({
   newPassword: CompleteRegistrationSchema.shape.password,
 });
 
+export const changePasswordClientSchema = changePasswordSchema
+  .extend({
+    confirmPassword: CompleteRegistrationSchema.shape.password,
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
+
 export const changeEmailSchema = z.object({
   token: CompleteRegistrationSchema.shape.token,
   newEmail: EmailSchema,
@@ -89,6 +98,9 @@ export type ResetPasswordWithTokenInput = z.infer<
 >;
 export type UpdateUserInput = z.infer<typeof UpdateUserSchema>;
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
+export type ChangePasswordClientInput = z.infer<
+  typeof changePasswordClientSchema
+>;
 export type changeEmailInput = z.infer<typeof changeEmailSchema>;
 export type changeEmailRequestInput = z.infer<typeof changeEmailRequestSchema>;
 export type OAuthUserInput = z.infer<typeof OAuthUserSchema>;

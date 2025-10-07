@@ -57,6 +57,19 @@ export const deleteRoomSchema = z.object({
 
 export type CreateRoomInput = z.infer<typeof createRoomSchema>;
 export type UpdateRoomInput = z.infer<typeof updateRoomSchema>;
+
+export type CreateRoomFormInput = CreateRoomInput | FormData;
+export type UpdateRoomFormInput = UpdateRoomInput | FormData;
+export type RoomFormData = CreateRoomInput | UpdateRoomInput | FormData;
+
+export type RoomFormSubmitHandler = (
+  data: CreateRoomInput | UpdateRoomInput | FormData
+) => Promise<void>;
+
+export type RoomSubmitHandler = (
+  data: CreateRoomInput | UpdateRoomInput
+) => Promise<void>;
+
 export type CreateRoomAvailabilityInput = z.infer<
   typeof createRoomAvailabilitySchema
 >;

@@ -28,13 +28,11 @@ export default function SignInForm({ callbackUrl = "/dashboard" }: Props) {
   });
 
   const router = useRouter();
-  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   async function onSubmit(data: LoginInput) {
     setIsLoading(true);
-    setError("");
 
     try {
       const result = await signIn("credentials", {
@@ -46,7 +44,6 @@ export default function SignInForm({ callbackUrl = "/dashboard" }: Props) {
       if (result?.error) {
         const message = "Sign in failed";
         toast.error(message);
-        setError(message);
         setIsLoading(false);
         return;
       }
@@ -54,18 +51,15 @@ export default function SignInForm({ callbackUrl = "/dashboard" }: Props) {
       if (result?.ok) {
         toast.success("Successfully signed in!");
 
-        // Wait briefly for the session to be established, then decide redirect
         let session = await getSession();
         const maxAttempts = 5;
         let attempt = 0;
         while ((!session || !session.user) && attempt < maxAttempts) {
-          // Wait 200ms and retry
           await new Promise((res) => setTimeout(res, 200));
           session = await getSession();
           attempt += 1;
         }
 
-        // If user is tenant, always go to dashboard; otherwise follow callbackUrl
         if (session?.user?.role === "TENANT") {
           router.push("/dashboard");
         } else {
@@ -79,7 +73,6 @@ export default function SignInForm({ callbackUrl = "/dashboard" }: Props) {
       toast.error(
         "An error occurred during sign in. Please try again. " + (message || "")
       );
-      setError(message || "An unknown error occurred");
     } finally {
       setIsLoading(false);
     }
@@ -165,11 +158,7 @@ export default function SignInForm({ callbackUrl = "/dashboard" }: Props) {
           </Button>
         </form>
 
-        {error && (
-          <p className="mt-3 text-sm text-red-600" role="alert">
-            {error}
-          </p>
-        )}
+        {/* error handling is done via Sonner toasts */}
 
         <div className="flex items-center gap-4 my-6">
           <div className="flex-1 h-px bg-border"></div>

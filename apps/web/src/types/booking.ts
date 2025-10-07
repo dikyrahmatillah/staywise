@@ -140,5 +140,5 @@ export interface AvailabilityWithValidationResult
   nights?: number;
   totalPrice?: number;
   validationPassed?: boolean;
-  validationErrors?: any;
+  validationErrors?: Record<string, string>;
 }

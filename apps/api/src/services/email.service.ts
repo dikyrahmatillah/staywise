@@ -1,6 +1,11 @@
 import { resend } from "../configs/resend.config.js";
 import fs from "node:fs/promises";
 import Handlebars from "handlebars";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 export class EmailService {
   constructor() {
@@ -16,7 +21,7 @@ export class EmailService {
     )}`;
 
     const template = await fs.readFile(
-      "./src/templates/emails/password-reset.hbs",
+      join(__dirname, "../templates/emails/password-reset.hbs"),
       "utf-8"
     );
     const compiledTemplate = Handlebars.compile(template);
@@ -38,7 +43,7 @@ export class EmailService {
     )}`;
 
     const template = await fs.readFile(
-      "./src/templates/emails/verify-email.hbs",
+      join(__dirname, "../templates/emails/verify-email.hbs"),
       "utf-8"
     );
     const compiledTemplate = Handlebars.compile(template);
@@ -75,7 +80,7 @@ export class EmailService {
     }
   ) {
     const template = await fs.readFile(
-      "./src/templates/emails/payment-confirmed.hbs",
+      join(__dirname, "../templates/emails/payment-confirmed.hbs"),
       "utf-8"
     );
 
@@ -102,7 +107,7 @@ Manage your booking here: ${bookingData.manageBookingUrl}`,
     )}`;
 
     const template = await fs.readFile(
-      "./src/templates/emails/verify-email-change.hbs",
+      join(__dirname, "../templates/emails/verify-email-change.hbs"),
       "utf-8"
     );
     const compiledTemplate = Handlebars.compile(template);

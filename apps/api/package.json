@@ -3,7 +3,7 @@
     "type": "module",
     "scripts": {
         "postinstall": "prisma generate",
-        "build": "prisma generate && tsc && tsc-alias",
+        "build": "prisma generate && tsc && tsc-alias && cp -r src/templates dist/src/templates",
         "dev": "cross-env NODE_ENV=development tsx --watch src/index.ts",
         "start": "npm run build && cross-env NODE_ENV=production node dist/src/index.js",
         "seed": "tsx prisma/seed.ts"
@@ -11,6 +11,7 @@
     "dependencies": {
         "@prisma/client": "^6.16.3",
         "@sindresorhus/slugify": "^2.2.1",
+        "@upstash/qstash": "^2.8.3",
         "@upstash/redis": "^0.0.0-ci.c21ca079c33c67efb29ee43e778ab181aeed6386-20250530111221",
         "bcryptjs": "^3.0.2",
         "bullmq": "^5.7.10",

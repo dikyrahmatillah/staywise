@@ -1,6 +1,27 @@
 export type BedType = "KING" | "QUEEN" | "SINGLE" | "TWIN";
 export type PriceAdjustType = "PERCENTAGE" | "NOMINAL";
 
+export type RoomFormSubmitData =
+  | {
+      name: string;
+      basePrice: number;
+      capacity: number;
+      bedCount: number;
+      description?: string;
+      bedType?: BedType;
+      imageUrl?: string;
+    }
+  | {
+      name?: string;
+      basePrice?: number;
+      capacity?: number;
+      bedCount?: number;
+      description?: string;
+      bedType?: BedType;
+      imageUrl?: string;
+    }
+  | FormData;
+
 export interface PriceAdjustmentDate {
   id: string;
   priceAdjustmentId: string;

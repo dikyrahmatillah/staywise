@@ -1,4 +1,5 @@
-export * from "./prisma.js";
-export * from "./payment-status.js";
-export * from "./booking.js";
-export * from "./ui.js";
+export * from "./prisma";
+export * from "./payment-status";
+export * from "./booking";
+export * from "./ui";
+export * as room from "./room";

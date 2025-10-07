@@ -1,10 +1,10 @@
 import z from "zod";
-import { createFacilitySchema } from "./facility.schema.js";
+import { createFacilitySchema } from "./facility.schema";
 import {
   createRoomSchema,
   createRoomAvailabilitySchema,
   createPriceAdjustmentSchema,
-} from "./room.schema.js";
+} from "./room.schema";
 
 export const propertySchema = z.object({
   tenantId: z.uuid(),
@@ -40,14 +40,21 @@ export const getPropertiesQuerySchema = z.object({
   pets: coerceOptionalInt(0),
   name: z.string().optional(),
   category: z.string().optional(),
-  sortBy: z.union([z.literal("name"), z.literal("price")]).optional(),
-  sortOrder: z.union([z.literal("asc"), z.literal("desc")]).optional(),
+  sortBy: z.preprocess(
+    (v) => (v === "" ? undefined : v),
+    z.union([z.literal("name"), z.literal("price")]).optional()
+  ),
+  sortOrder: z.preprocess(
+    (v) => (v === "" ? undefined : v),
+    z.union([z.literal("asc"), z.literal("desc")]).optional()
+  ),
 });
 
 export const roomSummarySchema = z.object({
   name: z.string().optional(),
   basePrice: z.number(),
   beds: z.number().optional(),
+  capacity: z.number().optional(),
 });
 
 export const propertyCategorySchema = z.object({
@@ -58,11 +65,17 @@ export const customCategorySchema = z.object({
   name: z.string(),
 });
 
+export const createPropertyPictureSchema = z.object({
+  imageUrl: z.url(),
+  note: z.string().optional(),
+});
+
 export const propertyResponseSchema = propertySchema
   .omit({ tenantId: true, propertyCategoryId: true, customCategoryId: true })
   .extend({
     id: z.string(),
     maxGuests: z.number().int().min(1),
+    Pictures: z.array(createPropertyPictureSchema).default([]),
     PropertyCategory: propertyCategorySchema.optional().nullable(),
     CustomCategory: customCategorySchema.optional().nullable(),
     Rooms: z.array(roomSummarySchema),
@@ -79,15 +92,9 @@ export type GetPropertiesParams = {
   pets?: number;
   name?: string;
   category?: string;
-  sortBy?: "name" | "price";
-  sortOrder?: "asc" | "desc";
+  sortBy?: "name" | "price" | "";
+  sortOrder?: "asc" | "desc" | "";
 };
-
-export const createPropertyPictureSchema = z.object({
-  imageUrl: z.url(),
-  note: z.string().optional().nullable(),
-});
-
 export const createPropertyCategoryInput = z.union([
   z.object({ propertyCategoryId: z.uuid() }),
   z.object({ customCategoryId: z.uuid() }),
@@ -139,7 +146,13 @@ export type CreatePropertyPictureInput = z.infer<
   typeof createPropertyPictureSchema
 >;
 export type Property = z.infer<typeof createPropertyInputSchema>;
-export type GetPropertiesQuery = z.infer<typeof getPropertiesQuerySchema>;
+export type GetPropertiesQuery = Omit<
+  z.infer<typeof getPropertiesQuerySchema>,
+  "sortBy" | "sortOrder"
+> & {
+  sortBy?: "name" | "price" | "";
+  sortOrder?: "asc" | "desc" | "";
+};
 export type RoomResponse = z.infer<typeof roomSummarySchema>;
 export type PropertyCategoryResponse = z.infer<typeof propertyCategorySchema>;
 export type PropertyResponse = z.infer<typeof propertyResponseSchema>;
