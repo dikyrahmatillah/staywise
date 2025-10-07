@@ -54,7 +54,6 @@ export function ImageUploadArea({
 
     if (valid.length > 0) {
       if (!multiple) {
-        // when multiple is false, only pass the first valid file
         onFilesSelected([valid[0]]);
       } else {
         onFilesSelected(valid);
@@ -113,10 +112,9 @@ export function ImageUploadArea({
         }}
         className="group relative border-2 border-dashed border-gray-300 rounded-xl p-6 sm:p-12 text-center sm:text-left transition-all duration-200 hover:border-primary/40 bg-gradient-to-br from-gray-50/50 to-white cursor-pointer"
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-purple-50/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
         <div className="relative z-10">
-          <div className="sm:flex sm:items-center sm:gap-6">
-            <div className="mx-auto sm:mx-0 w-12 h-12 sm:w-16 sm:h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4 sm:mb-0">
+          <div className="flex flex-col items-center gap-4 text-center">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-primary/10 rounded-full flex items-center justify-center">
               <Upload className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
             </div>
 

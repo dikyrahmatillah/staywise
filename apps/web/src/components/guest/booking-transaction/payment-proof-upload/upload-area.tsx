@@ -43,7 +43,6 @@ export function UploadArea() {
       if (files.length > 0) {
         actions.onFileSelect(files[0]);
       }
-      // Reset input value to allow selecting the same file again
       e.target.value = "";
     },
     [actions]
@@ -61,7 +60,8 @@ export function UploadArea() {
         className={cn(
           "relative border-2 border-dashed rounded-lg p-8 text-center transition-all duration-200 cursor-pointer",
           {
-            "border-gray-300 hover:border-gray-400": !isDragOver && !state.error,
+            "border-gray-300 hover:border-gray-400":
+              !isDragOver && !state.error,
             "border-blue-400 bg-blue-50": isDragOver,
             "border-red-400 bg-red-50": state.error,
           }
