@@ -10,6 +10,7 @@ import categoryRouter from "./routers/category.router.js";
 import roomRouter from "./routers/room.router.js";
 import webhookRouter from "./routers/webhook.route.js";
 import reviweRouter from "./routers/review.router.js";
+import tokenWebhookRouter from "./routers/token-webhook.router.js";
 
 export class App {
   app: Application;
@@ -42,6 +43,7 @@ export class App {
     this.app.use("/api/v1/categories", categoryRouter);
     this.app.use("/api/v1/rooms", roomRouter);
     this.app.use("/api/webhooks", webhookRouter);
+    this.app.use("/api/webhooks", tokenWebhookRouter);
     this.app.use("/api/v1/reviews", reviweRouter);
     this.app.get("/api/v1/health", (request: Request, response: Response) =>
       response.status(200).json({ message: "API running!" })

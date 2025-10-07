@@ -16,6 +16,14 @@
         "!.next/cache/**",
         "dist/**",
         "generated/**"
+      ],
+      "env": [
+        "NEXTAUTH_URL",
+        "NEXTAUTH_SECRET",
+        "JWT_SECRET_KEY",
+        "AUTH_GOOGLE_ID",
+        "AUTH_GOOGLE_SECRET",
+        "GOOGLE_MAPS_API_KEY"
       ]
     },
     "dev": {
