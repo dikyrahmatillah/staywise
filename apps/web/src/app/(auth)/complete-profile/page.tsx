@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import CompleteProfileForm from "@/components/auth/complete-profile-form";
 import AuthHeader from "@/components/auth/auth-header";
@@ -8,7 +8,7 @@ import { Ellipsis } from "@/components/ui/ellipsis";
 import { api } from "@/lib/axios";
 import Link from "next/link";
 
-export default function CompleteProfilePage() {
+function CompleteProfileContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams?.get("token") || "";
@@ -107,5 +107,24 @@ export default function CompleteProfilePage() {
         <CompleteProfileForm token={token} />
       </div>
     </div>
+  );
+}
+
+export default function CompleteProfilePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center px-4 py-12 mb-10">
+          <div className="w-full max-w-md space-y-8">
+            <div className="flex flex-col items-center gap-4">
+              <Ellipsis size={8} color="var(--tw-text-opacity, #ef4444)" />
+              <p className="text-sm text-muted-foreground">Loading…</p>
+            </div>
+          </div>
+        </div>
+      }
+    >
+      <CompleteProfileContent />
+    </Suspense>
   );
 }

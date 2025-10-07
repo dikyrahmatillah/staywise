@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,7 +13,7 @@ import { signIn } from "next-auth/react";
 import AuthHeader from "@/components/auth/auth-header";
 import api from "@/lib/axios";
 
-export default function GuestSignUpPage() {
+function GuestSignUpContent() {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const searchParams = useSearchParams();
@@ -110,5 +110,23 @@ export default function GuestSignUpPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function GuestSignUpPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center px-4 py-12 mb-10">
+          <div className="w-full max-w-md space-y-8">
+            <div className="text-center">
+              <p className="text-sm text-muted-foreground">Loading...</p>
+            </div>
+          </div>
+        </div>
+      }
+    >
+      <GuestSignUpContent />
+    </Suspense>
   );
 }
