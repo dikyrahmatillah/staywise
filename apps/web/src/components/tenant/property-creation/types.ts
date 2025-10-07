@@ -6,8 +6,9 @@ export type PictureFormData =
       url?: string;
       imageUrl?: string;
       description?: string;
-      note?: string | null;
+      note?: string;
       file?: File;
+      preview?: string;
     };
 
 export type RoomFormData = {
@@ -34,7 +35,10 @@ export type RoomFormData = {
   }>;
 };
 
-export type PropertyFormData = Partial<CreatePropertyInput> & {
+export type PropertyFormData = Omit<
+  Partial<CreatePropertyInput>,
+  "pictures" | "facilities" | "rooms"
+> & {
   selectedCategory?: "existing" | "custom";
   facilities?: Array<string | { facility: string }>;
   pictures?: Array<PictureFormData>;

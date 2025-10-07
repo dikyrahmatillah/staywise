@@ -67,7 +67,7 @@ export const customCategorySchema = z.object({
 
 export const createPropertyPictureSchema = z.object({
   imageUrl: z.url(),
-  note: z.string().optional().nullable(),
+  note: z.string().optional(),
 });
 
 export const propertyResponseSchema = propertySchema
