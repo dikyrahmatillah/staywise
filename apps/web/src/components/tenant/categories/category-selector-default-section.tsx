@@ -45,7 +45,7 @@ export function CategorySelectorDefaultSection({
         </div>
       </div>
 
-      <ScrollArea className="h-72 pr-3">
+      <ScrollArea className="h-72 lg:h-auto lg:max-h-full pr-3">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {sortedCategories.map((cat) => (
             <button
