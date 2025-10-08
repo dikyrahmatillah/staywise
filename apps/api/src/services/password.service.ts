@@ -15,6 +15,13 @@ export class PasswordResetService {
     if (!user) throw new AppError("User not found", 404);
     if (!user.emailVerified) throw new AppError("Email not verified", 400);
 
+    if (user.isOAuth) {
+      throw new AppError(
+        "This account uses OAuth authentication. Please sign in with your OAuth provider.",
+        400
+      );
+    }
+
     const token = await this.tokenService.generateEmailToken(
       user.id,
       "PASSWORD_RESET",
@@ -46,7 +53,7 @@ export class PasswordResetService {
 
       await tx.user.update({
         where: { id: user.id },
-        data: { password: hashedPassword },
+        data: { password: hashedPassword, isOAuth: false },
       });
     });
 

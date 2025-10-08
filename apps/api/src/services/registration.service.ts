@@ -66,6 +66,7 @@ export class RegistrationService {
           image,
           password: hashedPassword,
           emailVerified: new Date(),
+          isOAuth: false,
         },
       });
     });
@@ -96,6 +97,7 @@ export class RegistrationService {
             image: input.image,
             role: desiredRole === "TENANT" ? "TENANT" : undefined,
             emailVerified: existing.emailVerified ? undefined : now,
+            isOAuth: true,
           },
         })
       : await prisma.user.create({
@@ -107,6 +109,7 @@ export class RegistrationService {
             image: input.image,
             role: desiredRole,
             emailVerified: new Date(),
+            isOAuth: true,
           },
         });
 

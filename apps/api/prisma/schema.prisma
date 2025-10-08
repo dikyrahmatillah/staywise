@@ -106,6 +106,7 @@ model User {
     email         String    @unique @db.VarChar(255)
     emailVerified DateTime?
     password      String?   @db.VarChar(255)
+    isOAuth       Boolean   @default(false)
     image         String?   @db.Text
     phone         String?   @db.VarChar(50)
     createdAt     DateTime  @default(now())
