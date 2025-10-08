@@ -12,6 +12,7 @@ import { extractErrorMessage } from "@/lib/auth-error.utils";
 import { signIn } from "next-auth/react";
 import AuthHeader from "@/components/auth/auth-header";
 import api from "@/lib/axios";
+import { Building2, Sparkles } from "lucide-react";
 
 export default function TenantSignUpPage() {
   const [email, setEmail] = useState("");
@@ -33,7 +34,8 @@ export default function TenantSignUpPage() {
       toast.success("Verification email sent. Please check your inbox.");
       router.push("/signin");
     } catch (err: unknown) {
-      const message = extractErrorMessage(err) || "Signup failed";
+      const message =
+        extractErrorMessage(err) || "Signup failed. Please try again later.";
       toast.error(message);
     } finally {
       setIsLoading(false);
@@ -41,14 +43,28 @@ export default function TenantSignUpPage() {
   };
 
   return (
-    <div className="flex items-center justify-center px-4 py-12 mb-10">
-      <div className="w-full max-w-md space-y-8">
-        <AuthHeader
-          title="Tenant sign up"
-          caption="Already have an account?"
-          link="/signin"
-          linkWord="Sign in"
-        />
+    <div className="flex items-center justify-center px-4 py-12 mb-10 min-h-[calc(100vh-200px)]">
+      <div className="w-full max-w-md space-y-8 animate-in fade-in duration-500">
+        <div className="space-y-4">
+          <div className="flex justify-center">
+            <div className="relative">
+              <div className="absolute inset-0 bg-primary/10 blur-2xl rounded-full animate-pulse" />
+              <div className="relative bg-gradient-to-br from-rose-500 to-rose-600 p-4 rounded-2xl shadow-lg">
+                <Building2 className="w-8 h-8 text-white" />
+              </div>
+            </div>
+          </div>
+          <AuthHeader
+            title="Start Hosting Today"
+            caption="Already have an account?"
+            link="/signin"
+            linkWord="Sign in"
+          />
+          <p className="text-center text-sm text-muted-foreground max-w-sm mx-auto">
+            Join thousands of property owners and start earning from your
+            property
+          </p>
+        </div>
 
         <div>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -71,7 +87,17 @@ export default function TenantSignUpPage() {
               className={`w-full bg-rose-500 hover:bg-rose-600 text-white cursor-pointer`}
               disabled={isLoading}
             >
-              {isLoading ? "Signing up..." : "Create account"}
+              {isLoading ? (
+                <span className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Creating account...
+                </span>
+              ) : (
+                <span className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4" />
+                  Create account
+                </span>
+              )}
             </Button>
           </form>
 
@@ -83,7 +109,7 @@ export default function TenantSignUpPage() {
 
           <Button
             variant="outline"
-            className="w-full cursor-pointer"
+            className="w-full h-11 border-2 hover:bg-accent/50 hover:border-accent-foreground/20 transition-all duration-200 font-medium"
             disabled={isLoading}
             onClick={() =>
               signIn("google-tenant", { callbackUrl: "/dashboard" })
@@ -92,6 +118,29 @@ export default function TenantSignUpPage() {
             <FcGoogle className="w-5 h-5 mr-2" />
             Continue with Google
           </Button>
+        </div>
+
+        <div className="bg-gradient-to-br from-rose-50/50 to-orange-50/50 dark:from-rose-950/20 dark:to-orange-950/20 border border-rose-200/50 dark:border-rose-800/30 rounded-xl p-4">
+          <div className="space-y-2">
+            <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-rose-500" />
+              Why host with us?
+            </h3>
+            <ul className="text-xs text-muted-foreground space-y-1.5">
+              <li className="flex items-start gap-2">
+                <span className="text-rose-500 mt-0.5">✓</span>
+                <span>Easy property management dashboard</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-rose-500 mt-0.5">✓</span>
+                <span>Secure payment processing</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-rose-500 mt-0.5">✓</span>
+                <span>24/7 host support and guidance</span>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>

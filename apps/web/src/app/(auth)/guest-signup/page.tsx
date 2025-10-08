@@ -45,7 +45,8 @@ function GuestSignUpContent() {
       toast.success("Verification email sent. Please check your inbox.");
       router.push("/signin");
     } catch (err: unknown) {
-      const message = extractErrorMessage(err) || "Signup failed";
+      const message =
+        extractErrorMessage(err) || "Signup failed. Please try again later.";
       toast.error(message);
     } finally {
       setIsLoading(false);
