@@ -155,15 +155,17 @@ export class PropertyManageController {
         ? JSON.parse(request.body.propertyPictures)
         : [];
 
-      for (let i = 0; i < propertyImages.length; i++) {
-        const imageUrl = await this.fileService.uploadPictureFromBuffer(
-          propertyImages[i].buffer
-        );
+      const uploadPromises = propertyImages.map((img) =>
+        this.fileService.uploadPictureFromBuffer(img.buffer)
+      );
+      const urls = await Promise.all(uploadPromises);
+
+      urls.forEach((imageUrl, i) => {
         const pictureData = propertyPicturesData.find(
           (p: any) => p.fileIndex === i
         );
         finalPictures.push({ imageUrl, note: pictureData?.note || null });
-      }
+      });
     }
   }
 }

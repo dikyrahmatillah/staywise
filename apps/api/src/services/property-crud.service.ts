@@ -19,31 +19,37 @@ export class PropertyCrudService {
   async createProperty(data: CreatePropertyInput) {
     const slug = `${slugify(data.name)}-${nanoid(6)}`;
 
-    const property = await prisma.$transaction(async (tx) => {
-      const propertyCategoryId = data.propertyCategoryId;
-      if (!propertyCategoryId) {
-        throw new Error("propertyCategoryId is required");
+    const property = await prisma.$transaction(
+      async (tx) => {
+        const propertyCategoryId = data.propertyCategoryId;
+        if (!propertyCategoryId) {
+          throw new Error("propertyCategoryId is required");
+        }
+
+        const propertyData = {
+          tenantId: data.tenantId,
+          propertyCategoryId,
+          customCategoryId: data.customCategoryId ?? undefined,
+          name: data.name,
+          slug,
+          description: data.description,
+          country: data.country,
+          city: data.city,
+          address: data.address,
+          latitude: data.latitude ?? null,
+          longitude: data.longitude ?? null,
+          Facilities: mapFacilities(data.facilities),
+          Pictures: mapPictures(data.pictures),
+          Rooms: mapRooms(data.rooms),
+        };
+
+        return this.repository.create(propertyData);
+      },
+      {
+        maxWait: 10000, // 10 seconds max wait to acquire transaction
+        timeout: 15000, // 15 seconds transaction timeout
       }
-
-      const propertyData = {
-        tenantId: data.tenantId,
-        propertyCategoryId,
-        customCategoryId: data.customCategoryId ?? undefined,
-        name: data.name,
-        slug,
-        description: data.description,
-        country: data.country,
-        city: data.city,
-        address: data.address,
-        latitude: data.latitude ?? null,
-        longitude: data.longitude ?? null,
-        Facilities: mapFacilities(data.facilities),
-        Pictures: mapPictures(data.pictures),
-        Rooms: mapRooms(data.rooms),
-      };
-
-      return this.repository.create(propertyData);
-    });
+    );
 
     return property;
   }
@@ -112,31 +118,37 @@ export class PropertyCrudService {
     );
     PropertyValidator.validateUpdatePermission(existingProperty);
 
-    const updatedProperty = await prisma.$transaction(async (tx) => {
-      const updateData: any = this.buildBasicUpdateData(data);
+    const updatedProperty = await prisma.$transaction(
+      async (tx) => {
+        const updateData: any = this.buildBasicUpdateData(data);
 
-      // Handle category updates - allow explicit null to remove categories
-      // propertyCategoryId: only update when provided and not empty string
-      if ("propertyCategoryId" in data) {
-        const val = (data as any).propertyCategoryId;
-        if (val !== "") {
-          updateData.propertyCategoryId = val;
+        // Handle category updates - allow explicit null to remove categories
+        // propertyCategoryId: only update when provided and not empty string
+        if ("propertyCategoryId" in data) {
+          const val = (data as any).propertyCategoryId;
+          if (val !== "") {
+            updateData.propertyCategoryId = val;
+          }
+          // if empty string -> do not change
         }
-        // if empty string -> do not change
+
+        // customCategoryId: allow explicit null to remove
+        if ("customCategoryId" in data) {
+          updateData.customCategoryId = data.customCategoryId || null;
+        }
+
+        const updated = await this.repository.update(propertyId, updateData);
+
+        await this.updateFacilities(propertyId, data);
+        await this.updatePictures(propertyId, data);
+
+        return updated;
+      },
+      {
+        maxWait: 10000, // 10 seconds max wait to acquire transaction
+        timeout: 15000, // 15 seconds transaction timeout
       }
-
-      // customCategoryId: allow explicit null to remove
-      if ("customCategoryId" in data) {
-        updateData.customCategoryId = data.customCategoryId || null;
-      }
-
-      const updated = await this.repository.update(propertyId, updateData);
-
-      await this.updateFacilities(propertyId, data);
-      await this.updatePictures(propertyId, data);
-
-      return updated;
-    });
+    );
 
     return updatedProperty;
   }
