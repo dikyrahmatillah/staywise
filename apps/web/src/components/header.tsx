@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { HiHome } from "react-icons/hi";
+import Image from "next/image";
 import { UserMenu } from "./user-menu";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { SearchButton } from "./search/search-button";
 import { ExpandedSearch } from "./search/expanded-search";
@@ -22,16 +22,15 @@ export function Header() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isAtTop, setIsAtTop] = useState(true);
   const [userClosedSearch, setUserClosedSearch] = useState(false);
-  const [mounted, setMounted] = useState(false);
-  const [locationOpen, setLocationOpen] = useState(false);
-  const [datesOpen, setDatesOpen] = useState(false);
-  const [guestsOpen, setGuestsOpen] = useState(false);
+  const mountedRef = useRef(false);
+  const [openSection, setOpenSection] = useState<
+    "location" | "dates" | "guests" | null
+  >(null);
 
   useEffect(() => {
     const onScroll = () => {
       const scrollTop = window.pageYOffset;
       const nearTop = scrollTop < 5;
-
       setIsAtTop(nearTop);
 
       const isDesktop =
@@ -44,99 +43,60 @@ export function Header() {
         return;
       }
 
-      if (mounted && nearTop && !isSearchOpen && !userClosedSearch && auto) {
+      if (nearTop && !isSearchOpen && !userClosedSearch && auto)
         setIsSearchOpen(true);
-      }
     };
 
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
-
     return () => window.removeEventListener("scroll", onScroll);
-  }, [isSearchOpen, userClosedSearch, pathname, mounted]);
+  }, [isSearchOpen, userClosedSearch, pathname]);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  useEffect(() => void (mountedRef.current = true), []);
 
   useEffect(() => {
     const isDesktop = typeof window !== "undefined" && window.innerWidth >= 640;
     const shouldAutoOpen =
       (pathname === "/" || pathname === "/properties") && isDesktop;
-
     if (shouldAutoOpen) {
       setUserClosedSearch(false);
       setIsSearchOpen(true);
       return;
     }
-
     setIsSearchOpen(false);
     setUserClosedSearch(false);
-    setLocationOpen(false);
-    setDatesOpen(false);
-    setGuestsOpen(false);
+    setOpenSection(null);
   }, [pathname]);
 
   useEffect(() => {
-    if (isAtTop) {
-      const timeoutId = setTimeout(() => {
-        setUserClosedSearch(false);
-      }, 500);
-      return () => clearTimeout(timeoutId);
-    }
+    if (!isAtTop) return;
+    const t = setTimeout(() => setUserClosedSearch(false), 500);
+    return () => clearTimeout(t);
   }, [isAtTop]);
-
-  const openSection = (section: "location" | "dates" | "guests" | null) => {
-    setLocationOpen(section === "location");
-    setDatesOpen(section === "dates");
-    setGuestsOpen(section === "guests");
-  };
-
-  const handleLocationOpenChange = (open: boolean) => {
-    if (open) openSection("location");
-    else setLocationOpen(false);
-  };
-
-  const handleDatesOpenChange = (open: boolean) => {
-    if (open) openSection("dates");
-    else setDatesOpen(false);
-  };
-
-  const handleGuestsOpenChange = (open: boolean) => {
-    if (open) openSection("guests");
-    else setGuestsOpen(false);
-  };
+  const handleOpenChange = (
+    section: "location" | "dates" | "guests" | null,
+    open: boolean
+  ) => setOpenSection(open ? section : null);
 
   const setSearchOpenManual = (open: boolean) => {
     setIsSearchOpen(open);
-    if (isAtTop) {
-      setUserClosedSearch(!open);
-    } else {
-      setUserClosedSearch(open);
-    }
+    setUserClosedSearch(isAtTop ? !open : open);
   };
 
   const handleSearch = () => {
     const searchParams = new URLSearchParams();
-
     if (location) searchParams.set("location", location);
     if (checkIn) searchParams.set("checkIn", format(checkIn, "yyyy-MM-dd"));
     if (checkOut) searchParams.set("checkOut", format(checkOut, "yyyy-MM-dd"));
     if (adults > 0) searchParams.set("adults", adults.toString());
     if (children > 0) searchParams.set("children", children.toString());
     if (pets > 0) searchParams.set("pets", pets.toString());
-
     router.push(`/properties?${searchParams.toString()}`);
     setSearchOpenManual(false);
   };
 
-  const handleSearchToggle = () => {
-    setSearchOpenManual(!isSearchOpen);
-  };
-
-  const handleSearchClose = () => {
-    setSearchOpenManual(false);
-  };
+  const handleSearchToggle = () => setSearchOpenManual(!isSearchOpen);
+  const handleSearchClose = () => setSearchOpenManual(false);
 
   return (
     <header
@@ -156,11 +116,24 @@ export function Header() {
           </div>
 
           <div className="flex items-center justify-center flex-shrink-0">
-            <Link href="/" className="flex items-center space-x-1 sm:space-x-2">
-              <HiHome className="h-6 w-6 sm:h-8 sm:w-8 text-rose-500" />
-              <span className="font-display font-bold text-lg sm:text-xl text-rose-500 hidden sm:inline-block">
-                StayWise
-              </span>
+            <Link href="/" className="flex items-center">
+              <Image
+                src="/icon.svg"
+                alt="StayWise"
+                width={28}
+                height={28}
+                className="h-9 w-9 sm:hidden"
+                priority={true}
+              />
+
+              <Image
+                src="/staywise_logo_type.svg"
+                alt="StayWise"
+                width={120}
+                height={32}
+                className="hidden sm:inline-block h-6 w-auto sm:h-7 ml-2"
+                priority={true}
+              />
             </Link>
           </div>
 
@@ -184,12 +157,12 @@ export function Header() {
             setChildrenCount={setChildren}
             setPets={setPets}
             onSearch={handleSearch}
-            locationOpen={locationOpen}
-            datesOpen={datesOpen}
-            guestsOpen={guestsOpen}
-            onLocationOpenChange={handleLocationOpenChange}
-            onDatesOpenChange={handleDatesOpenChange}
-            onGuestsOpenChange={handleGuestsOpenChange}
+            locationOpen={openSection === "location"}
+            datesOpen={openSection === "dates"}
+            guestsOpen={openSection === "guests"}
+            onLocationOpenChange={(o) => handleOpenChange("location", o)}
+            onDatesOpenChange={(o) => handleOpenChange("dates", o)}
+            onGuestsOpenChange={(o) => handleOpenChange("guests", o)}
             onClose={handleSearchClose}
           />
         )}
