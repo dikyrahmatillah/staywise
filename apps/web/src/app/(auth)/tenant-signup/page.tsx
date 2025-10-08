@@ -7,19 +7,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FcGoogle } from "react-icons/fc";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+// router no longer needed because we show inline confirmation instead of redirect
 import { EmailSchema } from "@/schemas";
 import { extractErrorMessage } from "@/lib/auth-error.utils";
 import { signIn } from "next-auth/react";
 import AuthHeader from "@/components/auth/auth-header";
 import api from "@/lib/axios";
 import { Building2, Sparkles } from "lucide-react";
+import EmailSent from "@/components/auth/email-sent";
 
 export default function TenantSignUpPage() {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-
-  const router = useRouter();
+  const [emailSent, setEmailSent] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,9 +33,7 @@ export default function TenantSignUpPage() {
       const payload = { email, role: "TENANT" };
       await api.post("/auth/signup", payload);
       toast.success("Verification email sent. Please check your inbox.");
-      router.push(
-        `/check-email?email=${encodeURIComponent(email)}&role=TENANT`
-      );
+      setEmailSent(true);
     } catch (err: unknown) {
       const message =
         extractErrorMessage(err) || "Signup failed. Please try again later.";
@@ -70,57 +68,63 @@ export default function TenantSignUpPage() {
         </div>
 
         <div>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email address</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="email@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="w-full"
+          {emailSent ? (
+            <EmailSent email={email} onTryAgain={() => setEmailSent(false)} />
+          ) : (
+            <>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email address</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="email@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="w-full"
+                    disabled={isLoading}
+                  />
+                </div>
+
+                <PrimaryButton
+                  type="submit"
+                  className="w-full h-11 px-4"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <span className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      Creating account...
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4" />
+                      Create account
+                    </span>
+                  )}
+                </PrimaryButton>
+              </form>
+
+              <div className="flex items-center gap-4 my-6">
+                <div className="flex-1 h-px bg-border"></div>
+                <span className="text-sm text-muted-foreground">or</span>
+                <div className="flex-1 h-px bg-border"></div>
+              </div>
+
+              <Button
+                variant="outline"
+                className="w-full h-11 border-2 hover:bg-accent/50 hover:border-accent-foreground/20 transition-all duration-200 font-medium"
                 disabled={isLoading}
-              />
-            </div>
-
-            <PrimaryButton
-              type="submit"
-              className="w-full h-11 px-4"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <span className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Creating account...
-                </span>
-              ) : (
-                <span className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4" />
-                  Create account
-                </span>
-              )}
-            </PrimaryButton>
-          </form>
-
-          <div className="flex items-center gap-4 my-6">
-            <div className="flex-1 h-px bg-border"></div>
-            <span className="text-sm text-muted-foreground">or</span>
-            <div className="flex-1 h-px bg-border"></div>
-          </div>
-
-          <Button
-            variant="outline"
-            className="w-full h-11 border-2 hover:bg-accent/50 hover:border-accent-foreground/20 transition-all duration-200 font-medium"
-            disabled={isLoading}
-            onClick={() =>
-              signIn("google-tenant", { callbackUrl: "/dashboard" })
-            }
-          >
-            <FcGoogle className="w-5 h-5 mr-2" />
-            Continue with Google
-          </Button>
+                onClick={() =>
+                  signIn("google-tenant", { callbackUrl: "/dashboard" })
+                }
+              >
+                <FcGoogle className="w-5 h-5 mr-2" />
+                Continue with Google
+              </Button>
+            </>
+          )}
         </div>
 
         <div className="bg-gradient-to-br from-rose-50/50 to-orange-50/50 dark:from-rose-950/20 dark:to-orange-950/20 border border-rose-200/50 dark:border-rose-800/30 rounded-xl p-4">

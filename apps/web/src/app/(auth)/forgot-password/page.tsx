@@ -9,6 +9,7 @@ import { api } from "@/lib/axios";
 import { toast } from "sonner";
 import { extractErrorMessage } from "@/lib/auth-error.utils";
 import Link from "next/link";
+import EmailSent from "@/components/auth/email-sent";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -58,32 +59,17 @@ export default function ForgotPasswordPage() {
 
         <div>
           {emailSent ? (
-            <div className="space-y-4">
-              <div className="rounded-lg border border-green-200 bg-green-50 p-4">
-                <p className="text-sm text-green-800">
+            <EmailSent
+              email={email}
+              onTryAgain={() => setEmailSent(false)}
+              message={
+                <>
                   We&apos;ve sent a password reset link to{" "}
                   <strong>{email}</strong>. Please check your inbox and follow
                   the instructions.
-                </p>
-              </div>
-              <p className="text-sm text-muted-foreground text-center">
-                Didn&apos;t receive the email? Check your spam folder or{" "}
-                <button
-                  onClick={() => setEmailSent(false)}
-                  className="text-primary hover:underline font-medium"
-                >
-                  try again
-                </button>
-              </p>
-              <div className="text-center">
-                <Link
-                  href="/signin"
-                  className="text-sm text-primary hover:underline"
-                >
-                  Back to sign in
-                </Link>
-              </div>
-            </div>
+                </>
+              }
+            />
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
