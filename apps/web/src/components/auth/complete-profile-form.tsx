@@ -1,110 +1,87 @@
 "use client";
 
-import { useCallback, useState, ChangeEvent } from "react";
 import { FiEye, FiEyeOff } from "react-icons/fi";
-import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import api from "@/lib/axios";
-import {
-  CompleteRegistrationClientSchema,
-  CompleteRegistrationClientInput,
-} from "@/schemas";
-import {
-  validateAvatar,
-  buildCompleteProfileFormData,
-} from "./complete-profile.utils";
-import { extractErrorMessage } from "@/lib/auth-error.utils";
+import AvatarInput from "./avatar-input";
+import { useCompleteProfileForm } from "./use-complete-profile-form";
 
 interface Props {
   token: string;
 }
 
 export default function CompleteProfileForm({ token }: Props) {
-  const router = useRouter();
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] =
-    useState(false);
+  const {
+    form,
+    fileInputRef,
+    avatarPreview,
+    isPasswordVisible,
+    setIsPasswordVisible,
+    isConfirmPasswordVisible,
+    setIsConfirmPasswordVisible,
+    onSelectAvatar,
+    onRemoveAvatar,
+    onSubmit,
+  } = useCompleteProfileForm({ token });
 
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<CompleteRegistrationClientInput>({
-    resolver: zodResolver(CompleteRegistrationClientSchema),
-    defaultValues: { token },
-  });
-
-  const onSelectAvatar = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) {
-      setAvatarFile(null);
-      return;
-    }
-    const error = validateAvatar(file);
-    if (error) {
-      toast.error(error);
-      e.target.value = "";
-      setAvatarFile(null);
-      return;
-    }
-    setAvatarFile(file);
-  }, []);
-
-  const onSubmit = useCallback(
-    async (data: CompleteRegistrationClientInput) => {
-      if (!token) {
-        toast.error("Missing token. Restart signup.");
-        router.replace("/guest-signup");
-        return;
-      }
-      try {
-        const formData = buildCompleteProfileFormData(token, data, avatarFile);
-        await api.post("/auth/signup/complete", formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-        toast.success("Registration completed. Please sign in.");
-        router.replace("/signin");
-      } catch (err: unknown) {
-        const message =
-          extractErrorMessage(err) || "Failed to complete registration";
-        toast.error(message);
-      }
-    },
-    [avatarFile, router, token]
-  );
+  } = form;
 
   return (
+    // @ts-expect-error - Type mismatch due to Zod preprocess
     <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
       <input type="hidden" value={token} {...register("token")} />
-      <div className="space-y-2">
-        <Label htmlFor="firstName">First name</Label>
-        <Input
-          id="firstName"
-          disabled={isSubmitting}
-          required
-          {...register("firstName")}
-        />
-        {errors.firstName && (
-          <p className="text-xs text-red-500">{errors.firstName.message}</p>
-        )}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="firstName">First </Label>
+          <Input
+            id="firstName"
+            placeholder="John"
+            disabled={isSubmitting}
+            required
+            {...register("firstName")}
+          />
+          {errors.firstName && (
+            <p className="text-xs text-red-500">{errors.firstName.message}</p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="lastName">
+            Last name
+            <span className="text-xs text-muted-foreground font-normal">
+              (Optional)
+            </span>
+          </Label>
+          <Input
+            id="lastName"
+            placeholder="Doe"
+            disabled={isSubmitting}
+            {...register("lastName")}
+          />
+          {errors.lastName && (
+            <p className="text-xs text-red-500">{errors.lastName.message}</p>
+          )}
+        </div>
       </div>
       <div className="space-y-2">
-        <Label htmlFor="lastName">Last name</Label>
+        <Label htmlFor="phone">
+          Phone number{" "}
+          <span className="text-xs text-muted-foreground font-normal">
+            (Optional)
+          </span>
+        </Label>
         <Input
-          id="lastName"
+          id="phone"
+          placeholder="+62 812 3456 7890"
           disabled={isSubmitting}
-          {...register("lastName")}
+          className="w-full"
+          {...register("phone")}
         />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="phone">Phone</Label>
-        <Input id="phone" disabled={isSubmitting} {...register("phone")} />
         {errors.phone && (
           <p className="text-xs text-red-500">{errors.phone.message}</p>
         )}
@@ -114,6 +91,7 @@ export default function CompleteProfileForm({ token }: Props) {
         <div className="relative">
           <Input
             id="password"
+            placeholder="••••••••"
             type={isPasswordVisible ? "text" : "password"}
             disabled={isSubmitting}
             required
@@ -142,6 +120,7 @@ export default function CompleteProfileForm({ token }: Props) {
         <div className="relative">
           <Input
             id="confirmPassword"
+            placeholder="••••••••"
             type={isConfirmPasswordVisible ? "text" : "password"}
             disabled={isSubmitting}
             required
@@ -170,16 +149,23 @@ export default function CompleteProfileForm({ token }: Props) {
         )}
       </div>
       <div className="space-y-2">
-        <Label htmlFor="avatar">Profile Picture</Label>
-        <Input
-          id="avatar"
-          type="file"
-          accept=".jpg,.jpeg,.png,.gif,image/jpeg,image/png,image/gif"
-          disabled={isSubmitting}
-          onChange={onSelectAvatar}
+        <Label htmlFor="avatar">
+          Profile Picture{" "}
+          <span className="text-xs text-muted-foreground font-normal">
+            (Optional)
+          </span>
+        </Label>
+
+        <AvatarInput
+          avatarPreview={avatarPreview}
+          isSubmitting={isSubmitting}
+          fileInputRef={fileInputRef}
+          onFileChange={onSelectAvatar}
+          onRemove={onRemoveAvatar}
         />
+
         <p className="text-xs text-muted-foreground">
-          Max 1MB. JPG, JPEG, PNG, GIF.
+          Max 1MB. Supports JPG, JPEG, PNG, GIF formats.
         </p>
       </div>
       <Button

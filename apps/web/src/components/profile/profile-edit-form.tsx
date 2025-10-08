@@ -39,6 +39,7 @@ export function ProfileEditForm({
     reset,
     formState: { errors, isSubmitting },
   } = useForm<UpdateUserInput>({
+    // @ts-expect-error - Zod preprocess causes type mismatch with react-hook-form
     resolver: zodResolver(UpdateUserSchema),
     defaultValues: {
       firstName: user.firstName,

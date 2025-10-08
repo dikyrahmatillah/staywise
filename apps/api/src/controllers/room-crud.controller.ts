@@ -15,8 +15,8 @@ export class RoomCrudController {
       const data = createRoomSchema.parse(request.body);
 
       if (request.file) {
-        const secureUrl = await this.fileService.uploadPicture(
-          request.file.path
+        const secureUrl = await this.fileService.uploadPictureFromBuffer(
+          request.file.buffer
         );
         data.imageUrl = secureUrl;
       }
@@ -79,8 +79,8 @@ export class RoomCrudController {
       const data = createRoomSchema.partial().parse(request.body);
 
       if (request.file) {
-        const secureUrl = await this.fileService.uploadPicture(
-          request.file.path
+        const secureUrl = await this.fileService.uploadPictureFromBuffer(
+          request.file.buffer
         );
         data.imageUrl = secureUrl;
       }
