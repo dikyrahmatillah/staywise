@@ -45,7 +45,7 @@ export class AuthController {
   ) => {
     try {
       const profilePicture = request.file
-        ? await this.fileService.uploadPicture(request.file.path)
+        ? await this.fileService.uploadPictureFromBuffer(request.file.buffer)
         : undefined;
 
       const data = CompleteRegistrationSchema.parse({
@@ -149,7 +149,7 @@ export class AuthController {
   ) => {
     try {
       const profilePicture = request.file
-        ? await this.fileService.uploadPicture(request.file.path)
+        ? await this.fileService.uploadPictureFromBuffer(request.file.buffer)
         : undefined;
 
       const data = UpdateUserSchema.parse({
