@@ -3,8 +3,8 @@
 import { Suspense } from "react";
 import { AlertCircle, SearchX } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import Ellipsis from "@/components/ui/ellipsis";
 import { useProperties } from "@/hooks/useProperties";
+import SkeletonCard from "@/components/ui/skeleton-card";
 import { FiltersBar } from "@/components/properties/filters-bar";
 import { PropertiesSummary } from "@/components/properties/properties-summary";
 import { PropertiesGrid } from "@/components/properties/properties-grid";
@@ -66,13 +66,12 @@ function PropertiesPageInner() {
             />
 
             {isLoading && (
-              <div className="space-y-6">
-                <div className="flex flex-col items-center justify-center gap-3 text-sm font-medium text-muted-foreground">
-                  <Ellipsis size={12} className="inline-block" />
-                  <div className="mt-2 text-sm text-muted-foreground">
-                    Searching for properties...
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={`prop-skel-${i}`}>
+                    <SkeletonCard />
                   </div>
-                </div>
+                ))}
               </div>
             )}
 

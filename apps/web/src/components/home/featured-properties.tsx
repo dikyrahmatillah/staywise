@@ -8,6 +8,7 @@ import PagerControls from "@/components/ui/pager-controls";
 import { useProperties } from "@/hooks/useProperties";
 import type { Property } from "@/types/property";
 import { useEffect, useState } from "react";
+import SkeletonCard from "@/components/ui/skeleton-card";
 import { formatCurrency } from "@/lib/booking-formatters";
 
 export default function FeaturedProperties() {
@@ -63,11 +64,16 @@ export default function FeaturedProperties() {
               transform: `translateX(-${(current * 100) / slidesPerView}%)`,
             }}
           >
-            {isLoading && (
-              <div className="w-full text-center text-slate-500">
-                Loading...
-              </div>
-            )}
+            {isLoading &&
+              Array.from({ length: slidesPerView }).map((_, i) => (
+                <div
+                  key={`skeleton-${i}`}
+                  style={{ flex: `0 0 ${100 / slidesPerView}%` }}
+                  className="px-2"
+                >
+                  <SkeletonCard />
+                </div>
+              ))}
 
             {isError && (
               <div className="w-full text-center text-red-500">

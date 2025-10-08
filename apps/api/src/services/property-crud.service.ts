@@ -46,8 +46,8 @@ export class PropertyCrudService {
         return this.repository.create(propertyData);
       },
       {
-        maxWait: 10000, // 10 seconds max wait to acquire transaction
-        timeout: 15000, // 15 seconds transaction timeout
+        maxWait: 15000,
+        timeout: 30000,
       }
     );
 
@@ -122,17 +122,13 @@ export class PropertyCrudService {
       async (tx) => {
         const updateData: any = this.buildBasicUpdateData(data);
 
-        // Handle category updates - allow explicit null to remove categories
-        // propertyCategoryId: only update when provided and not empty string
         if ("propertyCategoryId" in data) {
           const val = (data as any).propertyCategoryId;
           if (val !== "") {
             updateData.propertyCategoryId = val;
           }
-          // if empty string -> do not change
         }
 
-        // customCategoryId: allow explicit null to remove
         if ("customCategoryId" in data) {
           updateData.customCategoryId = data.customCategoryId || null;
         }
@@ -145,8 +141,8 @@ export class PropertyCrudService {
         return updated;
       },
       {
-        maxWait: 10000, // 10 seconds max wait to acquire transaction
-        timeout: 15000, // 15 seconds transaction timeout
+        maxWait: 15000,
+        timeout: 30000,
       }
     );
 
