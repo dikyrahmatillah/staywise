@@ -82,7 +82,7 @@ export class EmailService {
       amountPaid: string;
       currency: string;
       manageBookingUrl: string;
-      mail: string;
+      supportEmail: string;
       year: string;
     }
   ) {
