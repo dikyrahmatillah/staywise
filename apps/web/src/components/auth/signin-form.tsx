@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import PrimaryButton from "@/components/ui/primary-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FcGoogle } from "react-icons/fc";
@@ -149,13 +150,13 @@ export default function SignInForm({ callbackUrl = "/dashboard" }: Props) {
             </div>
           </div>
 
-          <Button
+          <PrimaryButton
             type="submit"
-            className="w-full bg-rose-500 hover:bg-rose-600 text-white cursor-pointer"
+            className="w-full h-11"
             disabled={isLoading}
           >
             {isLoading ? "Signing in..." : "Sign in"}
-          </Button>
+          </PrimaryButton>
         </form>
 
         {/* error handling is done via Sonner toasts */}

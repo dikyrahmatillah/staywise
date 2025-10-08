@@ -85,18 +85,18 @@ export class PropertyCreateController {
         ? JSON.parse(request.body.propertyPictures)
         : [];
 
-      for (let i = 0; i < propertyImages.length; i++) {
-        const imageUrl = await this.fileService.uploadPictureFromBuffer(
-          propertyImages[i].buffer
-        );
+      // Upload all images in parallel to reduce total upload time
+      const uploadPromises = propertyImages.map((img) =>
+        this.fileService.uploadPictureFromBuffer(img.buffer)
+      );
+      const urls = await Promise.all(uploadPromises);
+
+      urls.forEach((imageUrl, i) => {
         const pictureData = propertyPicturesData.find(
           (p: any) => p.fileIndex === i
         );
-        pictures.push({
-          imageUrl,
-          note: pictureData?.note || null,
-        });
-      }
+        pictures.push({ imageUrl, note: pictureData?.note || null });
+      });
     }
 
     return pictures;
@@ -108,6 +108,16 @@ export class PropertyCreateController {
     if (request.body.rooms) {
       const roomsData = JSON.parse(request.body.rooms);
       let roomImageIndex = 0;
+
+      // Pre-upload all room images in parallel and index them
+      const roomImageUrls =
+        roomImages.length > 0
+          ? await Promise.all(
+              roomImages.map((f) =>
+                this.fileService.uploadPictureFromBuffer(f.buffer)
+              )
+            )
+          : [];
 
       for (const roomData of roomsData) {
         const room: any = {
@@ -121,11 +131,8 @@ export class PropertyCreateController {
           priceAdjustments: roomData.priceAdjustments || [],
         };
 
-        if (roomData.hasImage && roomImageIndex < roomImages.length) {
-          const imageUrl = await this.fileService.uploadPictureFromBuffer(
-            roomImages[roomImageIndex].buffer
-          );
-          room.imageUrl = imageUrl;
+        if (roomData.hasImage && roomImageIndex < roomImageUrls.length) {
+          room.imageUrl = roomImageUrls[roomImageIndex];
           roomImageIndex++;
         }
 
