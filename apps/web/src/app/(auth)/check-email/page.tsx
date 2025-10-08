@@ -1,15 +1,13 @@
-"use client";
-
 import React from "react";
 import Link from "next/link";
-import { useSearchParams, useRouter } from "next/navigation";
-import PrimaryButton from "@/components/ui/primary-button";
 import { Mail } from "lucide-react";
 
-export default function CheckEmailPage() {
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const email = searchParams.get("email") || undefined;
+export default function CheckEmailPage({
+  searchParams,
+}: {
+  searchParams: { email?: string };
+}) {
+  const email = searchParams?.email || undefined;
 
   return (
     <div className="flex items-center justify-center px-4 py-20 min-h-[60vh]">
@@ -35,13 +33,12 @@ export default function CheckEmailPage() {
             </p>
 
             <div className="w-full space-y-2 mt-2">
-              <PrimaryButton
-                type="button"
-                onClick={() => router.push("/signin")}
-                className="w-full h-11"
+              <Link
+                href="/signin"
+                className="inline-flex items-center justify-center px-5 py-2.5 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 transition-colors shadow-sm w-full h-11"
               >
                 I&apos;ve verified — Sign in
-              </PrimaryButton>
+              </Link>
 
               <Link
                 href={`/`}
