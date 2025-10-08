@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
+import PrimaryButton from "@/components/ui/primary-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FcGoogle } from "react-icons/fc";
@@ -84,9 +85,9 @@ export default function TenantSignUpPage() {
               />
             </div>
 
-            <Button
+            <PrimaryButton
               type="submit"
-              className={`w-full bg-rose-500 hover:bg-rose-600 text-white cursor-pointer`}
+              className="w-full h-11 px-4"
               disabled={isLoading}
             >
               {isLoading ? (
@@ -100,7 +101,7 @@ export default function TenantSignUpPage() {
                   Create account
                 </span>
               )}
-            </Button>
+            </PrimaryButton>
           </form>
 
           <div className="flex items-center gap-4 my-6">

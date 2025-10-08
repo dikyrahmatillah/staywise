@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import PrimaryButton from "@/components/ui/primary-button";
 import { Mail } from "lucide-react";
 
 export default function CheckEmailPage() {
@@ -35,13 +35,13 @@ export default function CheckEmailPage() {
             </p>
 
             <div className="w-full space-y-2 mt-2">
-              <Button
+              <PrimaryButton
                 type="button"
                 onClick={() => router.push("/signin")}
-                className="w-full h-11 bg-primary text-primary-foreground font-medium rounded-md hover:bg-primary/90 transition-colors shadow-sm"
+                className="w-full h-11"
               >
                 I&apos;ve verified — Sign in
-              </Button>
+              </PrimaryButton>
 
               <Link
                 href={`/`}

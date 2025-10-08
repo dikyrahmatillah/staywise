@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
+import PrimaryButton from "@/components/ui/primary-button";
 import AuthHeader from "@/components/auth/auth-header";
 
 export default function ForgotPasswordPage() {
@@ -40,13 +40,13 @@ export default function ForgotPasswordPage() {
               />
             </div>
 
-            <Button
+            <PrimaryButton
               type="submit"
-              className="w-full bg-rose-500 hover:bg-rose-600 text-white cursor-pointer"
+              className="w-full h-11"
               disabled={loading}
             >
               {loading ? "Sending..." : "Send reset link"}
-            </Button>
+            </PrimaryButton>
 
             {message && <p className="text-sm mt-2 text-center">{message}</p>}
           </form>

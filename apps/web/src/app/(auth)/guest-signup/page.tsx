@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, Suspense } from "react";
 import { Button } from "@/components/ui/button";
+import PrimaryButton from "@/components/ui/primary-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FcGoogle } from "react-icons/fc";
@@ -84,20 +85,14 @@ function GuestSignUpContent() {
               />
             </div>
 
-            <Button
+            <PrimaryButton
               type="submit"
-              className={`w-full bg-rose-500 hover:bg-rose-600 text-white cursor-pointer`}
+              className="w-full h-11 px-4"
               disabled={isLoading}
             >
               {isLoading ? "Signing up..." : "Create account"}
-            </Button>
+            </PrimaryButton>
           </form>
-
-          <div className="flex items-center gap-4 my-6">
-            <div className="flex-1 h-px bg-border"></div>
-            <span className="text-sm text-muted-foreground">or</span>
-            <div className="flex-1 h-px bg-border"></div>
-          </div>
 
           <Button
             variant="outline"

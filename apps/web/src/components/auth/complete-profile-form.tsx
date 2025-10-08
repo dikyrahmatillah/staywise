@@ -2,7 +2,7 @@
 
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import PrimaryButton from "@/components/ui/primary-button";
 import { Label } from "@/components/ui/label";
 import AvatarInput from "./avatar-input";
 import { useCompleteProfileForm } from "./use-complete-profile-form";
@@ -168,13 +168,13 @@ export default function CompleteProfileForm({ token }: Props) {
           Max 1MB. Supports JPG, JPEG, PNG, GIF formats.
         </p>
       </div>
-      <Button
+      <PrimaryButton
         type="submit"
-        className="w-full bg-rose-500 hover:bg-rose-600 text-white cursor-pointer"
+        className="w-full h-11"
         disabled={isSubmitting}
       >
         {isSubmitting ? "Submitting..." : "Complete Registration"}
-      </Button>
+      </PrimaryButton>
     </form>
   );
 }
