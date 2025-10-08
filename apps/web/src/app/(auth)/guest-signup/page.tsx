@@ -43,7 +43,7 @@ function GuestSignUpContent() {
       const payload = { email, role: "GUEST" };
       await api.post("/auth/signup", payload);
       toast.success("Verification email sent. Please check your inbox.");
-      router.push("/signin");
+      router.push(`/check-email?email=${encodeURIComponent(email)}&role=GUEST`);
     } catch (err: unknown) {
       const message =
         extractErrorMessage(err) || "Signup failed. Please try again later.";
