@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Trash2, Image as ImageIcon, Camera } from "lucide-react";
 import Image from "next/image";
-import { ImageUploadArea } from "@/components/tenant/shared/image-upload-area";
+import { ImageUploadArea } from "@/components/tenant/image-upload-area";
 
 type PictureItem =
   | string

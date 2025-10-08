@@ -86,8 +86,8 @@ export class PropertyCreateController {
         : [];
 
       for (let i = 0; i < propertyImages.length; i++) {
-        const imageUrl = await this.fileService.uploadPicture(
-          propertyImages[i].path
+        const imageUrl = await this.fileService.uploadPictureFromBuffer(
+          propertyImages[i].buffer
         );
         const pictureData = propertyPicturesData.find(
           (p: any) => p.fileIndex === i
@@ -122,8 +122,8 @@ export class PropertyCreateController {
         };
 
         if (roomData.hasImage && roomImageIndex < roomImages.length) {
-          const imageUrl = await this.fileService.uploadPicture(
-            roomImages[roomImageIndex].path
+          const imageUrl = await this.fileService.uploadPictureFromBuffer(
+            roomImages[roomImageIndex].buffer
           );
           room.imageUrl = imageUrl;
           roomImageIndex++;
