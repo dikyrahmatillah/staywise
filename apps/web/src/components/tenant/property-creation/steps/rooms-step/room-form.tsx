@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, X, BedDouble } from "lucide-react";
 import { RoomFormData } from "./types";
 import { RoomBasicInfo } from "./room-basic-info";
-import { ImageUploadArea } from "@/components/tenant/shared/image-upload-area";
+import { ImageUploadArea } from "@/components/tenant/image-upload-area";
 import Image from "next/image";
 import { Label } from "@/components/ui/label";
 

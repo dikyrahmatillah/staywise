@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Camera, X } from "lucide-react";
 import Image from "next/image";
 import React from "react";
-import { ImageUploadArea } from "@/components/tenant/shared/image-upload-area";
+import { ImageUploadArea } from "@/components/tenant/image-upload-area";
 
 type ExistingPicture = { id: string; imageUrl: string; note?: string | null };
 

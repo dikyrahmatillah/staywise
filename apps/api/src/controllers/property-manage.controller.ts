@@ -156,8 +156,8 @@ export class PropertyManageController {
         : [];
 
       for (let i = 0; i < propertyImages.length; i++) {
-        const imageUrl = await this.fileService.uploadPicture(
-          propertyImages[i].path
+        const imageUrl = await this.fileService.uploadPictureFromBuffer(
+          propertyImages[i].buffer
         );
         const pictureData = propertyPicturesData.find(
           (p: any) => p.fileIndex === i
