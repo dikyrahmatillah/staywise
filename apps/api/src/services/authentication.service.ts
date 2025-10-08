@@ -144,11 +144,17 @@ export class AuthenticationService {
 
     if (!user) throw new AppError("User not found", 404);
 
+    const updateData = { ...data };
+    if ("phone" in updateData) {
+      const phoneValue = updateData.phone as string | null | undefined;
+      if (phoneValue === "" || phoneValue === null) {
+        updateData.phone = null;
+      }
+    }
+
     const updatedUser = await prisma.user.update({
       where: { id: userId },
-      data: {
-        ...data,
-      },
+      data: updateData,
     });
 
     return updatedUser;

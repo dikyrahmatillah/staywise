@@ -70,7 +70,7 @@ export function ProfileEditForm({
         const formData = new FormData();
         if (data.firstName) formData.append("firstName", data.firstName);
         if (data.lastName) formData.append("lastName", data.lastName);
-        if (data.phone) formData.append("phone", data.phone);
+        formData.append("phone", data.phone || "");
         if (data.email) formData.append("email", data.email);
         if (avatarFile) formData.append("image", avatarFile);
 
