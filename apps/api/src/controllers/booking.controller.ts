@@ -8,6 +8,16 @@ export class BookingController {
     next: NextFunction
   ) {
     try {
+      const userRole = (request as any).user?.role;
+
+      if (userRole === "TENANT") {
+        return response.status(403).json({
+          success: false,
+          message: "Tenants are not allowed to book properties",
+          data: null,
+        });
+      }
+
       const booking = await bookingService.createBooking(request.body);
       return response.status(201).json(booking);
     } catch (error: any) {
