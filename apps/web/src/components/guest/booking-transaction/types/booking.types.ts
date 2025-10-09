@@ -1,5 +1,3 @@
-// apps/web/src/app/booking/types/booking-types.ts
-
 import type { OrderStatus } from "@/types";
 
 export interface BookingDetails {
@@ -20,6 +18,7 @@ export interface CreateBookingResponse {
   snapToken?: string;
   status: OrderStatus;
   totalAmount: number;
+  expiresAt?: Date | null; // Add expiration timestamp
 }
 
 export interface MidtransResult {

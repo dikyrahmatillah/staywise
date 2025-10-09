@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, XCircle, Eye, FileImage, Trash2 } from "lucide-react";
+import { PaymentProofUploadModal } from "@/components/guest/booking-transaction/payment-proof-upload-modal";
 import {
   needsPaymentConfirmation,
   isWaitingPaymentNoproof,
@@ -26,6 +28,7 @@ export const BookingActions = ({
   onViewDetails,
 }: BookingActionsProps) => {
   const { booking } = useBookingRow();
+  const [proofModalOpen, setProofModalOpen] = useState(false);
 
   // Case 1: Waiting for payment with no proof uploaded - show cancel option
   if (isWaitingPaymentNoproof(booking)) {
@@ -48,14 +51,29 @@ export const BookingActions = ({
   // Case 2: Payment proof uploaded but waiting for processing - show view button
   if (hasUnprocessedPaymentProof(booking)) {
     return (
-      <Button
-        variant="outline"
-        size="sm"
-        className="rounded-sm"
-        onClick={onViewPaymentProof}
-      >
-        <FileImage className="h-3 w-3" />
-      </Button>
+      <>
+        <Button
+          variant="outline"
+          size="sm"
+          className="rounded-sm"
+          onClick={() => setProofModalOpen(true)}
+        >
+          <FileImage className="h-3 w-3" />
+        </Button>
+
+        {/* Unified View Modal for Tenant */}
+        <PaymentProofUploadModal
+          open={proofModalOpen}
+          onOpenChange={setProofModalOpen}
+          bookingId={booking.id}
+          orderCode={booking.orderCode}
+          totalAmount={booking.totalAmount}
+          existingProofUrl={booking.paymentProof?.imageUrl}
+          mode="view"
+          showUploadButton={false}
+          title={`Payment Proof - ${booking.orderCode}`}
+        />
+      </>
     );
   }
 
@@ -68,11 +86,24 @@ export const BookingActions = ({
           variant="outline"
           size="sm"
           className="rounded-sm px-3 h-8"
-          onClick={onViewPaymentProof}
+          onClick={() => setProofModalOpen(true)}
         >
           <FileImage className="h-3 w-3 mr-1" />
           View
         </Button>
+
+        {/* Unified View Modal for Tenant */}
+        <PaymentProofUploadModal
+          open={proofModalOpen}
+          onOpenChange={setProofModalOpen}
+          bookingId={booking.id}
+          orderCode={booking.orderCode}
+          totalAmount={booking.totalAmount}
+          existingProofUrl={booking.paymentProof?.imageUrl}
+          mode="view"
+          showUploadButton={false}
+          title={`Review Payment Proof - ${booking.orderCode}`}
+        />
 
         {/* Approve */}
         <Button
