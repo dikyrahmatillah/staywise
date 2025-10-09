@@ -67,7 +67,9 @@ export async function generateMetadata({
       : 0;
 
   const ratingText =
-    avgRating > 0 ? `${avgRating.toFixed(1)}⭐ (${reviewCount} reviews)` : "";
+    reviewCount > 0
+      ? `${avgRating.toFixed(1)} (${reviewCount} reviews)`
+      : "No reviews yet";
 
   console.log(
     "[generateMetadata] Generated title:",

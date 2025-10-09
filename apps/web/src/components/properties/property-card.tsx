@@ -4,7 +4,6 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { MapPin, Users, Building2, Star } from "lucide-react";
-import usePropertyDetails from "@/hooks/usePropertyDetails";
 import { getGuestRange } from "@/components/tenant/property-utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -16,15 +15,13 @@ interface PropertyCardProps {
 }
 
 export function PropertyCard({ property }: PropertyCardProps) {
-  const { data } = usePropertyDetails(property.slug);
-
   const totalRooms = property.Rooms?.length || 1;
   type PropLike = { Rooms?: unknown[]; maxGuests?: number };
   const guestRange = getGuestRange(property as PropLike);
   const minGuests = guestRange.min;
   const maxGuests = guestRange.max;
-  const averageRating = data?.averageRating || 0.0;
   const priceFrom = property.priceFrom;
+  const averageRating = property.averageRating ?? 0;
 
   return (
     <Link href={`/properties/${property.slug}`} className="block" passHref>
@@ -85,11 +82,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
             <div className="flex gap-2">
               <div className="flex items-center gap-1">
                 <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                <span className="font-medium">
-                  {typeof averageRating === "number"
-                    ? averageRating.toFixed(1)
-                    : "—"}
-                </span>
+                <span className="font-medium">{averageRating.toFixed(1)}</span>
               </div>
             </div>
           </div>
