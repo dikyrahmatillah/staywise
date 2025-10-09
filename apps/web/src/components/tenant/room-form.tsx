@@ -34,12 +34,9 @@ export function RoomForm({
   title,
   description,
 }: RoomFormProps) {
-  // Wrapper to handle both FormData and plain objects
   const handleSubmitWrapper = async (
     data: CreateRoomInput | UpdateRoomInput | FormData
   ) => {
-    // Cast FormData back to the expected type for the parent handler
-    // The actual API call in useRooms handles FormData properly
     await onSubmit(data as CreateRoomInput | UpdateRoomInput);
   };
 

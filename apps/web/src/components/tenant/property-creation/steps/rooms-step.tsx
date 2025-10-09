@@ -36,9 +36,9 @@ export function RoomsStep() {
       name: roomFormData.name,
       description: roomFormData.description || undefined,
       basePrice: roomFormData.basePrice,
-      capacity: roomFormData.capacity || 1,
+      capacity: roomFormData.capacity ?? 1,
       bedType: roomFormData.bedType,
-      bedCount: roomFormData.bedCount || 1,
+      bedCount: roomFormData.bedCount ?? 1,
       imageFile: roomFormData.imageFile,
       imagePreview: savedPreview,
     };

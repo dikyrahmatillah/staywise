@@ -22,7 +22,7 @@ export class EmailService {
   }
 
   async sendPasswordResetEmail(email: string, resetToken: string) {
-    const webUrl = process.env.WEB_APP_URL || "http://localhost:3000";
+    const webUrl = process.env.API_BASE_URL || "http://localhost:3000";
     const resetLink = `${webUrl}/reset-password?token=${encodeURIComponent(
       resetToken
     )}`;
@@ -44,7 +44,7 @@ export class EmailService {
   }
 
   async sendEmailVerification(email: string, verifyToken: string) {
-    const webUrl = process.env.WEB_APP_URL || "http://localhost:3000";
+    const webUrl = process.env.API_BASE_URL || "http://localhost:3000";
     const verifyLink = `${webUrl}/complete-profile?token=${encodeURIComponent(
       verifyToken
     )}`;
@@ -108,7 +108,7 @@ Manage your booking here: ${bookingData.manageBookingUrl}`,
   }
 
   async sendEmailChangeVerification(newEmail: string, token: string) {
-    const webUrl = process.env.WEB_APP_URL || "http://localhost:3000";
+    const webUrl = process.env.API_BASE_URL || "http://localhost:3000";
     const verifyLink = `${webUrl}/verify-email-change?token=${encodeURIComponent(
       token
     )}`;

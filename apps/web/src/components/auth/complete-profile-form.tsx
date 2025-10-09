@@ -77,7 +77,7 @@ export default function CompleteProfileForm({ token }: Props) {
         </Label>
         <Input
           id="phone"
-          placeholder="+62 812 3456 7890"
+          placeholder="+62 8xx xxxx xxxx"
           disabled={isSubmitting}
           className="w-full"
           {...register("phone")}

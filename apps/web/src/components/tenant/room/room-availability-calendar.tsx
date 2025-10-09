@@ -132,19 +132,19 @@ export function RoomAvailabilityCalendar({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] md:w-[80vw] max-w-4xl p-4 sm:p-6 sm:mx-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5" />
-            Unavailable Dates - {roomName}
+          <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <Calendar className="h-4 w-4 sm:h-5 sm:w-5" />
+            <span className="truncate">Unavailable Dates - {roomName}</span>
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-xs sm:text-sm">
             Mark specific dates as unavailable when this room cannot be rented.
             Rooms are available by default unless marked unavailable.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {error && <ErrorAlert message={error} />}
 
           <CalendarHeader
@@ -154,7 +154,7 @@ export function RoomAvailabilityCalendar({
           />
 
           <Card>
-            <CardContent className="p-4">
+            <CardContent className="p-2 sm:p-4">
               <CalendarGrid
                 dates={calendarDates}
                 currentDate={currentDate}
@@ -167,7 +167,7 @@ export function RoomAvailabilityCalendar({
 
           <CalendarLegend />
 
-          <div className="text-sm text-muted-foreground">
+          <div className="text-xs sm:text-sm text-muted-foreground">
             Click on any date to toggle between available (green) and
             unavailable (red).
           </div>

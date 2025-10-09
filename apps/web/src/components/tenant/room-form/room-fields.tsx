@@ -67,10 +67,17 @@ export function RoomFields({
           id="price"
           name="price"
           type="number"
-          placeholder="1"
           min={1}
+          placeholder="1"
           value={values.price}
           onChange={onChange}
+          onBlur={(e) => {
+            if ((e.target as HTMLInputElement).value === "") {
+              onChange({
+                target: { name: "price", value: String(1) },
+              } as unknown as React.ChangeEvent<HTMLInputElement>);
+            }
+          }}
           disabled={disabled}
         />
         {errors.price && <p className="text-sm text-red-500">{errors.price}</p>}
@@ -83,10 +90,17 @@ export function RoomFields({
             id="capacity"
             name="capacity"
             type="number"
-            placeholder="1"
             min={1}
+            placeholder="1"
             value={values.capacity}
             onChange={onChange}
+            onBlur={(e) => {
+              if ((e.target as HTMLInputElement).value === "") {
+                onChange({
+                  target: { name: "capacity", value: String(1) },
+                } as unknown as React.ChangeEvent<HTMLInputElement>);
+              }
+            }}
             disabled={disabled}
           />
           {errors.capacity && (
@@ -100,10 +114,17 @@ export function RoomFields({
             id="bedCount"
             name="bedCount"
             type="number"
-            placeholder="1"
             min={1}
+            placeholder="1"
             value={values.bedCount}
             onChange={onChange}
+            onBlur={(e) => {
+              if ((e.target as HTMLInputElement).value === "") {
+                onChange({
+                  target: { name: "bedCount", value: String(1) },
+                } as unknown as React.ChangeEvent<HTMLInputElement>);
+              }
+            }}
             disabled={disabled}
           />
           {errors.bedCount && (

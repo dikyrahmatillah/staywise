@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, MoreHorizontal } from "lucide-react";
 
 const routeTitleMap: Record<string, string> = {
   "/dashboard/tenant": "Overview",
@@ -47,9 +47,51 @@ export function Breadcrumb() {
     return <h1 className="text-lg font-semibold tracking-tight">Dashboard</h1>;
   }
 
+  const shouldCollapse = visibleCrumbs.length > 3;
+  const renderCrumbs = shouldCollapse
+    ? [
+        visibleCrumbs[0],
+        { seg: "...", path: "", collapsed: true as const }, // Ellipsis
+        visibleCrumbs[visibleCrumbs.length - 1], // Last (current)
+      ]
+    : visibleCrumbs;
+
   return (
-    <nav aria-label="Breadcrumb">
-      <ol className="flex items-center gap-2 text-sm text-muted-foreground">
+    <nav aria-label="Breadcrumb" className="overflow-hidden">
+      <ol className="flex items-center gap-1 md:gap-2 text-sm text-muted-foreground flex-wrap lg:hidden">
+        {renderCrumbs.map((c, i) => {
+          const isLast = i === renderCrumbs.length - 1;
+          const isCollapsed = "collapsed" in c && c.collapsed;
+          const title = isCollapsed ? "..." : segmentTitle(c.seg, c.path);
+
+          return (
+            <li key={c.path || `collapsed-${i}`} className="flex items-center">
+              {isCollapsed ? (
+                <span className="inline lg:hidden text-muted-foreground px-1">
+                  <MoreHorizontal className="h-4 w-4" />
+                </span>
+              ) : !isLast ? (
+                <Link
+                  href={c.path}
+                  className="text-sm md:text-sm text-muted-foreground hover:text-foreground transition-colors truncate max-w-[120px] md:max-w-none"
+                >
+                  {title}
+                </Link>
+              ) : (
+                <span className="text-sm md:text-sm font-semibold text-foreground truncate max-w-[150px] md:max-w-none">
+                  {title}
+                </span>
+              )}
+
+              {!isLast && !isCollapsed && (
+                <ChevronRight className="ml-1 md:ml-2 h-3 w-3 md:h-4 md:w-4 text-muted-foreground flex-shrink-0" />
+              )}
+            </li>
+          );
+        })}
+      </ol>
+
+      <ol className="hidden lg:flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
         {visibleCrumbs.map((c, i) => {
           const isLast = i === visibleCrumbs.length - 1;
           const title = segmentTitle(c.seg, c.path);
@@ -59,7 +101,7 @@ export function Breadcrumb() {
               {!isLast ? (
                 <Link
                   href={c.path}
-                  className="text-sm text-muted-foreground hover:text-foreground"
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
                   {title}
                 </Link>
