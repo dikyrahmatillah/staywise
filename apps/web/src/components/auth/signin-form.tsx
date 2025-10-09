@@ -80,6 +80,7 @@ export default function SignInForm({ callbackUrl = "/dashboard" }: Props) {
   }
 
   const handleGoogleSignIn = () => {
+    toast.loading("Redirecting to Google...");
     const redirectTo = `/oauth-redirect?callbackUrl=${encodeURIComponent(
       callbackUrl
     )}`;
@@ -158,8 +159,6 @@ export default function SignInForm({ callbackUrl = "/dashboard" }: Props) {
             {isLoading ? "Signing in..." : "Sign in"}
           </PrimaryButton>
         </form>
-
-        {/* error handling is done via Sonner toasts */}
 
         <div className="flex items-center gap-4 my-6">
           <div className="flex-1 h-px bg-border"></div>

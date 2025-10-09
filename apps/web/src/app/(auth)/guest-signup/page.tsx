@@ -21,8 +21,6 @@ function GuestSignUpContent() {
   const [emailSent, setEmailSent] = useState(false);
   const searchParams = useSearchParams();
 
-  // router was previously used for redirecting to /check-email; not needed with inline UI
-
   useEffect(() => {
     const error = searchParams.get("error");
     if (error === "missing-token") {
@@ -110,7 +108,10 @@ function GuestSignUpContent() {
                 variant="outline"
                 className="w-full cursor-pointer"
                 disabled={isLoading}
-                onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+                onClick={() => {
+                  toast.loading("Redirecting to Google...");
+                  signIn("google", { callbackUrl: "/dashboard" });
+                }}
               >
                 <FcGoogle className="w-5 h-5 mr-2" />
                 Continue with Google

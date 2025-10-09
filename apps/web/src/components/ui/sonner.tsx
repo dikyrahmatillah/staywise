@@ -22,6 +22,7 @@ const Toaster = (props: ToasterProps) => {
           error: "border-l-4 border-l-red-500 text-red-600",
           warning: "border-l-4 border-l-orange-500 text-orange-600",
           info: "border-l-4 border-l-blue-500 text-blue-600",
+          loading: "border-l-4 border-l-blue-500 text-blue-600 justify-center",
         },
       }}
       {...props}
