@@ -9,7 +9,7 @@ export function useRoomForm() {
   const handleFieldChange = useCallback(
     (field: string, value: string | number) => {
       setFormData((prev) => {
-        let nextValue: string | number = value;
+        let nextValue: string | number | undefined = value;
 
         if (field === "basePrice") {
           const n = typeof value === "string" ? parseFloat(value) : value;
@@ -17,8 +17,12 @@ export function useRoomForm() {
         }
 
         if (field === "capacity" || field === "bedCount") {
-          const n = typeof value === "string" ? parseInt(value) : value;
-          nextValue = Number.isNaN(n) ? 1 : n;
+          if (value === "") {
+            nextValue = undefined;
+          } else {
+            const n = typeof value === "string" ? parseInt(value) : value;
+            nextValue = Number.isNaN(n) ? undefined : n;
+          }
         }
 
         return {

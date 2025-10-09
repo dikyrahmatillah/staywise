@@ -130,12 +130,13 @@ export function useRoomForm({
     setIsSubmitting(true);
     try {
       if (imageFile) {
+        const fallbackPrice =
+          typeof formData.price === "number" ? formData.price : 1;
         const form = buildRoomFormData(
           validatedData as CreateRoomInput | UpdateRoomInput,
           imageFile,
-          formData.price
+          fallbackPrice
         );
-        // Type assertion: FormData is compatible with the union type
         await onSubmit(form as CreateRoomInput | UpdateRoomInput | FormData);
       } else {
         await onSubmit(validatedData);

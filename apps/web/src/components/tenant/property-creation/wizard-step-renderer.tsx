@@ -11,15 +11,15 @@ export function renderStepContent(currentStep: number) {
     case 1:
       return <BasicInfoStep />;
     case 2:
-      return <PhotosStep />;
-    case 3:
       return <LocationStep />;
-    case 4:
+    case 3:
       return <CategoryStep />;
-    case 5:
-      return <RoomsStep />;
-    case 6:
+    case 4:
       return <FacilitiesStep />;
+    case 5:
+      return <PhotosStep />;
+    case 6:
+      return <RoomsStep />;
     case 7:
       return <ReviewStep />;
     default:

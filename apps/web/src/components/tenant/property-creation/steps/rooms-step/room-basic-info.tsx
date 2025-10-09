@@ -78,10 +78,19 @@ export function RoomBasicInfo({ formData, onFieldChange }: Props) {
               id="capacity"
               type="number"
               min={1}
-              value={formData.capacity ?? 1}
-              onChange={(e) =>
-                onFieldChange("capacity", parseInt(e.target.value || "1"))
-              }
+              value={formData.capacity ?? ""}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (value === "") {
+                  onFieldChange("capacity", 1);
+                } else {
+                  const numValue = parseInt(value);
+                  if (!isNaN(numValue) && numValue > 0) {
+                    onFieldChange("capacity", numValue);
+                  }
+                }
+              }}
+              placeholder="1"
               className="h-11 max-w-[90px] text-sm"
             />
           </div>
@@ -94,10 +103,19 @@ export function RoomBasicInfo({ formData, onFieldChange }: Props) {
               id="bedCount"
               type="number"
               min={1}
-              value={formData.bedCount ?? 1}
-              onChange={(e) =>
-                onFieldChange("bedCount", parseInt(e.target.value || "1"))
-              }
+              value={formData.bedCount ?? ""}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (value === "") {
+                  onFieldChange("bedCount", 1);
+                } else {
+                  const numValue = parseInt(value);
+                  if (!isNaN(numValue) && numValue > 0) {
+                    onFieldChange("bedCount", numValue);
+                  }
+                }
+              }}
+              placeholder="1"
               className="h-11 max-w-[90px] text-sm"
             />
           </div>
