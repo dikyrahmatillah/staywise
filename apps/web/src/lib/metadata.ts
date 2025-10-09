@@ -93,7 +93,7 @@ export function constructMetadata({
   title = siteConfig.name,
   description = siteConfig.description,
   image = siteConfig.ogImage,
-  icons = "/favicon.ico",
+  icons = "/icon.svg",
   noIndex = false,
 }: {
   title?: string;
