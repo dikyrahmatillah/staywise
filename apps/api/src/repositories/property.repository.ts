@@ -2,46 +2,21 @@ import type { Prisma } from "@prisma/client";
 import { prisma } from "../configs/prisma.config.js";
 
 export class PropertyRepository {
-  private readonly includeBasic = {
-    PropertyCategory: true,
-    Pictures: true,
-    Rooms: {
-      include: {
-        RoomAvailabilities: true,
-        PriceAdjustments: { include: { Dates: true } },
-      },
-    },
-  };
-
-  private readonly includeDetailed = {
-    PropertyCategory: true,
-    CustomCategory: true,
-    Pictures: true,
-    Rooms: {
-      include: {
-        RoomAvailabilities: true,
-        PriceAdjustments: { include: { Dates: true } },
-      },
-    },
-    Facilities: true,
-  };
-
-  private readonly includeWithReviews = {
-    PropertyCategory: true,
-    Pictures: true,
-    Rooms: true,
-    Facilities: true,
-    Reviews: {
-      include: { User: true },
-      orderBy: { createdAt: "desc" as const },
-      take: 3,
-    },
-  };
-
   async create(data: any): Promise<any> {
     return prisma.property.create({
       data,
-      include: this.includeDetailed,
+      include: {
+        PropertyCategory: true,
+        CustomCategory: true,
+        Pictures: true,
+        Rooms: {
+          include: {
+            RoomAvailabilities: true,
+            PriceAdjustments: { include: { Dates: true } },
+          },
+        },
+        Facilities: true,
+      },
     });
   }
 
@@ -56,14 +31,65 @@ export class PropertyRepository {
       skip,
       take,
       orderBy,
-      include: this.includeBasic,
+      include: {
+        PropertyCategory: true,
+        Pictures: true,
+        Rooms: {
+          include: {
+            RoomAvailabilities: true,
+            PriceAdjustments: { include: { Dates: true } },
+          },
+        },
+        _count: { select: { Reviews: true } },
+      },
     });
   }
 
   async findManyByIds(propertyIds: string[]): Promise<any[]> {
-    return prisma.property.findMany({
+    const properties = await prisma.property.findMany({
       where: { id: { in: propertyIds } },
-      include: this.includeBasic,
+      include: {
+        PropertyCategory: true,
+        Pictures: true,
+        Rooms: {
+          include: {
+            RoomAvailabilities: true,
+            PriceAdjustments: { include: { Dates: true } },
+          },
+        },
+        _count: { select: { Reviews: true } },
+      },
+    });
+
+    const propertyIds2 = properties.map((p) => p.id);
+
+    const reviewStats = await prisma.review.groupBy({
+      by: ["propertyId"],
+      where: { propertyId: { in: propertyIds2 } },
+      _avg: { rating: true },
+      _count: { rating: true },
+    });
+
+    const statsMap = new Map(
+      reviewStats.map((stat: any) => [
+        stat.propertyId,
+        {
+          averageRating: stat._avg.rating ?? 0,
+          reviewCount: stat._count.rating,
+        },
+      ])
+    );
+
+    return properties.map((property) => {
+      const stats = statsMap.get(property.id) || {
+        averageRating: 0,
+        reviewCount: 0,
+      };
+      return {
+        ...property,
+        averageRating: stats.averageRating,
+        reviewCount: stats.reviewCount,
+      };
     });
   }
 
@@ -79,11 +105,52 @@ export class PropertyRepository {
     const properties = await prisma.property.findMany({
       where,
       orderBy,
-      include: this.includeBasic,
+      include: {
+        PropertyCategory: true,
+        Pictures: true,
+        Rooms: {
+          include: {
+            RoomAvailabilities: true,
+            PriceAdjustments: { include: { Dates: true } },
+          },
+        },
+        _count: { select: { Reviews: true } },
+      },
     });
 
     if (!checkIn || !checkOut) {
-      return properties.slice(skip, skip + take);
+      const sliced = properties.slice(skip, skip + take);
+
+      const propertyIds = sliced.map((p) => p.id);
+
+      const reviewStats = await prisma.review.groupBy({
+        by: ["propertyId"],
+        where: { propertyId: { in: propertyIds } },
+        _avg: { rating: true },
+        _count: { rating: true },
+      });
+
+      const statsMap = new Map(
+        reviewStats.map((stat: any) => [
+          stat.propertyId,
+          {
+            averageRating: stat._avg.rating ?? 0,
+            reviewCount: stat._count.rating,
+          },
+        ])
+      );
+
+      return sliced.map((property) => {
+        const stats = statsMap.get(property.id) || {
+          averageRating: 0,
+          reviewCount: 0,
+        };
+        return {
+          ...property,
+          averageRating: stats.averageRating,
+          reviewCount: stats.reviewCount,
+        };
+      });
     }
 
     const { PriceCalculationService } = await import(
@@ -115,7 +182,38 @@ export class PropertyRepository {
       })
       .filter((p) => typeof p.priceFrom !== "undefined");
 
-    return withPrices.slice(skip, skip + take);
+    const sliced = withPrices.slice(skip, skip + take);
+
+    const propertyIds = sliced.map((p) => p.id);
+
+    const reviewStats = await prisma.review.groupBy({
+      by: ["propertyId"],
+      where: { propertyId: { in: propertyIds } },
+      _avg: { rating: true },
+      _count: { rating: true },
+    });
+
+    const statsMap = new Map(
+      reviewStats.map((stat: any) => [
+        stat.propertyId,
+        {
+          averageRating: stat._avg.rating ?? 0,
+          reviewCount: stat._count.rating,
+        },
+      ])
+    );
+
+    return sliced.map((property) => {
+      const stats = statsMap.get(property.id) || {
+        averageRating: 0,
+        reviewCount: 0,
+      };
+      return {
+        ...property,
+        averageRating: stats.averageRating,
+        reviewCount: stats.reviewCount,
+      };
+    });
   }
 
   async count(where: Prisma.PropertyWhereInput): Promise<number> {
@@ -125,7 +223,17 @@ export class PropertyRepository {
   async findUniqueBySlug(slug: string): Promise<any | null> {
     return prisma.property.findUnique({
       where: { slug },
-      include: this.includeWithReviews,
+      include: {
+        PropertyCategory: true,
+        Pictures: true,
+        Rooms: true,
+        Facilities: true,
+        Reviews: {
+          include: { User: true },
+          orderBy: { createdAt: "desc" as const },
+          take: 3,
+        },
+      },
     });
   }
 
@@ -142,7 +250,18 @@ export class PropertyRepository {
 
     return prisma.property.findUnique({
       where,
-      include: this.includeDetailed,
+      include: {
+        PropertyCategory: true,
+        CustomCategory: true,
+        Pictures: true,
+        Rooms: {
+          include: {
+            RoomAvailabilities: true,
+            PriceAdjustments: { include: { Dates: true } },
+          },
+        },
+        Facilities: true,
+      },
     });
   }
 
@@ -150,7 +269,16 @@ export class PropertyRepository {
     return prisma.property.findMany({
       where: { tenantId },
       include: {
-        ...this.includeDetailed,
+        PropertyCategory: true,
+        CustomCategory: true,
+        Pictures: true,
+        Rooms: {
+          include: {
+            RoomAvailabilities: true,
+            PriceAdjustments: { include: { Dates: true } },
+          },
+        },
+        Facilities: true,
         _count: {
           select: {
             Bookings: true,
@@ -184,7 +312,18 @@ export class PropertyRepository {
     return prisma.property.update({
       where: { id: propertyId },
       data,
-      include: this.includeDetailed,
+      include: {
+        PropertyCategory: true,
+        CustomCategory: true,
+        Pictures: true,
+        Rooms: {
+          include: {
+            RoomAvailabilities: true,
+            PriceAdjustments: { include: { Dates: true } },
+          },
+        },
+        Facilities: true,
+      },
     });
   }
 

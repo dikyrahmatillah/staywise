@@ -13,7 +13,7 @@ import bcrypt from "bcryptjs";
 export class RegistrationService {
   private emailService = new EmailService();
   private tokenService = new TokenService();
-  private static readonly VERIFY_TTL_MS = 1 * 60 * 1000;
+  private static readonly VERIFY_TTL_MS = 3 * 60 * 1000;
 
   async startRegistration(input: RegistrationStartInput) {
     const { email, role } = input;

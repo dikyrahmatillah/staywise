@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FcGoogle } from "react-icons/fc";
 import { toast } from "sonner";
-// router no longer needed because we show inline confirmation instead of redirect
 import { EmailSchema } from "@/schemas";
 import { extractErrorMessage } from "@/lib/auth-error.utils";
 import { signIn } from "next-auth/react";
@@ -116,9 +115,10 @@ export default function TenantSignUpPage() {
                 variant="outline"
                 className="w-full h-11 border-2 hover:bg-accent/50 hover:border-accent-foreground/20 transition-all duration-200 font-medium"
                 disabled={isLoading}
-                onClick={() =>
-                  signIn("google-tenant", { callbackUrl: "/dashboard" })
-                }
+                onClick={() => {
+                  toast.loading("Redirecting to Google...");
+                  signIn("google-tenant", { callbackUrl: "/dashboard" });
+                }}
               >
                 <FcGoogle className="w-5 h-5 mr-2" />
                 Continue with Google

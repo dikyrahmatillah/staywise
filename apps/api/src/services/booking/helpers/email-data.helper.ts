@@ -76,7 +76,7 @@ export function formatBookingForEmail(
     paymentMethod: paymentMethodLabel,
     amountPaid: totalAmount,
     currency: "IDR",
-    manageBookingUrl: `${process.env.API_BASE_URL}/dashboard/bookings/${booking.orderCode}`,
+    manageBookingUrl: `${process.env.WEB_APP_URL}/dashboard/bookings/${booking.orderCode}`,
     supportEmail: process.env.SUPPORT_EMAIL || "support@staywise.com",
     year: new Date().getFullYear().toString(),
   };

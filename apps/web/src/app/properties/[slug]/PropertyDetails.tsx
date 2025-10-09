@@ -84,7 +84,9 @@ export function PropertyDetails({ slug, initialData }: PropertyDetailsProps) {
 
   const reviewCount = Number(property.reviewCount);
   const rating =
-    property.Reviews.reduce((s, r) => s + (r.rating || 0), 0) / reviewCount;
+    reviewCount > 0
+      ? property.Reviews.reduce((s, r) => s + (r.rating || 0), 0) / reviewCount
+      : 0;
 
   const reviewsToShow = (property.Reviews ?? []).map((rv) => ({
     id: rv.id,

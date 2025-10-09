@@ -80,6 +80,8 @@ export const propertyResponseSchema = propertySchema
     CustomCategory: customCategorySchema.optional().nullable(),
     Rooms: z.array(roomSummarySchema),
     priceFrom: z.number().optional(),
+    averageRating: z.number().optional().default(0),
+    reviewCount: z.number().optional().default(0),
   });
 
 export type GetPropertiesParams = {
