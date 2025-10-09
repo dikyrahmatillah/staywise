@@ -28,7 +28,7 @@ export default function Dashboard() {
           <div className="mb-8">
             <EnhancedStats />
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-4">
             <BookingChart />
             <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 border-0">
               <CardHeader className="flex items-center justify-between">
