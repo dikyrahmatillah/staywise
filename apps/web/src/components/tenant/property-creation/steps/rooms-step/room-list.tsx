@@ -57,7 +57,7 @@ export function RoomList({
             return (
               <div
                 key={index}
-                className="group relative overflow-hidden rounded-xl border bg-white dark:bg-gray-900 p-4 sm:p-6 transition-all hover:shadow-md hover:border-blue-200 dark:hover:border-blue-800"
+                className="group relative overflow-hidden rounded-xl border bg-white dark:bg-gray-900 p-4 sm:p-6 transition-all hover:shadow-md hover:border-primary/40 dark:hover:border-primary/40"
               >
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-2 justify-between">
                   <div className="flex-1 space-y-3">

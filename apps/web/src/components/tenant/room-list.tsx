@@ -69,8 +69,13 @@ export function RoomList({
   return (
     <>
       {loading ? (
-        <div className="p-6 flex items-center justify-center">
-          <Ellipsis size={8} />
+        <div className="min-h-[160px] p-6 flex flex-col items-center justify-center space-y-3">
+          <div className="text-muted-foreground">
+            <Ellipsis size={10} className="text-muted-foreground" />
+          </div>
+          <div className="text-center">
+            <p className="text-muted-foreground text-sm">Loading rooms...</p>
+          </div>
         </div>
       ) : isEmpty ? (
         <RoomListEmpty />

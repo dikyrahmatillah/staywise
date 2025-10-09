@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Separator } from "@/components/ui/separator";
+import { Label } from "@/components/ui/label";
 import { FormField } from "./form-field";
 import { Mail, Phone, UserRound } from "lucide-react";
 import type { FormFieldProps } from "./types";
@@ -10,6 +11,7 @@ interface ProfileFormSectionsProps {
   register: FormFieldProps["register"];
   errors: Record<string, { message?: string } | undefined>;
   disabled: boolean;
+  email?: string;
 }
 
 export function PersonalDetailsSection({
@@ -55,6 +57,7 @@ export function ContactDetailsSection({
   register,
   errors,
   disabled,
+  email,
 }: ProfileFormSectionsProps) {
   return (
     <section className="space-y-4">
@@ -66,17 +69,18 @@ export function ContactDetailsSection({
         </div>
       </div>
       <div className="grid gap-4 md:grid-cols-2">
-        <FormField
-          id="email"
-          label="Email"
-          type="email"
-          placeholder="you@example.com"
-          icon={Mail}
-          disabled={disabled}
-          error={errors.email?.message}
-          required
-          register={register}
-        />
+        <div className="space-y-1 ">
+          <Label htmlFor="email" className="text-sm font-medium">
+            Email <span className="text-destructive">*</span>
+          </Label>
+          <div className="flex items-center gap-2 rounded-md border border-input bg-muted/50 px-3 py-2 text-sm">
+            <Mail className="h-4 w-4 text-muted-foreground" />
+            <span className="text-muted-foreground">{email}</span>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Email cannot be changed
+          </p>
+        </div>
         <FormField
           id="phone"
           label="Phone number"
@@ -96,6 +100,7 @@ export function ProfileFormSections({
   register,
   errors,
   disabled,
+  email,
 }: ProfileFormSectionsProps) {
   return (
     <div className="space-y-10">
@@ -108,6 +113,7 @@ export function ProfileFormSections({
         register={register}
         errors={errors}
         disabled={disabled}
+        email={email}
       />
       <Separator />
     </div>

@@ -6,9 +6,11 @@ export const CommonProfileSchema = z.object({
   lastName: z.string().min(1, "Invalid last name").max(150).optional(),
   name: z.string().min(1, "Invalid name").max(300).optional(),
   phone: z
-    .string()
-    .min(8, "Invalid phone number")
-    .max(20, "Invalid phone number")
+    .preprocess((val: unknown) => {
+      // Convert empty string to null so backend can clear phone field
+      if (typeof val === "string" && val.trim() === "") return null;
+      return val;
+    }, z.string().min(8, "Invalid phone number").max(20, "Invalid phone number").nullable())
     .optional(),
   image: z.url("Invalid avatar").optional(),
 });

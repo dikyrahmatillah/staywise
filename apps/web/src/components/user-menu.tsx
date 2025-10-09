@@ -11,6 +11,7 @@ import {
 } from "react-icons/hi";
 import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -169,6 +170,7 @@ export function UserMenu() {
             className="text-destructive hover:text-destructive hover:bg-destructive/10 cursor-pointer flex items-center gap-3 px-4 py-2.5 mx-2 my-1 rounded-lg transition-all duration-200 group"
             onSelect={(e) => {
               e.preventDefault();
+              toast.success("Signed out");
               signOut({ callbackUrl: "/" });
             }}
           >
