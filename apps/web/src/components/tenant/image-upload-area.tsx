@@ -122,7 +122,7 @@ export function ImageUploadArea({
               <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-1">
                 Upload Property Images
               </h3>
-              <p className="text-xs sm:text-base text-gray-600 mb-1">
+              <p className="text-xs sm:text-sm text-gray-600 mb-1">
                 Drag and drop your images here, or click to browse
               </p>
               <p className="text-xs sm:text-sm text-gray-500 mb-4">

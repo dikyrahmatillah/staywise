@@ -30,6 +30,7 @@ type Props = {
 export default function CategorySelector({
   defaultCategories,
   customCategories,
+  defaultLoading = false,
   customLoading = false,
   selectedDefault,
   selectedCustom,
@@ -126,6 +127,7 @@ export default function CategorySelector({
           <div className="space-y-6">
             <CategorySelectorDefaultSection
               categories={defaultCategories}
+              loading={!!defaultLoading}
               selectedId={selectedDefault}
               onSelect={onDefaultSelect}
             />

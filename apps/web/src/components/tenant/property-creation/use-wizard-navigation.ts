@@ -58,15 +58,15 @@ export function useWizardNavigation() {
         case 1:
           return Boolean(formData.name || formData.description);
         case 2:
-          return Boolean(formData.country || formData.city || formData.address);
-        case 3:
-          return Boolean(formData.propertyCategoryId);
-        case 4:
-          return Boolean(formData.rooms && formData.rooms.length > 0);
-        case 5:
-          return Boolean(formData.facilities && formData.facilities.length > 0);
-        case 6:
           return Boolean(formData.pictures && formData.pictures.length > 0);
+        case 3:
+          return Boolean(formData.country || formData.city || formData.address);
+        case 4:
+          return Boolean(formData.propertyCategoryId);
+        case 5:
+          return Boolean(formData.rooms && formData.rooms.length > 0);
+        case 6:
+          return Boolean(formData.facilities && formData.facilities.length > 0);
         case 7:
           return isStepValid(7);
         default:

@@ -114,7 +114,7 @@ export function UploadArea() {
                 <p className="text-lg font-medium text-gray-900">
                   {isDragOver ? "Drop your image here" : "Upload payment proof"}
                 </p>
-                <p className="text-sm text-gray-500">
+                <p className="text-xs text-gray-500">
                   Drag and drop an image, or{" "}
                   <span className="text-blue-600 underline">browse files</span>
                 </p>

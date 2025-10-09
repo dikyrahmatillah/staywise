@@ -5,6 +5,7 @@ import { Edit3, Trash2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import Ellipsis from "@/components/ui/ellipsis";
 import { cn } from "@/lib/utils";
 
 type Category = { id: string; name: string };
@@ -54,13 +55,8 @@ export function CategorySelectorCustomSection({
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 3 }).map((_, index) => (
-            <div
-              key={index}
-              className="h-24 animate-pulse rounded-2xl border border-dashed border-border/50 bg-muted/20"
-            />
-          ))}
+        <div className="flex items-center justify-center h-36">
+          <Ellipsis />
         </div>
       ) : sortedCategories.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-border/60 bg-muted/20 p-6 text-center">
