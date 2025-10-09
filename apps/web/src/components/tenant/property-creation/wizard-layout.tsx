@@ -41,7 +41,3 @@ export function WizardProgress({ currentStep }: WizardProgressProps) {
     </div>
   );
 }
-
-// Wizard step header removed — markup has been inlined where used.
-
-// Wizard step content wrapper removed — container markup has been inlined where used.

@@ -39,18 +39,13 @@ const getCompletionChecks = (formData: FormData): CompletionCheck[] => {
   const defaultName = formData.propertyCategoryName ?? null;
 
   return [
-    // New order: Basic Info, Photos, Location, Category, Rooms, Facilities
+    // New order: Basic Info, Location, Category, Facilities, Pictures, Rooms
     {
       label: "Basic Information",
       completed: !!(formData.name && formData.description),
       details: `Name: ${formData.name || "Not set"}, Description: ${
         formData.description ? "Added" : "Not set"
       }`,
-    },
-    {
-      label: "Photos",
-      completed: !!(formData.pictures && formData.pictures.length > 0),
-      details: `${formData.pictures?.length || 0} photo(s) added`,
     },
     {
       label: "Location",
@@ -69,14 +64,19 @@ const getCompletionChecks = (formData: FormData): CompletionCheck[] => {
         : "Default category not selected",
     },
     {
-      label: "Rooms",
-      completed: !!(formData.rooms && formData.rooms.length > 0),
-      details: `${formData.rooms?.length || 0} room(s) added`,
-    },
-    {
       label: "Facilities",
       completed: !!(formData.facilities && formData.facilities.length > 0),
       details: `${formData.facilities?.length || 0} facility(ies) added`,
+    },
+    {
+      label: "Pictures",
+      completed: !!(formData.pictures && formData.pictures.length > 0),
+      details: `${formData.pictures?.length || 0} photo(s) added`,
+    },
+    {
+      label: "Rooms",
+      completed: !!(formData.rooms && formData.rooms.length > 0),
+      details: `${formData.rooms?.length || 0} room(s) added`,
     },
   ];
 };
@@ -113,20 +113,13 @@ export function ReviewStep() {
 
           <Separator />
 
-          <PhotosSection
-            pictures={formData.pictures}
-            onEdit={() => setCurrentStep(2)}
-          />
-
-          <Separator />
-
           <LocationSection
             country={formData.country}
             city={formData.city}
             address={formData.address}
             latitude={formData.latitude}
             longitude={formData.longitude}
-            onEdit={() => setCurrentStep(3)}
+            onEdit={() => setCurrentStep(2)}
           />
 
           <Separator />
@@ -136,28 +129,28 @@ export function ReviewStep() {
             propertyCategoryName={formData.propertyCategoryName}
             customCategoryId={formData.customCategoryId}
             customCategoryName={formData.customCategoryName}
-            onEdit={() => setCurrentStep(4)}
-          />
-
-          <Separator />
-
-          <RoomsSection
-            rooms={formData.rooms}
-            onEdit={() => setCurrentStep(5)}
+            onEdit={() => setCurrentStep(3)}
           />
 
           <Separator />
 
           <FacilitiesSection
             facilities={formData.facilities}
-            onEdit={() => setCurrentStep(6)}
+            onEdit={() => setCurrentStep(4)}
           />
 
           <Separator />
 
           <PhotosSection
             pictures={formData.pictures}
-            onEdit={() => setCurrentStep(2)}
+            onEdit={() => setCurrentStep(5)}
+          />
+
+          <Separator />
+
+          <RoomsSection
+            rooms={formData.rooms}
+            onEdit={() => setCurrentStep(6)}
           />
         </CardContent>
       </Card>
