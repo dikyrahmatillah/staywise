@@ -1,7 +1,6 @@
-// apps/web/src/app/booking/components/booking-content.tsx
-
 "use client";
 
+import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
@@ -12,17 +11,29 @@ import { PaymentTypeStep } from "./payment-type-step";
 import { PaymentMethodStep } from "./payment-method-step";
 import { ReviewStep } from "./review-step";
 import { BookingSummaryCard } from "./booking-summary-card";
-import { PaymentUploadModal } from "./payment-upload-modal";
 
 export function BookingContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session } = useSession();
 
-  // Redirect to login if not authenticated
+  // Redirect to login if not authenticated - use useEffect to avoid setState during render
+  useEffect(() => {
+    if (!session) {
+      router.push("/signin");
+    }
+  }, [session, router]);
+
+  // Show loading state while checking authentication
   if (!session) {
-    router.push("/signin");
-    return <div>Redirecting to login...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Redirecting to login...</p>
+        </div>
+      </div>
+    );
   }
 
   const bookingDetails = parseBookingDetailsFromParams(searchParams);
@@ -61,8 +72,7 @@ export function BookingContent() {
           </div>
         </div>
 
-        {/* Payment Upload Modal */}
-        <PaymentUploadModal />
+        {/* Payment Upload Modal is now handled inside BookingSummaryCard */}
       </div>
     </BookingProvider>
   );

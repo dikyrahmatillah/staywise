@@ -1,14 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { BookingPaymentProofUpload } from "@/components/guest/booking-transaction/booking-payment-proof-upload";
+import { PaymentProofUploadModal } from "@/components/guest/booking-transaction/payment-proof-upload-modal";
 import { Upload, CreditCard, Eye, X, FileImage, Star } from "lucide-react";
 import { useBookingCardContext } from "./booking-card-context";
 
@@ -40,44 +33,39 @@ export const BookingCardActions = ({
   const { booking, review, canReview, onViewDetails, onBookingUpdate } =
     useBookingCardContext();
 
-  // Handler for payment proof expiration
-  const handlePaymentProofExpire = async () => {
-    // This will be called by the timer in BookingPaymentProofUpload
-    onBookingUpdate?.();
-  };
-
   // WAITING_PAYMENT actions
   if (booking.status === "WAITING_PAYMENT") {
     if (booking.paymentMethod === "MANUAL_TRANSFER") {
       return (
         <div className="flex flex-col gap-2">
-          <Dialog
+          <Button
+            variant="default"
+            size="sm"
+            className="w-full"
+            onClick={() => paymentProofDialog.setOpen(true)}
+          >
+            <Upload className="h-4 w-4 mr-2" />
+            Upload Payment Proof
+          </Button>
+
+          {/* Unified Upload Modal with Timer */}
+          <PaymentProofUploadModal
             open={paymentProofDialog.open}
             onOpenChange={paymentProofDialog.setOpen}
-          >
-            <DialogTrigger asChild>
-              <Button variant="default" size="sm" className="w-full">
-                <Upload className="h-4 w-4 mr-2" />
-                Upload Payment Proof
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>Upload Payment Proof</DialogTitle>
-              </DialogHeader>
-              <BookingPaymentProofUpload
-                bookingId={booking.id}
-                orderCode={booking.orderCode}
-                totalAmount={booking.totalAmount}
-                expiresAt={booking.expiresAt}
-                onExpire={handlePaymentProofExpire}
-                onUploadComplete={() => {
-                  paymentProofDialog.setOpen(false);
-                  onBookingUpdate?.();
-                }}
-              />
-            </DialogContent>
-          </Dialog>
+            bookingId={booking.id}
+            orderCode={booking.orderCode}
+            totalAmount={booking.totalAmount}
+            expiresAt={booking.expiresAt}
+            mode="upload"
+            onUploadComplete={() => {
+              paymentProofDialog.setOpen(false);
+              onBookingUpdate?.();
+            }}
+            onExpire={() => {
+              paymentProofDialog.setOpen(false);
+              onBookingUpdate?.();
+            }}
+          />
 
           <Button
             variant="destructive"
@@ -119,33 +107,29 @@ export const BookingCardActions = ({
     booking.paymentMethod === "MANUAL_TRANSFER"
   ) {
     return (
-      <Dialog
-        open={paymentProofViewDialog.open}
-        onOpenChange={paymentProofViewDialog.setOpen}
-      >
-        <DialogTrigger asChild>
-          <Button variant="outline" size="sm" className="w-full">
-            <FileImage className="h-4 w-4 mr-2" />
-            View Payment Proof
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Payment Proof - {booking.orderCode}</DialogTitle>
-          </DialogHeader>
-          <BookingPaymentProofUpload
-            bookingId={booking.id}
-            orderCode={booking.orderCode}
-            totalAmount={booking.totalAmount}
-            existingProofUrl={booking.paymentProof?.imageUrl}
-            onUploadComplete={() => {
-              paymentProofViewDialog.setOpen(false);
-              onBookingUpdate?.();
-            }}
-            showUploadButton={false}
-          />
-        </DialogContent>
-      </Dialog>
+      <>
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-full"
+          onClick={() => paymentProofViewDialog.setOpen(true)}
+        >
+          <FileImage className="h-4 w-4 mr-2" />
+          View Payment Proof
+        </Button>
+
+        {/* Unified View Modal */}
+        <PaymentProofUploadModal
+          open={paymentProofViewDialog.open}
+          onOpenChange={paymentProofViewDialog.setOpen}
+          bookingId={booking.id}
+          orderCode={booking.orderCode}
+          totalAmount={booking.totalAmount}
+          existingProofUrl={booking.paymentProof?.imageUrl}
+          mode="view"
+          showUploadButton={false}
+        />
+      </>
     );
   }
 
@@ -204,7 +188,6 @@ export const BookingCardActions = ({
     }
   }
 
-  // Default action
   return (
     <Button
       variant="outline"

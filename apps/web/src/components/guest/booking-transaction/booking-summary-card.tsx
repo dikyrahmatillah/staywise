@@ -1,3 +1,4 @@
+// apps/web/src/components/guest/booking-transaction/booking-summary-card.tsx
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
@@ -9,6 +10,7 @@ import { toast } from "sonner";
 import { useBookingContext } from "./context/booking-context";
 import { useBookingCreation } from "./hooks/use-booking-creation";
 import { useMidtrans } from "./hooks/use-midtrans";
+import { PaymentProofUploadModal } from "./payment-proof-upload-modal";
 
 export function BookingSummaryCard() {
   const router = useRouter();
@@ -32,6 +34,7 @@ export function BookingSummaryCard() {
     setCreatedBooking,
     setCurrentStep,
     setIsUploadModalOpen,
+    isUploadModalOpen,
     createdBooking,
   } = useBookingContext();
 
@@ -68,148 +71,176 @@ export function BookingSummaryCard() {
   };
 
   return (
-    <Card className="p-6">
-      <div className="flex gap-4 mb-6">
-        <div className="flex-1">
-          <h3 className="font-semibold text-lg">{propertyName}</h3>
-          {propertyCity && (
-            <p className="text-sm font-sans text-muted-foreground mb-2">
-              {propertyCity}
-            </p>
-          )}
-          <div className="flex items-center gap-1 text-sm font-sans text-muted-foreground">
-            {reviewCount > 0 ? (
-              <>
-                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                <span>{propertyRating.toFixed(2)}</span>
-                <span>({reviewCount})</span>
-              </>
-            ) : (
-              <span>No reviews yet</span>
+    <>
+      <Card className="p-6">
+        <div className="flex gap-4 mb-6">
+          <div className="flex-1">
+            <h3 className="font-semibold text-lg">{propertyName}</h3>
+            {propertyCity && (
+              <p className="text-sm font-sans text-muted-foreground mb-2">
+                {propertyCity}
+              </p>
             )}
-          </div>
-        </div>
-      </div>
-
-      <div className="mb-6">
-        <div className="text-sm font-sans font-medium">Selected Room</div>
-        <div className="text-sm font-sans text-muted-foreground">
-          {roomName}
-        </div>
-      </div>
-
-      <div className="border-t pt-4">
-        <div className="flex justify-between items-center">
-          <span className="font-medium font-sans mb-1.4">Dates</span>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-sm font-sans underline p-0 h-auto"
-            disabled={currentStep >= 3}
-          >
-            Edit
-          </Button>
-        </div>
-        <div className="text-sm font-sans">
-          {bookingDetails.checkIn.toLocaleDateString("en-US", {
-            month: "short",
-            day: "numeric",
-            year: "numeric",
-          })}{" "}
-          -{" "}
-          {bookingDetails.checkOut.toLocaleDateString("en-US", {
-            month: "short",
-            day: "numeric",
-            year: "numeric",
-          })}
-        </div>
-
-        <div className="flex justify-between items-center pt-4">
-          <span className="font-medium font-sans mb-1.4">Guests</span>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-sm font-sans underline p-0 h-auto"
-            disabled={currentStep >= 3}
-          >
-            Edit
-          </Button>
-        </div>
-        <div className="text-sm font-sans">
-          {totalGuests} guest{totalGuests > 1 ? "s" : ""}
-          {bookingDetails.pets > 0 &&
-            `, ${bookingDetails.pets} pet${bookingDetails.pets > 1 ? "s" : ""}`}
-        </div>
-      </div>
-
-      <div className="border-t pt-4 mt-6">
-        <h4 className="font-medium font-sans mb-1.4">Price details</h4>
-        <div className="text-sm font-sans text-muted-foreground space-y-2">
-          <div className="flex justify-between">
-            <span>
-              {nights} night{nights > 1 ? "s" : ""} x{" "}
-              {formatCurrency(bookingDetails.pricePerNight)}
-            </span>
-            <span>{formatCurrency(totalPrice)}</span>
-          </div>
-        </div>
-        <div className="border-t pt-4 mt-4">
-          <div className="flex justify-between font-semibold font-sans">
-            <span>Total (IDR)</span>
-            <span>{formatCurrency(totalPrice)}</span>
-          </div>
-        </div>
-
-        {currentStep >= 2 && selectedPaymentMethod && currentStep < 3 && (
-          <div className="mt-4">
-            <Button
-              className="w-full bg-foreground text-background hover:bg-foreground/90"
-              onClick={handlePayNow}
-              disabled={isProcessing}
-            >
-              {isProcessing ? (
+            <div className="flex items-center gap-1 text-sm font-sans text-muted-foreground">
+              {reviewCount > 0 ? (
                 <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Creating Booking...
+                  <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                  <span>{propertyRating.toFixed(2)}</span>
+                  <span>({reviewCount})</span>
                 </>
               ) : (
-                "Pay Now"
+                <span>No reviews yet</span>
               )}
-            </Button>
-          </div>
-        )}
-
-        {currentStep >= 3 && (
-          <div className="mt-4">
-            <Button
-              className="w-full"
-              onClick={() => router.push("/dashboard/guest")}
-            >
-              View My Bookings
-            </Button>
-          </div>
-        )}
-      </div>
-
-      {currentStep >= 3 && createdBooking && (
-        <div className="border-t pt-4 mt-6">
-          <h4 className="font-medium mb-4">Booking Details</h4>
-          <div className="space-y-2 text-sm font-sans">
-            <div className="flex justify-between">
-              <span>Booking ID:</span>
-              <span className="font-mono">{createdBooking.orderCode}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Status:</span>
-              <span className="capitalize">{createdBooking.status}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Total Amount:</span>
-              <span>{formatCurrency(createdBooking.totalAmount)}</span>
             </div>
           </div>
         </div>
+
+        <div className="mb-6">
+          <div className="text-sm font-sans font-medium">Selected Room</div>
+          <div className="text-sm font-sans text-muted-foreground">
+            {roomName}
+          </div>
+        </div>
+
+        <div className="border-t pt-4">
+          <div className="flex justify-between items-center">
+            <span className="font-medium font-sans mb-1.4">Dates</span>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-sm font-sans underline p-0 h-auto"
+              disabled={currentStep >= 3}
+            >
+              Edit
+            </Button>
+          </div>
+          <div className="text-sm font-sans">
+            {bookingDetails.checkIn.toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+            })}{" "}
+            -{" "}
+            {bookingDetails.checkOut.toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+            })}
+          </div>
+
+          <div className="flex justify-between items-center pt-4">
+            <span className="font-medium font-sans mb-1.4">Guests</span>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-sm font-sans underline p-0 h-auto"
+              disabled={currentStep >= 3}
+            >
+              Edit
+            </Button>
+          </div>
+          <div className="text-sm font-sans">
+            {totalGuests} guest{totalGuests > 1 ? "s" : ""}
+            {bookingDetails.pets > 0 &&
+              `, ${bookingDetails.pets} pet${
+                bookingDetails.pets > 1 ? "s" : ""
+              }`}
+          </div>
+        </div>
+
+        <div className="border-t pt-4 mt-6">
+          <h4 className="font-medium font-sans mb-1.4">Price details</h4>
+          <div className="text-sm font-sans text-muted-foreground space-y-2">
+            <div className="flex justify-between">
+              <span>
+                {nights} night{nights > 1 ? "s" : ""} x{" "}
+                {formatCurrency(bookingDetails.pricePerNight)}
+              </span>
+              <span>{formatCurrency(totalPrice)}</span>
+            </div>
+          </div>
+          <div className="border-t pt-4 mt-4">
+            <div className="flex justify-between font-semibold font-sans">
+              <span>Total (IDR)</span>
+              <span>{formatCurrency(totalPrice)}</span>
+            </div>
+          </div>
+
+          {currentStep >= 2 && selectedPaymentMethod && currentStep < 3 && (
+            <div className="mt-4">
+              <Button
+                className="w-full bg-foreground text-background hover:bg-foreground/90"
+                onClick={handlePayNow}
+                disabled={isProcessing}
+              >
+                {isProcessing ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Creating Booking...
+                  </>
+                ) : (
+                  "Pay Now"
+                )}
+              </Button>
+            </div>
+          )}
+
+          {currentStep >= 3 && (
+            <div className="mt-4">
+              <Button
+                className="w-full"
+                onClick={() => router.push("/dashboard/guest")}
+              >
+                View My Bookings
+              </Button>
+            </div>
+          )}
+        </div>
+
+        {currentStep >= 3 && createdBooking && (
+          <div className="border-t pt-4 mt-6">
+            <h4 className="font-medium mb-4">Booking Details</h4>
+            <div className="space-y-2 text-sm font-sans">
+              <div className="flex justify-between">
+                <span>Booking ID:</span>
+                <span className="font-mono">{createdBooking.orderCode}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Status:</span>
+                <span className="capitalize">{createdBooking.status}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Total Amount:</span>
+                <span>{formatCurrency(createdBooking.totalAmount)}</span>
+              </div>
+            </div>
+          </div>
+        )}
+      </Card>
+
+      {/* Unified Payment Upload Modal with Timer */}
+      {createdBooking && (
+        <PaymentProofUploadModal
+          open={isUploadModalOpen}
+          onOpenChange={setIsUploadModalOpen}
+          bookingId={createdBooking.id}
+          orderCode={createdBooking.orderCode}
+          totalAmount={createdBooking.totalAmount}
+          expiresAt={createdBooking.expiresAt}
+          mode="upload"
+          onUploadComplete={() => {
+            setIsUploadModalOpen(false);
+            setCurrentStep(3);
+            setTimeout(() => {
+              router.push("/dashboard/guest");
+            }, 2000);
+          }}
+          onExpire={() => {
+            setIsUploadModalOpen(false);
+            toast.error("Booking expired due to payment timeout");
+          }}
+        />
       )}
-    </Card>
+    </>
   );
 }
