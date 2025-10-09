@@ -35,13 +35,18 @@ export function isNumericField(name: string): boolean {
 export function sanitizeNumericInput(
   name: string,
   value: string
-): number | string {
+): number | string | "" {
   if (!isNumericField(name)) return value;
+
+  // Allow empty string for deletion/editing
+  if (value === "" || value === null || value === undefined) {
+    return "";
+  }
+
   const num = Number(value);
-  if (Number.isNaN(num)) return 0;
-  const min = 1;
-  if (num < min) return min;
-  return num;
+  if (Number.isNaN(num)) return "";
+
+  return Math.max(1, num);
 }
 
 export function validateImage(file: File | null): string | null {
@@ -58,7 +63,9 @@ export function validateImage(file: File | null): string | null {
 export function toUpdateRoomSchemaInput(form: RoomFormState) {
   return {
     ...form,
-    basePrice: form.price,
+    basePrice: form.price === "" ? 1 : form.price,
+    capacity: form.capacity === "" ? 1 : form.capacity,
+    bedCount: form.bedCount === "" ? 1 : form.bedCount,
     bedType: form.bedType || undefined,
     imageUrl: form.imageUrl || undefined,
     description: form.description || undefined,
