@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Building2, Plus, RefreshCw, Search } from "lucide-react";
+import Ellipsis from "@/components/ui/ellipsis";
 
 interface ErrorStateProps {
   error: string;
@@ -18,14 +19,11 @@ interface EmptyStateProps {
 
 export const LoadingState = () => {
   return (
-    <div className="min-h-[400px] flex flex-col items-center justify-center space-y-4">
-      <div className="relative">
-        <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+    <div className="min-h-[300px] flex flex-col items-center justify-center space-y-4">
+      <div className="relative text-muted-foreground">
+        <Ellipsis size={10} className="text-muted-foreground" />
       </div>
       <div className="text-center space-y-2">
-        <h3 className="text-lg font-semibold text-foreground">
-          Loading Properties
-        </h3>
         <p className="text-muted-foreground text-sm">
           Searching your property listings...
         </p>
