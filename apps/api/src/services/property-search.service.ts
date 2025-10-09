@@ -1,11 +1,11 @@
 import type { GetPropertiesParams } from "../schemas/index.js";
 import { prisma } from "../configs/prisma.config.js";
-import { PropertyRepository } from "../repositories/property.repository.js";
+import { PropertySearchRepository } from "../repositories/property-search.repository.js";
 import { PriceCalculationService } from "./price-calculation.service.js";
 import { isValid, isSameDay, addDays, startOfDay } from "date-fns";
 
 export class PropertySearchService {
-  private repository = new PropertyRepository();
+  private searchRepository = new PropertySearchRepository();
 
   private normalizeDates(checkIn?: string, checkOut?: string) {
     const defaultCheckIn = startOfDay(new Date());
@@ -156,7 +156,7 @@ export class PropertySearchService {
         .slice(skip, skip + take)
         .map((p: any) => p.id);
       const total = propertiesWithMinPrice.length;
-      const properties = await this.repository.findManyByIds(pagedIds);
+      const properties = await this.searchRepository.findManyByIds(pagedIds);
       const itemsById = new Map(properties.map((item: any) => [item.id, item]));
       const priceMap = new Map(
         propertiesWithMinPrice.map((p: any) => [p.id, p.priceFrom])
@@ -183,7 +183,7 @@ export class PropertySearchService {
     );
 
     const [properties, total] = await Promise.all([
-      this.repository.findManyWithMinPrices(
+      this.searchRepository.findManyWithMinPrices(
         where,
         skip,
         take,
@@ -192,7 +192,7 @@ export class PropertySearchService {
         checkOutDate,
         guest
       ),
-      this.repository.count(where),
+      this.searchRepository.count(where),
     ]);
     return { properties, total };
   }
