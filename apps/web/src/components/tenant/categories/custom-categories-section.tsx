@@ -11,7 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, AlertTriangle, Edit, Trash2 } from "lucide-react";
+import { AlertTriangle, Edit, Trash2 } from "lucide-react";
+import Ellipsis from "@/components/ui/ellipsis";
 import type { CustomCategoryResponse } from "@/schemas";
 interface CustomCategoriesSectionProps {
   categories: CustomCategoryResponse[];
@@ -57,7 +58,7 @@ export function CustomCategoriesSection({
       <CardContent className="pb-8">
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            <Ellipsis size={8} className="text-primary" />
           </div>
         ) : error ? (
           <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-destructive/40 bg-destructive/10 p-8 text-center">

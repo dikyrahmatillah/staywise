@@ -43,14 +43,6 @@ export const PropertyCreationProvider = ({
       case 1:
         return !!(formData.name && formData.description);
       case 2:
-        return !!(formData.country && formData.city && formData.address);
-      case 3:
-        return !!formData.propertyCategoryId;
-      case 4:
-        return !!(formData.rooms && formData.rooms.length > 0);
-      case 5:
-        return true;
-      case 6:
         if (!formData.pictures || formData.pictures.length === 0) return false;
         return formData.pictures.some((picture: PictureFormData) => {
           if (typeof picture === "string") return true;
@@ -59,6 +51,14 @@ export const PropertyCreationProvider = ({
           }
           return false;
         });
+      case 3:
+        return !!(formData.country && formData.city && formData.address);
+      case 4:
+        return !!formData.propertyCategoryId;
+      case 5:
+        return !!(formData.rooms && formData.rooms.length > 0);
+      case 6:
+        return true;
       case 7:
         if (!formData.name || !formData.description) return false;
         if (!formData.country || !formData.city || !formData.address)

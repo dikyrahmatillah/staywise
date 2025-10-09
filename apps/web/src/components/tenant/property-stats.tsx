@@ -87,6 +87,8 @@ export function PropertyStats({ tenantId }: PropertyStatsProps) {
     },
   ];
 
+  if (loading) return null;
+
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
       {statsCards.map((card, index) => (
@@ -103,9 +105,7 @@ export function PropertyStats({ tenantId }: PropertyStatsProps) {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold mb-1">
-              {loading ? "..." : card.value}
-            </div>
+            <div className="text-3xl font-bold mb-1">{card.value}</div>
             <p className="text-xs text-muted-foreground">{card.description}</p>
           </CardContent>
         </Card>

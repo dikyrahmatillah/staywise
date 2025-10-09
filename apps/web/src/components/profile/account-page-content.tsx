@@ -13,9 +13,11 @@ export function AccountPageContent() {
   if (loading) {
     return (
       <div className="border-l flex items-center justify-center min-h-[400px]">
-        <div className="flex items-center gap-3">
-          <Ellipsis className="text-muted-foreground" />
-          <span className="text-muted-foreground">Loading profile</span>
+        <div className="flex flex-col items-center gap-2">
+          <Ellipsis size={8} />
+          <span className="text-muted-foreground text-lg font-sm">
+            Loading profile
+          </span>
         </div>
       </div>
     );
