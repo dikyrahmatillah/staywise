@@ -110,24 +110,31 @@ export function PriceAdjustmentModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto w-[95vw] sm:w-full">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <DollarSign className="h-5 w-5" /> Price Adjustments - {roomName}
+          <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <DollarSign className="h-4 w-4 sm:h-5 sm:w-5" />
+            <span className="truncate">Price Adjustments - {roomName}</span>
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
-          <div className="bg-muted/50 p-4 rounded-lg">
-            <div className="flex items-center justify-between">
+        <div className="space-y-4 sm:space-y-6">
+          <div className="bg-muted/50 p-3 sm:p-4 rounded-lg">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
               <div>
-                <h3 className="font-medium">Base Price</h3>
-                <p className="text-2xl font-bold text-green-600">
+                <h3 className="font-medium text-sm sm:text-base">Base Price</h3>
+                <p className="text-xl sm:text-2xl font-bold text-green-600">
                   {formatIdr(basePrice)}
                 </p>
               </div>
-              <Button onClick={() => setShowForm(true)} disabled={showForm}>
-                <Plus className="h-4 w-4 mr-2" /> Add Price Adjustment
+              <Button
+                onClick={() => setShowForm(true)}
+                disabled={showForm}
+                className="w-full sm:w-auto text-sm"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                <span className="hidden sm:inline">Add Price Adjustment</span>
+                <span className="sm:hidden">Add Adjustment</span>
               </Button>
             </div>
           </div>
