@@ -8,6 +8,11 @@ import PagerControls from "@/components/ui/pager-controls";
 import { useProperties } from "@/hooks/useProperties";
 import type { Property } from "@/types/property";
 import { useEffect, useState } from "react";
+
+type PropertyWithStats = Property & {
+  averageRating?: number | null;
+  reviewCount?: number | null;
+};
 import SkeletonCard from "@/components/ui/skeleton-card";
 import { formatCurrency } from "@/lib/booking-formatters";
 
@@ -81,7 +86,7 @@ export default function FeaturedProperties() {
               </div>
             )}
 
-            {featuredProperties.map((property) => (
+            {featuredProperties.map((property: PropertyWithStats) => (
               <div
                 key={property.id}
                 style={{ flex: `0 0 ${100 / slidesPerView}%` }}
@@ -125,9 +130,28 @@ export default function FeaturedProperties() {
                             </span>
                           </p>
                         </div>
-                        <div className="flex items-center gap-1">
-                          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                          <span className="text-sm font-medium">4.8</span>
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1" aria-hidden>
+                            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                            <span className="text-sm font-medium">
+                              {(property.averageRating ?? 0).toFixed(1)}
+                            </span>
+                          </div>
+                          {typeof property.reviewCount === "number" && (
+                            <span className="text-xs text-slate-500">
+                              ({property.reviewCount})
+                            </span>
+                          )}
+                          <span className="sr-only">
+                            {property.averageRating
+                              ? `${property.averageRating.toFixed(
+                                  1
+                                )} out of 5` +
+                                (property.reviewCount
+                                  ? ` from ${property.reviewCount} reviews`
+                                  : "")
+                              : "No rating yet"}
+                          </span>
                         </div>
                       </div>
                     </CardContent>

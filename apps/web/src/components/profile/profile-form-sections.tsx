@@ -85,7 +85,7 @@ export function ContactDetailsSection({
           id="phone"
           label="Phone number"
           type="tel"
-          placeholder="+62 812-3456-7890"
+          placeholder="+62 8XX-XXXX-XXXX"
           icon={Phone}
           disabled={disabled}
           error={errors.phone?.message}
