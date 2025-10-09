@@ -71,7 +71,6 @@ export function ProfileEditForm({
         if (data.firstName) formData.append("firstName", data.firstName);
         if (data.lastName) formData.append("lastName", data.lastName);
         formData.append("phone", data.phone || "");
-        if (data.email) formData.append("email", data.email);
         if (avatarFile) formData.append("image", avatarFile);
 
         await updateProfile(formData);
@@ -138,6 +137,7 @@ export function ProfileEditForm({
                 register={register}
                 errors={errors}
                 disabled={isDisabled}
+                email={user.email}
               />
             </div>
 

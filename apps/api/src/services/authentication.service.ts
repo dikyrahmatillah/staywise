@@ -145,6 +145,15 @@ export class AuthenticationService {
     if (!user) throw new AppError("User not found", 404);
 
     const updateData = { ...data };
+
+    if ("email" in updateData) {
+      const newEmail = updateData.email as string | undefined | null;
+      if (newEmail && newEmail !== user.email) {
+        throw new AppError("Email cannot be changed.", 400);
+      }
+      delete (updateData as Partial<UpdateUserInput>).email;
+    }
+
     if ("phone" in updateData) {
       const phoneValue = updateData.phone as string | null | undefined;
       if (phoneValue === "" || phoneValue === null) {
