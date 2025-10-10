@@ -82,12 +82,18 @@ export function RoomBasicInfo({ formData, onFieldChange }: Props) {
               onChange={(e) => {
                 const value = e.target.value;
                 if (value === "") {
-                  onFieldChange("capacity", 1);
+                  onFieldChange("capacity", "");
                 } else {
                   const numValue = parseInt(value);
-                  if (!isNaN(numValue) && numValue > 0) {
+                  if (!isNaN(numValue)) {
                     onFieldChange("capacity", numValue);
                   }
+                }
+              }}
+              onBlur={(e) => {
+                const value = e.target.value;
+                if (value === "" || parseInt(value) < 1) {
+                  onFieldChange("capacity", 1);
                 }
               }}
               placeholder="1"
@@ -107,12 +113,18 @@ export function RoomBasicInfo({ formData, onFieldChange }: Props) {
               onChange={(e) => {
                 const value = e.target.value;
                 if (value === "") {
-                  onFieldChange("bedCount", 1);
+                  onFieldChange("bedCount", "");
                 } else {
                   const numValue = parseInt(value);
-                  if (!isNaN(numValue) && numValue > 0) {
+                  if (!isNaN(numValue)) {
                     onFieldChange("bedCount", numValue);
                   }
+                }
+              }}
+              onBlur={(e) => {
+                const value = e.target.value;
+                if (value === "" || parseInt(value) < 1) {
+                  onFieldChange("bedCount", 1);
                 }
               }}
               placeholder="1"
