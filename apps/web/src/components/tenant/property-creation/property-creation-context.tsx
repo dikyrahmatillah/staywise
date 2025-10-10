@@ -1,7 +1,6 @@
 "use client";
 
 import { createContext, useContext, useState, type ReactNode } from "react";
-import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { usePropertyCreation as usePropertyCreationHook } from "@/hooks/usePropertyCreation";
@@ -25,7 +24,6 @@ export const PropertyCreationProvider = ({
 }: PropertyCreationProviderProps) => {
   const { data: session } = useSession();
   const { createProperty, isCreating } = usePropertyCreationHook();
-  const router = useRouter();
 
   const [formData, setFormData] = useState<PropertyFormData>({
     facilities: [],
@@ -91,11 +89,7 @@ export const PropertyCreationProvider = ({
 
     const formDataToSend = buildPropertyFormData(formData, session.user.id);
 
-    const result = await createProperty(formDataToSend);
-    if (result) {
-      router.push("/dashboard/tenant/properties");
-      router.refresh();
-    }
+    await createProperty(formDataToSend);
   };
 
   return (

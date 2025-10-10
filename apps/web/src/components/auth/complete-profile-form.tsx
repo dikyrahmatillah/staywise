@@ -40,7 +40,7 @@ export default function CompleteProfileForm({ token }: Props) {
           <Label htmlFor="firstName">First </Label>
           <Input
             id="firstName"
-            placeholder="John"
+            placeholder="Your first name"
             disabled={isSubmitting}
             required
             {...register("firstName")}
@@ -59,7 +59,7 @@ export default function CompleteProfileForm({ token }: Props) {
           </Label>
           <Input
             id="lastName"
-            placeholder="Doe"
+            placeholder="Your last name"
             disabled={isSubmitting}
             {...register("lastName")}
           />
