@@ -1,12 +1,10 @@
 import { PrismaClient } from "@prisma/client";
-import { withAccelerate } from "@prisma/extension-accelerate";
 
 const globalForPrisma = globalThis as unknown as {
-  prisma: ReturnType<typeof createPrismaClient> | undefined;
+  prisma: PrismaClient | undefined;
 };
 
-const createPrismaClient = () =>
-  new PrismaClient({ log: ["error", "warn"] }).$extends(withAccelerate());
+const createPrismaClient = () => new PrismaClient({ log: ["error", "warn"] });
 
 export const prisma = globalForPrisma.prisma ?? createPrismaClient();
 

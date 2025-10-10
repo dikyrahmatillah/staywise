@@ -82,7 +82,7 @@ export function PropertyStats({ tenantId }: PropertyStatsProps) {
     {
       title: "Total Bookings",
       value: stats.totalBookings,
-      description: "All bookings across properties",
+      description: "Active bookings across properties",
       icon: Calendar,
     },
   ];

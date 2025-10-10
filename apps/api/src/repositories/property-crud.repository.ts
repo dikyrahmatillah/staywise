@@ -1,13 +1,7 @@
 import type { Prisma } from "@prisma/client";
 import { prisma } from "../configs/prisma.config.js";
 
-/**
- * Repository for basic CRUD operations on properties
- */
 export class PropertyCrudRepository {
-  /**
-   * Create a new property with all related entities
-   */
   async create(data: any): Promise<any> {
     return prisma.property.create({
       data,
@@ -26,9 +20,6 @@ export class PropertyCrudRepository {
     });
   }
 
-  /**
-   * Find a property by its unique slug
-   */
   async findUniqueBySlug(slug: string): Promise<any | null> {
     return prisma.property.findUnique({
       where: { slug },
@@ -46,9 +37,6 @@ export class PropertyCrudRepository {
     });
   }
 
-  /**
-   * Find a property by its unique ID, optionally filtered by tenant
-   */
   async findUniqueById(
     propertyId: string,
     tenantId?: string
@@ -77,9 +65,6 @@ export class PropertyCrudRepository {
     });
   }
 
-  /**
-   * Find all properties belonging to a specific tenant
-   */
   async findManyByTenant(tenantId: string): Promise<any[]> {
     return prisma.property.findMany({
       where: { tenantId },
@@ -96,7 +81,13 @@ export class PropertyCrudRepository {
         Facilities: true,
         _count: {
           select: {
-            Bookings: true,
+            Bookings: {
+              where: {
+                status: {
+                  in: ["WAITING_PAYMENT", "WAITING_CONFIRMATION", "PROCESSING"],
+                },
+              },
+            },
             Reviews: true,
           },
         },
@@ -105,9 +96,6 @@ export class PropertyCrudRepository {
     });
   }
 
-  /**
-   * Find the first property matching both ID and tenant ID
-   */
   async findFirstByIdAndTenant(
     propertyId: string,
     tenantId: string
@@ -117,9 +105,6 @@ export class PropertyCrudRepository {
     });
   }
 
-  /**
-   * Update a property by its ID
-   */
   async update(
     propertyId: string,
     data: Prisma.PropertyUpdateInput
@@ -142,18 +127,12 @@ export class PropertyCrudRepository {
     });
   }
 
-  /**
-   * Delete a property by its ID
-   */
   async delete(propertyId: string): Promise<any> {
     return prisma.property.delete({
       where: { id: propertyId },
     });
   }
 
-  /**
-   * Count active bookings for a property
-   */
   async getActiveBookingCount(propertyId: string): Promise<number> {
     return prisma.booking.count({
       where: {
